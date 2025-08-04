@@ -13,7 +13,7 @@ import { useApp } from '../context/AppContext';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 
 const DashboardScreen = ({ navigation }) => {
-  const { workoutHistory, userStats, loading, updateWorkout } = useApp();
+  const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates } = useApp();
 
   // Calculate dashboard stats
   const dashboardStats = useMemo(() => {
@@ -33,37 +33,6 @@ const DashboardScreen = ({ navigation }) => {
       return workoutDate >= thisMonth;
     });
 
-    // Calculate average workout rating for this month
-    const avgRating = thisMonthWorkouts.length > 0 
-      ? thisMonthWorkouts.reduce((sum, w) => sum + (w.ratings?.workoutRating || 5), 0) / thisMonthWorkouts.length
-      : 0;
-
-    // Calculate streak
-    let currentStreak = 0;
-    if (workoutHistory.length > 0) {
-      const sortedWorkouts = [...workoutHistory].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      let checkDate = new Date(today);
-      let foundGap = false;
-      
-      while (!foundGap && currentStreak < 30) { // Max 30 day check
-        const dayWorkouts = sortedWorkouts.filter(workout => {
-          const workoutDate = new Date(workout.startTime);
-          workoutDate.setHours(0, 0, 0, 0);
-          return workoutDate.getTime() === checkDate.getTime();
-        });
-        
-        if (dayWorkouts.length > 0) {
-          currentStreak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          foundGap = true;
-        }
-      }
-    }
-
     // Most frequent exercise
     const exerciseCount = {};
     workoutHistory.forEach(workout => {
@@ -80,12 +49,13 @@ const DashboardScreen = ({ navigation }) => {
       totalWorkouts: workoutHistory.length,
       thisWeekCount: thisWeekWorkouts.length,
       thisMonthCount: thisMonthWorkouts.length,
-      avgRating: Math.round(avgRating * 10) / 10,
-      currentStreak,
+      avgWorkoutsPerWeek: userStats?.avgWorkoutsPerWeek || 0,
+      avgRating: userStats?.avgRating || 0,
       totalDuration: workoutHistory.reduce((sum, w) => sum + (w.duration || 0), 0),
       favoriteExercise,
+      templatesCount: workoutTemplates.length
     };
-  }, [workoutHistory]);
+  }, [workoutHistory, userStats, workoutTemplates]);
 
   const getRatingColor = (rating) => {
     if (rating >= 8) return '#22c55e';
@@ -152,9 +122,9 @@ const DashboardScreen = ({ navigation }) => {
             </View>
             
             <View style={styles.compactStatCard}>
-              <Ionicons name="flame" size={18} color="#ff6b35" />
-              <Text style={styles.compactStatNumber}>{dashboardStats.currentStreak}</Text>
-              <Text style={styles.compactStatLabel}>Streak</Text>
+              <Ionicons name="trending-up" size={18} color="#ff6b35" />
+              <Text style={styles.compactStatNumber}>{dashboardStats.avgWorkoutsPerWeek}</Text>
+              <Text style={styles.compactStatLabel}>Avg/Week</Text>
             </View>
             
             <View style={styles.compactStatCard}>
@@ -176,6 +146,37 @@ const DashboardScreen = ({ navigation }) => {
               <Text style={styles.compactStatNumber}>{dashboardStats.thisMonthCount}</Text>
               <Text style={styles.compactStatLabel}>This Month</Text>
             </View>
+          </View>
+        )}
+
+        {/* Templates Quick Access */}
+        {workoutTemplates.length > 0 && (
+          <View style={styles.templatesSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Quick Start Templates</Text>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('Workout', { showTemplates: true })}
+                style={styles.seeAllButton}
+              >
+                <Text style={styles.seeAllText}>See All</Text>
+                <Ionicons name="chevron-forward" size={16} color="#007AFF" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templatesScroll}>
+              {workoutTemplates.slice(0, 3).map(template => (
+                <TouchableOpacity 
+                  key={template.id} 
+                  style={styles.templateCard}
+                  onPress={() => navigation.navigate('Workout', { templateId: template.id })}
+                >
+                  <View style={styles.templateIcon}>
+                    <Ionicons name="document-text" size={24} color="#007AFF" />
+                  </View>
+                  <Text style={styles.templateName}>{template.name}</Text>
+                  <Text style={styles.templateExercises}>{template.exercises.length} exercises</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -212,27 +213,25 @@ const DashboardScreen = ({ navigation }) => {
               </View>
             </View>
             
-            {dashboardStats.currentStreak >= 3 && (
-              <View style={styles.streakCard}>
-                <Ionicons name="flame" size={24} color="#ff6b35" />
-                <View style={styles.streakContent}>
-                  <Text style={styles.streakTitle}>
-                    {dashboardStats.currentStreak} Day Streak! 🔥
-                  </Text>
-                  <Text style={styles.streakText}>
-                    You're on fire! Keep up the consistency.
+            {dashboardStats.avgWorkoutsPerWeek >= 3 && (
+              <View style={styles.consistencyCard}>
+                <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+                <View style={styles.consistencyContent}>
+                  <Text style={styles.consistencyTitle}>Great Consistency!</Text>
+                  <Text style={styles.consistencyText}>
+                    Averaging {dashboardStats.avgWorkoutsPerWeek} workouts per week
                   </Text>
                 </View>
               </View>
             )}
 
-            {dashboardStats.thisWeekCount >= 3 && (
-              <View style={styles.weeklyCard}>
-                <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
-                <View style={styles.weeklyContent}>
-                  <Text style={styles.weeklyTitle}>Great Week!</Text>
-                  <Text style={styles.weeklyText}>
-                    {dashboardStats.thisWeekCount} workouts this week. You're crushing it!
+            {dashboardStats.avgRating >= 7 && (
+              <View style={styles.qualityCard}>
+                <Ionicons name="star-outline" size={24} color="#ffd700" />
+                <View style={styles.qualityContent}>
+                  <Text style={styles.qualityTitle}>High Quality Workouts</Text>
+                  <Text style={styles.qualityText}>
+                    Your average rating is {dashboardStats.avgRating}/10
                   </Text>
                 </View>
               </View>
@@ -315,6 +314,62 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // Templates Section
+  templatesSection: {
+    marginVertical: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: '#007AFF',
+    marginRight: 4,
+  },
+  templatesScroll: {
+    paddingHorizontal: 16,
+  },
+  templateCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    width: 120,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  templateIcon: {
+    marginBottom: 8,
+  },
+  templateName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  templateExercises: {
+    fontSize: 12,
+    color: '#666',
+  },
+
   // Empty State
   emptyState: {
     alignItems: 'center',
@@ -388,30 +443,7 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
-  streakCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff5f0',
-    padding: 16,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff6b35',
-  },
-  streakContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  streakTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ff6b35',
-  },
-  streakText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  weeklyCard: {
+  consistencyCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f0fdf4',
@@ -420,16 +452,39 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: '#22c55e',
   },
-  weeklyContent: {
+  consistencyContent: {
     marginLeft: 12,
     flex: 1,
   },
-  weeklyTitle: {
+  consistencyTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#22c55e',
   },
-  weeklyText: {
+  consistencyText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  qualityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fffbeb',
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ffd700',
+  },
+  qualityContent: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  qualityTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#f59e0b',
+  },
+  qualityText: {
     fontSize: 14,
     color: '#666',
     marginTop: 2,

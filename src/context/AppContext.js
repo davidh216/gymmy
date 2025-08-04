@@ -15,7 +15,14 @@ const ActionTypes = {
   UPDATE_USER_STATS: 'UPDATE_USER_STATS',
   UPDATE_EXPERIENCE: 'UPDATE_EXPERIENCE',
   CLEAR_ALL_DATA: 'CLEAR_ALL_DATA',
-  SET_ERROR: 'SET_ERROR'
+  SET_ERROR: 'SET_ERROR',
+  // New action types for templates and rest days
+  ADD_TEMPLATE: 'ADD_TEMPLATE',
+  UPDATE_TEMPLATE: 'UPDATE_TEMPLATE',
+  REMOVE_TEMPLATE: 'REMOVE_TEMPLATE',
+  ADD_REST_DAY: 'ADD_REST_DAY',
+  REMOVE_REST_DAY: 'REMOVE_REST_DAY',
+  UPDATE_REST_DAY: 'UPDATE_REST_DAY'
 };
 
 // Initial state
@@ -43,8 +50,12 @@ const initialState = {
     },
     experience: 0,
     level: 1,
-    totalExperience: 0
-  }
+    totalExperience: 0,
+    avgWorkoutsPerWeek: 0,
+    avgRating: 0
+  },
+  workoutTemplates: [],
+  restDays: []
 };
 
 // Reducer
@@ -151,6 +162,50 @@ const appReducer = (state, action) => {
         }
       };
 
+    case ActionTypes.ADD_TEMPLATE:
+      return {
+        ...state,
+        workoutTemplates: [...state.workoutTemplates, action.payload]
+      };
+
+    case ActionTypes.UPDATE_TEMPLATE:
+      return {
+        ...state,
+        workoutTemplates: state.workoutTemplates.map(template =>
+          template.id === action.payload.id ? action.payload : template
+        )
+      };
+
+    case ActionTypes.REMOVE_TEMPLATE:
+      return {
+        ...state,
+        workoutTemplates: state.workoutTemplates.filter(template =>
+          template.id !== action.payload
+        )
+      };
+
+    case ActionTypes.ADD_REST_DAY:
+      return {
+        ...state,
+        restDays: [...state.restDays, action.payload]
+      };
+
+    case ActionTypes.REMOVE_REST_DAY:
+      return {
+        ...state,
+        restDays: state.restDays.filter(day =>
+          day.date !== action.payload
+        )
+      };
+
+    case ActionTypes.UPDATE_REST_DAY:
+      return {
+        ...state,
+        restDays: state.restDays.map(day =>
+          day.date === action.payload.date ? action.payload : day
+        )
+      };
+
     case ActionTypes.CLEAR_ALL_DATA:
       return {
         ...initialState,
@@ -183,13 +238,17 @@ export const AppProvider = ({ children }) => {
         exerciseHistory,
         oneRepMaxes,
         settings,
-        userStats
+        userStats,
+        workoutTemplates,
+        restDays
       ] = await Promise.all([
         StorageManager.loadWorkoutHistory(),
         StorageManager.loadExerciseHistory(),
         StorageManager.loadOneRepMaxes(),
         StorageManager.loadSettings(),
-        StorageManager.loadUserStats()
+        StorageManager.loadUserStats(),
+        StorageManager.loadWorkoutTemplates(),
+        StorageManager.loadRestDays()
       ]);
 
       console.log('loadAllData - loaded userStats:', userStats);
@@ -201,13 +260,45 @@ export const AppProvider = ({ children }) => {
           exerciseHistory,
           oneRepMaxes,
           settings,
-          userStats
+          userStats,
+          workoutTemplates,
+          restDays
         }
       });
     } catch (error) {
       console.error('Error loading app data:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
     }
+  };
+
+  // Calculate average workouts per week
+  const calculateAvgWorkoutsPerWeek = (workoutHistory) => {
+    if (workoutHistory.length === 0) return 0;
+    
+    // Sort workouts by date
+    const sortedWorkouts = [...workoutHistory].sort((a, b) => 
+      new Date(a.workoutDate || a.startTime) - new Date(b.workoutDate || b.startTime)
+    );
+    
+    const firstWorkoutDate = new Date(sortedWorkouts[0].workoutDate || sortedWorkouts[0].startTime);
+    const lastWorkoutDate = new Date(sortedWorkouts[sortedWorkouts.length - 1].workoutDate || sortedWorkouts[sortedWorkouts.length - 1].startTime);
+    
+    // Calculate weeks between first and last workout
+    const daysDiff = (lastWorkoutDate - firstWorkoutDate) / (1000 * 60 * 60 * 24);
+    const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7)); // At least 1 week
+    
+    return Math.round((workoutHistory.length / weeksDiff) * 10) / 10; // Round to 1 decimal
+  };
+
+  // Calculate average rating
+  const calculateAvgRating = (workoutHistory) => {
+    if (workoutHistory.length === 0) return 0;
+    
+    const totalRating = workoutHistory.reduce((sum, workout) => 
+      sum + (workout.ratings?.workoutRating || 5), 0
+    );
+    
+    return Math.round((totalRating / workoutHistory.length) * 10) / 10; // Round to 1 decimal
   };
 
   // Experience calculation function
@@ -270,6 +361,10 @@ export const AppProvider = ({ children }) => {
       const newTotalExperience = state.userStats.totalExperience + experienceGained;
       const newLevel = calculateLevel(newTotalExperience);
       
+      // Calculate new KPIs
+      const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(newWorkoutHistory);
+      const avgRating = calculateAvgRating(newWorkoutHistory);
+      
       // Update user stats with all changes at once
       const updatedStats = {
         ...state.userStats,
@@ -278,6 +373,8 @@ export const AppProvider = ({ children }) => {
         experience: state.userStats.experience + experienceGained,
         level: newLevel,
         totalExperience: newTotalExperience,
+        avgWorkoutsPerWeek,
+        avgRating,
         streaks: {
           ...state.userStats.streaks,
           current: state.userStats.streaks.current + 1,
@@ -308,6 +405,19 @@ export const AppProvider = ({ children }) => {
       );
       await StorageManager.saveWorkoutHistory(updatedHistory);
       
+      // Recalculate KPIs
+      const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(updatedHistory);
+      const avgRating = calculateAvgRating(updatedHistory);
+      
+      const updatedStats = {
+        ...state.userStats,
+        avgWorkoutsPerWeek,
+        avgRating
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_USER_STATS, payload: updatedStats });
+      await StorageManager.saveUserStats(updatedStats);
+      
     } catch (error) {
       console.error('Error updating workout:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
@@ -331,6 +441,20 @@ export const AppProvider = ({ children }) => {
       // Save updated workout history to storage
       await StorageManager.saveWorkoutHistory(updatedHistory);
       console.log('Workout history saved to storage');
+      
+      // Recalculate KPIs
+      const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(updatedHistory);
+      const avgRating = calculateAvgRating(updatedHistory);
+      
+      const updatedStats = {
+        ...state.userStats,
+        totalWorkouts: updatedHistory.length,
+        avgWorkoutsPerWeek,
+        avgRating
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_USER_STATS, payload: updatedStats });
+      await StorageManager.saveUserStats(updatedStats);
       
     } catch (error) {
       console.error('Error removing workout:', error);
@@ -373,6 +497,111 @@ export const AppProvider = ({ children }) => {
       });
     } catch (error) {
       console.error('Error updating settings:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  // Template management functions
+  const addTemplate = async (template) => {
+    try {
+      const newTemplate = {
+        ...template,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.ADD_TEMPLATE, payload: newTemplate });
+      const updatedTemplates = [...state.workoutTemplates, newTemplate];
+      await StorageManager.saveWorkoutTemplates(updatedTemplates);
+      
+      return newTemplate;
+    } catch (error) {
+      console.error('Error adding template:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+      return null;
+    }
+  };
+
+  const updateTemplate = async (templateId, updates) => {
+    try {
+      const updatedTemplate = {
+        ...state.workoutTemplates.find(t => t.id === templateId),
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_TEMPLATE, payload: updatedTemplate });
+      const updatedTemplates = state.workoutTemplates.map(t =>
+        t.id === templateId ? updatedTemplate : t
+      );
+      await StorageManager.saveWorkoutTemplates(updatedTemplates);
+      
+    } catch (error) {
+      console.error('Error updating template:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  const removeTemplate = async (templateId) => {
+    try {
+      dispatch({ type: ActionTypes.REMOVE_TEMPLATE, payload: templateId });
+      const updatedTemplates = state.workoutTemplates.filter(t => t.id !== templateId);
+      await StorageManager.saveWorkoutTemplates(updatedTemplates);
+      
+    } catch (error) {
+      console.error('Error removing template:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  // Rest day management functions
+  const addRestDay = async (date, notes = '', planned = false) => {
+    try {
+      const restDay = {
+        date,
+        notes,
+        planned,
+        createdAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.ADD_REST_DAY, payload: restDay });
+      const updatedRestDays = [...state.restDays, restDay];
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error adding rest day:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  const removeRestDay = async (date) => {
+    try {
+      dispatch({ type: ActionTypes.REMOVE_REST_DAY, payload: date });
+      const updatedRestDays = state.restDays.filter(day => day.date !== date);
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error removing rest day:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  const updateRestDay = async (date, updates) => {
+    try {
+      const updatedRestDay = {
+        ...state.restDays.find(d => d.date === date),
+        ...updates,
+        date // Ensure date doesn't change
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_REST_DAY, payload: updatedRestDay });
+      const updatedRestDays = state.restDays.map(d =>
+        d.date === date ? updatedRestDay : d
+      );
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error updating rest day:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
     }
   };
@@ -450,7 +679,15 @@ export const AppProvider = ({ children }) => {
     clearAllData,
     resetToDummyData,
     loadAllData,
-    updateUserStats
+    updateUserStats,
+    // Template actions
+    addTemplate,
+    updateTemplate,
+    removeTemplate,
+    // Rest day actions
+    addRestDay,
+    removeRestDay,
+    updateRestDay
   };
 
   return (

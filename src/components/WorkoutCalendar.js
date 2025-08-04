@@ -8,16 +8,23 @@ import {
   ScrollView,
   Modal,
   SafeAreaView,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import EditWorkoutModal from './EditWorkoutModal';
+import { useApp } from '../context/AppContext';
 
 const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
+  const { restDays, addRestDay, removeRestDay, updateRestDay } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
   const [showDateModal, setShowDateModal] = useState(false);
   const [expandedWorkouts, setExpandedWorkouts] = useState(new Set());
+  const [showRestDayModal, setShowRestDayModal] = useState(false);
+  const [restDayNotes, setRestDayNotes] = useState('');
+  const [selectedRestDay, setSelectedRestDay] = useState(null);
   
   // Edit workout states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -74,6 +81,15 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
     return map;
   }, [workoutHistory]);
 
+  // Generate rest days by date map
+  const restDaysByDate = useMemo(() => {
+    const map = {};
+    restDays.forEach(restDay => {
+      map[restDay.date] = restDay;
+    });
+    return map;
+  }, [restDays]);
+
   // Calendar generation
   const generateCalendar = () => {
     const year = currentDate.getFullYear();
@@ -96,12 +112,12 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
         const date = new Date(currentWeekDate);
         const dateKey = date.toISOString().split('T')[0]; // Use YYYY-MM-DD format
         const dayWorkouts = workoutsByDate[dateKey] || [];
-        
-        
+        const restDay = restDaysByDate[dateKey];
         
         week.push({
           date: new Date(date),
           workouts: dayWorkouts,
+          restDay: restDay,
           isCurrentMonth: date.getMonth() === month,
           isToday: 
             date.getDate() === new Date().getDate() &&
@@ -127,9 +143,10 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  const openDateDetail = (date, workouts) => {
+  const openDateDetail = (date, workouts, restDay) => {
     setSelectedDate(date);
     setSelectedWorkouts(workouts);
+    setSelectedRestDay(restDay);
     setShowDateModal(true);
     
     // Auto-expand if only one workout, collapse if multiple
@@ -165,6 +182,34 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
     setWorkoutToEdit(null);
   };
 
+  const handleAddRestDay = async () => {
+    if (selectedDate) {
+      const dateKey = selectedDate.toISOString().split('T')[0];
+      await addRestDay(dateKey, restDayNotes, false);
+      setRestDayNotes('');
+      setShowRestDayModal(false);
+      setShowDateModal(false);
+    }
+  };
+
+  const handleRemoveRestDay = async (date) => {
+    Alert.alert(
+      'Remove Rest Day',
+      'Are you sure you want to remove this rest day?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            await removeRestDay(date);
+            setSelectedRestDay(null);
+          }
+        }
+      ]
+    );
+  };
+
   const formatDateForDisplay = (date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -173,6 +218,53 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
       day: 'numeric'
     });
   };
+
+  const renderRestDayModal = () => (
+    <Modal
+      visible={showRestDayModal}
+      transparent={true}
+      animationType="fade"
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Add Rest Day</Text>
+            <TouchableOpacity 
+              onPress={() => {
+                setShowRestDayModal(false);
+                setRestDayNotes('');
+              }}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.restDayDate}>
+            {selectedDate && formatDateForDisplay(selectedDate)}
+          </Text>
+          
+          <Text style={styles.inputLabel}>Notes (Optional)</Text>
+          <TextInput
+            style={styles.restDayInput}
+            value={restDayNotes}
+            onChangeText={setRestDayNotes}
+            placeholder="e.g., Active recovery, yoga, stretching..."
+            placeholderTextColor="#999"
+            multiline
+            numberOfLines={3}
+          />
+          
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={handleAddRestDay}
+          >
+            <Text style={styles.modalButtonText}>Add Rest Day</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const renderDateModal = () => (
     <Modal
@@ -196,6 +288,26 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
             </View>
             
             <ScrollView style={styles.modalBody}>
+              {selectedRestDay && (
+                <View style={styles.restDayCard}>
+                  <View style={styles.restDayHeader}>
+                    <View style={styles.restDayInfo}>
+                      <Ionicons name="bed" size={24} color="#8b5cf6" />
+                      <Text style={styles.restDayTitle}>Rest Day</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveRestDay(selectedRestDay.date)}
+                      style={styles.removeRestDayButton}
+                    >
+                      <Ionicons name="trash-outline" size={18} color="#ff4444" />
+                    </TouchableOpacity>
+                  </View>
+                  {selectedRestDay.notes && (
+                    <Text style={styles.restDayNotes}>{selectedRestDay.notes}</Text>
+                  )}
+                </View>
+              )}
+              
               {selectedWorkouts.length > 0 ? (
                 <>
                   <Text style={styles.workoutsCount}>
@@ -327,7 +439,7 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
                     );
                   })}
                 </>
-              ) : (
+              ) : !selectedRestDay ? (
                 <View style={styles.noWorkoutsContainer}>
                   <Ionicons name="calendar-outline" size={48} color="#ccc" />
                   <Text style={styles.noWorkoutsTitle}>No workouts on this day</Text>
@@ -351,8 +463,15 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
                       <Text style={styles.startTodayButtonText}>Start Today's Workout</Text>
                     </TouchableOpacity>
                   )}
+                  <TouchableOpacity 
+                    style={styles.addRestDayButton}
+                    onPress={() => setShowRestDayModal(true)}
+                  >
+                    <Ionicons name="bed" size={20} color="#8b5cf6" />
+                    <Text style={styles.addRestDayButtonText}>Mark as Rest Day</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
+              ) : null}
             </ScrollView>
           </View>
         </SafeAreaView>
@@ -394,9 +513,10 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
                 style={[
                   styles.day,
                   !day.isCurrentMonth && styles.otherMonth,
-                  day.isToday && styles.today
+                  day.isToday && styles.today,
+                  day.restDay && styles.restDayCell
                 ]}
-                onPress={() => openDateDetail(day.date, day.workouts)}
+                onPress={() => openDateDetail(day.date, day.workouts, day.restDay)}
                 activeOpacity={0.7}
               >
                 <Text style={[
@@ -407,21 +527,30 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
                   {day.date.getDate()}
                 </Text>
                 
+                {/* Rest Day Indicator */}
+                {day.restDay && (
+                  <View style={styles.restDayIndicator}>
+                    <Ionicons name="bed" size={12} color="#8b5cf6" />
+                  </View>
+                )}
+                
                 {/* Workout Indicators */}
-                <View style={styles.workoutIndicators}>
-                  {day.workouts.slice(0, 3).map((workout, workoutIndex) => (
-                    <View
-                      key={workout.id}
-                      style={[
-                        styles.workoutDot,
-                        { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }
-                      ]}
-                    />
-                  ))}
-                  {day.workouts.length > 3 && (
-                    <Text style={styles.moreWorkouts}>+{day.workouts.length - 3}</Text>
-                  )}
-                </View>
+                {day.workouts.length > 0 && (
+                  <View style={styles.workoutIndicators}>
+                    {day.workouts.slice(0, 3).map((workout, workoutIndex) => (
+                      <View
+                        key={workout.id}
+                        style={[
+                          styles.workoutDot,
+                          { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }
+                        ]}
+                      />
+                    ))}
+                    {day.workouts.length > 3 && (
+                      <Text style={styles.moreWorkouts}>+{day.workouts.length - 3}</Text>
+                    )}
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -430,32 +559,29 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
 
       {/* Legend */}
       <View style={styles.legend}>
-        <Text style={styles.legendTitle}>Workout Ratings:</Text>
+        <Text style={styles.legendTitle}>Legend:</Text>
         <View style={styles.legendItems}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#22c55e' }]} />
-            <Text style={styles.legendText}>9-10</Text>
+            <Ionicons name="bed" size={16} color="#8b5cf6" />
+            <Text style={styles.legendText}>Rest Day</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#84cc16' }]} />
-            <Text style={styles.legendText}>7-8</Text>
+            <View style={[styles.legendDot, { backgroundColor: '#22c55e' }]} />
+            <Text style={styles.legendText}>Great (7+)</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#eab308' }]} />
-            <Text style={styles.legendText}>5-6</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#f97316' }]} />
-            <Text style={styles.legendText}>3-4</Text>
+            <Text style={styles.legendText}>Good (5-6)</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#ef4444' }]} />
-            <Text style={styles.legendText}>1-2</Text>
+            <Text style={styles.legendText}>Poor (&lt;5)</Text>
           </View>
         </View>
       </View>
 
       {renderDateModal()}
+      {renderRestDayModal()}
       
       <EditWorkoutModal
         visible={showEditModal}
@@ -529,6 +655,9 @@ const styles = StyleSheet.create({
   today: {
     backgroundColor: '#e3f2fd',
   },
+  restDayCell: {
+    backgroundColor: '#f3e8ff',
+  },
   dayNumber: {
     fontSize: 14,
     fontWeight: '500',
@@ -542,12 +671,18 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontWeight: 'bold',
   },
+  restDayIndicator: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
   workoutIndicators: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
+    marginTop: 4,
   },
   workoutDot: {
     width: 8,
@@ -627,6 +762,87 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: 20,
+  },
+  modalButton: {
+    backgroundColor: '#8b5cf6',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  
+  // Rest Day Styles
+  restDayCard: {
+    backgroundColor: '#f3e8ff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  restDayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  restDayInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  restDayTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#8b5cf6',
+  },
+  restDayNotes: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  removeRestDayButton: {
+    padding: 4,
+  },
+  restDayDate: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  restDayInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  addRestDayButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3e8ff',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    gap: 8,
+    marginTop: 16,
+  },
+  addRestDayButtonText: {
+    color: '#8b5cf6',
+    fontSize: 14,
+    fontWeight: '600',
   },
   
   // Date Modal Styles

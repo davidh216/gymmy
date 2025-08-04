@@ -15,7 +15,7 @@ import { useApp } from '../context/AppContext';
 import MotivationalQuote from '../components/MotivationalQuote';
 import GamificationStats from '../components/GamificationStats';
 
-const WorkoutScreen = ({ navigation }) => {
+const WorkoutScreen = ({ navigation, route }) => {
   // Get global state and actions from context
   const { 
     workoutHistory, 
@@ -25,10 +25,14 @@ const WorkoutScreen = ({ navigation }) => {
     removeWorkout,
     userStats,
     updateUserStats,
-    resetToDummyData
+    resetToDummyData,
+    workoutTemplates,
+    addTemplate,
+    removeTemplate
   } = useApp();
 
-
+  // Check if we should show templates or start with a template
+  const { showTemplates, templateId } = route.params || {};
 
   // Local state for current workout session
   const [currentWorkout, setCurrentWorkout] = useState(null);
@@ -44,6 +48,27 @@ const WorkoutScreen = ({ navigation }) => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingType, setRatingType] = useState('pre'); // 'pre' or 'post'
   const [expandedWorkouts, setExpandedWorkouts] = useState(new Set());
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+
+  // Load template if templateId is provided
+  useEffect(() => {
+    if (templateId && workoutTemplates) {
+      const template = workoutTemplates.find(t => t.id === templateId);
+      if (template) {
+        startWorkoutFromTemplate(template);
+      }
+    }
+  }, [templateId, workoutTemplates]);
+
+  // Show templates modal if requested
+  useEffect(() => {
+    if (showTemplates) {
+      setShowTemplateModal(true);
+    }
+  }, [showTemplates]);
 
   // Memoized exercise categories to prevent unnecessary re-renders
   const exerciseCategories = useMemo(() => ({
@@ -110,6 +135,120 @@ const WorkoutScreen = ({ navigation }) => {
     setRatingType('pre');
     setShowRatingModal(true);
   }, [workoutRatings]);
+
+  const startWorkoutFromTemplate = useCallback((template) => {
+    const now = new Date();
+    const workout = {
+      id: Date.now(),
+      startTime: now,
+      workoutDate: now.toISOString().split('T')[0],
+      type: 'Weightlifting',
+      exercises: [],
+      ratings: { ...workoutRatings },
+      templateUsed: template.id
+    };
+    
+    setCurrentWorkout(workout);
+    
+    // Add exercises from template
+    const templateExercises = template.exercises.map((templateExercise, index) => {
+      if (templateExercise.isCardio) {
+        return {
+          id: Date.now() + index,
+          name: templateExercise.name,
+          sets: [],
+          cardioData: {
+            totalTime: templateExercise.targetDuration || 0,
+            pace: '',
+            calories: templateExercise.targetCalories || 0,
+            distance: 0,
+          },
+          notes: '',
+          order: index,
+        };
+      } else {
+        // Create sets based on template
+        const sets = [];
+        for (let i = 0; i < (templateExercise.sets || 3); i++) {
+          sets.push({
+            id: Date.now() + index + i,
+            reps: templateExercise.targetReps || '',
+            weight: templateExercise.targetWeight || '',
+            completed: false,
+          });
+        }
+        
+        return {
+          id: Date.now() + index,
+          name: templateExercise.name,
+          sets,
+          cardioData: null,
+          notes: '',
+          order: index,
+        };
+      }
+    });
+    
+    setExercises(templateExercises);
+    setShowTemplateModal(false);
+    
+    // Show pre-workout ratings
+    setRatingType('pre');
+    setShowRatingModal(true);
+  }, [workoutRatings]);
+
+  const saveAsTemplate = useCallback(async () => {
+    if (!templateName.trim()) {
+      Alert.alert('Template Name Required', 'Please enter a name for your template.');
+      return;
+    }
+    
+    if (exercises.length === 0) {
+      Alert.alert('No Exercises', 'Add at least one exercise before saving as a template.');
+      return;
+    }
+    
+    const templateExercises = exercises.map(exercise => {
+      if (isCardioExercise(exercise.name)) {
+        return {
+          name: exercise.name,
+          isCardio: true,
+          targetDuration: exercise.cardioData?.totalTime || 30,
+          targetCalories: exercise.cardioData?.calories || 0
+        };
+      } else {
+        // Get average weight and reps from sets
+        const completedSets = exercise.sets.filter(set => set.reps && set.weight);
+        const avgWeight = completedSets.length > 0
+          ? Math.round(completedSets.reduce((sum, set) => sum + set.weight, 0) / completedSets.length)
+          : 0;
+        const avgReps = completedSets.length > 0
+          ? Math.round(completedSets.reduce((sum, set) => sum + set.reps, 0) / completedSets.length)
+          : 0;
+        
+        return {
+          name: exercise.name,
+          sets: exercise.sets.length,
+          targetReps: avgReps,
+          targetWeight: avgWeight
+        };
+      }
+    });
+    
+    const template = {
+      name: templateName,
+      description: templateDescription,
+      exercises: templateExercises
+    };
+    
+    await addTemplate(template);
+    
+    setShowSaveTemplateModal(false);
+    setTemplateName('');
+    setTemplateDescription('');
+    
+    Alert.alert('Template Saved', 'Your workout has been saved as a template!');
+  }, [templateName, templateDescription, exercises, addTemplate, isCardioExercise]);
 
   const addExercise = useCallback((exerciseName) => {
     // Check if exercise already exists in current workout
@@ -187,8 +326,6 @@ const WorkoutScreen = ({ navigation }) => {
       });
     }
   }, [exercises]);
-
-
 
   const removeSet = useCallback((exerciseId, setId) => {
     setExercises(prev => prev.map(exercise => {
@@ -282,40 +419,40 @@ const WorkoutScreen = ({ navigation }) => {
       
       await addWorkout(finishedWorkout);
       
-             // Update exercise history
-       const exerciseHistoryUpdates = {};
-       sortedExercises.forEach(exercise => {
-         if (isCardioExercise(exercise.name)) {
-           // Handle cardio exercises
-           if (exercise.cardioData && (exercise.cardioData.totalTime || exercise.cardioData.calories)) {
-             const exerciseName = exercise.name;
-             if (!exerciseHistoryUpdates[exerciseName]) {
-               exerciseHistoryUpdates[exerciseName] = [];
-             }
-             exerciseHistoryUpdates[exerciseName].push({
-               date: endTime,
-               duration: exercise.cardioData.totalTime || 0,
-               calories: exercise.cardioData.calories || 0,
-             });
-           }
-         } else {
-           // Handle weight exercises
-           exercise.sets.forEach(set => {
-             if (set.reps && set.weight) {
-               const exerciseName = exercise.name;
-               if (!exerciseHistoryUpdates[exerciseName]) {
-                 exerciseHistoryUpdates[exerciseName] = [];
-               }
-               exerciseHistoryUpdates[exerciseName].push({
-                 date: endTime,
-                 sets: exercise.sets.length,
-                 reps: set.reps,
-                 weight: set.weight,
-               });
-             }
-           });
-         }
-       });
+      // Update exercise history
+      const exerciseHistoryUpdates = {};
+      sortedExercises.forEach(exercise => {
+        if (isCardioExercise(exercise.name)) {
+          // Handle cardio exercises
+          if (exercise.cardioData && (exercise.cardioData.totalTime || exercise.cardioData.calories)) {
+            const exerciseName = exercise.name;
+            if (!exerciseHistoryUpdates[exerciseName]) {
+              exerciseHistoryUpdates[exerciseName] = [];
+            }
+            exerciseHistoryUpdates[exerciseName].push({
+              date: endTime,
+              duration: exercise.cardioData.totalTime || 0,
+              calories: exercise.cardioData.calories || 0,
+            });
+          }
+        } else {
+          // Handle weight exercises
+          exercise.sets.forEach(set => {
+            if (set.reps && set.weight) {
+              const exerciseName = exercise.name;
+              if (!exerciseHistoryUpdates[exerciseName]) {
+                exerciseHistoryUpdates[exerciseName] = [];
+              }
+              exerciseHistoryUpdates[exerciseName].push({
+                date: endTime,
+                sets: exercise.sets.length,
+                reps: set.reps,
+                weight: set.weight,
+              });
+            }
+          });
+        }
+      });
       
       if (Object.keys(exerciseHistoryUpdates).length > 0) {
         await updateExerciseHistory(exerciseHistoryUpdates);
@@ -490,6 +627,133 @@ const WorkoutScreen = ({ navigation }) => {
     </Modal>
   );
 
+  const renderTemplateModal = () => (
+    <Modal
+      visible={showTemplateModal}
+      transparent={true}
+      animationType="slide"
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { maxHeight: '80%' }]}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Workout Templates</Text>
+            <TouchableOpacity 
+              onPress={() => setShowTemplateModal(false)}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.templatesList}>
+            {workoutTemplates.length === 0 ? (
+              <View style={styles.emptyTemplates}>
+                <Ionicons name="document-text-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyTemplatesText}>No templates yet</Text>
+                <Text style={styles.emptyTemplatesSubtext}>
+                  Complete a workout and save it as a template for quick access
+                </Text>
+              </View>
+            ) : (
+              workoutTemplates.map(template => (
+                <TouchableOpacity
+                  key={template.id}
+                  style={styles.templateItem}
+                  onPress={() => startWorkoutFromTemplate(template)}
+                >
+                  <View style={styles.templateInfo}>
+                    <Text style={styles.templateTitle}>{template.name}</Text>
+                    {template.description && (
+                      <Text style={styles.templateDescription}>{template.description}</Text>
+                    )}
+                    <Text style={styles.templateExerciseCount}>
+                      {template.exercises.length} exercises
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        'Delete Template',
+                        'Are you sure you want to delete this template?',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Delete',
+                            style: 'destructive',
+                            onPress: () => removeTemplate(template.id)
+                          }
+                        ]
+                      );
+                    }}
+                    style={styles.deleteTemplateButton}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#ff4444" />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const renderSaveTemplateModal = () => (
+    <Modal
+      visible={showSaveTemplateModal}
+      transparent={true}
+      animationType="slide"
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Save as Template</Text>
+            <TouchableOpacity 
+              onPress={() => {
+                setShowSaveTemplateModal(false);
+                setTemplateName('');
+                setTemplateDescription('');
+              }}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.templateForm}>
+            <Text style={styles.inputLabel}>Template Name</Text>
+            <TextInput
+              style={styles.templateInput}
+              value={templateName}
+              onChangeText={setTemplateName}
+              placeholder="e.g., Upper Body Day"
+              placeholderTextColor="#999"
+            />
+            
+            <Text style={styles.inputLabel}>Description (Optional)</Text>
+            <TextInput
+              style={[styles.templateInput, styles.templateTextArea]}
+              value={templateDescription}
+              onChangeText={setTemplateDescription}
+              placeholder="Describe this workout..."
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={3}
+            />
+          </View>
+          
+          <TouchableOpacity
+            style={[styles.modalButton, !templateName.trim() && styles.disabledButton]}
+            onPress={saveAsTemplate}
+            disabled={!templateName.trim()}
+          >
+            <Text style={styles.modalButtonText}>Save Template</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   // Memoized recent workouts to prevent unnecessary re-renders
   const recentWorkouts = useMemo(() => {
     console.log('Workout history length:', workoutHistory.length);
@@ -529,15 +793,15 @@ const WorkoutScreen = ({ navigation }) => {
             <Text style={styles.exerciseNumber}>#{exerciseIndex + 1}</Text>
             <Text style={styles.exerciseName}>{exercise.name}</Text>
           </View>
-                     <TouchableOpacity 
-             onPress={() => {
-               console.log('Trashcan pressed for cardio exercise:', exercise.name);
-               removeExercise(exercise.id);
-             }}
-             style={styles.actionButton}
-           >
-             <Ionicons name="trash" size={20} color="#ff4444" />
-           </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              console.log('Trashcan pressed for cardio exercise:', exercise.name);
+              removeExercise(exercise.id);
+            }}
+            style={styles.actionButton}
+          >
+            <Ionicons name="trash" size={20} color="#ff4444" />
+          </TouchableOpacity>
         </View>
         
         {history && (
@@ -613,15 +877,15 @@ const WorkoutScreen = ({ navigation }) => {
             >
               <Ionicons name="add-circle" size={24} color="#007AFF" />
             </TouchableOpacity>
-                         <TouchableOpacity 
-               onPress={() => {
-                 console.log('Trashcan pressed for weight exercise:', exercise.name);
-                 removeExercise(exercise.id);
-               }}
-               style={styles.actionButton}
-             >
-               <Ionicons name="trash" size={20} color="#ff4444" />
-             </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => {
+                console.log('Trashcan pressed for weight exercise:', exercise.name);
+                removeExercise(exercise.id);
+              }}
+              style={styles.actionButton}
+            >
+              <Ionicons name="trash" size={20} color="#ff4444" />
+            </TouchableOpacity>
           </View>
         </View>
         
@@ -670,30 +934,30 @@ const WorkoutScreen = ({ navigation }) => {
                 </TouchableOpacity>
               )}
             </View>
-                         {/* Ghost line for next set */}
-             {index === exercise.sets.length - 1 && (
-               <View style={styles.ghostSetRow}>
-                 <Text style={styles.ghostSetNumber}>Set {index + 2}</Text>
-                 <TextInput
-                   style={styles.ghostInput}
-                   placeholder="Reps"
-                   keyboardType="numeric"
-                   onFocus={() => {
-                     // Add a new set when user starts typing in ghost set
-                     addSet(exercise.id);
-                   }}
-                 />
-                 <TextInput
-                   style={styles.ghostInput}
-                   placeholder="lbs"
-                   keyboardType="numeric"
-                   onFocus={() => {
-                     // Add a new set when user starts typing in ghost set
-                     addSet(exercise.id);
-                   }}
-                 />
-               </View>
-             )}
+            {/* Ghost line for next set */}
+            {index === exercise.sets.length - 1 && (
+              <View style={styles.ghostSetRow}>
+                <Text style={styles.ghostSetNumber}>Set {index + 2}</Text>
+                <TextInput
+                  style={styles.ghostInput}
+                  placeholder="Reps"
+                  keyboardType="numeric"
+                  onFocus={() => {
+                    // Add a new set when user starts typing in ghost set
+                    addSet(exercise.id);
+                  }}
+                />
+                <TextInput
+                  style={styles.ghostInput}
+                  placeholder="lbs"
+                  keyboardType="numeric"
+                  onFocus={() => {
+                    // Add a new set when user starts typing in ghost set
+                    addSet(exercise.id);
+                  }}
+                />
+              </View>
+            )}
           </View>
         ))}
       </View>
@@ -710,19 +974,32 @@ const WorkoutScreen = ({ navigation }) => {
               <MotivationalQuote />
               <GamificationStats userStats={userStats} />
               <Text style={styles.title}>Start a New Workout</Text>
-              <TouchableOpacity style={styles.startButton} onPress={startNewWorkout}>
-                <Ionicons name="play" size={24} color="#fff" />
-                <Text style={styles.startButtonText}>Begin Workout</Text>
-              </TouchableOpacity>
+              
+              <View style={styles.startOptions}>
+                <TouchableOpacity style={styles.startButton} onPress={startNewWorkout}>
+                  <Ionicons name="play" size={24} color="#fff" />
+                  <Text style={styles.startButtonText}>Begin Workout</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.startButton, styles.templateButton]} 
+                  onPress={() => setShowTemplateModal(true)}
+                >
+                  <Ionicons name="document-text" size={24} color="#007AFF" />
+                  <Text style={[styles.startButtonText, styles.templateButtonText]}>
+                    Use Template
+                  </Text>
+                </TouchableOpacity>
+              </View>
               
               {/* Hidden for now - can be uncommented for debugging */}
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.startButton, { marginTop: 10, backgroundColor: '#ff6b35' }]}
                 onPress={resetToDummyData}
               >
                 <Ionicons name="refresh" size={24} color="#fff" />
                 <Text style={styles.startButtonText}>Reset to Dummy Data</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
               
             {/* Recent Workouts - Simplified and more spacious */}
@@ -877,20 +1154,20 @@ const WorkoutScreen = ({ navigation }) => {
                     style={styles.exerciseButton}
                     onPress={() => addExercise(exercise)}
                   >
-                                         <View style={styles.exerciseButtonContent}>
-                       <Text style={styles.exerciseText}>{exercise}</Text>
-                                               <Text style={styles.autoSetText}>
-                          {(() => {
-                            const history = getExerciseHistory(exercise);
-                            console.log('Exercise history for', exercise, ':', history);
-                            if (history) {
-                              return `Last: ${history.date} - ${history.reps} reps @ ${history.weight} lbs`;
-                            } else {
-                              return 'No data available.';
-                            }
-                          })()}
-                        </Text>
-                     </View>
+                    <View style={styles.exerciseButtonContent}>
+                      <Text style={styles.exerciseText}>{exercise}</Text>
+                      <Text style={styles.autoSetText}>
+                        {(() => {
+                          const history = getExerciseHistory(exercise);
+                          console.log('Exercise history for', exercise, ':', history);
+                          if (history) {
+                            return `Last: ${history.date} - ${history.reps} reps @ ${history.weight} lbs`;
+                          } else {
+                            return 'No data available.';
+                          }
+                        })()}
+                      </Text>
+                    </View>
                     <Ionicons name="add" size={20} color="#007AFF" />
                   </TouchableOpacity>
                 ))}
@@ -930,13 +1207,23 @@ const WorkoutScreen = ({ navigation }) => {
             {/* Continue Adding or Finish Workout */}
             <View style={styles.workoutActions}>
               {exercises.length > 0 && (
-                <TouchableOpacity 
-                  style={styles.addMoreButton} 
-                  onPress={() => setSelectedCategory('Chest')}
-                >
-                  <Ionicons name="add" size={20} color="#007AFF" />
-                  <Text style={styles.addMoreButtonText}>Add More Exercises</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity 
+                    style={styles.saveTemplateButton} 
+                    onPress={() => setShowSaveTemplateModal(true)}
+                  >
+                    <Ionicons name="save" size={20} color="#8b5cf6" />
+                    <Text style={styles.saveTemplateButtonText}>Save as Template</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.addMoreButton} 
+                    onPress={() => setSelectedCategory('Chest')}
+                  >
+                    <Ionicons name="add" size={20} color="#007AFF" />
+                    <Text style={styles.addMoreButtonText}>Add More Exercises</Text>
+                  </TouchableOpacity>
+                </>
               )}
               
               <TouchableOpacity 
@@ -955,6 +1242,8 @@ const WorkoutScreen = ({ navigation }) => {
         )}
       </ScrollView>
       {renderRatingModal()}
+      {renderTemplateModal()}
+      {renderSaveTemplateModal()}
     </SafeAreaView>
   );
 };
@@ -964,10 +1253,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-          scrollView: {
-          flex: 1,
-          paddingHorizontal: 20,
-        },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
   startContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -980,6 +1269,10 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 30,
   },
+  startOptions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -988,6 +1281,14 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 25,
     gap: 10,
+  },
+  templateButton: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#007AFF',
+  },
+  templateButtonText: {
+    color: '#007AFF',
   },
   startButtonText: {
     color: '#fff',
@@ -1162,6 +1463,22 @@ const styles = StyleSheet.create({
   workoutActions: {
     gap: 12,
   },
+  saveTemplateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#8b5cf6',
+    gap: 8,
+  },
+  saveTemplateButtonText: {
+    color: '#8b5cf6',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   addMoreButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1221,15 +1538,6 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 14,
     textAlign: 'center',
-  },
-  finishButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#28a745',
-    paddingVertical: 15,
-    borderRadius: 25,
-    gap: 10,
   },
   finishButtonText: {
     color: '#fff',
@@ -1317,24 +1625,99 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
   modalButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
+  // Templates modal
+  templatesList: {
+    maxHeight: 400,
+  },
+  emptyTemplates: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyTemplatesText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 12,
+  },
+  emptyTemplatesSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  templateItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  templateInfo: {
+    flex: 1,
+  },
+  templateTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  templateDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  templateExerciseCount: {
+    fontSize: 12,
+    color: '#999',
+  },
+  deleteTemplateButton: {
+    padding: 8,
+  },
+  // Save template modal
+  templateForm: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  templateInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  templateTextArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
   // History Styles
-          historySection: {
-          marginTop: 40,
-          paddingHorizontal: 0,
-          marginHorizontal: 0,
-        },
-          historyTitle: {
-          fontSize: 22,
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: 20,
-          paddingHorizontal: 0,
-        },
+  historySection: {
+    marginTop: 40,
+    paddingHorizontal: 0,
+    marginHorizontal: 0,
+  },
+  historyTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    paddingHorizontal: 0,
+  },
   historyCard: {
     backgroundColor: '#fff',
     padding: 15,
@@ -1463,19 +1846,26 @@ const styles = StyleSheet.create({
   },
   ghostInput: {
     flex: 1,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 14,
+    textAlign: 'center',
+    backgroundColor: '#f8f9fa',
   },
   // Workout detail styles (matching WorkoutCalendar modal style)
-          workoutDetailCard: {
-          backgroundColor: '#fff',
-          borderRadius: 8,
-          marginBottom: 16,
-          marginHorizontal: 0,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-        },
+  workoutDetailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 16,
+    marginHorizontal: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   workoutDetailHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

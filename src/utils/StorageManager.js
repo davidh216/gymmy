@@ -6,7 +6,9 @@ const STORAGE_KEYS = {
   EXERCISE_HISTORY: '@exercise_history',
   ONE_REP_MAXES: '@one_rep_maxes',
   SETTINGS: '@settings',
-  USER_STATS: '@user_stats'
+  USER_STATS: '@user_stats',
+  WORKOUT_TEMPLATES: '@workout_templates',
+  REST_DAYS: '@rest_days'
 };
 
 class StorageManager {
@@ -102,9 +104,29 @@ class StorageManager {
       },
       experience: 0,
       level: 1,
-      totalExperience: 0
+      totalExperience: 0,
+      avgWorkoutsPerWeek: 0,
+      avgRating: 0
     };
     return await this.loadData(STORAGE_KEYS.USER_STATS, defaultStats);
+  }
+
+  // New methods for workout templates
+  static async saveWorkoutTemplates(templates) {
+    return await this.saveData(STORAGE_KEYS.WORKOUT_TEMPLATES, templates);
+  }
+
+  static async loadWorkoutTemplates() {
+    return await this.loadData(STORAGE_KEYS.WORKOUT_TEMPLATES, []);
+  }
+
+  // New methods for rest days
+  static async saveRestDays(restDays) {
+    return await this.saveData(STORAGE_KEYS.REST_DAYS, restDays);
+  }
+
+  static async loadRestDays() {
+    return await this.loadData(STORAGE_KEYS.REST_DAYS, []);
   }
 
   // Data export/import methods
@@ -116,6 +138,8 @@ class StorageManager {
         oneRepMaxes: await this.loadOneRepMaxes(),
         settings: await this.loadSettings(),
         userStats: await this.loadUserStats(),
+        workoutTemplates: await this.loadWorkoutTemplates(),
+        restDays: await this.loadRestDays(),
         exportDate: new Date().toISOString(),
         appVersion: '1.0.0'
       };
@@ -147,6 +171,8 @@ class StorageManager {
       await this.saveOneRepMaxes(importData.oneRepMaxes || {});
       await this.saveSettings(importData.settings || {});
       await this.saveUserStats(importData.userStats || {});
+      await this.saveWorkoutTemplates(importData.workoutTemplates || []);
+      await this.saveRestDays(importData.restDays || []);
 
       return true;
     } catch (error) {
@@ -163,7 +189,9 @@ class StorageManager {
         this.removeData(STORAGE_KEYS.EXERCISE_HISTORY),
         this.removeData(STORAGE_KEYS.ONE_REP_MAXES),
         this.removeData(STORAGE_KEYS.SETTINGS),
-        this.removeData(STORAGE_KEYS.USER_STATS)
+        this.removeData(STORAGE_KEYS.USER_STATS),
+        this.removeData(STORAGE_KEYS.WORKOUT_TEMPLATES),
+        this.removeData(STORAGE_KEYS.REST_DAYS)
       ]);
       return true;
     } catch (error) {
@@ -291,15 +319,22 @@ class StorageManager {
       const dummyWorkouts = generateWorkouts();
       await this.saveWorkoutHistory(dummyWorkouts);
       
-      // Calculate comprehensive stats
+      // Calculate comprehensive stats with new KPIs
       const totalWorkouts = dummyWorkouts.length;
       const totalDuration = dummyWorkouts.reduce((sum, w) => sum + w.duration, 0);
       const averageRating = dummyWorkouts.reduce((sum, w) => sum + w.ratings.workoutRating, 0) / totalWorkouts;
+      
+      // Calculate average workouts per week
+      const firstWorkoutDate = new Date(dummyWorkouts[0].workoutDate);
+      const lastWorkoutDate = new Date(dummyWorkouts[dummyWorkouts.length - 1].workoutDate);
+      const weeksBetween = Math.ceil((lastWorkoutDate - firstWorkoutDate) / (7 * 24 * 60 * 60 * 1000));
+      const avgWorkoutsPerWeek = totalWorkouts / weeksBetween;
       
       const dummyStats = {
         totalWorkouts,
         totalDuration,
         averageRating: Math.round(averageRating * 10) / 10,
+        avgWorkoutsPerWeek: Math.round(avgWorkoutsPerWeek * 10) / 10,
         currentStreak: 7,
         longestStreak: 12,
         experience: totalWorkouts * 50,
@@ -343,6 +378,55 @@ class StorageManager {
       });
       
       await this.saveExerciseHistory(exerciseHistory);
+      
+      // Generate dummy templates
+      const dummyTemplates = [
+        {
+          id: '1',
+          name: 'Upper Body Day',
+          description: 'Chest, back, and arms workout',
+          exercises: [
+            { name: 'Bench Press', sets: 3, targetReps: 8, targetWeight: 135 },
+            { name: 'Pull-ups', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Overhead Press', sets: 3, targetReps: 8, targetWeight: 95 }
+          ],
+          createdAt: '2025-05-01T12:00:00.000Z'
+        },
+        {
+          id: '2',
+          name: 'Leg Day',
+          description: 'Complete lower body workout',
+          exercises: [
+            { name: 'Squats', sets: 4, targetReps: 10, targetWeight: 185 },
+            { name: 'Deadlifts', sets: 3, targetReps: 5, targetWeight: 225 }
+          ],
+          createdAt: '2025-05-01T12:00:00.000Z'
+        },
+        {
+          id: '3',
+          name: 'Cardio Session',
+          description: 'Mixed cardio workout',
+          exercises: [
+            { name: 'Running', isCardio: true, targetDuration: 30, targetCalories: 300 },
+            { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 200 }
+          ],
+          createdAt: '2025-05-01T12:00:00.000Z'
+        }
+      ];
+      
+      await this.saveWorkoutTemplates(dummyTemplates);
+      
+      // Generate dummy rest days
+      const dummyRestDays = [
+        { date: '2025-05-02', notes: 'Active recovery - light walk', planned: true },
+        { date: '2025-05-05', notes: 'Complete rest', planned: true },
+        { date: '2025-05-09', notes: 'Yoga and stretching', planned: false },
+        { date: '2025-06-02', notes: 'Rest day', planned: true },
+        { date: '2025-06-08', notes: 'Recovery day', planned: true },
+        { date: '2025-07-07', notes: 'Rest - feeling sore', planned: false }
+      ];
+      
+      await this.saveRestDays(dummyRestDays);
       
     } catch (error) {
       console.error('Error resetting to dummy data:', error);
