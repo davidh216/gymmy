@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
@@ -10,11 +11,21 @@ import { AppProvider, useApp } from './src/context/AppContext';
 
 // Import screens
 import DashboardScreen from './src/screens/DashboardScreen';
+import AchievementsScreen from './src/screens/AchievementsScreen';
 import WorkoutScreen from './src/screens/WorkoutScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+// Dashboard Stack Navigator
+const DashboardStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="DashboardMain" component={DashboardScreen} />
+    <Stack.Screen name="Achievements" component={AchievementsScreen} />
+  </Stack.Navigator>
+);
 
 // Loading screen component
 const LoadingScreen = () => (
@@ -77,7 +88,7 @@ const AppNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Dashboard" component={DashboardStack} />
       <Tab.Screen name="Workout" component={WorkoutScreen} />
       <Tab.Screen name="Progress" component={ProgressScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />

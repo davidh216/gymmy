@@ -627,76 +627,124 @@ const WorkoutScreen = ({ navigation, route }) => {
     </Modal>
   );
 
-  const renderTemplateModal = () => (
-    <Modal
-      visible={showTemplateModal}
-      transparent={true}
-      animationType="slide"
-    >
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { maxHeight: '80%' }]}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Workout Templates</Text>
-            <TouchableOpacity 
-              onPress={() => setShowTemplateModal(false)}
-              style={styles.closeButton}
-            >
-              <Ionicons name="close" size={24} color="#666" />
-            </TouchableOpacity>
+  const renderTemplateModal = () => {
+    // Categorize templates
+    const categorizedTemplates = {
+      'Strength Training': workoutTemplates.filter(t => 
+        !t.exercises.some(e => e.isCardio) && 
+        !t.name.toLowerCase().includes('cardio') &&
+        !t.name.toLowerCase().includes('abs')
+      ),
+      'Cardio & HIIT': workoutTemplates.filter(t => 
+        t.exercises.some(e => e.isCardio) || 
+        t.name.toLowerCase().includes('cardio') ||
+        t.name.toLowerCase().includes('hiit')
+      ),
+      'Core & Abs': workoutTemplates.filter(t => 
+        t.name.toLowerCase().includes('abs') || 
+        t.name.toLowerCase().includes('core')
+      )
+    };
+
+    const getTemplateIcon = (template) => {
+      if (template.exercises.some(e => e.isCardio)) return 'fitness-outline';
+      if (template.name.toLowerCase().includes('abs') || template.name.toLowerCase().includes('core')) return 'body-outline';
+      return 'barbell-outline';
+    };
+
+    const getTemplateColor = (template) => {
+      if (template.exercises.some(e => e.isCardio)) return '#ff6b35';
+      if (template.name.toLowerCase().includes('abs') || template.name.toLowerCase().includes('core')) return '#8b5cf6';
+      return '#007AFF';
+    };
+
+    return (
+      <Modal
+        visible={showTemplateModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Workout Templates</Text>
+              <TouchableOpacity 
+                onPress={() => setShowTemplateModal(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.templatesList}>
+              {workoutTemplates.length === 0 ? (
+                <View style={styles.emptyTemplates}>
+                  <Ionicons name="document-text-outline" size={48} color="#ccc" />
+                  <Text style={styles.emptyTemplatesText}>No templates yet</Text>
+                  <Text style={styles.emptyTemplatesSubtext}>
+                    Complete a workout and save it as a template for quick access
+                  </Text>
+                </View>
+              ) : (
+                Object.entries(categorizedTemplates).map(([category, templates]) => {
+                  if (templates.length === 0) return null;
+                  
+                  return (
+                    <View key={category} style={styles.templateCategory}>
+                      <Text style={styles.templateCategoryTitle}>{category}</Text>
+                      {templates.map(template => (
+                        <TouchableOpacity
+                          key={template.id}
+                          style={styles.templateItem}
+                          onPress={() => startWorkoutFromTemplate(template)}
+                        >
+                          <View style={styles.templateIconContainer}>
+                            <Ionicons 
+                              name={getTemplateIcon(template)} 
+                              size={24} 
+                              color={getTemplateColor(template)} 
+                            />
+                          </View>
+                          <View style={styles.templateInfo}>
+                            <Text style={styles.templateTitle}>{template.name}</Text>
+                            {template.description && (
+                              <Text style={styles.templateDescription}>{template.description}</Text>
+                            )}
+                            <Text style={styles.templateExerciseCount}>
+                              {template.exercises.length} exercises
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => {
+                              Alert.alert(
+                                'Delete Template',
+                                'Are you sure you want to delete this template?',
+                                [
+                                  { text: 'Cancel', style: 'cancel' },
+                                  {
+                                    text: 'Delete',
+                                    style: 'destructive',
+                                    onPress: () => removeTemplate(template.id)
+                                  }
+                                ]
+                              );
+                            }}
+                            style={styles.deleteTemplateButton}
+                          >
+                            <Ionicons name="trash-outline" size={20} color="#ff4444" />
+                          </TouchableOpacity>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  );
+                })
+              )}
+            </ScrollView>
           </View>
-          
-          <ScrollView style={styles.templatesList}>
-            {workoutTemplates.length === 0 ? (
-              <View style={styles.emptyTemplates}>
-                <Ionicons name="document-text-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyTemplatesText}>No templates yet</Text>
-                <Text style={styles.emptyTemplatesSubtext}>
-                  Complete a workout and save it as a template for quick access
-                </Text>
-              </View>
-            ) : (
-              workoutTemplates.map(template => (
-                <TouchableOpacity
-                  key={template.id}
-                  style={styles.templateItem}
-                  onPress={() => startWorkoutFromTemplate(template)}
-                >
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateTitle}>{template.name}</Text>
-                    {template.description && (
-                      <Text style={styles.templateDescription}>{template.description}</Text>
-                    )}
-                    <Text style={styles.templateExerciseCount}>
-                      {template.exercises.length} exercises
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert(
-                        'Delete Template',
-                        'Are you sure you want to delete this template?',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Delete',
-                            style: 'destructive',
-                            onPress: () => removeTemplate(template.id)
-                          }
-                        ]
-                      );
-                    }}
-                    style={styles.deleteTemplateButton}
-                  >
-                    <Ionicons name="trash-outline" size={20} color="#ff4444" />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
         </View>
-      </View>
-    </Modal>
-  );
+      </Modal>
+    );
+  };
 
   const renderSaveTemplateModal = () => (
     <Modal
@@ -1653,6 +1701,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
+  templateCategory: {
+    marginBottom: 20,
+  },
+  templateCategoryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
   templateItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1661,6 +1719,20 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+  },
+  templateIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   templateInfo: {
     flex: 1,

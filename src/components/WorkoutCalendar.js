@@ -1,5 +1,5 @@
 // src/components/WorkoutCalendar.js
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import EditWorkoutModal from './EditWorkoutModal';
 import { useApp } from '../context/AppContext';
 
-const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
+const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthChange, selectedMonth }) => {
   const { restDays, addRestDay, removeRestDay, updateRestDay } = useApp();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(selectedMonth || new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
   const [showDateModal, setShowDateModal] = useState(false);
@@ -29,6 +29,13 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
   // Edit workout states
   const [showEditModal, setShowEditModal] = useState(false);
   const [workoutToEdit, setWorkoutToEdit] = useState(null);
+
+  // Update currentDate when selectedMonth prop changes
+  React.useEffect(() => {
+    if (selectedMonth) {
+      setCurrentDate(selectedMonth);
+    }
+  }, [selectedMonth]);
 
   // Get workout rating colors
   const getRatingColor = (rating) => {
@@ -52,6 +59,7 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
   const createDateKey = (workout) => {
     // Use workoutDate if available, otherwise fall back to startTime
     if (workout.workoutDate) {
+      console.log('WorkoutCalendar - createDateKey - using workoutDate:', workout.workoutDate, 'for workout:', workout.id);
       return workout.workoutDate;
     }
     
@@ -63,11 +71,15 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
     const day = String(date.getUTCDate()).padStart(2, '0'); // Pad with 0
     const dateKey = `${year}-${month}-${day}`;
     
+    console.log('WorkoutCalendar - createDateKey - using startTime fallback:', dateKey, 'for workout:', workout.id);
     return dateKey;
   };
 
   // Generate workouts by date map
   const workoutsByDate = useMemo(() => {
+    console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory length:', workoutHistory.length);
+    console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory:', workoutHistory);
+    
     const map = {};
     workoutHistory.forEach(workout => {
       const dateKey = createDateKey(workout);
@@ -78,6 +90,7 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
       map[dateKey].push(workout);
     });
     
+    console.log('WorkoutCalendar - workoutsByDate useMemo - map:', map);
     return map;
   }, [workoutHistory]);
 
@@ -136,11 +149,21 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation }) => {
   const calendar = generateCalendar();
 
   const goToPreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    setCurrentDate(newDate);
+    // Notify parent component about month change
+    if (onMonthChange) {
+      onMonthChange(newDate);
+    }
   };
 
   const goToNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    setCurrentDate(newDate);
+    // Notify parent component about month change
+    if (onMonthChange) {
+      onMonthChange(newDate);
+    }
   };
 
   const openDateDetail = (date, workouts, restDay) => {

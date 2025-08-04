@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,12 +14,21 @@ import WorkoutCalendar from '../components/WorkoutCalendar';
 
 const DashboardScreen = ({ navigation }) => {
   const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates } = useApp();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
-  // Calculate dashboard stats
+  // Handle month change from calendar
+  const handleMonthChange = (newMonth) => {
+    setSelectedMonth(newMonth);
+  };
+
+      // Calculate dashboard stats based on selected month
   const dashboardStats = useMemo(() => {
     const now = new Date();
     const thisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Use selected month instead of current month
+    const selectedMonthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const selectedMonthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
     
     // This week's workouts
     const thisWeekWorkouts = workoutHistory.filter(workout => {
@@ -27,15 +36,15 @@ const DashboardScreen = ({ navigation }) => {
       return workoutDate >= thisWeek;
     });
 
-    // This month's workouts
-    const thisMonthWorkouts = workoutHistory.filter(workout => {
+    // Selected month's workouts
+    const selectedMonthWorkouts = workoutHistory.filter(workout => {
       const workoutDate = new Date(workout.startTime);
-      return workoutDate >= thisMonth;
+      return workoutDate >= selectedMonthStart && workoutDate <= selectedMonthEnd;
     });
 
-    // Most frequent exercise
+    // Most frequent exercise in selected month
     const exerciseCount = {};
-    workoutHistory.forEach(workout => {
+    selectedMonthWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
         exerciseCount[exercise.name] = (exerciseCount[exercise.name] || 0) + 1;
       });
@@ -45,17 +54,34 @@ const DashboardScreen = ({ navigation }) => {
       ? Object.keys(exerciseCount).reduce((a, b) => exerciseCount[a] > exerciseCount[b] ? a : b)
       : 'None yet';
 
+    // Calculate total duration for selected month
+    const selectedMonthDuration = selectedMonthWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+
+    // Calculate average rating for selected month
+    const selectedMonthRatings = selectedMonthWorkouts
+      .filter(w => w.ratings?.workoutRating)
+      .map(w => w.ratings.workoutRating);
+    
+    const selectedMonthAvgRating = selectedMonthRatings.length > 0 
+      ? selectedMonthRatings.reduce((sum, rating) => sum + rating, 0) / selectedMonthRatings.length
+      : 0;
+
+    // Calculate average workouts per week for the selected month
+    const weeksInSelectedMonth = Math.ceil((selectedMonthEnd - selectedMonthStart) / (1000 * 60 * 60 * 24 * 7));
+    const avgWorkoutsPerWeek = weeksInSelectedMonth > 0 ? selectedMonthWorkouts.length / weeksInSelectedMonth : 0;
+
     return {
       totalWorkouts: workoutHistory.length,
       thisWeekCount: thisWeekWorkouts.length,
-      thisMonthCount: thisMonthWorkouts.length,
-      avgWorkoutsPerWeek: userStats?.avgWorkoutsPerWeek || 0,
-      avgRating: userStats?.avgRating || 0,
+      selectedMonthCount: selectedMonthWorkouts.length,
+      avgWorkoutsPerWeek: avgWorkoutsPerWeek,
+      avgRating: selectedMonthAvgRating,
       totalDuration: workoutHistory.reduce((sum, w) => sum + (w.duration || 0), 0),
+      selectedMonthDuration: selectedMonthDuration,
       favoriteExercise,
       templatesCount: workoutTemplates.length
     };
-  }, [workoutHistory, userStats, workoutTemplates]);
+  }, [workoutHistory, userStats, workoutTemplates, selectedMonth]);
 
   const getRatingColor = (rating) => {
     if (rating >= 8) return '#22c55e';
@@ -64,6 +90,309 @@ const DashboardScreen = ({ navigation }) => {
     if (rating >= 2) return '#f97316';
     return '#ef4444';
   };
+
+  // Achievements System
+  const achievements = useMemo(() => {
+    const totalWorkouts = workoutHistory.length;
+    const totalDuration = workoutHistory.reduce((sum, w) => sum + (w.duration || 0), 0);
+    const totalHours = totalDuration / 60;
+    const avgRating = workoutHistory.length > 0 
+      ? workoutHistory.reduce((sum, w) => sum + (w.ratings?.workoutRating || 0), 0) / workoutHistory.length
+      : 0;
+    
+    // Calculate streak data
+    const sortedWorkouts = [...workoutHistory].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let lastWorkoutDate = null;
+    
+    for (let i = 0; i < sortedWorkouts.length; i++) {
+      const workoutDate = new Date(sortedWorkouts[i].startTime);
+      const workoutDay = new Date(workoutDate.getFullYear(), workoutDate.getMonth(), workoutDate.getDate());
+      
+      if (lastWorkoutDate === null) {
+        lastWorkoutDate = workoutDay;
+        tempStreak = 1;
+        currentStreak = 1;
+      } else {
+        const daysDiff = Math.floor((lastWorkoutDate - workoutDay) / (1000 * 60 * 60 * 24));
+        if (daysDiff === 1) {
+          tempStreak++;
+          currentStreak = tempStreak;
+        } else if (daysDiff === 0) {
+          // Same day workout, don't break streak
+        } else {
+          tempStreak = 1;
+        }
+        lastWorkoutDate = workoutDay;
+      }
+      
+      longestStreak = Math.max(longestStreak, tempStreak);
+    }
+
+    // Calculate weekly consistency
+    const now = new Date();
+    const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
+    const recentWorkouts = workoutHistory.filter(w => new Date(w.startTime) >= fourWeeksAgo);
+    const weeklyConsistency = recentWorkouts.length / 4; // workouts per week average
+
+    // Define all achievements
+    const allAchievements = [
+      // Workout Count Achievements
+      {
+        id: 'first_workout',
+        title: 'First Steps',
+        description: 'Complete your first workout',
+        icon: 'fitness-outline',
+        color: '#10b981',
+        condition: totalWorkouts >= 1,
+        progress: Math.min(totalWorkouts, 1),
+        maxProgress: 1,
+        category: 'milestone'
+      },
+      {
+        id: 'workout_5',
+        title: 'Getting Started',
+        description: 'Complete 5 workouts',
+        icon: 'fitness',
+        color: '#10b981',
+        condition: totalWorkouts >= 5,
+        progress: Math.min(totalWorkouts, 5),
+        maxProgress: 5,
+        category: 'milestone'
+      },
+      {
+        id: 'workout_25',
+        title: 'Dedicated Athlete',
+        description: 'Complete 25 workouts',
+        icon: 'trophy-outline',
+        color: '#f59e0b',
+        condition: totalWorkouts >= 25,
+        progress: Math.min(totalWorkouts, 25),
+        maxProgress: 25,
+        category: 'milestone'
+      },
+      {
+        id: 'workout_50',
+        title: 'Fitness Enthusiast',
+        description: 'Complete 50 workouts',
+        icon: 'trophy',
+        color: '#f59e0b',
+        condition: totalWorkouts >= 50,
+        progress: Math.min(totalWorkouts, 50),
+        maxProgress: 50,
+        category: 'milestone'
+      },
+      {
+        id: 'workout_100',
+        title: 'Century Club',
+        description: 'Complete 100 workouts',
+        icon: 'diamond-outline',
+        color: '#8b5cf6',
+        condition: totalWorkouts >= 100,
+        progress: Math.min(totalWorkouts, 100),
+        maxProgress: 100,
+        category: 'milestone'
+      },
+      {
+        id: 'workout_500',
+        title: 'Legendary',
+        description: 'Complete 500 workouts',
+        icon: 'diamond',
+        color: '#8b5cf6',
+        condition: totalWorkouts >= 500,
+        progress: Math.min(totalWorkouts, 500),
+        maxProgress: 500,
+        category: 'milestone'
+      },
+
+      // Duration Achievements
+      {
+        id: 'hours_10',
+        title: 'Time Warrior',
+        description: 'Log 10 hours of workouts',
+        icon: 'time-outline',
+        color: '#8b5cf6',
+        condition: totalHours >= 10,
+        progress: Math.min(totalHours, 10),
+        maxProgress: 10,
+        category: 'duration'
+      },
+      {
+        id: 'hours_50',
+        title: 'Endurance Master',
+        description: 'Log 50 hours of workouts',
+        icon: 'time',
+        color: '#8b5cf6',
+        condition: totalHours >= 50,
+        progress: Math.min(totalHours, 50),
+        maxProgress: 50,
+        category: 'duration'
+      },
+      {
+        id: 'hours_100',
+        title: 'Time Legend',
+        description: 'Log 100 hours of workouts',
+        icon: 'infinite-outline',
+        color: '#8b5cf6',
+        condition: totalHours >= 100,
+        progress: Math.min(totalHours, 100),
+        maxProgress: 100,
+        category: 'duration'
+      },
+
+      // Streak Achievements
+      {
+        id: 'streak_3',
+        title: 'Consistency Starter',
+        description: 'Maintain a 3-day workout streak',
+        icon: 'flame-outline',
+        color: '#f97316',
+        condition: longestStreak >= 3,
+        progress: Math.min(longestStreak, 3),
+        maxProgress: 3,
+        category: 'streak'
+      },
+      {
+        id: 'streak_7',
+        title: 'Week Warrior',
+        description: 'Maintain a 7-day workout streak',
+        icon: 'flame',
+        color: '#f97316',
+        condition: longestStreak >= 7,
+        progress: Math.min(longestStreak, 7),
+        maxProgress: 7,
+        category: 'streak'
+      },
+      {
+        id: 'streak_30',
+        title: 'Month Master',
+        description: 'Maintain a 30-day workout streak',
+        icon: 'fire',
+        color: '#ef4444',
+        condition: longestStreak >= 30,
+        progress: Math.min(longestStreak, 30),
+        maxProgress: 30,
+        category: 'streak'
+      },
+
+      // Rating Achievements
+      {
+        id: 'rating_8',
+        title: 'Quality Focus',
+        description: 'Maintain an average rating of 8+',
+        icon: 'star-outline',
+        color: '#ffd700',
+        condition: avgRating >= 8,
+        progress: Math.min(avgRating, 8),
+        maxProgress: 8,
+        category: 'quality'
+      },
+      {
+        id: 'rating_9',
+        title: 'Perfectionist',
+        description: 'Maintain an average rating of 9+',
+        icon: 'star',
+        color: '#ffd700',
+        condition: avgRating >= 9,
+        progress: Math.min(avgRating, 9),
+        maxProgress: 9,
+        category: 'quality'
+      },
+
+      // Consistency Achievements
+      {
+        id: 'weekly_3',
+        title: 'Regular Routine',
+        description: 'Average 3+ workouts per week',
+        icon: 'calendar-outline',
+        color: '#22c55e',
+        condition: weeklyConsistency >= 3,
+        progress: Math.min(weeklyConsistency, 3),
+        maxProgress: 3,
+        category: 'consistency'
+      },
+      {
+        id: 'weekly_5',
+        title: 'Fitness Fanatic',
+        description: 'Average 5+ workouts per week',
+        icon: 'calendar',
+        color: '#22c55e',
+        condition: weeklyConsistency >= 5,
+        progress: Math.min(weeklyConsistency, 5),
+        maxProgress: 5,
+        category: 'consistency'
+      },
+
+      // Special Achievements
+      {
+        id: 'perfect_week',
+        title: 'Perfect Week',
+        description: 'Complete 7 workouts in 7 days',
+        icon: 'checkmark-circle',
+        color: '#22c55e',
+        condition: currentStreak >= 7,
+        progress: Math.min(currentStreak, 7),
+        maxProgress: 7,
+        category: 'special'
+      },
+      {
+        id: 'early_bird',
+        title: 'Early Bird',
+        description: 'Complete 5 workouts before 8 AM',
+        icon: 'sunny-outline',
+        color: '#f59e0b',
+        condition: workoutHistory.filter(w => {
+          const workoutHour = new Date(w.startTime).getHours();
+          return workoutHour < 8;
+        }).length >= 5,
+        progress: Math.min(workoutHistory.filter(w => {
+          const workoutHour = new Date(w.startTime).getHours();
+          return workoutHour < 8;
+        }).length, 5),
+        maxProgress: 5,
+        category: 'special'
+      },
+      {
+        id: 'night_owl',
+        title: 'Night Owl',
+        description: 'Complete 5 workouts after 10 PM',
+        icon: 'moon-outline',
+        color: '#8b5cf6',
+        condition: workoutHistory.filter(w => {
+          const workoutHour = new Date(w.startTime).getHours();
+          return workoutHour >= 22;
+        }).length >= 5,
+        progress: Math.min(workoutHistory.filter(w => {
+          const workoutHour = new Date(w.startTime).getHours();
+          return workoutHour >= 22;
+        }).length, 5),
+        maxProgress: 5,
+        category: 'special'
+      }
+    ];
+
+    const unlockedAchievements = allAchievements.filter(achievement => achievement.condition);
+    const lockedAchievements = allAchievements.filter(achievement => !achievement.condition);
+    
+    // Calculate total progress
+    const totalProgress = unlockedAchievements.length;
+    const totalAchievements = allAchievements.length;
+    const completionPercentage = totalAchievements > 0 ? (totalProgress / totalAchievements) * 100 : 0;
+
+    return {
+      allAchievements,
+      unlockedAchievements,
+      lockedAchievements,
+      totalProgress,
+      totalAchievements,
+      completionPercentage,
+      currentStreak,
+      longestStreak,
+      weeklyConsistency
+    };
+  }, [workoutHistory]);
 
   const handleWorkoutPress = async (workout, action = 'view') => {
     if (action === 'update') {
@@ -116,35 +445,35 @@ const DashboardScreen = ({ navigation }) => {
         {workoutHistory.length > 0 && (
           <View style={styles.compactStatsContainer}>
             <View style={styles.compactStatCard}>
-              <Ionicons name="calendar" size={18} color="#007AFF" />
-              <Text style={styles.compactStatNumber}>{dashboardStats.thisWeekCount}</Text>
-              <Text style={styles.compactStatLabel}>This Week</Text>
-            </View>
-            
-            <View style={styles.compactStatCard}>
               <Ionicons name="trending-up" size={18} color="#ff6b35" />
-              <Text style={styles.compactStatNumber}>{dashboardStats.avgWorkoutsPerWeek}</Text>
+              <Text style={styles.compactStatNumber}>{dashboardStats.avgWorkoutsPerWeek.toFixed(2)}</Text>
               <Text style={styles.compactStatLabel}>Avg/Week</Text>
             </View>
             
             <View style={styles.compactStatCard}>
               <Ionicons name="star" size={18} color="#ffd700" />
               <Text style={[styles.compactStatNumber, { color: getRatingColor(dashboardStats.avgRating) }]}>
-                {dashboardStats.avgRating || '0.0'}
+                {dashboardStats.avgRating.toFixed(2)}
               </Text>
               <Text style={styles.compactStatLabel}>Avg Rating</Text>
             </View>
 
             <View style={styles.compactStatCard}>
               <Ionicons name="time" size={18} color="#8b5cf6" />
-              <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.totalDuration / 60)}</Text>
+              <Text style={styles.compactStatNumber}>{(dashboardStats.selectedMonthDuration / 60).toFixed(2)}</Text>
               <Text style={styles.compactStatLabel}>Hours</Text>
             </View>
             
             <View style={styles.compactStatCard}>
               <Ionicons name="fitness" size={18} color="#10b981" />
-              <Text style={styles.compactStatNumber}>{dashboardStats.thisMonthCount}</Text>
-              <Text style={styles.compactStatLabel}>This Month</Text>
+              <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.selectedMonthCount)}</Text>
+              <Text style={styles.compactStatLabel}>Monthly Total</Text>
+            </View>
+
+            <View style={styles.compactStatCard}>
+              <Ionicons name="trophy" size={18} color="#22c55e" />
+              <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.totalWorkouts)}</Text>
+              <Text style={styles.compactStatLabel}>All Time</Text>
             </View>
           </View>
         )}
@@ -180,11 +509,20 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         )}
 
+        {/* Month Indicator */}
+        <View style={styles.monthIndicator}>
+          <Text style={styles.monthIndicatorText}>
+            {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Stats
+          </Text>
+        </View>
+
         {/* Workout Calendar */}
         <WorkoutCalendar 
           workoutHistory={workoutHistory}
           onWorkoutPress={handleWorkoutPress}
           navigation={navigation}
+          onMonthChange={handleMonthChange}
+          selectedMonth={selectedMonth}
         />
 
         {/* Motivational Section */}
@@ -235,12 +573,113 @@ const DashboardScreen = ({ navigation }) => {
                   </Text>
                 </View>
               </View>
+                         )}
+           </View>
+         )}
+
+        {/* Achievements Section */}
+        {workoutHistory.length > 0 && (
+          <View style={styles.achievementsSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Achievements</Text>
+              <View style={styles.achievementStats}>
+                <Text style={styles.achievementProgress}>
+                  {achievements.totalProgress}/{achievements.totalAchievements}
+                </Text>
+                <Text style={styles.achievementPercentage}>
+                  {achievements.completionPercentage.toFixed(1)}%
+                </Text>
+              </View>
+            </View>
+
+            {/* Progress Bar */}
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { width: `${achievements.completionPercentage}%` }
+                  ]} 
+                />
+              </View>
+            </View>
+
+            {/* Streak Info */}
+            <View style={styles.streakContainer}>
+              <View style={styles.streakCard}>
+                <Ionicons name="flame" size={20} color="#f97316" />
+                <Text style={styles.streakLabel}>Current Streak</Text>
+                                 <Text style={styles.streakNumber}>{Math.round(achievements.currentStreak)} days</Text>
+               </View>
+               <View style={styles.streakCard}>
+                 <Ionicons name="trophy" size={20} color="#f59e0b" />
+                 <Text style={styles.streakLabel}>Longest Streak</Text>
+                 <Text style={styles.streakNumber}>{Math.round(achievements.longestStreak)} days</Text>
+              </View>
+            </View>
+
+            {/* Recent Achievements */}
+            {achievements.unlockedAchievements.length > 0 && (
+              <View style={styles.recentAchievements}>
+                <Text style={styles.subsectionTitle}>Recent Unlocks</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {achievements.unlockedAchievements.slice(0, 5).map(achievement => (
+                    <View key={achievement.id} style={styles.achievementCard}>
+                      <View style={[styles.achievementIcon, { backgroundColor: achievement.color + '20' }]}>
+                        <Ionicons name={achievement.icon} size={24} color={achievement.color} />
+                      </View>
+                      <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                      <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
             )}
+
+            {/* Next Achievements */}
+            {achievements.lockedAchievements.length > 0 && (
+              <View style={styles.nextAchievements}>
+                <Text style={styles.subsectionTitle}>Next Goals</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {achievements.lockedAchievements.slice(0, 3).map(achievement => (
+                    <View key={achievement.id} style={styles.achievementCard}>
+                      <View style={[styles.achievementIcon, { backgroundColor: '#f3f4f6' }]}>
+                        <Ionicons name={achievement.icon} size={24} color="#9ca3af" />
+                      </View>
+                      <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                      <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                      <View style={styles.progressContainer}>
+                        <View style={styles.miniProgressBar}>
+                          <View 
+                            style={[
+                              styles.miniProgressFill, 
+                              { width: `${(achievement.progress / achievement.maxProgress) * 100}%` }
+                            ]} 
+                          />
+                        </View>
+                                                 <Text style={styles.progressText}>
+                           {Math.round(achievement.progress)}/{achievement.maxProgress}
+                         </Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* View All Achievements Button */}
+            <TouchableOpacity 
+              style={styles.viewAllButton}
+              onPress={() => navigation.navigate('Achievements')}
+            >
+              <Text style={styles.viewAllText}>View All Achievements</Text>
+              <Ionicons name="chevron-forward" size={16} color="#007AFF" />
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
-    </SafeAreaView>
-  );
+       </ScrollView>
+     </SafeAreaView>
+   );
 };
 
 const styles = StyleSheet.create({
@@ -311,6 +750,27 @@ const styles = StyleSheet.create({
   compactStatLabel: {
     fontSize: 10,
     color: '#666',
+    textAlign: 'center',
+  },
+
+  // Month Indicator
+  monthIndicator: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  monthIndicatorText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#007AFF',
     textAlign: 'center',
   },
 
@@ -484,11 +944,156 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#f59e0b',
   },
-  qualityText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-});
+     qualityText: {
+     fontSize: 14,
+     color: '#666',
+     marginTop: 2,
+   },
+
+   // Achievements Section
+   achievementsSection: {
+     marginVertical: 16,
+     paddingHorizontal: 16,
+   },
+   achievementStats: {
+     alignItems: 'flex-end',
+   },
+   achievementProgress: {
+     fontSize: 16,
+     fontWeight: 'bold',
+     color: '#007AFF',
+   },
+   achievementPercentage: {
+     fontSize: 12,
+     color: '#666',
+     marginTop: 2,
+   },
+   progressContainer: {
+     marginVertical: 8,
+   },
+   progressBar: {
+     height: 8,
+     backgroundColor: '#f3f4f6',
+     borderRadius: 4,
+     overflow: 'hidden',
+   },
+   progressFill: {
+     height: '100%',
+     backgroundColor: '#007AFF',
+     borderRadius: 4,
+   },
+   streakContainer: {
+     flexDirection: 'row',
+     gap: 12,
+     marginVertical: 16,
+   },
+   streakCard: {
+     flex: 1,
+     backgroundColor: '#fff',
+     padding: 16,
+     borderRadius: 12,
+     alignItems: 'center',
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   streakLabel: {
+     fontSize: 12,
+     color: '#666',
+     marginTop: 8,
+     marginBottom: 4,
+   },
+   streakNumber: {
+     fontSize: 18,
+     fontWeight: 'bold',
+     color: '#333',
+   },
+   recentAchievements: {
+     marginVertical: 16,
+   },
+   nextAchievements: {
+     marginVertical: 16,
+   },
+   subsectionTitle: {
+     fontSize: 16,
+     fontWeight: '600',
+     color: '#333',
+     marginBottom: 12,
+   },
+   achievementCard: {
+     backgroundColor: '#fff',
+     padding: 16,
+     borderRadius: 12,
+     marginHorizontal: 4,
+     width: 160,
+     alignItems: 'center',
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   achievementIcon: {
+     width: 48,
+     height: 48,
+     borderRadius: 24,
+     justifyContent: 'center',
+     alignItems: 'center',
+     marginBottom: 8,
+   },
+   achievementTitle: {
+     fontSize: 14,
+     fontWeight: '600',
+     color: '#333',
+     textAlign: 'center',
+     marginBottom: 4,
+   },
+   achievementDescription: {
+     fontSize: 11,
+     color: '#666',
+     textAlign: 'center',
+     lineHeight: 14,
+   },
+   miniProgressBar: {
+     height: 4,
+     backgroundColor: '#f3f4f6',
+     borderRadius: 2,
+     overflow: 'hidden',
+     marginTop: 8,
+     marginBottom: 4,
+   },
+   miniProgressFill: {
+     height: '100%',
+     backgroundColor: '#007AFF',
+     borderRadius: 2,
+   },
+   progressText: {
+     fontSize: 10,
+     color: '#666',
+     textAlign: 'center',
+   },
+   viewAllButton: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     justifyContent: 'center',
+     backgroundColor: '#fff',
+     padding: 16,
+     borderRadius: 12,
+     marginTop: 16,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 2 },
+     shadowOpacity: 0.1,
+     shadowRadius: 4,
+     elevation: 3,
+   },
+   viewAllText: {
+     fontSize: 16,
+     fontWeight: '600',
+     color: '#007AFF',
+     marginRight: 8,
+   },
+ });
 
 export default DashboardScreen;

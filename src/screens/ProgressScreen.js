@@ -311,7 +311,7 @@ const ProgressScreen = ({ navigation }) => {
           {Object.keys(muscleGroupStats).map(groupName => 
             renderMuscleGroupCard(groupName, muscleGroupStats[groupName])
           )}
-        </View>
+          </View>
       </ScrollView>
     </SafeAreaView>
   );

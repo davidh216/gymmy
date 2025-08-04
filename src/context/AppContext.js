@@ -90,9 +90,13 @@ const appReducer = (state, action) => {
       };
 
     case ActionTypes.UPDATE_WORKOUT:
+      console.log('AppContext - UPDATE_WORKOUT reducer - action.payload:', action.payload);
+      console.log('AppContext - UPDATE_WORKOUT reducer - action.payload.workoutDate:', action.payload.workoutDate);
       const updatedWorkoutHistory = state.workoutHistory.map(workout =>
         workout.id === action.payload.id ? action.payload : workout
       );
+      console.log('AppContext - UPDATE_WORKOUT reducer - updatedWorkoutHistory length:', updatedWorkoutHistory.length);
+      console.log('AppContext - UPDATE_WORKOUT reducer - updated workout in history:', updatedWorkoutHistory.find(w => w.id === action.payload.id));
       return {
         ...state,
         workoutHistory: updatedWorkoutHistory
@@ -251,7 +255,24 @@ export const AppProvider = ({ children }) => {
         StorageManager.loadRestDays()
       ]);
 
-      console.log('loadAllData - loaded userStats:', userStats);
+      // Ensure userStats has all required properties with proper defaults
+      const validatedUserStats = {
+        totalWorkouts: userStats?.totalWorkouts || 0,
+        totalDuration: userStats?.totalDuration || 0,
+        favoriteExercises: userStats?.favoriteExercises || [],
+        streaks: {
+          current: userStats?.streaks?.current || 0,
+          best: userStats?.streaks?.best || 0,
+          lastWorkout: userStats?.streaks?.lastWorkout || null
+        },
+        experience: userStats?.experience || 0,
+        level: userStats?.level || 1,
+        totalExperience: userStats?.totalExperience || 0,
+        avgWorkoutsPerWeek: userStats?.avgWorkoutsPerWeek || 0,
+        avgRating: userStats?.avgRating || 0
+      };
+
+      console.log('loadAllData - loaded userStats:', validatedUserStats);
 
       dispatch({
         type: ActionTypes.LOAD_DATA,
@@ -260,11 +281,14 @@ export const AppProvider = ({ children }) => {
           exerciseHistory,
           oneRepMaxes,
           settings,
-          userStats,
+          userStats: validatedUserStats,
           workoutTemplates,
           restDays
         }
       });
+
+      // Initialize base templates for new users
+      await initializeBaseTemplates();
     } catch (error) {
       console.error('Error loading app data:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
@@ -326,7 +350,7 @@ export const AppProvider = ({ children }) => {
     }
     
     // Bonus for streak
-    if (state.userStats.streaks.current > 0) {
+    if (state.userStats.streaks?.current > 0) {
       experience += Math.min(state.userStats.streaks.current * 5, 50); // Max 50 exp for streak
     }
     
@@ -376,9 +400,8 @@ export const AppProvider = ({ children }) => {
         avgWorkoutsPerWeek,
         avgRating,
         streaks: {
-          ...state.userStats.streaks,
-          current: state.userStats.streaks.current + 1,
-          best: Math.max(state.userStats.streaks.best, state.userStats.streaks.current + 1),
+          current: (state.userStats.streaks?.current || 0) + 1,
+          best: Math.max(state.userStats.streaks?.best || 0, (state.userStats.streaks?.current || 0) + 1),
           lastWorkout: workout.endTime
         }
       };
@@ -397,6 +420,9 @@ export const AppProvider = ({ children }) => {
 
   const updateWorkout = async (updatedWorkout) => {
     try {
+      console.log('AppContext - updateWorkout - updatedWorkout:', updatedWorkout);
+      console.log('AppContext - updateWorkout - updatedWorkout.workoutDate:', updatedWorkout.workoutDate);
+      
       dispatch({ type: ActionTypes.UPDATE_WORKOUT, payload: updatedWorkout });
       
       // Save updated workout history to storage
@@ -404,6 +430,8 @@ export const AppProvider = ({ children }) => {
         workout.id === updatedWorkout.id ? updatedWorkout : workout
       );
       await StorageManager.saveWorkoutHistory(updatedHistory);
+      
+      console.log('AppContext - updateWorkout - updatedHistory saved to storage');
       
       // Recalculate KPIs
       const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(updatedHistory);
@@ -554,6 +582,151 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const initializeBaseTemplates = async () => {
+    try {
+      // Only initialize if user has no templates
+      if (state.workoutTemplates.length === 0) {
+        const baseTemplates = [
+          {
+            id: 'template_beginner_full_body',
+            name: 'Beginner Full Body',
+            description: 'Complete full body workout for beginners. Focus on form and building strength.',
+            exercises: [
+              { name: 'Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Barbell Squat', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Lat Pulldown (Wide-grip)', sets: 3, targetReps: 10, targetWeight: 0 },
+              { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+              { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_push_pull_legs',
+            name: 'Push Pull Legs',
+            description: 'Classic PPL split for intermediate lifters. 3-day rotation.',
+            exercises: [
+              { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+              { name: 'Incline Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Lateral Raise', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_upper_lower',
+            name: 'Upper Lower Split',
+            description: '4-day split alternating upper and lower body workouts.',
+            exercises: [
+              { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+              { name: 'Lat Pulldown (Wide-grip)', sets: 4, targetReps: 8, targetWeight: 0 },
+              { name: 'Upright Barbell Row', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+              { name: 'Tricep Dips', sets: 3, targetReps: 10, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_chest_back',
+            name: 'Chest & Back',
+            description: 'Focus on major pushing and pulling movements.',
+            exercises: [
+              { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+              { name: 'Incline Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Cable Fly (Middle)', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Lat Pulldown (Wide-grip)', sets: 4, targetReps: 8, targetWeight: 0 },
+              { name: 'Bent-Over Rows', sets: 3, targetReps: 8, targetWeight: 0 },
+              { name: 'Single Arm Dumbbell Row', sets: 3, targetReps: 10, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_legs_focus',
+            name: 'Legs Focus',
+            description: 'Comprehensive leg day with squats, presses, and accessories.',
+            exercises: [
+              { name: 'Barbell Squat', sets: 4, targetReps: 6, targetWeight: 0 },
+              { name: 'Seated Leg Press', sets: 3, targetReps: 10, targetWeight: 0 },
+              { name: 'Leg Extension', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Seated Calf Raise', sets: 4, targetReps: 15, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_shoulders_arms',
+            name: 'Shoulders & Arms',
+            description: 'Isolation work for shoulders, biceps, and triceps.',
+            exercises: [
+              { name: 'Standing Barbell Shoulder Press', sets: 4, targetReps: 8, targetWeight: 0 },
+              { name: 'Lateral Raise', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Face Pulls', sets: 3, targetReps: 15, targetWeight: 0 },
+              { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+              { name: 'Preacher Curls', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_cardio_mix',
+            name: 'Cardio Mix',
+            description: 'Variety of cardio exercises for endurance and fat burning.',
+            exercises: [
+              { name: 'Running', isCardio: true, targetDuration: 20, targetCalories: 200 },
+              { name: 'Cycling', isCardio: true, targetDuration: 15, targetCalories: 150 },
+              { name: 'Rowing', isCardio: true, targetDuration: 10, targetCalories: 100 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_hiit_workout',
+            name: 'HIIT Workout',
+            description: 'High-intensity interval training for maximum calorie burn.',
+            exercises: [
+              { name: 'Running', isCardio: true, targetDuration: 30, targetCalories: 300 },
+              { name: 'Elliptical', isCardio: true, targetDuration: 20, targetCalories: 200 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_abs_core',
+            name: 'Abs & Core',
+            description: 'Core strengthening workout with bodyweight and weighted exercises.',
+            exercises: [
+              { name: 'Hanging Leg Raises', sets: 3, targetReps: 12, targetWeight: 0 },
+              { name: 'Upright Ab Pulldowns', sets: 3, targetReps: 15, targetWeight: 0 }
+            ],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'template_beginner_cardio',
+            name: 'Beginner Cardio',
+            description: 'Low-impact cardio for beginners starting their fitness journey.',
+            exercises: [
+              { name: 'Walking', isCardio: true, targetDuration: 30, targetCalories: 150 },
+              { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 120 }
+            ],
+            createdAt: new Date().toISOString()
+          }
+        ];
+
+        // Add all base templates
+        for (const template of baseTemplates) {
+          dispatch({ type: ActionTypes.ADD_TEMPLATE, payload: template });
+        }
+        
+        await StorageManager.saveWorkoutTemplates(baseTemplates);
+        console.log('Base templates initialized for new user');
+      }
+    } catch (error) {
+      console.error('Error initializing base templates:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
   // Rest day management functions
   const addRestDay = async (date, notes = '', planned = false) => {
     try {
@@ -684,6 +857,7 @@ export const AppProvider = ({ children }) => {
     addTemplate,
     updateTemplate,
     removeTemplate,
+    initializeBaseTemplates,
     // Rest day actions
     addRestDay,
     removeRestDay,

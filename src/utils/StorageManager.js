@@ -206,6 +206,134 @@ class StorageManager {
       // Clear existing data
       await this.clearAllData();
 
+      // Base workout templates for new users
+      const baseTemplates = [
+        {
+          id: 'template_beginner_full_body',
+          name: 'Beginner Full Body',
+          description: 'Complete full body workout for beginners. Focus on form and building strength.',
+          exercises: [
+            { name: 'Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Barbell Squat', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Lat Pulldown (Wide-grip)', sets: 3, targetReps: 10, targetWeight: 0 },
+            { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+            { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_push_pull_legs',
+          name: 'Push Pull Legs',
+          description: 'Classic PPL split for intermediate lifters. 3-day rotation.',
+          exercises: [
+            { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+            { name: 'Incline Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Lateral Raise', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_upper_lower',
+          name: 'Upper Lower Split',
+          description: '4-day split alternating upper and lower body workouts.',
+          exercises: [
+            { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+            { name: 'Lat Pulldown (Wide-grip)', sets: 4, targetReps: 8, targetWeight: 0 },
+            { name: 'Upright Barbell Row', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+            { name: 'Tricep Dips', sets: 3, targetReps: 10, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_chest_back',
+          name: 'Chest & Back',
+          description: 'Focus on major pushing and pulling movements.',
+          exercises: [
+            { name: 'Bench Press', sets: 4, targetReps: 6, targetWeight: 0 },
+            { name: 'Incline Bench Press', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Cable Fly (Middle)', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Lat Pulldown (Wide-grip)', sets: 4, targetReps: 8, targetWeight: 0 },
+            { name: 'Bent-Over Rows', sets: 3, targetReps: 8, targetWeight: 0 },
+            { name: 'Single Arm Dumbbell Row', sets: 3, targetReps: 10, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_legs_focus',
+          name: 'Legs Focus',
+          description: 'Comprehensive leg day with squats, presses, and accessories.',
+          exercises: [
+            { name: 'Barbell Squat', sets: 4, targetReps: 6, targetWeight: 0 },
+            { name: 'Seated Leg Press', sets: 3, targetReps: 10, targetWeight: 0 },
+            { name: 'Leg Extension', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Seated Calf Raise', sets: 4, targetReps: 15, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_shoulders_arms',
+          name: 'Shoulders & Arms',
+          description: 'Isolation work for shoulders, biceps, and triceps.',
+          exercises: [
+            { name: 'Standing Barbell Shoulder Press', sets: 4, targetReps: 8, targetWeight: 0 },
+            { name: 'Lateral Raise', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Face Pulls', sets: 3, targetReps: 15, targetWeight: 0 },
+            { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
+            { name: 'Preacher Curls', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_cardio_mix',
+          name: 'Cardio Mix',
+          description: 'Variety of cardio exercises for endurance and fat burning.',
+          exercises: [
+            { name: 'Running', isCardio: true, targetDuration: 20, targetCalories: 200 },
+            { name: 'Cycling', isCardio: true, targetDuration: 15, targetCalories: 150 },
+            { name: 'Rowing', isCardio: true, targetDuration: 10, targetCalories: 100 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_hiit_workout',
+          name: 'HIIT Workout',
+          description: 'High-intensity interval training for maximum calorie burn.',
+          exercises: [
+            { name: 'Running', isCardio: true, targetDuration: 30, targetCalories: 300 },
+            { name: 'Elliptical', isCardio: true, targetDuration: 20, targetCalories: 200 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_abs_core',
+          name: 'Abs & Core',
+          description: 'Core strengthening workout with bodyweight and weighted exercises.',
+          exercises: [
+            { name: 'Hanging Leg Raises', sets: 3, targetReps: 12, targetWeight: 0 },
+            { name: 'Upright Ab Pulldowns', sets: 3, targetReps: 15, targetWeight: 0 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'template_beginner_cardio',
+          name: 'Beginner Cardio',
+          description: 'Low-impact cardio for beginners starting their fitness journey.',
+          exercises: [
+            { name: 'Walking', isCardio: true, targetDuration: 30, targetCalories: 150 },
+            { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 120 }
+          ],
+          createdAt: new Date().toISOString()
+        }
+      ];
+
       // Generate comprehensive dummy data for May, June, July with ~4 workouts per week
       const generateWorkouts = () => {
         const workouts = [];
@@ -379,42 +507,8 @@ class StorageManager {
       
       await this.saveExerciseHistory(exerciseHistory);
       
-      // Generate dummy templates
-      const dummyTemplates = [
-        {
-          id: '1',
-          name: 'Upper Body Day',
-          description: 'Chest, back, and arms workout',
-          exercises: [
-            { name: 'Bench Press', sets: 3, targetReps: 8, targetWeight: 135 },
-            { name: 'Pull-ups', sets: 3, targetReps: 8, targetWeight: 0 },
-            { name: 'Overhead Press', sets: 3, targetReps: 8, targetWeight: 95 }
-          ],
-          createdAt: '2025-05-01T12:00:00.000Z'
-        },
-        {
-          id: '2',
-          name: 'Leg Day',
-          description: 'Complete lower body workout',
-          exercises: [
-            { name: 'Squats', sets: 4, targetReps: 10, targetWeight: 185 },
-            { name: 'Deadlifts', sets: 3, targetReps: 5, targetWeight: 225 }
-          ],
-          createdAt: '2025-05-01T12:00:00.000Z'
-        },
-        {
-          id: '3',
-          name: 'Cardio Session',
-          description: 'Mixed cardio workout',
-          exercises: [
-            { name: 'Running', isCardio: true, targetDuration: 30, targetCalories: 300 },
-            { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 200 }
-          ],
-          createdAt: '2025-05-01T12:00:00.000Z'
-        }
-      ];
-      
-      await this.saveWorkoutTemplates(dummyTemplates);
+      // Save base templates for new users
+      await this.saveWorkoutTemplates(baseTemplates);
       
       // Generate dummy rest days
       const dummyRestDays = [

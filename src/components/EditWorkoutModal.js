@@ -25,25 +25,39 @@ const EditWorkoutModal = ({
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState(5);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState('12:00');
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
   const [duration, setDuration] = useState(0);
   const [exercises, setExercises] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
   useEffect(() => {
     if (workout) {
+      console.log('EditWorkoutModal - useEffect - workout:', workout);
       setEditedWorkout({ ...workout });
       setNotes(workout.notes || '');
       setRating(workout.ratings?.workoutRating || 5);
-      const workoutDate = new Date(workout.startTime);
+      
+      // Use workoutDate if available, otherwise fall back to startTime
+      let workoutDate;
+      if (workout.workoutDate) {
+        console.log('EditWorkoutModal - useEffect - using workoutDate:', workout.workoutDate);
+        // Parse workoutDate (format: YYYY-MM-DD) to create a Date object
+        const [year, month, day] = workout.workoutDate.split('-').map(Number);
+        workoutDate = new Date(year, month - 1, day); // month is 0-indexed
+      } else {
+        console.log('EditWorkoutModal - useEffect - using startTime fallback');
+        workoutDate = new Date(workout.startTime);
+      }
+      
+      console.log('EditWorkoutModal - Setting selectedDate from workout:', workoutDate);
       setSelectedDate(workoutDate);
       
-      // Set time from workout start time
-      const workoutTime = new Date(workout.startTime);
-      const hours = workoutTime.getHours().toString().padStart(2, '0');
-      const minutes = workoutTime.getMinutes().toString().padStart(2, '0');
-      setSelectedTime(`${hours}:${minutes}`);
+      // Set start and end times from the workout
+      setStartTime(new Date(workout.startTime));
+      setEndTime(new Date(workout.endTime));
       
       setExercises(workout.exercises || []);
       
@@ -58,18 +72,22 @@ const EditWorkoutModal = ({
   const handleSave = () => {
     if (!editedWorkout) return;
 
-    // Parse time and create new start time
-    const [hours, minutes] = selectedTime.split(':').map(Number);
-    const newStartTime = new Date(selectedDate);
-    newStartTime.setHours(hours, minutes, 0, 0);
-    
-    const newEndTime = new Date(newStartTime.getTime() + (duration * 60 * 1000));
+    console.log('EditWorkoutModal - handleSave - selectedDate:', selectedDate);
+    console.log('EditWorkoutModal - handleSave - startTime:', startTime);
+    console.log('EditWorkoutModal - handleSave - endTime:', endTime);
+    console.log('EditWorkoutModal - handleSave - duration:', duration);
 
+    // Create workoutDate in local timezone to avoid timezone issues
+    const workoutDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    
+    console.log('EditWorkoutModal - handleSave - workoutDate (local):', workoutDate);
+    
+    // Update the workout with new times but keep workoutDate separate
     const updatedWorkout = {
       ...editedWorkout,
-      startTime: newStartTime.toISOString(),
-      endTime: newEndTime.toISOString(),
-      workoutDate: newStartTime.toISOString().split('T')[0], // Update workoutDate to match new date
+      workoutDate: workoutDate, // Use local date to avoid timezone issues
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
       exercises: exercises,
       notes: notes.trim(),
       ratings: {
@@ -79,6 +97,9 @@ const EditWorkoutModal = ({
       lastModified: new Date().toISOString(),
     };
 
+    console.log('EditWorkoutModal - handleSave - updatedWorkout:', updatedWorkout);
+    console.log('EditWorkoutModal - handleSave - updatedWorkout.workoutDate:', updatedWorkout.workoutDate);
+    console.log('EditWorkoutModal - handleSave - updatedWorkout.startTime:', updatedWorkout.startTime);
     onSave(updatedWorkout);
   };
 
@@ -86,7 +107,8 @@ const EditWorkoutModal = ({
     setNotes('');
     setRating(5);
     setSelectedDate(new Date());
-    setSelectedTime('12:00');
+    setStartTime(new Date());
+    setEndTime(new Date());
     setDuration(0);
     setExercises([]);
     onCancel();
@@ -265,30 +287,52 @@ const EditWorkoutModal = ({
     if (selectedDate) {
       console.log('EditWorkoutModal - Setting selectedDate to:', selectedDate);
       setSelectedDate(selectedDate);
-      // Set default time to 12:00 PM when date is selected
-      setSelectedTime('12:00');
+    }
+  };
+
+  const handleStartTimeChange = (event, selectedTime) => {
+    console.log('EditWorkoutModal - handleStartTimeChange called:', { event, selectedTime });
+    setShowStartTimePicker(false);
+    if (selectedTime) {
+      console.log('EditWorkoutModal - Setting startTime to:', selectedTime);
+      setStartTime(selectedTime);
+      
+      // Update duration if end time is set
+      if (endTime) {
+        const durationMinutes = Math.round((endTime - selectedTime) / 1000 / 60);
+        setDuration(Math.max(0, durationMinutes));
+      }
+    }
+  };
+
+  const handleEndTimeChange = (event, selectedTime) => {
+    console.log('EditWorkoutModal - handleEndTimeChange called:', { event, selectedTime });
+    setShowEndTimePicker(false);
+    if (selectedTime) {
+      console.log('EditWorkoutModal - Setting endTime to:', selectedTime);
+      setEndTime(selectedTime);
+      
+      // Update duration
+      const durationMinutes = Math.round((selectedTime - startTime) / 1000 / 60);
+      setDuration(Math.max(0, durationMinutes));
     }
   };
 
   const handleWebDateChange = (event) => {
-    const newDate = new Date(event.target.value);
+    console.log('EditWorkoutModal - Web date change - event.target.value:', event.target.value);
+    
+    // Parse the date string (YYYY-MM-DD) to avoid timezone issues
+    const [year, month, day] = event.target.value.split('-').map(Number);
+    const newDate = new Date(year, month - 1, day); // month is 0-indexed
+    
+    console.log('EditWorkoutModal - Web date change - parsed date components:', { year, month, day });
+    console.log('EditWorkoutModal - Web date change - newDate:', newDate);
+    console.log('EditWorkoutModal - Web date change - newDate.toISOString():', newDate.toISOString());
     setSelectedDate(newDate);
-    // Set default time to 12:00 PM when date is selected
-    setSelectedTime('12:00');
   };
 
-  const handleWebTimeChange = (event) => {
-    setSelectedTime(event.target.value);
-  };
-
-  const handleTimeChange = (event, selectedTime) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      const hours = selectedTime.getHours().toString().padStart(2, '0');
-      const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
-      const timeString = `${hours}:${minutes}`;
-      setSelectedTime(timeString);
-    }
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (!workout) return null;
@@ -319,7 +363,7 @@ const EditWorkoutModal = ({
               {Platform.OS === 'web' ? (
                 <input
                   type="date"
-                  value={selectedDate.toISOString().split('T')[0]}
+                  value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
                   onChange={handleWebDateChange}
                   style={{
                     padding: 8,
@@ -348,37 +392,29 @@ const EditWorkoutModal = ({
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Time:</Text>
-              {Platform.OS === 'web' ? (
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={handleWebTimeChange}
-                  style={{
-                    padding: 8,
-                    fontSize: 16,
-                    borderWidth: 1,
-                    borderColor: '#e0e0e0',
-                    borderRadius: 8,
-                    backgroundColor: '#f0f0f0',
-                    color: '#333',
-                    fontWeight: '600',
-                  }}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log('EditWorkoutModal - Time button pressed, current selectedTime:', selectedTime);
-                    setShowTimePicker(true);
-                  }}
-                  style={styles.dateButton}
-                >
-                  <Text style={styles.dateButtonText}>
-                    {selectedTime}
-                  </Text>
-                  <Ionicons name="time-outline" size={20} color="#007AFF" />
-                </TouchableOpacity>
-              )}
+              <Text style={styles.detailLabel}>Start Time:</Text>
+              <TouchableOpacity
+                onPress={() => setShowStartTimePicker(true)}
+                style={styles.timeButton}
+              >
+                <Text style={styles.timeButtonText}>
+                  {formatTime(startTime)}
+                </Text>
+                <Ionicons name="time-outline" size={20} color="#007AFF" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>End Time:</Text>
+              <TouchableOpacity
+                onPress={() => setShowEndTimePicker(true)}
+                style={styles.timeButton}
+              >
+                <Text style={styles.timeButtonText}>
+                  {formatTime(endTime)}
+                </Text>
+                <Ionicons name="time-outline" size={20} color="#007AFF" />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.detailRow}>
@@ -441,17 +477,22 @@ const EditWorkoutModal = ({
           />
         )}
 
-        {showTimePicker && Platform.OS !== 'web' && (
+        {showStartTimePicker && Platform.OS !== 'web' && (
           <DateTimePicker
-            value={(() => {
-              const [hours, minutes] = selectedTime.split(':').map(Number);
-              const timeDate = new Date();
-              timeDate.setHours(hours, minutes, 0, 0);
-              return timeDate;
-            })()}
+            value={startTime}
             mode="time"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handleTimeChange}
+            onChange={handleStartTimeChange}
+            style={{ backgroundColor: 'white' }}
+          />
+        )}
+
+        {showEndTimePicker && Platform.OS !== 'web' && (
+          <DateTimePicker
+            value={endTime}
+            mode="time"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleEndTimeChange}
             style={{ backgroundColor: 'white' }}
           />
         )}
@@ -544,6 +585,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   dateButtonText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  timeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  timeButtonText: {
     fontSize: 16,
     color: '#333',
     fontWeight: '600',
