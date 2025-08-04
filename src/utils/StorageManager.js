@@ -8,7 +8,16 @@ const STORAGE_KEYS = {
   SETTINGS: '@settings',
   USER_STATS: '@user_stats',
   WORKOUT_TEMPLATES: '@workout_templates',
-  REST_DAYS: '@rest_days'
+  REST_DAYS: '@rest_days',
+  BODY_WEIGHTS: '@body_weights',
+  // Backup keys for demo mode
+  BACKUP_WORKOUT_HISTORY: '@backup_workout_history',
+  BACKUP_EXERCISE_HISTORY: '@backup_exercise_history',
+  BACKUP_ONE_REP_MAXES: '@backup_one_rep_maxes',
+  BACKUP_USER_STATS: '@backup_user_stats',
+  BACKUP_WORKOUT_TEMPLATES: '@backup_workout_templates',
+  BACKUP_REST_DAYS: '@backup_rest_days',
+  BACKUP_BODY_WEIGHTS: '@backup_body_weights'
 };
 
 class StorageManager {
@@ -83,7 +92,8 @@ class StorageManager {
       notifications: true,
       darkMode: false,
       autoTimer: true,
-      exportFormat: 'JSON'
+      exportFormat: 'JSON',
+      demoMode: false
     };
     return await this.loadData(STORAGE_KEYS.SETTINGS, defaultSettings);
   }
@@ -129,6 +139,15 @@ class StorageManager {
     return await this.loadData(STORAGE_KEYS.REST_DAYS, []);
   }
 
+  // New methods for body weights
+  static async saveBodyWeights(bodyWeights) {
+    return await this.saveData(STORAGE_KEYS.BODY_WEIGHTS, bodyWeights);
+  }
+
+  static async loadBodyWeights() {
+    return await this.loadData(STORAGE_KEYS.BODY_WEIGHTS, []);
+  }
+
   // Data export/import methods
   static async exportAllData() {
     try {
@@ -140,6 +159,7 @@ class StorageManager {
         userStats: await this.loadUserStats(),
         workoutTemplates: await this.loadWorkoutTemplates(),
         restDays: await this.loadRestDays(),
+        bodyWeights: await this.loadBodyWeights(),
         exportDate: new Date().toISOString(),
         appVersion: '1.0.0'
       };
@@ -173,6 +193,7 @@ class StorageManager {
       await this.saveUserStats(importData.userStats || {});
       await this.saveWorkoutTemplates(importData.workoutTemplates || []);
       await this.saveRestDays(importData.restDays || []);
+      await this.saveBodyWeights(importData.bodyWeights || []);
 
       return true;
     } catch (error) {
@@ -191,7 +212,8 @@ class StorageManager {
         this.removeData(STORAGE_KEYS.SETTINGS),
         this.removeData(STORAGE_KEYS.USER_STATS),
         this.removeData(STORAGE_KEYS.WORKOUT_TEMPLATES),
-        this.removeData(STORAGE_KEYS.REST_DAYS)
+        this.removeData(STORAGE_KEYS.REST_DAYS),
+        this.removeData(STORAGE_KEYS.BODY_WEIGHTS)
       ]);
       return true;
     } catch (error) {
@@ -521,9 +543,106 @@ class StorageManager {
       ];
       
       await this.saveRestDays(dummyRestDays);
+
+      // Generate dummy body weight data (weekly entries showing gradual improvement)
+      const dummyBodyWeights = [
+        { id: '1', weight: 180.0, date: '2025-05-01', notes: 'Starting weight', createdAt: '2025-05-01T08:00:00.000Z' },
+        { id: '2', weight: 179.5, date: '2025-05-08', notes: 'Week 1 - feeling good', createdAt: '2025-05-08T08:00:00.000Z' },
+        { id: '3', weight: 179.2, date: '2025-05-15', notes: '', createdAt: '2025-05-15T08:00:00.000Z' },
+        { id: '4', weight: 178.8, date: '2025-05-22', notes: 'Consistent progress', createdAt: '2025-05-22T08:00:00.000Z' },
+        { id: '5', weight: 178.3, date: '2025-05-29', notes: '', createdAt: '2025-05-29T08:00:00.000Z' },
+        { id: '6', weight: 178.0, date: '2025-06-05', notes: 'Month 1 complete', createdAt: '2025-06-05T08:00:00.000Z' },
+        { id: '7', weight: 177.5, date: '2025-06-12', notes: '', createdAt: '2025-06-12T08:00:00.000Z' },
+        { id: '8', weight: 177.2, date: '2025-06-19', notes: 'Strength gains while losing weight', createdAt: '2025-06-19T08:00:00.000Z' },
+        { id: '9', weight: 176.8, date: '2025-06-26', notes: '', createdAt: '2025-06-26T08:00:00.000Z' },
+        { id: '10', weight: 176.3, date: '2025-07-03', notes: '', createdAt: '2025-07-03T08:00:00.000Z' },
+        { id: '11', weight: 176.0, date: '2025-07-10', notes: 'Halfway to goal!', createdAt: '2025-07-10T08:00:00.000Z' },
+        { id: '12', weight: 175.7, date: '2025-07-17', notes: '', createdAt: '2025-07-17T08:00:00.000Z' },
+        { id: '13', weight: 175.3, date: '2025-07-24', notes: 'Looking leaner', createdAt: '2025-07-24T08:00:00.000Z' },
+        { id: '14', weight: 175.0, date: '2025-07-31', notes: 'Best shape of my life!', createdAt: '2025-07-31T08:00:00.000Z' }
+      ];
+      
+      await this.saveBodyWeights(dummyBodyWeights);
       
     } catch (error) {
       console.error('Error resetting to dummy data:', error);
+    }
+  }
+
+  // Demo mode backup and restore functions
+  static async backupUserData() {
+    try {
+      const workoutHistory = await this.loadWorkoutHistory();
+      const exerciseHistory = await this.loadExerciseHistory();
+      const oneRepMaxes = await this.loadOneRepMaxes();
+      const userStats = await this.loadUserStats();
+      const workoutTemplates = await this.loadWorkoutTemplates();
+      const restDays = await this.loadRestDays();
+      const bodyWeights = await this.loadBodyWeights();
+
+      await Promise.all([
+        this.saveData(STORAGE_KEYS.BACKUP_WORKOUT_HISTORY, workoutHistory),
+        this.saveData(STORAGE_KEYS.BACKUP_EXERCISE_HISTORY, exerciseHistory),
+        this.saveData(STORAGE_KEYS.BACKUP_ONE_REP_MAXES, oneRepMaxes),
+        this.saveData(STORAGE_KEYS.BACKUP_USER_STATS, userStats),
+        this.saveData(STORAGE_KEYS.BACKUP_WORKOUT_TEMPLATES, workoutTemplates),
+        this.saveData(STORAGE_KEYS.BACKUP_REST_DAYS, restDays),
+        this.saveData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS, bodyWeights)
+      ]);
+
+      console.log('User data backed up successfully');
+      return true;
+    } catch (error) {
+      console.error('Error backing up user data:', error);
+      return false;
+    }
+  }
+
+  static async restoreUserData() {
+    try {
+      const backupWorkoutHistory = await this.loadData(STORAGE_KEYS.BACKUP_WORKOUT_HISTORY, []);
+      const backupExerciseHistory = await this.loadData(STORAGE_KEYS.BACKUP_EXERCISE_HISTORY, {});
+      const backupOneRepMaxes = await this.loadData(STORAGE_KEYS.BACKUP_ONE_REP_MAXES, {});
+      const backupUserStats = await this.loadData(STORAGE_KEYS.BACKUP_USER_STATS, {});
+      const backupWorkoutTemplates = await this.loadData(STORAGE_KEYS.BACKUP_WORKOUT_TEMPLATES, []);
+      const backupRestDays = await this.loadData(STORAGE_KEYS.BACKUP_REST_DAYS, []);
+      const backupBodyWeights = await this.loadData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS, []);
+
+      await Promise.all([
+        this.saveWorkoutHistory(backupWorkoutHistory),
+        this.saveExerciseHistory(backupExerciseHistory),
+        this.saveOneRepMaxes(backupOneRepMaxes),
+        this.saveUserStats(backupUserStats),
+        this.saveWorkoutTemplates(backupWorkoutTemplates),
+        this.saveRestDays(backupRestDays),
+        this.saveBodyWeights(backupBodyWeights)
+      ]);
+
+      console.log('User data restored successfully');
+      return true;
+    } catch (error) {
+      console.error('Error restoring user data:', error);
+      return false;
+    }
+  }
+
+  static async clearBackupData() {
+    try {
+      await Promise.all([
+        this.removeData(STORAGE_KEYS.BACKUP_WORKOUT_HISTORY),
+        this.removeData(STORAGE_KEYS.BACKUP_EXERCISE_HISTORY),
+        this.removeData(STORAGE_KEYS.BACKUP_ONE_REP_MAXES),
+        this.removeData(STORAGE_KEYS.BACKUP_USER_STATS),
+        this.removeData(STORAGE_KEYS.BACKUP_WORKOUT_TEMPLATES),
+        this.removeData(STORAGE_KEYS.BACKUP_REST_DAYS),
+        this.removeData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS)
+      ]);
+
+      console.log('Backup data cleared successfully');
+      return true;
+    } catch (error) {
+      console.error('Error clearing backup data:', error);
+      return false;
     }
   }
 }

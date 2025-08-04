@@ -11,13 +11,16 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
+import AnalyticsCharts from '../components/AnalyticsCharts';
+import BodyWeightTracker from '../components/BodyWeightTracker';
 
-const ProgressScreen = ({ navigation }) => {
-  const { workoutHistory, exerciseHistory, userStats } = useApp();
+const ProgressScreen = ({ navigation, route }) => {
+  const { workoutHistory, exerciseHistory, userStats, bodyWeights } = useApp();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showAddMax, setShowAddMax] = useState(false);
   const [newMax, setNewMax] = useState({ weight: '', date: '' });
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [activeTab, setActiveTab] = useState(route?.params?.initialTab || 'analytics'); // 'analytics', 'weight', or 'levels'
 
   // Muscle groups with their exercises and level calculations
   const muscleGroups = useMemo(() => ({
@@ -277,15 +280,17 @@ const ProgressScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
+  const renderTabContent = () => {
+    if (activeTab === 'analytics') {
+      return <AnalyticsCharts workoutHistory={workoutHistory} exerciseHistory={exerciseHistory} userStats={userStats} bodyWeights={bodyWeights} />;
+    }
+    
+    if (activeTab === 'weight') {
+      return <BodyWeightTracker />;
+    }
+    
+    return (
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Progress & Levels</Text>
-          <Text style={styles.subtitle}>Track your muscle group and exercise progression</Text>
-        </View>
-
         {/* Overall Stats */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overall Progress</Text>
@@ -307,12 +312,70 @@ const ProgressScreen = ({ navigation }) => {
 
         {/* Muscle Groups */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Muscle Group Levels</Text>
-          {Object.keys(muscleGroupStats).map(groupName => 
-            renderMuscleGroupCard(groupName, muscleGroupStats[groupName])
+          <Text style={styles.sectionTitle}>Muscle Group Progress</Text>
+          {Object.entries(muscleGroupStats).map(([groupName, stats]) =>
+            renderMuscleGroupCard(groupName, stats)
           )}
-          </View>
+        </View>
       </ScrollView>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Progress & Analytics</Text>
+        <Text style={styles.subtitle}>Track your progression and performance</Text>
+      </View>
+
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'analytics' && styles.activeTab]}
+          onPress={() => setActiveTab('analytics')}
+        >
+          <Ionicons 
+            name="analytics" 
+            size={18} 
+            color={activeTab === 'analytics' ? '#007AFF' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'analytics' && styles.activeTabText]}>
+            Analytics
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'weight' && styles.activeTab]}
+          onPress={() => setActiveTab('weight')}
+        >
+          <Ionicons 
+            name="scale" 
+            size={18} 
+            color={activeTab === 'weight' ? '#007AFF' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'weight' && styles.activeTabText]}>
+            Weight
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'levels' && styles.activeTab]}
+          onPress={() => setActiveTab('levels')}
+        >
+          <Ionicons 
+            name="trophy" 
+            size={18} 
+            color={activeTab === 'levels' ? '#007AFF' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'levels' && styles.activeTabText]}>
+            Levels
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Tab Content */}
+      {renderTabContent()}
     </SafeAreaView>
   );
 };
@@ -481,6 +544,42 @@ const styles = StyleSheet.create({
   exerciseStatText: {
     fontSize: 12,
     color: '#666',
+  },
+  // Tab styles
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f8f9fa',
+    marginHorizontal: 16,
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 16,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    gap: 6,
+  },
+  activeTab: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,22 +10,94 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useApp } from '../context/AppContext';
 
 const SettingsScreen = ({ navigation }) => {
+  const { settings: appSettings, isDemo, setDemoMode, updateSettings } = useApp();
+  
   const [settings, setSettings] = useState({
-    notifications: true,
-    autoSave: true,
-    darkMode: false,
-    units: 'lbs', // lbs or kg
+    notifications: appSettings?.notifications ?? true,
+    autoSave: appSettings?.autoSave ?? true,
+    darkMode: appSettings?.darkMode ?? false,
+    units: appSettings?.units ?? 'lbs',
     showSorenessRatings: true,
     showWorkoutRatings: true,
+    demoMode: appSettings?.demoMode ?? false,
   });
 
-  const toggleSetting = (key) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  // Sync settings when app settings change
+  useEffect(() => {
+    if (appSettings) {
+      setSettings(prev => ({
+        ...prev,
+        notifications: appSettings.notifications,
+        autoSave: appSettings.autoSave,
+        darkMode: appSettings.darkMode,
+        units: appSettings.units,
+        demoMode: appSettings.demoMode,
+      }));
+    }
+  }, [appSettings]);
+
+  const toggleSetting = async (key) => {
+    if (key === 'demoMode') {
+      const newDemoMode = !settings.demoMode;
+      setSettings(prev => ({ ...prev, demoMode: newDemoMode }));
+      
+      // Show confirmation dialog for demo mode
+      Alert.alert(
+        newDemoMode ? 'Enable Demo Mode' : 'Disable Demo Mode',
+        newDemoMode 
+          ? 'This will replace your current data with demo data for showcase purposes. Your real data will be preserved and restored when you turn off demo mode.'
+          : 'This will restore your real workout data and disable demo mode.',
+        [
+          { 
+            text: 'Cancel', 
+            style: 'cancel',
+            onPress: () => {
+              // Revert the setting
+              setSettings(prev => ({ ...prev, demoMode: !newDemoMode }));
+            }
+          },
+          { 
+            text: newDemoMode ? 'Enable Demo' : 'Disable Demo', 
+            onPress: async () => {
+              try {
+                console.log('Toggling demo mode to:', newDemoMode);
+                await setDemoMode(newDemoMode);
+                console.log('Demo mode toggle completed successfully');
+                Alert.alert(
+                  'Success', 
+                  newDemoMode 
+                    ? 'Demo mode enabled! You\'re now viewing demo data. The app will reload.' 
+                    : 'Demo mode disabled! Your real data has been restored. The app will reload.'
+                );
+              } catch (error) {
+                console.error('Error toggling demo mode:', error);
+                Alert.alert('Error', 'Failed to toggle demo mode. Please try again.');
+                // Revert the setting on error
+                setSettings(prev => ({ ...prev, demoMode: !newDemoMode }));
+              }
+            }
+          },
+        ]
+      );
+    } else {
+      const newValue = !settings[key];
+      const newSettings = { ...settings, [key]: newValue };
+      setSettings(newSettings);
+      
+      // Update app settings for other toggles
+      if (updateSettings) {
+        try {
+          await updateSettings(newSettings);
+        } catch (error) {
+          console.error('Error updating settings:', error);
+          // Revert on error
+          setSettings(prev => ({ ...prev, [key]: !newValue }));
+        }
+      }
+    }
   };
 
   const exportData = () => {
@@ -147,6 +219,37 @@ const SettingsScreen = ({ navigation }) => {
             >
               <Text style={styles.unitText}>{settings.units.toUpperCase()}</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Demo Mode Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Demo & Testing</Text>
+          
+          <View style={[styles.settingItem, isDemo && styles.demoModeActive]}>
+            <View style={styles.settingInfo}>
+              <Ionicons 
+                name="eye" 
+                size={20} 
+                color={isDemo ? "#ff6b35" : "#007AFF"} 
+              />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingLabel, isDemo && styles.demoModeText]}>
+                  Demo Mode
+                </Text>
+                {isDemo && (
+                  <Text style={styles.demoModeSubtext}>
+                    Currently viewing demo data
+                  </Text>
+                )}
+              </View>
+            </View>
+            <Switch
+              value={settings.demoMode}
+              onValueChange={() => toggleSetting('demoMode')}
+              trackColor={{ false: '#ddd', true: '#ff6b35' }}
+              thumbColor="#fff"
+            />
           </View>
         </View>
 
@@ -299,6 +402,26 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 16,
     color: '#333',
+  },
+  
+  // Demo Mode Styles
+  demoModeActive: {
+    backgroundColor: '#fff5f0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff6b35',
+  },
+  settingTextContainer: {
+    flex: 1,
+  },
+  demoModeText: {
+    color: '#ff6b35',
+    fontWeight: '600',
+  },
+  demoModeSubtext: {
+    fontSize: 12,
+    color: '#ff6b35',
+    marginTop: 2,
+    fontStyle: 'italic',
   },
 });
 

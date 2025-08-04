@@ -7,14 +7,18 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import WorkoutCalendar from '../components/WorkoutCalendar';
+import AnalyticsPreview from '../components/AnalyticsPreview';
+import MiniWeeklyChart from '../components/MiniWeeklyChart';
 
 const DashboardScreen = ({ navigation }) => {
-  const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates } = useApp();
+  const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates, bodyWeights, isDemo } = useApp();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false);
 
   // Handle month change from calendar
   const handleMonthChange = (newMonth) => {
@@ -424,7 +428,7 @@ const DashboardScreen = ({ navigation }) => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerContent}>
             <Text style={styles.greeting}>Your Fitness Journey</Text>
             <Text style={styles.subtitle}>
               {workoutHistory.length > 0 
@@ -432,10 +436,16 @@ const DashboardScreen = ({ navigation }) => {
                 : 'Ready to start your first workout?'
               }
             </Text>
+            {isDemo && (
+              <View style={styles.demoIndicator}>
+                <Ionicons name="eye" size={14} color="#ff6b35" />
+                <Text style={styles.demoIndicatorText}>Demo Mode</Text>
+              </View>
+            )}
           </View>
           <TouchableOpacity 
             style={styles.quickStartButton}
-            onPress={() => navigation.navigate('Workout')}
+            onPress={() => setShowTemplateMenu(true)}
           >
             <Ionicons name="add-circle" size={32} color="#007AFF" />
           </TouchableOpacity>
@@ -443,71 +453,53 @@ const DashboardScreen = ({ navigation }) => {
 
         {/* Compact Stats Row */}
         {workoutHistory.length > 0 && (
-          <View style={styles.compactStatsContainer}>
-            <View style={styles.compactStatCard}>
-              <Ionicons name="trending-up" size={18} color="#ff6b35" />
-              <Text style={styles.compactStatNumber}>{dashboardStats.avgWorkoutsPerWeek.toFixed(2)}</Text>
-              <Text style={styles.compactStatLabel}>Avg/Week</Text>
-            </View>
-            
-            <View style={styles.compactStatCard}>
-              <Ionicons name="star" size={18} color="#ffd700" />
-              <Text style={[styles.compactStatNumber, { color: getRatingColor(dashboardStats.avgRating) }]}>
-                {dashboardStats.avgRating.toFixed(2)}
-              </Text>
-              <Text style={styles.compactStatLabel}>Avg Rating</Text>
-            </View>
-
-            <View style={styles.compactStatCard}>
-              <Ionicons name="time" size={18} color="#8b5cf6" />
-              <Text style={styles.compactStatNumber}>{(dashboardStats.selectedMonthDuration / 60).toFixed(2)}</Text>
-              <Text style={styles.compactStatLabel}>Hours</Text>
-            </View>
-            
-            <View style={styles.compactStatCard}>
-              <Ionicons name="fitness" size={18} color="#10b981" />
-              <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.selectedMonthCount)}</Text>
-              <Text style={styles.compactStatLabel}>Monthly Total</Text>
-            </View>
-
-            <View style={styles.compactStatCard}>
-              <Ionicons name="trophy" size={18} color="#22c55e" />
-              <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.totalWorkouts)}</Text>
-              <Text style={styles.compactStatLabel}>All Time</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Templates Quick Access */}
-        {workoutTemplates.length > 0 && (
-          <View style={styles.templatesSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Quick Start Templates</Text>
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Workout', { showTemplates: true })}
-                style={styles.seeAllButton}
+          <View style={styles.kpiSection}>
+            <View style={styles.kpiHeader}>
+              <Text style={styles.kpiTitle}>Key Metrics</Text>
+              <TouchableOpacity
+                style={styles.viewAllAnalyticsButton}
+                onPress={() => navigation.navigate('Progress', { initialTab: 'analytics' })}
               >
-                <Text style={styles.seeAllText}>See All</Text>
+                <Text style={styles.viewAllAnalyticsText}>View All</Text>
                 <Ionicons name="chevron-forward" size={16} color="#007AFF" />
               </TouchableOpacity>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templatesScroll}>
-              {workoutTemplates.slice(0, 3).map(template => (
-                <TouchableOpacity 
-                  key={template.id} 
-                  style={styles.templateCard}
-                  onPress={() => navigation.navigate('Workout', { templateId: template.id })}
-                >
-                  <View style={styles.templateIcon}>
-                    <Ionicons name="document-text" size={24} color="#007AFF" />
-                  </View>
-                  <Text style={styles.templateName}>{template.name}</Text>
-                  <Text style={styles.templateExercises}>{template.exercises.length} exercises</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.compactStatsContainer}>
+              <View style={styles.compactStatCard}>
+                <Ionicons name="trending-up" size={18} color="#ff6b35" />
+                <Text style={styles.compactStatNumber}>{dashboardStats.avgWorkoutsPerWeek.toFixed(2)}</Text>
+                <Text style={styles.compactStatLabel}>Avg/Week</Text>
+              </View>
+              
+              <View style={styles.compactStatCard}>
+                <Ionicons name="star" size={18} color="#ffd700" />
+                <Text style={[styles.compactStatNumber, { color: getRatingColor(dashboardStats.avgRating) }]}>
+                  {dashboardStats.avgRating.toFixed(2)}
+                </Text>
+                <Text style={styles.compactStatLabel}>Avg Rating</Text>
+              </View>
+
+              <View style={styles.compactStatCard}>
+                <Ionicons name="time" size={18} color="#8b5cf6" />
+                <Text style={styles.compactStatNumber}>{(dashboardStats.selectedMonthDuration / 60).toFixed(2)}</Text>
+                <Text style={styles.compactStatLabel}>Hours</Text>
+              </View>
+              
+              <View style={styles.compactStatCard}>
+                <Ionicons name="fitness" size={18} color="#10b981" />
+                <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.selectedMonthCount)}</Text>
+                <Text style={styles.compactStatLabel}>Monthly Total</Text>
+              </View>
+
+              <View style={styles.compactStatCard}>
+                <Ionicons name="trophy" size={18} color="#22c55e" />
+                <Text style={styles.compactStatNumber}>{Math.round(dashboardStats.totalWorkouts)}</Text>
+                <Text style={styles.compactStatLabel}>All Time</Text>
+              </View>
+            </View>
           </View>
         )}
+
 
         {/* Month Indicator */}
         <View style={styles.monthIndicator}>
@@ -576,6 +568,77 @@ const DashboardScreen = ({ navigation }) => {
                          )}
            </View>
          )}
+
+        {/* Template Menu Modal */}
+        <Modal
+          visible={showTemplateMenu}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowTemplateMenu(false)}
+        >
+          <SafeAreaView style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Start Workout</Text>
+              <TouchableOpacity 
+                style={styles.closeButton}
+                onPress={() => setShowTemplateMenu(false)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.modalContent}>
+              {/* New Workout Option */}
+              <TouchableOpacity 
+                style={styles.templateMenuOption}
+                onPress={() => {
+                  setShowTemplateMenu(false);
+                  navigation.navigate('Workout');
+                }}
+              >
+                <View style={styles.templateMenuIcon}>
+                  <Ionicons name="add-circle" size={32} color="#007AFF" />
+                </View>
+                <View style={styles.templateMenuContent}>
+                  <Text style={styles.templateMenuTitle}>New Workout</Text>
+                  <Text style={styles.templateMenuSubtitle}>Start a fresh workout from scratch</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#ccc" />
+              </TouchableOpacity>
+
+              {/* Template Options */}
+              {workoutTemplates.length > 0 && (
+                <>
+                  <View style={styles.menuDivider}>
+                    <Text style={styles.menuDividerText}>Templates</Text>
+                  </View>
+                  
+                  {workoutTemplates.map(template => (
+                    <TouchableOpacity 
+                      key={template.id}
+                      style={styles.templateMenuOption}
+                      onPress={() => {
+                        setShowTemplateMenu(false);
+                        navigation.navigate('Workout', { templateId: template.id });
+                      }}
+                    >
+                      <View style={styles.templateMenuIcon}>
+                        <Ionicons name="document-text" size={32} color="#34c759" />
+                      </View>
+                      <View style={styles.templateMenuContent}>
+                        <Text style={styles.templateMenuTitle}>{template.name}</Text>
+                        <Text style={styles.templateMenuSubtitle}>
+                          {template.exercises.length} exercises • {template.estimatedDuration || 45} min
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                    </TouchableOpacity>
+                  ))}
+                </>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
 
         {/* Achievements Section */}
         {workoutHistory.length > 0 && (
@@ -707,6 +770,9 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 10,
   },
+  headerContent: {
+    flex: 1,
+  },
   greeting: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -717,15 +783,64 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
+  demoIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff5f0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    gap: 4,
+  },
+  demoIndicatorText: {
+    fontSize: 12,
+    color: '#ff6b35',
+    fontWeight: '600',
+  },
   quickStartButton: {
     padding: 8,
+  },
+  
+  // KPI Section
+  kpiSection: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  kpiHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  kpiTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  viewAllAnalyticsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  viewAllAnalyticsText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
   },
   
   // Compact Stats Container
   compactStatsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 8,
     gap: 8,
   },
   compactStatCard: {
@@ -1093,6 +1208,73 @@ const styles = StyleSheet.create({
      fontWeight: '600',
      color: '#007AFF',
      marginRight: 8,
+   },
+
+   // Modal Styles
+   modalContainer: {
+     flex: 1,
+     backgroundColor: '#f8f9fa',
+   },
+   modalHeader: {
+     flexDirection: 'row',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     padding: 20,
+     backgroundColor: '#fff',
+     borderBottomWidth: 1,
+     borderBottomColor: '#e9ecef',
+   },
+   modalTitle: {
+     fontSize: 20,
+     fontWeight: 'bold',
+     color: '#333',
+   },
+   closeButton: {
+     padding: 4,
+   },
+   modalContent: {
+     flex: 1,
+     padding: 16,
+   },
+   templateMenuOption: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     backgroundColor: '#fff',
+     padding: 16,
+     borderRadius: 12,
+     marginBottom: 12,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 1 },
+     shadowOpacity: 0.05,
+     shadowRadius: 2,
+     elevation: 1,
+   },
+   templateMenuIcon: {
+     marginRight: 16,
+   },
+   templateMenuContent: {
+     flex: 1,
+   },
+   templateMenuTitle: {
+     fontSize: 16,
+     fontWeight: '600',
+     color: '#333',
+     marginBottom: 2,
+   },
+   templateMenuSubtitle: {
+     fontSize: 14,
+     color: '#666',
+   },
+   menuDivider: {
+     paddingVertical: 16,
+     alignItems: 'center',
+   },
+   menuDividerText: {
+     fontSize: 14,
+     fontWeight: '500',
+     color: '#999',
+     textTransform: 'uppercase',
+     letterSpacing: 1,
    },
  });
 

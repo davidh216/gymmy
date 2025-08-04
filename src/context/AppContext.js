@@ -22,13 +22,21 @@ const ActionTypes = {
   REMOVE_TEMPLATE: 'REMOVE_TEMPLATE',
   ADD_REST_DAY: 'ADD_REST_DAY',
   REMOVE_REST_DAY: 'REMOVE_REST_DAY',
-  UPDATE_REST_DAY: 'UPDATE_REST_DAY'
+  UPDATE_REST_DAY: 'UPDATE_REST_DAY',
+  // Body weight tracking
+  ADD_BODY_WEIGHT: 'ADD_BODY_WEIGHT',
+  UPDATE_BODY_WEIGHT: 'UPDATE_BODY_WEIGHT',
+  REMOVE_BODY_WEIGHT: 'REMOVE_BODY_WEIGHT',
+  // Demo mode
+  SET_DEMO_MODE: 'SET_DEMO_MODE',
+  LOAD_DEMO_DATA: 'LOAD_DEMO_DATA'
 };
 
 // Initial state
 const initialState = {
   loading: true,
   error: null,
+  isDemo: false,
   workoutHistory: [],
   exerciseHistory: {},
   oneRepMaxes: {},
@@ -37,7 +45,8 @@ const initialState = {
     notifications: true,
     darkMode: false,
     autoTimer: true,
-    exportFormat: 'JSON'
+    exportFormat: 'JSON',
+    demoMode: false
   },
   userStats: {
     totalWorkouts: 0,
@@ -55,7 +64,8 @@ const initialState = {
     avgRating: 0
   },
   workoutTemplates: [],
-  restDays: []
+  restDays: [],
+  bodyWeights: []
 };
 
 // Reducer
@@ -210,10 +220,62 @@ const appReducer = (state, action) => {
         )
       };
 
+    case ActionTypes.ADD_BODY_WEIGHT:
+      const newBodyWeights = [...state.bodyWeights, action.payload].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      return {
+        ...state,
+        bodyWeights: newBodyWeights
+      };
+
+    case ActionTypes.UPDATE_BODY_WEIGHT:
+      return {
+        ...state,
+        bodyWeights: state.bodyWeights.map(entry =>
+          entry.id === action.payload.id ? action.payload : entry
+        )
+      };
+
+    case ActionTypes.REMOVE_BODY_WEIGHT:
+      return {
+        ...state,
+        bodyWeights: state.bodyWeights.filter(entry =>
+          entry.id !== action.payload
+        )
+      };
+
     case ActionTypes.CLEAR_ALL_DATA:
       return {
         ...initialState,
         loading: false
+      };
+
+    case ActionTypes.SET_DEMO_MODE:
+      return {
+        ...state,
+        isDemo: action.payload.isDemo,
+        settings: {
+          ...state.settings,
+          demoMode: action.payload.isDemo
+        }
+      };
+
+    case ActionTypes.LOAD_DEMO_DATA:
+      return {
+        ...state,
+        workoutHistory: action.payload.workoutHistory,
+        exerciseHistory: action.payload.exerciseHistory,
+        oneRepMaxes: action.payload.oneRepMaxes,
+        userStats: action.payload.userStats,
+        workoutTemplates: action.payload.workoutTemplates,
+        restDays: action.payload.restDays,
+        bodyWeights: action.payload.bodyWeights,
+        isDemo: true,
+        settings: {
+          ...state.settings,
+          demoMode: true
+        }
       };
 
     default:
@@ -244,7 +306,8 @@ export const AppProvider = ({ children }) => {
         settings,
         userStats,
         workoutTemplates,
-        restDays
+        restDays,
+        bodyWeights
       ] = await Promise.all([
         StorageManager.loadWorkoutHistory(),
         StorageManager.loadExerciseHistory(),
@@ -252,7 +315,8 @@ export const AppProvider = ({ children }) => {
         StorageManager.loadSettings(),
         StorageManager.loadUserStats(),
         StorageManager.loadWorkoutTemplates(),
-        StorageManager.loadRestDays()
+        StorageManager.loadRestDays(),
+        StorageManager.loadBodyWeights()
       ]);
 
       // Ensure userStats has all required properties with proper defaults
@@ -283,15 +347,29 @@ export const AppProvider = ({ children }) => {
           settings,
           userStats: validatedUserStats,
           workoutTemplates,
-          restDays
+          restDays,
+          bodyWeights
         }
       });
+
+      // Check if demo mode is enabled and load demo data (only on startup)
+      if (settings?.demoMode && !state.isDemo) {
+        console.log('Demo mode enabled on startup, loading demo data...');
+        dispatch({ 
+          type: ActionTypes.SET_DEMO_MODE, 
+          payload: { isDemo: true } 
+        });
+        await loadDemoData();
+      }
+
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
 
       // Initialize base templates for new users
       await initializeBaseTemplates();
     } catch (error) {
       console.error('Error loading app data:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
   };
 
@@ -779,6 +857,63 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Body weight management functions
+  const addBodyWeight = async (weight, date, notes = '') => {
+    try {
+      const bodyWeightEntry = {
+        id: Date.now().toString(),
+        weight: parseFloat(weight),
+        date,
+        notes,
+        createdAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.ADD_BODY_WEIGHT, payload: bodyWeightEntry });
+      const updatedBodyWeights = [...state.bodyWeights, bodyWeightEntry].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      await StorageManager.saveBodyWeights(updatedBodyWeights);
+      
+      return bodyWeightEntry;
+    } catch (error) {
+      console.error('Error adding body weight:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+      return null;
+    }
+  };
+
+  const updateBodyWeight = async (entryId, updates) => {
+    try {
+      const updatedEntry = {
+        ...state.bodyWeights.find(e => e.id === entryId),
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_BODY_WEIGHT, payload: updatedEntry });
+      const updatedBodyWeights = state.bodyWeights.map(e =>
+        e.id === entryId ? updatedEntry : e
+      );
+      await StorageManager.saveBodyWeights(updatedBodyWeights);
+      
+    } catch (error) {
+      console.error('Error updating body weight:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  const removeBodyWeight = async (entryId) => {
+    try {
+      dispatch({ type: ActionTypes.REMOVE_BODY_WEIGHT, payload: entryId });
+      const updatedBodyWeights = state.bodyWeights.filter(e => e.id !== entryId);
+      await StorageManager.saveBodyWeights(updatedBodyWeights);
+      
+    } catch (error) {
+      console.error('Error removing body weight:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
   const exportData = async () => {
     try {
       return await StorageManager.exportAllData();
@@ -836,6 +971,103 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Demo mode functions
+  const setDemoMode = async (isDemo) => {
+    try {
+      console.log('setDemoMode called with:', isDemo);
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      
+      if (isDemo) {
+        console.log('Enabling demo mode - backing up user data');
+        // Backup current user data before switching to demo
+        const backupSuccess = await StorageManager.backupUserData();
+        console.log('Backup success:', backupSuccess);
+        // Load demo data
+        console.log('Loading demo data...');
+        await loadDemoData();
+        console.log('Demo data loaded successfully');
+      } else {
+        console.log('Disabling demo mode - restoring user data');
+        // First update the settings to prevent reload loop
+        const newSettings = { ...state.settings, demoMode: false };
+        console.log('Saving settings first:', newSettings);
+        await StorageManager.saveSettings(newSettings);
+        
+        // Update demo mode state
+        dispatch({ 
+          type: ActionTypes.SET_DEMO_MODE, 
+          payload: { isDemo: false } 
+        });
+        
+        // Restore user data from backup
+        const restoreSuccess = await StorageManager.restoreUserData();
+        console.log('Restore success:', restoreSuccess);
+        
+        // Reload the restored data (this should now work correctly)
+        console.log('Reloading user data...');
+        await loadAllData();
+        console.log('User data reloaded successfully');
+      }
+
+      if (isDemo) {
+        // Update demo mode setting for enabling demo mode
+        console.log('Updating demo mode state...');
+        dispatch({ 
+          type: ActionTypes.SET_DEMO_MODE, 
+          payload: { isDemo } 
+        });
+        
+        // Save demo mode setting
+        const newSettings = { ...state.settings, demoMode: isDemo };
+        console.log('Saving settings:', newSettings);
+        await StorageManager.saveSettings(newSettings);
+      }
+      
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+      console.log('Demo mode toggle completed successfully');
+    } catch (error) {
+      console.error('Error setting demo mode:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+    }
+  };
+
+  const loadDemoData = async () => {
+    try {
+      console.log('Resetting to dummy data...');
+      // Reset to dummy data
+      await StorageManager.resetToDummyData();
+      console.log('Dummy data reset completed');
+      
+      // Load the dummy data
+      console.log('Loading dummy data from storage...');
+      const demoData = {
+        workoutHistory: await StorageManager.loadWorkoutHistory(),
+        exerciseHistory: await StorageManager.loadExerciseHistory(),
+        oneRepMaxes: await StorageManager.loadOneRepMaxes(),
+        userStats: await StorageManager.loadUserStats(),
+        workoutTemplates: await StorageManager.loadWorkoutTemplates(),
+        restDays: await StorageManager.loadRestDays(),
+        bodyWeights: await StorageManager.loadBodyWeights()
+      };
+      
+      console.log('Demo data loaded:', {
+        workoutCount: demoData.workoutHistory.length,
+        templatesCount: demoData.workoutTemplates.length,
+        bodyWeightsCount: demoData.bodyWeights.length
+      });
+      
+      dispatch({ 
+        type: ActionTypes.LOAD_DEMO_DATA, 
+        payload: demoData 
+      });
+      
+    } catch (error) {
+      console.error('Error loading demo data:', error);
+      throw error;
+    }
+  };
+
   const value = {
     // State
     ...state,
@@ -861,7 +1093,14 @@ export const AppProvider = ({ children }) => {
     // Rest day actions
     addRestDay,
     removeRestDay,
-    updateRestDay
+    updateRestDay,
+    // Body weight actions
+    addBodyWeight,
+    updateBodyWeight,
+    removeBodyWeight,
+    // Demo mode actions
+    setDemoMode,
+    loadDemoData
   };
 
   return (
