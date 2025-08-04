@@ -703,27 +703,28 @@ const WorkoutScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-                 {!currentWorkout ? (
-           // Workout not started
-           <View style={styles.startContainer}>
-             <MotivationalQuote />
-             <GamificationStats userStats={userStats} />
-             <Text style={styles.title}>Start a New Workout</Text>
-             <TouchableOpacity style={styles.startButton} onPress={startNewWorkout}>
-               <Ionicons name="play" size={24} color="#fff" />
-               <Text style={styles.startButtonText}>Begin Workout</Text>
-             </TouchableOpacity>
-             
-                                 {/* Hidden for now - can be uncommented for debugging */}
-          <TouchableOpacity
-            style={[styles.startButton, { marginTop: 10, backgroundColor: '#ff6b35' }]}
-            onPress={resetToDummyData}
-          >
-            <Ionicons name="refresh" size={24} color="#fff" />
-            <Text style={styles.startButtonText}>Reset to Dummy Data</Text>
-          </TouchableOpacity>
-          </View>
-            
+        {!currentWorkout ? (
+          // Workout not started
+          <View>
+            <View style={styles.startContainer}>
+              <MotivationalQuote />
+              <GamificationStats userStats={userStats} />
+              <Text style={styles.title}>Start a New Workout</Text>
+              <TouchableOpacity style={styles.startButton} onPress={startNewWorkout}>
+                <Ionicons name="play" size={24} color="#fff" />
+                <Text style={styles.startButtonText}>Begin Workout</Text>
+              </TouchableOpacity>
+              
+              {/* Hidden for now - can be uncommented for debugging */}
+              <TouchableOpacity
+                style={[styles.startButton, { marginTop: 10, backgroundColor: '#ff6b35' }]}
+                onPress={resetToDummyData}
+              >
+                <Ionicons name="refresh" size={24} color="#fff" />
+                <Text style={styles.startButtonText}>Reset to Dummy Data</Text>
+              </TouchableOpacity>
+            </View>
+              
             {/* Recent Workouts - Simplified and more spacious */}
             {recentWorkouts.length > 0 && (
               <View style={styles.historySection}>
@@ -826,6 +827,7 @@ const WorkoutScreen = ({ navigation }) => {
                 })}
               </View>
             )}
+          </View>
         ) : (
           // Workout in progress
           <View style={styles.workoutContainer}>
@@ -962,10 +964,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 0,
-  },
+          scrollView: {
+          flex: 1,
+          paddingHorizontal: 20,
+        },
   startContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1321,17 +1323,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   // History Styles
-  historySection: {
-    marginTop: 40,
-    paddingHorizontal: 0,
-    marginHorizontal: -20,
-  },
-  historyTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-  },
+          historySection: {
+          marginTop: 40,
+          paddingHorizontal: 0,
+          marginHorizontal: 0,
+        },
+          historyTitle: {
+          fontSize: 22,
+          fontWeight: 'bold',
+          color: '#333',
+          marginBottom: 20,
+          paddingHorizontal: 0,
+        },
   historyCard: {
     backgroundColor: '#fff',
     padding: 15,
@@ -1462,17 +1465,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   // Workout detail styles (matching WorkoutCalendar modal style)
-  workoutDetailCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    marginHorizontal: -20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
+          workoutDetailCard: {
+          backgroundColor: '#fff',
+          borderRadius: 8,
+          marginBottom: 16,
+          marginHorizontal: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        },
   workoutDetailHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
