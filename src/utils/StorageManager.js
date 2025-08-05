@@ -451,11 +451,16 @@ class StorageManager {
             const exercise = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
             if (!selectedExercises.includes(exercise.name)) {
               selectedExercises.push(exercise.name);
-              workout.exercises.push({
-                id: `${workoutId}-${i + 1}`,
-                name: exercise.name,
-                ...(exercise.isCardio ? { cardioData: exercise.cardioData } : { sets: exercise.sets })
-              });
+                        workout.exercises.push({
+            id: `${workoutId}-${i + 1}`,
+            name: exercise.name,
+            ...(exercise.isCardio ? { cardioData: exercise.cardioData } : { sets: exercise.sets })
+          });
+          
+          // Add template completion bonus for some workouts
+          if (Math.random() < 0.3) { // 30% chance of template completion
+            workout.templateId = `template_${['beginner_full_body', 'push_pull_legs', 'upper_lower'][Math.floor(Math.random() * 3)]}`;
+          }
             }
           }
           
@@ -480,6 +485,74 @@ class StorageManager {
       const weeksBetween = Math.ceil((lastWorkoutDate - firstWorkoutDate) / (7 * 24 * 60 * 60 * 1000));
       const avgWorkoutsPerWeek = totalWorkouts / weeksBetween;
       
+      // Calculate XP using the new gamification system
+      const calculateExperience = (workout) => {
+        let experience = 0;
+        
+        // Base experience for completing a workout
+        experience += 100;
+        
+        // Bonus for workout duration (more time = more exp)
+        if (workout.duration) {
+          experience += Math.floor(workout.duration / 3);
+        }
+        
+        // Bonus for number of exercises
+        if (workout.exercises) {
+          experience += workout.exercises.length * 15;
+        }
+        
+        // Bonus for high workout rating
+        if (workout.ratings && workout.ratings.workoutRating) {
+          if (workout.ratings.workoutRating >= 9) experience += 50;
+          else if (workout.ratings.workoutRating >= 8) experience += 35;
+          else if (workout.ratings.workoutRating >= 7) experience += 25;
+          else if (workout.ratings.workoutRating >= 6) experience += 15;
+          else if (workout.ratings.workoutRating >= 5) experience += 10;
+        }
+        
+        // Exercise variety bonus
+        if (workout.exercises) {
+          const uniqueExercises = new Set(workout.exercises.map(ex => ex.name)).size;
+          if (uniqueExercises >= 5) experience += 25;
+        }
+        
+        return experience;
+      };
+
+      // Calculate total XP and level using new system
+      const calculateLevelRequirement = (level) => {
+        const baseXP = 100;
+        return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+      };
+
+      const calculateTotalXPForLevel = (level) => {
+        let totalXP = 0;
+        for (let i = 1; i <= level; i++) {
+          totalXP += calculateLevelRequirement(i);
+        }
+        return totalXP;
+      };
+
+      const calculateLevel = (totalExperience) => {
+        let level = 1;
+        let requiredXP = 0;
+        
+        while (requiredXP <= totalExperience) {
+          level++;
+          requiredXP = calculateTotalXPForLevel(level);
+        }
+        
+        return Math.max(1, level - 1);
+      };
+
+      // Calculate total XP from all workouts
+      const totalExperience = dummyWorkouts.reduce((sum, workout) => {
+        return sum + calculateExperience(workout);
+      }, 0);
+
+      const currentLevel = calculateLevel(totalExperience);
+
       const dummyStats = {
         totalWorkouts,
         totalDuration,
@@ -487,9 +560,8 @@ class StorageManager {
         avgWorkoutsPerWeek: Math.round(avgWorkoutsPerWeek * 10) / 10,
         currentStreak: 7,
         longestStreak: 12,
-        experience: totalWorkouts * 50,
-        level: Math.floor(totalWorkouts / 10) + 1,
-        totalExperience: totalWorkouts * 50,
+        level: currentLevel,
+        totalExperience: totalExperience,
       };
       
       await this.saveUserStats(dummyStats);
@@ -563,6 +635,173 @@ class StorageManager {
       ];
       
       await this.saveBodyWeights(dummyBodyWeights);
+      
+      // Generate demo achievements data to showcase the achievement system
+      const demoAchievements = {
+        unlocked: [
+          {
+            id: 'first_workout',
+            title: 'First Steps',
+            description: 'Complete your first workout',
+            icon: 'fitness',
+            unlockedAt: '2025-05-01T12:00:00.000Z',
+            xpReward: 50
+          },
+          {
+            id: 'workout_5',
+            title: 'Getting Started',
+            description: 'Complete 5 workouts',
+            icon: 'fitness',
+            unlockedAt: '2025-05-10T12:00:00.000Z',
+            xpReward: 100
+          },
+          {
+            id: 'workout_25',
+            title: 'Dedicated Athlete',
+            description: 'Complete 25 workouts',
+            icon: 'trophy',
+            unlockedAt: '2025-06-15T12:00:00.000Z',
+            xpReward: 250
+          },
+          {
+            id: 'streak_7',
+            title: 'Week Warrior',
+            description: 'Maintain a 7-day workout streak',
+            icon: 'flame',
+            unlockedAt: '2025-06-20T12:00:00.000Z',
+            xpReward: 300
+          },
+          {
+            id: 'hours_10',
+            title: 'Time Master',
+            description: 'Log 10 hours of workouts',
+            icon: 'time',
+            unlockedAt: '2025-07-01T12:00:00.000Z',
+            xpReward: 200
+          },
+          {
+            id: 'variety_5',
+            title: 'Exercise Explorer',
+            description: 'Try 5 different exercises',
+            icon: 'list-outline',
+            unlockedAt: '2025-06-25T12:00:00.000Z',
+            xpReward: 100
+          },
+          {
+            id: 'weight_100',
+            title: 'Weight Lifter',
+            description: 'Lift 100 total pounds in a workout',
+            icon: 'barbell-outline',
+            unlockedAt: '2025-07-05T12:00:00.000Z',
+            xpReward: 200
+          },
+          {
+            id: 'cardio_30',
+            title: 'Cardio Enthusiast',
+            description: 'Complete 30 minutes of cardio',
+            icon: 'heart-outline',
+            unlockedAt: '2025-06-30T12:00:00.000Z',
+            xpReward: 150
+          },
+          {
+            id: 'template_5',
+            title: 'Template User',
+            description: 'Use workout templates 5 times',
+            icon: 'document-text-outline',
+            unlockedAt: '2025-07-10T12:00:00.000Z',
+            xpReward: 200
+          }
+        ],
+        progress: {
+          'workout_50': { progress: 40, maxProgress: 50 },
+          'workout_100': { progress: 40, maxProgress: 100 },
+          'streak_30': { progress: 12, maxProgress: 30 },
+          'hours_50': { progress: 25, maxProgress: 50 },
+          'variety_10': { progress: 7, maxProgress: 10 },
+          'variety_20': { progress: 7, maxProgress: 20 },
+          'weight_500': { progress: 0, maxProgress: 1 },
+          'cardio_60': { progress: 0, maxProgress: 1 },
+          'template_20': { progress: 8, maxProgress: 20 }
+        }
+      };
+      
+      await this.saveData('@achievements', demoAchievements);
+      
+      // Generate demo quests data to showcase the quest system
+      const demoQuests = {
+        daily: [
+          {
+            id: 'daily_workout',
+            title: 'Daily Workout',
+            description: 'Complete a workout today',
+            type: 'daily',
+            xpReward: 75,
+            progress: 1,
+            maxProgress: 1,
+            completed: true,
+            expiresAt: new Date().toISOString()
+          },
+          {
+            id: 'daily_duration',
+            title: 'Endurance Training',
+            description: 'Complete a workout lasting at least 45 minutes',
+            type: 'daily',
+            xpReward: 100,
+            progress: 1,
+            maxProgress: 1,
+            completed: true,
+            expiresAt: new Date().toISOString()
+          },
+          {
+            id: 'daily_rating',
+            title: 'Quality Focus',
+            description: 'Rate a workout 8 or higher',
+            type: 'daily',
+            xpReward: 50,
+            progress: 1,
+            maxProgress: 1,
+            completed: true,
+            expiresAt: new Date().toISOString()
+          }
+        ],
+        weekly: [
+          {
+            id: 'weekly_workouts',
+            title: 'Weekly Warrior',
+            description: 'Complete 4 workouts this week',
+            type: 'weekly',
+            xpReward: 200,
+            progress: 3,
+            maxProgress: 4,
+            completed: false,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: 'weekly_duration',
+            title: 'Time Master',
+            description: 'Log at least 3 hours of workouts this week',
+            type: 'weekly',
+            xpReward: 300,
+            progress: 120,
+            maxProgress: 180,
+            completed: false,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: 'weekly_streak',
+            title: 'Consistency King',
+            description: 'Maintain a 3-day workout streak',
+            type: 'weekly',
+            xpReward: 250,
+            progress: 2,
+            maxProgress: 3,
+            completed: false,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ]
+      };
+      
+      await this.saveData('@quests', demoQuests);
       
     } catch (error) {
       console.error('Error resetting to dummy data:', error);

@@ -71,7 +71,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 1,
         progress: Math.min(totalWorkouts, 1),
         maxProgress: 1,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 50
       },
       {
         id: 'workout_5',
@@ -82,7 +83,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 5,
         progress: Math.min(totalWorkouts, 5),
         maxProgress: 5,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 100
       },
       {
         id: 'workout_25',
@@ -93,7 +95,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 25,
         progress: Math.min(totalWorkouts, 25),
         maxProgress: 25,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 250
       },
       {
         id: 'workout_50',
@@ -104,7 +107,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 50,
         progress: Math.min(totalWorkouts, 50),
         maxProgress: 50,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 500
       },
       {
         id: 'workout_100',
@@ -115,7 +119,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 100,
         progress: Math.min(totalWorkouts, 100),
         maxProgress: 100,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 1000
       },
       {
         id: 'workout_500',
@@ -126,7 +131,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalWorkouts >= 500,
         progress: Math.min(totalWorkouts, 500),
         maxProgress: 500,
-        category: 'milestone'
+        category: 'milestone',
+        xpReward: 5000
       },
 
       // Duration Achievements
@@ -139,7 +145,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalHours >= 10,
         progress: Math.min(totalHours, 10),
         maxProgress: 10,
-        category: 'duration'
+        category: 'duration',
+        xpReward: 200
       },
       {
         id: 'hours_50',
@@ -150,7 +157,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalHours >= 50,
         progress: Math.min(totalHours, 50),
         maxProgress: 50,
-        category: 'duration'
+        category: 'duration',
+        xpReward: 750
       },
       {
         id: 'hours_100',
@@ -161,7 +169,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: totalHours >= 100,
         progress: Math.min(totalHours, 100),
         maxProgress: 100,
-        category: 'duration'
+        category: 'duration',
+        xpReward: 1500
       },
 
       // Streak Achievements
@@ -174,7 +183,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: longestStreak >= 3,
         progress: Math.min(longestStreak, 3),
         maxProgress: 3,
-        category: 'streak'
+        category: 'streak',
+        xpReward: 150
       },
       {
         id: 'streak_7',
@@ -185,7 +195,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: longestStreak >= 7,
         progress: Math.min(longestStreak, 7),
         maxProgress: 7,
-        category: 'streak'
+        category: 'streak',
+        xpReward: 300
       },
       {
         id: 'streak_30',
@@ -196,7 +207,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: longestStreak >= 30,
         progress: Math.min(longestStreak, 30),
         maxProgress: 30,
-        category: 'streak'
+        category: 'streak',
+        xpReward: 1000
       },
 
       // Rating Achievements
@@ -209,7 +221,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: avgRating >= 8,
         progress: Math.min(avgRating, 8),
         maxProgress: 8,
-        category: 'quality'
+        category: 'quality',
+        xpReward: 200
       },
       {
         id: 'rating_9',
@@ -220,7 +233,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: avgRating >= 9,
         progress: Math.min(avgRating, 9),
         maxProgress: 9,
-        category: 'quality'
+        category: 'quality',
+        xpReward: 400
       },
 
       // Consistency Achievements
@@ -233,7 +247,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: weeklyConsistency >= 3,
         progress: Math.min(weeklyConsistency, 3),
         maxProgress: 3,
-        category: 'consistency'
+        category: 'consistency',
+        xpReward: 150
       },
       {
         id: 'weekly_5',
@@ -244,7 +259,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: weeklyConsistency >= 5,
         progress: Math.min(weeklyConsistency, 5),
         maxProgress: 5,
-        category: 'consistency'
+        category: 'consistency',
+        xpReward: 300
       },
 
       // Special Achievements
@@ -257,7 +273,8 @@ const AchievementsScreen = ({ navigation }) => {
         condition: currentStreak >= 7,
         progress: Math.min(currentStreak, 7),
         maxProgress: 7,
-        category: 'special'
+        category: 'special',
+        xpReward: 200
       },
       {
         id: 'early_bird',
@@ -274,7 +291,8 @@ const AchievementsScreen = ({ navigation }) => {
           return workoutHour < 8;
         }).length, 5),
         maxProgress: 5,
-        category: 'special'
+        category: 'special',
+        xpReward: 150
       },
       {
         id: 'night_owl',
@@ -291,7 +309,182 @@ const AchievementsScreen = ({ navigation }) => {
           return workoutHour >= 22;
         }).length, 5),
         maxProgress: 5,
-        category: 'special'
+        category: 'special',
+        xpReward: 150
+      },
+
+      // Exercise Variety Achievements
+      {
+        id: 'variety_5',
+        title: 'Exercise Explorer',
+        description: 'Try 5 different exercises',
+        icon: 'list-outline',
+        color: '#06b6d4',
+        condition: new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size >= 5,
+        progress: Math.min(new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size, 5),
+        maxProgress: 5,
+        category: 'variety',
+        xpReward: 100
+      },
+      {
+        id: 'variety_10',
+        title: 'Exercise Master',
+        description: 'Try 10 different exercises',
+        icon: 'list',
+        color: '#06b6d4',
+        condition: new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size >= 10,
+        progress: Math.min(new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size, 10),
+        maxProgress: 10,
+        category: 'variety',
+        xpReward: 250
+      },
+      {
+        id: 'variety_20',
+        title: 'Exercise Legend',
+        description: 'Try 20 different exercises',
+        icon: 'library-outline',
+        color: '#06b6d4',
+        condition: new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size >= 20,
+        progress: Math.min(new Set(workoutHistory.flatMap(w => w.exercises.map(e => e.name))).size, 20),
+        maxProgress: 20,
+        category: 'variety',
+        xpReward: 500
+      },
+
+      // Weight Training Achievements
+      {
+        id: 'weight_100',
+        title: 'Weight Lifter',
+        description: 'Lift 100 total pounds in a workout',
+        icon: 'barbell-outline',
+        color: '#dc2626',
+        condition: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.sets && e.sets.reduce((sum, set) => sum + (set.weight || 0), 0) >= 100
+          )
+        ),
+        progress: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.sets && e.sets.reduce((sum, set) => sum + (set.weight || 0), 0) >= 100
+          )
+        ) ? 1 : 0,
+        maxProgress: 1,
+        category: 'weight',
+        xpReward: 200
+      },
+      {
+        id: 'weight_500',
+        title: 'Power Lifter',
+        description: 'Lift 500 total pounds in a workout',
+        icon: 'barbell',
+        color: '#dc2626',
+        condition: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.sets && e.sets.reduce((sum, set) => sum + (set.weight || 0), 0) >= 500
+          )
+        ),
+        progress: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.sets && e.sets.reduce((sum, set) => sum + (set.weight || 0), 0) >= 500
+          )
+        ) ? 1 : 0,
+        maxProgress: 1,
+        category: 'weight',
+        xpReward: 500
+      },
+
+      // Cardio Achievements
+      {
+        id: 'cardio_30',
+        title: 'Cardio Enthusiast',
+        description: 'Complete 30 minutes of cardio',
+        icon: 'heart-outline',
+        color: '#ec4899',
+        condition: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.cardioData && e.cardioData.duration >= 30
+          )
+        ),
+        progress: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.cardioData && e.cardioData.duration >= 30
+          )
+        ) ? 1 : 0,
+        maxProgress: 1,
+        category: 'cardio',
+        xpReward: 150
+      },
+      {
+        id: 'cardio_60',
+        title: 'Cardio Master',
+        description: 'Complete 60 minutes of cardio',
+        icon: 'heart',
+        color: '#ec4899',
+        condition: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.cardioData && e.cardioData.duration >= 60
+          )
+        ),
+        progress: workoutHistory.some(w => 
+          w.exercises.some(e => 
+            e.cardioData && e.cardioData.duration >= 60
+          )
+        ) ? 1 : 0,
+        maxProgress: 1,
+        category: 'cardio',
+        xpReward: 300
+      },
+
+      // Template Usage Achievements
+      {
+        id: 'template_5',
+        title: 'Template User',
+        description: 'Use workout templates 5 times',
+        icon: 'document-text-outline',
+        color: '#059669',
+        condition: workoutHistory.filter(w => w.templateId).length >= 5,
+        progress: Math.min(workoutHistory.filter(w => w.templateId).length, 5),
+        maxProgress: 5,
+        category: 'template',
+        xpReward: 200
+      },
+      {
+        id: 'template_20',
+        title: 'Template Master',
+        description: 'Use workout templates 20 times',
+        icon: 'document-text',
+        color: '#059669',
+        condition: workoutHistory.filter(w => w.templateId).length >= 20,
+        progress: Math.min(workoutHistory.filter(w => w.templateId).length, 20),
+        maxProgress: 20,
+        category: 'template',
+        xpReward: 500
+      },
+
+      // Social Achievements (for future features)
+      {
+        id: 'share_5',
+        title: 'Social Butterfly',
+        description: 'Share 5 workout achievements',
+        icon: 'share-social-outline',
+        color: '#3b82f6',
+        condition: false, // Placeholder for future social features
+        progress: 0,
+        maxProgress: 5,
+        category: 'social',
+        xpReward: 100
+      },
+      {
+        id: 'challenge_3',
+        title: 'Challenge Seeker',
+        description: 'Complete 3 workout challenges',
+        icon: 'trophy-outline',
+        color: '#3b82f6',
+        condition: false, // Placeholder for future challenge features
+        progress: 0,
+        maxProgress: 3,
+        category: 'social',
+        xpReward: 300
       }
     ];
 
@@ -322,7 +515,12 @@ const AchievementsScreen = ({ navigation }) => {
     streak: 'Streaks',
     quality: 'Quality',
     consistency: 'Consistency',
-    special: 'Special'
+    special: 'Special',
+    variety: 'Exercise Variety',
+    weight: 'Weight Training',
+    cardio: 'Cardio',
+    template: 'Templates',
+    social: 'Social'
   };
 
   const categoryColors = {
@@ -331,7 +529,12 @@ const AchievementsScreen = ({ navigation }) => {
     streak: '#f97316',
     quality: '#ffd700',
     consistency: '#22c55e',
-    special: '#f59e0b'
+    special: '#f59e0b',
+    variety: '#06b6d4',
+    weight: '#dc2626',
+    cardio: '#ec4899',
+    template: '#059669',
+    social: '#3b82f6'
   };
 
   const renderAchievementCard = (achievement) => (
@@ -358,6 +561,12 @@ const AchievementsScreen = ({ navigation }) => {
       <Text style={styles.achievementDescription}>
         {achievement.description}
       </Text>
+      {achievement.xpReward && (
+        <View style={styles.xpRewardContainer}>
+          <Ionicons name="star" size={12} color="#ffd700" />
+          <Text style={styles.xpRewardText}>{achievement.xpReward} XP</Text>
+        </View>
+      )}
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
           <View 
@@ -647,7 +856,19 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 14,
+    marginBottom: 4,
+  },
+  xpRewardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 8,
+    gap: 4,
+  },
+  xpRewardText: {
+    fontSize: 10,
+    color: '#ffd700',
+    fontWeight: '600',
   },
   progressContainer: {
     width: '100%',

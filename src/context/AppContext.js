@@ -403,33 +403,64 @@ export const AppProvider = ({ children }) => {
     return Math.round((totalRating / workoutHistory.length) * 10) / 10; // Round to 1 decimal
   };
 
-  // Experience calculation function
+  // WoW-style exponential XP curve calculation
+  const calculateLevelRequirement = (level) => {
+    // WoW-style exponential curve: each level requires more XP than the previous
+    // Formula: XP = baseXP * (level - 1)^1.5
+    const baseXP = 100;
+    return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+  };
+
+  const calculateTotalXPForLevel = (level) => {
+    // Calculate total XP needed to reach a specific level
+    let totalXP = 0;
+    for (let i = 1; i <= level; i++) {
+      totalXP += calculateLevelRequirement(i);
+    }
+    return totalXP;
+  };
+
+  // Experience calculation function with enhanced rewards
   const calculateExperience = (workout) => {
     let experience = 0;
     
     // Base experience for completing a workout
-    experience += 50;
+    experience += 100; // Increased base XP
     
     // Bonus for workout duration (more time = more exp)
     if (workout.duration) {
-      experience += Math.floor(workout.duration / 5); // 1 exp per 5 minutes
+      experience += Math.floor(workout.duration / 3); // More XP per minute
     }
     
     // Bonus for number of exercises
     if (workout.exercises) {
-      experience += workout.exercises.length * 10; // 10 exp per exercise
+      experience += workout.exercises.length * 15; // More XP per exercise
     }
     
     // Bonus for high workout rating
     if (workout.ratings && workout.ratings.workoutRating) {
-      if (workout.ratings.workoutRating >= 8) experience += 25;
+      if (workout.ratings.workoutRating >= 9) experience += 50;
+      else if (workout.ratings.workoutRating >= 8) experience += 35;
+      else if (workout.ratings.workoutRating >= 7) experience += 25;
       else if (workout.ratings.workoutRating >= 6) experience += 15;
-      else if (workout.ratings.workoutRating >= 4) experience += 5;
+      else if (workout.ratings.workoutRating >= 5) experience += 10;
     }
     
-    // Bonus for streak
+    // Bonus for streak (exponential growth)
     if (state.userStats.streaks?.current > 0) {
-      experience += Math.min(state.userStats.streaks.current * 5, 50); // Max 50 exp for streak
+      const streakBonus = Math.min(state.userStats.streaks.current * 10, 100); // Max 100 exp for streak
+      experience += streakBonus;
+    }
+    
+    // Template completion bonus
+    if (workout.templateId) {
+      experience += 50; // Bonus for using and completing a template
+    }
+    
+    // Exercise variety bonus
+    if (workout.exercises) {
+      const uniqueExercises = new Set(workout.exercises.map(ex => ex.name)).size;
+      if (uniqueExercises >= 5) experience += 25; // Bonus for variety
     }
     
     console.log('calculateExperience - workout:', workout);
@@ -438,15 +469,158 @@ export const AppProvider = ({ children }) => {
     return experience;
   };
 
-  // Level calculation function
+  // Level calculation function with exponential curve
   const calculateLevel = (totalExperience) => {
-    // Level 1: 0-99 exp
-    // Level 2: 100-299 exp
-    // Level 3: 300-599 exp
-    // And so on...
-    const level = Math.floor(totalExperience / 100) + 1;
+    let level = 1;
+    let requiredXP = 0;
+    
+    // Find the highest level that can be achieved with current XP
+    while (requiredXP <= totalExperience) {
+      level++;
+      requiredXP = calculateTotalXPForLevel(level);
+    }
+    
+    // Return the level that was just exceeded
+    level = Math.max(1, level - 1);
+    
     console.log('calculateLevel - totalExperience:', totalExperience, 'calculated level:', level);
     return level;
+  };
+
+  // Calculate XP progress to next level
+  const calculateXPProgress = (totalExperience) => {
+    const currentLevel = calculateLevel(totalExperience);
+    const xpForCurrentLevel = calculateTotalXPForLevel(currentLevel);
+    const xpForNextLevel = calculateTotalXPForLevel(currentLevel + 1);
+    const xpInCurrentLevel = totalExperience - xpForCurrentLevel;
+    const xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
+    
+    return {
+      currentLevel,
+      xpInCurrentLevel,
+      xpNeededForNextLevel,
+      progressPercentage: (xpInCurrentLevel / xpNeededForNextLevel) * 100
+    };
+  };
+
+  // Award XP for achievements
+  const awardAchievementXP = async (achievementId, xpAmount) => {
+    try {
+      const newTotalExperience = state.userStats.totalExperience + xpAmount;
+      const newLevel = calculateLevel(newTotalExperience);
+      
+      const updatedStats = {
+        ...state.userStats,
+        totalExperience: newTotalExperience,
+        level: newLevel
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_USER_STATS, payload: updatedStats });
+      await StorageManager.saveUserStats(updatedStats);
+      
+      console.log(`Awarded ${xpAmount} XP for achievement: ${achievementId}`);
+      
+    } catch (error) {
+      console.error('Error awarding achievement XP:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
+  };
+
+  // Quest system
+  const generateDailyQuests = () => {
+    const quests = [
+      {
+        id: 'daily_workout',
+        title: 'Daily Workout',
+        description: 'Complete a workout today',
+        type: 'daily',
+        xpReward: 75,
+        progress: 0,
+        maxProgress: 1,
+        completed: false
+      },
+      {
+        id: 'daily_duration',
+        title: 'Endurance Training',
+        description: 'Complete a workout lasting at least 45 minutes',
+        type: 'daily',
+        xpReward: 100,
+        progress: 0,
+        maxProgress: 1,
+        completed: false
+      },
+      {
+        id: 'daily_rating',
+        title: 'Quality Focus',
+        description: 'Rate a workout 8 or higher',
+        type: 'daily',
+        xpReward: 50,
+        progress: 0,
+        maxProgress: 1,
+        completed: false
+      }
+    ];
+    
+    return quests;
+  };
+
+  const generateWeeklyQuests = () => {
+    const quests = [
+      {
+        id: 'weekly_workouts',
+        title: 'Weekly Warrior',
+        description: 'Complete 4 workouts this week',
+        type: 'weekly',
+        xpReward: 200,
+        progress: 0,
+        maxProgress: 4,
+        completed: false
+      },
+      {
+        id: 'weekly_duration',
+        title: 'Time Master',
+        description: 'Log at least 3 hours of workouts this week',
+        type: 'weekly',
+        xpReward: 300,
+        progress: 0,
+        maxProgress: 180, // 3 hours in minutes
+        completed: false
+      },
+      {
+        id: 'weekly_streak',
+        title: 'Consistency King',
+        description: 'Maintain a 3-day workout streak',
+        type: 'weekly',
+        xpReward: 250,
+        progress: 0,
+        maxProgress: 3,
+        completed: false
+      }
+    ];
+    
+    return quests;
+  };
+
+  const awardQuestXP = async (questId, xpAmount) => {
+    try {
+      const newTotalExperience = state.userStats.totalExperience + xpAmount;
+      const newLevel = calculateLevel(newTotalExperience);
+      
+      const updatedStats = {
+        ...state.userStats,
+        totalExperience: newTotalExperience,
+        level: newLevel
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_USER_STATS, payload: updatedStats });
+      await StorageManager.saveUserStats(updatedStats);
+      
+      console.log(`Awarded ${xpAmount} XP for quest: ${questId}`);
+      
+    } catch (error) {
+      console.error('Error awarding quest XP:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
+    }
   };
 
   // Action creators
@@ -458,10 +632,11 @@ export const AppProvider = ({ children }) => {
       const newWorkoutHistory = [workout, ...state.workoutHistory];
       await StorageManager.saveWorkoutHistory(newWorkoutHistory);
       
-      // Calculate experience and level
+      // Calculate experience and level with new system
       const experienceGained = calculateExperience(workout);
       const newTotalExperience = state.userStats.totalExperience + experienceGained;
       const newLevel = calculateLevel(newTotalExperience);
+      const xpProgress = calculateXPProgress(newTotalExperience);
       
       // Calculate new KPIs
       const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(newWorkoutHistory);
@@ -974,23 +1149,16 @@ export const AppProvider = ({ children }) => {
   // Demo mode functions
   const setDemoMode = async (isDemo) => {
     try {
-      console.log('setDemoMode called with:', isDemo);
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       
       if (isDemo) {
-        console.log('Enabling demo mode - backing up user data');
         // Backup current user data before switching to demo
-        const backupSuccess = await StorageManager.backupUserData();
-        console.log('Backup success:', backupSuccess);
+        await StorageManager.backupUserData();
         // Load demo data
-        console.log('Loading demo data...');
         await loadDemoData();
-        console.log('Demo data loaded successfully');
       } else {
-        console.log('Disabling demo mode - restoring user data');
         // First update the settings to prevent reload loop
         const newSettings = { ...state.settings, demoMode: false };
-        console.log('Saving settings first:', newSettings);
         await StorageManager.saveSettings(newSettings);
         
         // Update demo mode state
@@ -1000,18 +1168,14 @@ export const AppProvider = ({ children }) => {
         });
         
         // Restore user data from backup
-        const restoreSuccess = await StorageManager.restoreUserData();
-        console.log('Restore success:', restoreSuccess);
+        await StorageManager.restoreUserData();
         
-        // Reload the restored data (this should now work correctly)
-        console.log('Reloading user data...');
+        // Reload the restored data
         await loadAllData();
-        console.log('User data reloaded successfully');
       }
 
       if (isDemo) {
         // Update demo mode setting for enabling demo mode
-        console.log('Updating demo mode state...');
         dispatch({ 
           type: ActionTypes.SET_DEMO_MODE, 
           payload: { isDemo } 
@@ -1019,12 +1183,10 @@ export const AppProvider = ({ children }) => {
         
         // Save demo mode setting
         const newSettings = { ...state.settings, demoMode: isDemo };
-        console.log('Saving settings:', newSettings);
         await StorageManager.saveSettings(newSettings);
       }
       
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-      console.log('Demo mode toggle completed successfully');
     } catch (error) {
       console.error('Error setting demo mode:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error.message });
@@ -1034,13 +1196,10 @@ export const AppProvider = ({ children }) => {
 
   const loadDemoData = async () => {
     try {
-      console.log('Resetting to dummy data...');
       // Reset to dummy data
       await StorageManager.resetToDummyData();
-      console.log('Dummy data reset completed');
       
       // Load the dummy data
-      console.log('Loading dummy data from storage...');
       const demoData = {
         workoutHistory: await StorageManager.loadWorkoutHistory(),
         exerciseHistory: await StorageManager.loadExerciseHistory(),
@@ -1050,12 +1209,6 @@ export const AppProvider = ({ children }) => {
         restDays: await StorageManager.loadRestDays(),
         bodyWeights: await StorageManager.loadBodyWeights()
       };
-      
-      console.log('Demo data loaded:', {
-        workoutCount: demoData.workoutHistory.length,
-        templatesCount: demoData.workoutTemplates.length,
-        bodyWeightsCount: demoData.bodyWeights.length
-      });
       
       dispatch({ 
         type: ActionTypes.LOAD_DEMO_DATA, 
@@ -1100,7 +1253,12 @@ export const AppProvider = ({ children }) => {
     removeBodyWeight,
     // Demo mode actions
     setDemoMode,
-    loadDemoData
+    loadDemoData,
+    // Gamification actions
+    awardAchievementXP,
+    generateDailyQuests,
+    generateWeeklyQuests,
+    awardQuestXP
   };
 
   return (

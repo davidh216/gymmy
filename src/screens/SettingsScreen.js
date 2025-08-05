@@ -39,49 +39,19 @@ const SettingsScreen = ({ navigation }) => {
     }
   }, [appSettings]);
 
-  const toggleSetting = async (key) => {
+    const toggleSetting = async (key) => {
     if (key === 'demoMode') {
       const newDemoMode = !settings.demoMode;
       setSettings(prev => ({ ...prev, demoMode: newDemoMode }));
       
-      // Show confirmation dialog for demo mode
-      Alert.alert(
-        newDemoMode ? 'Enable Demo Mode' : 'Disable Demo Mode',
-        newDemoMode 
-          ? 'This will replace your current data with demo data for showcase purposes. Your real data will be preserved and restored when you turn off demo mode.'
-          : 'This will restore your real workout data and disable demo mode.',
-        [
-          { 
-            text: 'Cancel', 
-            style: 'cancel',
-            onPress: () => {
-              // Revert the setting
-              setSettings(prev => ({ ...prev, demoMode: !newDemoMode }));
-            }
-          },
-          { 
-            text: newDemoMode ? 'Enable Demo' : 'Disable Demo', 
-            onPress: async () => {
-              try {
-                console.log('Toggling demo mode to:', newDemoMode);
-                await setDemoMode(newDemoMode);
-                console.log('Demo mode toggle completed successfully');
-                Alert.alert(
-                  'Success', 
-                  newDemoMode 
-                    ? 'Demo mode enabled! You\'re now viewing demo data. The app will reload.' 
-                    : 'Demo mode disabled! Your real data has been restored. The app will reload.'
-                );
-              } catch (error) {
-                console.error('Error toggling demo mode:', error);
-                Alert.alert('Error', 'Failed to toggle demo mode. Please try again.');
-                // Revert the setting on error
-                setSettings(prev => ({ ...prev, demoMode: !newDemoMode }));
-              }
-            }
-          },
-        ]
-      );
+      // Bypass Alert and directly call setDemoMode
+      try {
+        await setDemoMode(newDemoMode);
+      } catch (error) {
+        console.error('Error toggling demo mode:', error);
+        // Revert the setting on error
+        setSettings(prev => ({ ...prev, demoMode: !newDemoMode }));
+      }
     } else {
       const newValue = !settings[key];
       const newSettings = { ...settings, [key]: newValue };
@@ -145,7 +115,7 @@ const SettingsScreen = ({ navigation }) => {
 
   const aboutApp = () => {
     Alert.alert(
-      'About Workout Journal',
+      'About Gymmy',
       'Version 1.0.0\n\nA comprehensive workout tracking app for weightlifting and cardio.\n\nFeatures:\n• Track weightlifting exercises\n• Monitor cardio activities\n• Progress tracking\n• One-rep max tracking\n• Workout ratings\n• Soreness tracking',
       [{ text: 'OK' }]
     );
@@ -205,7 +175,7 @@ const SettingsScreen = ({ navigation }) => {
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="scale" size={20} color="#007AFF" />
+              <Ionicons name="scale-outline" size={20} color="#007AFF" />
               <Text style={styles.settingLabel}>Units</Text>
             </View>
             <TouchableOpacity 
@@ -294,7 +264,7 @@ const SettingsScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={importData}>
-            <Ionicons name="upload" size={20} color="#007AFF" />
+            <Ionicons name="cloud-upload-outline" size={20} color="#007AFF" />
             <Text style={styles.actionText}>Import Data</Text>
           </TouchableOpacity>
 

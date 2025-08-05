@@ -14,6 +14,7 @@ import { useApp } from '../context/AppContext';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import AnalyticsPreview from '../components/AnalyticsPreview';
 import MiniWeeklyChart from '../components/MiniWeeklyChart';
+import GamificationStats from '../components/GamificationStats';
 
 const DashboardScreen = ({ navigation }) => {
   const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates, bodyWeights, isDemo } = useApp();
@@ -417,7 +418,7 @@ const DashboardScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading your fitness journey...</Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -429,10 +430,10 @@ const DashboardScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.greeting}>Your Fitness Journey</Text>
+            <Text style={styles.greeting}>Gymmy</Text>
             <Text style={styles.subtitle}>
               {workoutHistory.length > 0 
-                ? `${dashboardStats.totalWorkouts} workouts completed`
+                ? 'Ready for your next workout?'
                 : 'Ready to start your first workout?'
               }
             </Text>
@@ -450,6 +451,20 @@ const DashboardScreen = ({ navigation }) => {
             <Ionicons name="add-circle" size={32} color="#007AFF" />
           </TouchableOpacity>
         </View>
+
+        {/* Level Progress Section */}
+        {workoutHistory.length > 0 && (
+          <GamificationStats userStats={userStats} />
+        )}
+
+        {/* Workout Calendar */}
+        <WorkoutCalendar 
+          workoutHistory={workoutHistory}
+          onWorkoutPress={handleWorkoutPress}
+          navigation={navigation}
+          onMonthChange={handleMonthChange}
+          selectedMonth={selectedMonth}
+        />
 
         {/* Compact Stats Row */}
         {workoutHistory.length > 0 && (
@@ -500,28 +515,11 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         )}
 
-
-        {/* Month Indicator */}
-        <View style={styles.monthIndicator}>
-          <Text style={styles.monthIndicatorText}>
-            {selectedMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Stats
-          </Text>
-        </View>
-
-        {/* Workout Calendar */}
-        <WorkoutCalendar 
-          workoutHistory={workoutHistory}
-          onWorkoutPress={handleWorkoutPress}
-          navigation={navigation}
-          onMonthChange={handleMonthChange}
-          selectedMonth={selectedMonth}
-        />
-
         {/* Motivational Section */}
         {workoutHistory.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="fitness-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyTitle}>Start Your Fitness Journey</Text>
+            <Text style={styles.emptyTitle}>Start Your Workout</Text>
             <Text style={styles.emptySubtitle}>
               Track your workouts, monitor progress, and stay motivated with detailed insights.
             </Text>
@@ -664,20 +662,6 @@ const DashboardScreen = ({ navigation }) => {
                     { width: `${achievements.completionPercentage}%` }
                   ]} 
                 />
-              </View>
-            </View>
-
-            {/* Streak Info */}
-            <View style={styles.streakContainer}>
-              <View style={styles.streakCard}>
-                <Ionicons name="flame" size={20} color="#f97316" />
-                <Text style={styles.streakLabel}>Current Streak</Text>
-                                 <Text style={styles.streakNumber}>{Math.round(achievements.currentStreak)} days</Text>
-               </View>
-               <View style={styles.streakCard}>
-                 <Ionicons name="trophy" size={20} color="#f59e0b" />
-                 <Text style={styles.streakLabel}>Longest Streak</Text>
-                 <Text style={styles.streakNumber}>{Math.round(achievements.longestStreak)} days</Text>
               </View>
             </View>
 
@@ -987,7 +971,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Motivation Section
+  // Motivational Section
   motivationSection: {
     padding: 16,
     gap: 12,
