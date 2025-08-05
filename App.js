@@ -79,13 +79,7 @@ const AppNavigator = () => {
         },
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
-        headerStyle: {
-          backgroundColor: '#f8f9fa',
-        },
-        headerTintColor: '#333',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerShown: false,
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardStack} />

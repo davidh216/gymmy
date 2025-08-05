@@ -1,8 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const GamificationStats = ({ userStats }) => {
+  const progressAnimation = useRef(new Animated.Value(0)).current;
+  const scaleAnimation = useRef(new Animated.Value(0.8)).current;
+  
   // Debug logging
   console.log('GamificationStats - userStats:', userStats);
   
@@ -16,9 +19,50 @@ const GamificationStats = ({ userStats }) => {
     );
   }
 
+  useEffect(() => {
+    const progress = calculateProgress();
+    
+    // Animate progress bar with more subtle timing
+    Animated.timing(progressAnimation, {
+      toValue: progress,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+    
+    // Animate scale with more subtle spring
+    Animated.spring(scaleAnimation, {
+      toValue: 1,
+      tension: 30,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+  }, [userStats.totalExperience]);
+
   const calculateProgress = () => {
-    const currentLevelExp = (userStats.totalExperience || 0) % 100;
-    return (currentLevelExp / 100) * 100;
+    // Use the new exponential XP system
+    const totalExperience = userStats.totalExperience || 0;
+    const currentLevel = userStats.level || 1;
+    
+    // Calculate XP needed for current level
+    const calculateLevelRequirement = (level) => {
+      const baseXP = 100;
+      return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+    };
+    
+    const calculateTotalXPForLevel = (level) => {
+      let totalXP = 0;
+      for (let i = 1; i <= level; i++) {
+        totalXP += calculateLevelRequirement(i);
+      }
+      return totalXP;
+    };
+    
+    const xpForCurrentLevel = calculateTotalXPForLevel(currentLevel);
+    const xpForNextLevel = calculateTotalXPForLevel(currentLevel + 1);
+    const xpInCurrentLevel = totalExperience - xpForCurrentLevel;
+    const xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
+    
+    return (xpInCurrentLevel / xpNeededForNextLevel) * 100;
   };
 
   const getLevelTitle = (level) => {
@@ -38,18 +82,35 @@ const GamificationStats = ({ userStats }) => {
   };
 
   const getLevelColor = (level) => {
+    if (level >= 10) return '#FF6B35'; // Legendary Orange
     if (level >= 8) return '#FFD700'; // Gold
     if (level >= 6) return '#C0C0C0'; // Silver
     if (level >= 4) return '#CD7F32'; // Bronze
+    if (level >= 2) return '#4ECDC4'; // Teal
     return '#007AFF'; // Blue
   };
 
+  const getLevelGradient = (level) => {
+    if (level >= 10) return ['#FF6B35', '#FF8E53']; // Legendary gradient
+    if (level >= 8) return ['#FFD700', '#FFA500']; // Gold gradient
+    if (level >= 6) return ['#C0C0C0', '#E5E5E5']; // Silver gradient
+    if (level >= 4) return ['#CD7F32', '#DAA520']; // Bronze gradient
+    if (level >= 2) return ['#4ECDC4', '#45B7D1']; // Teal gradient
+    return ['#007AFF', '#0056CC']; // Blue gradient
+  };
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { transform: [{ scale: scaleAnimation }] }]}>
       <View style={styles.levelContainer}>
-        <View style={[styles.levelBadge, { backgroundColor: getLevelColor(userStats.level || 1) }]}>
+        <Animated.View style={[
+          styles.levelBadge, 
+          { 
+            backgroundColor: getLevelColor(userStats.level || 1),
+            shadowColor: getLevelColor(userStats.level || 1),
+          }
+        ]}>
           <Text style={styles.levelText}>{userStats.level || 1}</Text>
-        </View>
+        </Animated.View>
         <View style={styles.levelInfo}>
           <Text style={styles.levelTitle}>{getLevelTitle(userStats.level || 1)}</Text>
           <Text style={styles.experienceText}>
@@ -58,123 +119,154 @@ const GamificationStats = ({ userStats }) => {
         </View>
       </View>
       
+      <View style={styles.hoursContainer}>
+        <Ionicons name="time" size={16} color="#007AFF" />
+        <Text style={styles.hoursText}>{Math.round((userStats.totalDuration || 0) / 60)} hours</Text>
+      </View>
+      
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
-          <View 
+          <Animated.View 
             style={[
               styles.progressFill, 
-              { width: `${calculateProgress()}%` }
+              { 
+                width: progressAnimation.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%']
+                }),
+                backgroundColor: getLevelColor(userStats.level || 1),
+                shadowColor: getLevelColor(userStats.level || 1),
+              }
             ]} 
           />
         </View>
         <Text style={styles.progressText}>
-          {(userStats.totalExperience || 0) % 100}/100 XP to next level
+          {(() => {
+            const totalExperience = userStats.totalExperience || 0;
+            const currentLevel = userStats.level || 1;
+            
+            const calculateLevelRequirement = (level) => {
+              const baseXP = 100;
+              return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+            };
+            
+            const calculateTotalXPForLevel = (level) => {
+              let totalXP = 0;
+              for (let i = 1; i <= level; i++) {
+                totalXP += calculateLevelRequirement(i);
+              }
+              return totalXP;
+            };
+            
+            const xpForCurrentLevel = calculateTotalXPForLevel(currentLevel);
+            const xpForNextLevel = calculateTotalXPForLevel(currentLevel + 1);
+            const xpInCurrentLevel = totalExperience - xpForCurrentLevel;
+            const xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
+            
+            return `${xpInCurrentLevel}/${xpNeededForNextLevel} XP to next level`;
+          })()}
         </Text>
       </View>
-
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Ionicons name="flame" size={20} color="#FF6B35" />
-          <Text style={styles.statValue}>{userStats.streaks?.current || 0}</Text>
-          <Text style={styles.statLabel}>Day Streak</Text>
-        </View>
-        
-        <View style={styles.statItem}>
-          <Ionicons name="trophy" size={20} color="#FFD700" />
-          <Text style={styles.statValue}>{userStats.streaks?.best || 0}</Text>
-          <Text style={styles.statLabel}>Best Streak</Text>
-        </View>
-        
-        <View style={styles.statItem}>
-          <Ionicons name="time" size={20} color="#007AFF" />
-          <Text style={styles.statValue}>{Math.round((userStats.totalDuration || 0) / 60)}</Text>
-          <Text style={styles.statLabel}>Hours</Text>
-        </View>
-      </View>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
+    padding: 24,
+    borderRadius: 16,
     marginHorizontal: 20,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
   levelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   levelBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   levelText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   levelInfo: {
     flex: 1,
   },
   levelTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   experienceText: {
     fontSize: 14,
     color: '#666',
+    fontWeight: '500',
   },
   progressContainer: {
     marginBottom: 15,
   },
   progressBar: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    marginBottom: 8,
+    height: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
+    marginBottom: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 4,
+    borderRadius: 6,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#666',
     textAlign: 'center',
+    fontWeight: '500',
   },
-  statsRow: {
+  hoursContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: 15,
+    gap: 6,
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignSelf: 'flex-end',
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  hoursText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
 

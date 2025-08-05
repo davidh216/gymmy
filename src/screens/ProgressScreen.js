@@ -13,14 +13,35 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import BodyWeightTracker from '../components/BodyWeightTracker';
+import GamificationStats from '../components/GamificationStats';
+import QuestDisplay from '../components/QuestDisplay';
 
 const ProgressScreen = ({ navigation, route }) => {
-  const { workoutHistory, exerciseHistory, userStats, bodyWeights } = useApp();
+  const { workoutHistory, exerciseHistory, userStats, bodyWeights, isDemo } = useApp();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showAddMax, setShowAddMax] = useState(false);
   const [newMax, setNewMax] = useState({ weight: '', date: '' });
   const [selectedExercise, setSelectedExercise] = useState(null);
-  const [activeTab, setActiveTab] = useState(route?.params?.initialTab || 'analytics'); // 'analytics', 'weight', or 'levels'
+  const [activeTab, setActiveTab] = useState(route?.params?.initialTab || 'analytics'); // 'analytics', 'weight', 'levels', or 'quests'
+  const [quests, setQuests] = useState(null);
+  const [achievements, setAchievements] = useState(null);
+
+  // Load quest and achievement data in demo mode
+  useEffect(() => {
+    if (isDemo) {
+      const loadDemoData = async () => {
+        try {
+          const questsData = await StorageManager.loadData('@quests');
+          const achievementsData = await StorageManager.loadData('@achievements');
+          setQuests(questsData);
+          setAchievements(achievementsData);
+        } catch (error) {
+          console.error('Error loading demo quest/achievement data:', error);
+        }
+      };
+      loadDemoData();
+    }
+  }, [isDemo]);
 
   // Muscle groups with their exercises and level calculations
   const muscleGroups = useMemo(() => ({
@@ -110,15 +131,16 @@ const ProgressScreen = ({ navigation, route }) => {
         }
       });
       
-      const level = Math.floor(totalExperience / 100) + 1;
+      // Make muscle group mastery more difficult - require 200 XP per level
+      const level = Math.floor(totalExperience / 200) + 1;
       
       stats[groupName] = {
         ...group,
         level,
         experience: totalExperience,
         totalWorkouts,
-        nextLevelExp: (level * 100),
-        progressToNext: (totalExperience % 100) / 100,
+        nextLevelExp: (level * 200),
+        progressToNext: (totalExperience % 200) / 200,
       };
     });
     
@@ -289,8 +311,19 @@ const ProgressScreen = ({ navigation, route }) => {
       return <BodyWeightTracker />;
     }
     
+    if (activeTab === 'quests' && isDemo) {
+      return <QuestDisplay quests={quests} achievements={achievements} />;
+    }
+    
     return (
       <ScrollView style={styles.scrollView}>
+        {/* Level Progress Section */}
+        {workoutHistory.length > 0 && (
+          <View style={styles.section}>
+            <GamificationStats userStats={userStats} />
+          </View>
+        )}
+
         {/* Overall Stats */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overall Progress</Text>
@@ -372,6 +405,22 @@ const ProgressScreen = ({ navigation, route }) => {
             Levels
           </Text>
         </TouchableOpacity>
+        
+        {isDemo && (
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'quests' && styles.activeTab]}
+            onPress={() => setActiveTab('quests')}
+          >
+            <Ionicons 
+              name="star" 
+              size={18} 
+              color={activeTab === 'quests' ? '#007AFF' : '#666'} 
+            />
+            <Text style={[styles.tabText, activeTab === 'quests' && styles.activeTabText]}>
+              Quests
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Tab Content */}

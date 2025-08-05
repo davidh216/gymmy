@@ -1018,36 +1018,16 @@ const WorkoutScreen = ({ navigation, route }) => {
         {!currentWorkout ? (
           // Workout not started
           <View>
-            <View style={styles.startContainer}>
-              <MotivationalQuote />
-              <GamificationStats userStats={userStats} />
-              <Text style={styles.title}>Start a New Workout</Text>
-              
-              <View style={styles.startOptions}>
-                <TouchableOpacity style={styles.startButton} onPress={startNewWorkout}>
-                  <Ionicons name="play" size={24} color="#fff" />
-                  <Text style={styles.startButtonText}>Begin Workout</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.startButton, styles.templateButton]} 
-                  onPress={() => setShowTemplateModal(true)}
-                >
-                  <Ionicons name="document-text" size={24} color="#007AFF" />
-                  <Text style={[styles.startButtonText, styles.templateButtonText]}>
-                    Use Template
-                  </Text>
-                </TouchableOpacity>
+            <View style={styles.headerContainer}>
+              <View style={styles.quoteContainer}>
+                <MotivationalQuote />
               </View>
-              
-              {/* Hidden for now - can be uncommented for debugging */}
-              {/* <TouchableOpacity
-                style={[styles.startButton, { marginTop: 10, backgroundColor: '#ff6b35' }]}
-                onPress={resetToDummyData}
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setShowTemplateModal(true)}
               >
-                <Ionicons name="refresh" size={24} color="#fff" />
-                <Text style={styles.startButtonText}>Reset to Dummy Data</Text>
-              </TouchableOpacity> */}
+                <Ionicons name="add-circle" size={48} color="#007AFF" />
+              </TouchableOpacity>
             </View>
               
             {/* Recent Workouts - Simplified and more spacious */}
@@ -1072,6 +1052,27 @@ const WorkoutScreen = ({ navigation, route }) => {
                             {new Date(workout.startTime).toLocaleDateString()}
                           </Text>
                         </View>
+                        
+                        <View style={styles.workoutSummaryRow}>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="time" size={14} color="#666" />
+                            <Text style={styles.workoutSummaryText}>{workout.duration}min</Text>
+                          </View>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="fitness" size={14} color="#666" />
+                            <Text style={styles.workoutSummaryText}>{workout.exercises.length}ex</Text>
+                          </View>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="star" size={14} color="#666" />
+                            <Text style={[
+                              styles.workoutSummaryText,
+                              { color: getRatingColor(workout.ratings?.workoutRating || 5) }
+                            ]}>
+                              {workout.ratings?.workoutRating || 5}/10
+                            </Text>
+                          </View>
+                        </View>
+                        
                         <View style={styles.workoutHeaderActions}>
                           <TouchableOpacity
                             onPress={(e) => {
@@ -1090,28 +1091,6 @@ const WorkoutScreen = ({ navigation, route }) => {
                           />
                         </View>
                       </TouchableOpacity>
-
-                      <View style={styles.workoutSummaryRow}>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="time" size={16} color="#666" />
-                          <Text style={styles.workoutSummaryText}>{workout.duration} min</Text>
-                        </View>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="fitness" size={16} color="#666" />
-                          <Text style={styles.workoutSummaryText}>
-                            {workout.exercises.length} exercises
-                          </Text>
-                        </View>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="star" size={16} color="#666" />
-                          <Text style={[
-                            styles.workoutSummaryText,
-                            { color: getRatingColor(workout.ratings?.workoutRating || 5) }
-                          ]}>
-                            {workout.ratings?.workoutRating || 5}/10
-                          </Text>
-                        </View>
-                      </View>
 
                       {isExpanded && (
                         <View style={styles.workoutDetailExpanded}>
@@ -1304,6 +1283,21 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  headerContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  quoteContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  addButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 10,
   },
   startContainer: {
     flex: 1,
@@ -1945,9 +1939,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   workoutDetailTitle: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   workoutDetailDot: {
     width: 12,
@@ -1969,14 +1963,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginLeft: 10,
   },
   workoutSummaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 10,
   },
   workoutSummaryItem: {
     flexDirection: 'row',
@@ -1984,7 +1978,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   workoutSummaryText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
   },
   workoutDetailExpanded: {
