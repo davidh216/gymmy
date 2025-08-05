@@ -15,6 +15,7 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import WorkoutScreen from './src/screens/WorkoutScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import ClassSelectionScreen from './src/screens/ClassSelectionScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -24,6 +25,7 @@ const DashboardStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="DashboardMain" component={DashboardScreen} />
     <Stack.Screen name="Achievements" component={AchievementsScreen} />
+    <Stack.Screen name="ClassSelection" component={ClassSelectionScreen} />
   </Stack.Navigator>
 );
 

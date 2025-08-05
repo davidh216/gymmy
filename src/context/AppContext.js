@@ -1,6 +1,7 @@
 // src/context/AppContext.js
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import StorageManager from '../utils/StorageManager';
+import { FITNESS_CLASSES, SKILL_TREES } from '../screens/ClassSelectionScreen';
 
 // Action types
 const ActionTypes = {
@@ -29,7 +30,11 @@ const ActionTypes = {
   REMOVE_BODY_WEIGHT: 'REMOVE_BODY_WEIGHT',
   // Demo mode
   SET_DEMO_MODE: 'SET_DEMO_MODE',
-  LOAD_DEMO_DATA: 'LOAD_DEMO_DATA'
+  LOAD_DEMO_DATA: 'LOAD_DEMO_DATA',
+  // Class system
+  SELECT_CLASS: 'SELECT_CLASS',
+  UNLOCK_SKILL: 'UNLOCK_SKILL',
+  AWARD_CLASS_XP: 'AWARD_CLASS_XP'
 };
 
 // Initial state
@@ -61,7 +66,15 @@ const initialState = {
     level: 1,
     totalExperience: 0,
     avgWorkoutsPerWeek: 0,
-    avgRating: 0
+    avgRating: 0,
+    // NEW CLASS SYSTEM PROPERTIES
+    selectedClass: null,
+    classLevel: 1,
+    classXP: 0,
+    skillPoints: 0,
+    unlockedSkills: [],
+    classSelectionDate: null,
+    classPrestige: 0,
   },
   workoutTemplates: [],
   restDays: [],
@@ -278,6 +291,55 @@ const appReducer = (state, action) => {
         }
       };
 
+    // Class system cases
+    case ActionTypes.SELECT_CLASS:
+      return {
+        ...state,
+        userStats: {
+          ...state.userStats,
+          selectedClass: action.payload.classKey,
+          classLevel: 1,
+          classXP: 0,
+          skillPoints: 3, // Starting skill points
+          unlockedSkills: [],
+          classSelectionDate: new Date().toISOString(),
+        }
+      };
+
+    case ActionTypes.UNLOCK_SKILL:
+      return {
+        ...state,
+        userStats: {
+          ...state.userStats,
+          unlockedSkills: [...state.userStats.unlockedSkills, action.payload.skillId],
+          skillPoints: state.userStats.skillPoints - action.payload.cost,
+        }
+      };
+
+    case ActionTypes.AWARD_CLASS_XP:
+      const newClassXP = state.userStats.classXP + action.payload.xp;
+      const classXPRequired = calculateClassXPRequired(state.userStats.classLevel + 1);
+      let newClassLevel = state.userStats.classLevel;
+      let remainingXP = newClassXP;
+      let skillPointsAwarded = 0;
+      
+      // Check for class level up
+      while (remainingXP >= classXPRequired && newClassLevel < 100) {
+        remainingXP -= classXPRequired;
+        newClassLevel++;
+        skillPointsAwarded += Math.floor(newClassLevel / 5) + 1;
+      }
+      
+      return {
+        ...state,
+        userStats: {
+          ...state.userStats,
+          classXP: remainingXP,
+          classLevel: newClassLevel,
+          skillPoints: state.userStats.skillPoints + skillPointsAwarded,
+        }
+      };
+
     default:
       return state;
   }
@@ -420,7 +482,7 @@ export const AppProvider = ({ children }) => {
     return totalXP;
   };
 
-  // Experience calculation function with enhanced rewards
+  // Experience calculation function with enhanced rewards and class bonuses
   const calculateExperience = (workout) => {
     let experience = 0;
     
@@ -463,10 +525,16 @@ export const AppProvider = ({ children }) => {
       if (uniqueExercises >= 5) experience += 25; // Bonus for variety
     }
     
+    // Apply class bonuses if class is selected
+    if (state.userStats.selectedClass) {
+      const classData = FITNESS_CLASSES[state.userStats.selectedClass];
+      experience = applyClassBonuses(experience, workout, classData, state.userStats);
+    }
+    
     console.log('calculateExperience - workout:', workout);
     console.log('calculateExperience - calculated experience:', experience);
     
-    return experience;
+    return Math.floor(experience);
   };
 
   // Level calculation function with exponential curve
@@ -501,6 +569,68 @@ export const AppProvider = ({ children }) => {
       xpNeededForNextLevel,
       progressPercentage: (xpInCurrentLevel / xpNeededForNextLevel) * 100
     };
+  };
+
+  // Class system helper functions
+  const calculateClassXPRequired = (level) => {
+    return Math.floor(200 * Math.pow(level - 1, 1.2)); // Slightly easier than main level
+  };
+
+  const calculateClassXP = (workout, userStats) => {
+    if (!userStats.selectedClass) return 0;
+    
+    const classData = FITNESS_CLASSES[userStats.selectedClass];
+    let classXP = 50; // Base class XP
+    
+    // Check for preferred exercises
+    const hasPreferredExercises = workout.exercises?.some(ex => 
+      classData.preferredExercises.includes(ex.name.toLowerCase().replace(/\s+/g, '_'))
+    );
+    
+    if (hasPreferredExercises) {
+      classXP *= 1.5; // 50% bonus for preferred exercises
+    }
+    
+    // Apply skill bonuses
+    const activeSkills = getActiveSkillBonuses(userStats.unlockedSkills);
+    activeSkills.forEach(skill => {
+      if (skill.type === 'classXP') {
+        classXP *= skill.multiplier;
+      }
+    });
+    
+    return Math.floor(classXP);
+  };
+
+  const applyClassBonuses = (baseXP, workout, classData, userStats) => {
+    let multiplier = 1.0;
+    
+    // Check workout type bonuses
+    const exerciseTypes = workout.exercises?.map(ex => ex.category) || [];
+    
+    if (exerciseTypes.includes('chest') || exerciseTypes.includes('back') || exerciseTypes.includes('legs')) {
+      if (classData.bonuses.compoundLiftXP) {
+        multiplier *= classData.bonuses.compoundLiftXP;
+      }
+    }
+    
+    if (exerciseTypes.length >= 5 && classData.bonuses.varietyXP) {
+      multiplier *= classData.bonuses.varietyXP;
+    }
+    
+    if (workout.exercises?.some(ex => ex.category === 'cardio') && classData.bonuses.cardioXP) {
+      multiplier *= classData.bonuses.cardioXP;
+    }
+    
+    return baseXP * multiplier;
+  };
+
+  const getActiveSkillBonuses = (unlockedSkills) => {
+    // Return array of active skill effects
+    return unlockedSkills.map(skillId => {
+      // This would lookup actual skill effects from SKILL_TREES
+      return { type: 'classXP', multiplier: 1.1 }; // Example
+    });
   };
 
   // Award XP for achievements
@@ -638,6 +768,9 @@ export const AppProvider = ({ children }) => {
       const newLevel = calculateLevel(newTotalExperience);
       const xpProgress = calculateXPProgress(newTotalExperience);
       
+      // Calculate class XP
+      const classXP = calculateClassXP(workout, state.userStats);
+      
       // Calculate new KPIs
       const avgWorkoutsPerWeek = calculateAvgWorkoutsPerWeek(newWorkoutHistory);
       const avgRating = calculateAvgRating(newWorkoutHistory);
@@ -663,7 +796,16 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.UPDATE_USER_STATS, payload: updatedStats });
       await StorageManager.saveUserStats(updatedStats);
       
-      console.log('Workout added with experience:', experienceGained, 'New level:', newLevel);
+      // Award class XP if class is selected
+      if (classXP > 0) {
+        dispatch({ type: ActionTypes.AWARD_CLASS_XP, payload: { xp: classXP } });
+        await StorageManager.saveUserStats({
+          ...updatedStats,
+          classXP: state.userStats.classXP + classXP
+        });
+      }
+      
+      console.log('Workout added with experience:', experienceGained, 'Class XP:', classXP, 'New level:', newLevel);
       
     } catch (error) {
       console.error('Error adding workout:', error);
@@ -1258,7 +1400,19 @@ export const AppProvider = ({ children }) => {
     awardAchievementXP,
     generateDailyQuests,
     generateWeeklyQuests,
-    awardQuestXP
+    awardQuestXP,
+    // Class system actions
+    selectClass: (classKey) => dispatch({ type: ActionTypes.SELECT_CLASS, payload: { classKey } }),
+    unlockSkill: (skillId, cost = 1) => {
+      if (state.userStats.skillPoints >= cost) {
+        dispatch({ type: ActionTypes.UNLOCK_SKILL, payload: { skillId, cost } });
+      }
+    },
+    awardClassXP: (xp) => dispatch({ type: ActionTypes.AWARD_CLASS_XP, payload: { xp } }),
+    calculateClassXPRequired,
+    calculateClassXP,
+    applyClassBonuses,
+    getActiveSkillBonuses
   };
 
   return (

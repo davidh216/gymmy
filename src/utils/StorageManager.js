@@ -116,7 +116,15 @@ class StorageManager {
       level: 1,
       totalExperience: 0,
       avgWorkoutsPerWeek: 0,
-      avgRating: 0
+      avgRating: 0,
+      // NEW CLASS SYSTEM PROPERTIES
+      selectedClass: null,
+      classLevel: 1,
+      classXP: 0,
+      skillPoints: 0,
+      unlockedSkills: [],
+      classSelectionDate: null,
+      classPrestige: 0,
     };
     return await this.loadData(STORAGE_KEYS.USER_STATS, defaultStats);
   }

@@ -15,6 +15,8 @@ import WorkoutCalendar from '../components/WorkoutCalendar';
 import AnalyticsPreview from '../components/AnalyticsPreview';
 import MiniWeeklyChart from '../components/MiniWeeklyChart';
 import GamificationStats from '../components/GamificationStats';
+import ClassDashboardWidget from '../components/ClassDashboardWidget';
+import EnhancedGamificationStats from '../components/EnhancedGamificationStats';
 
 const DashboardScreen = ({ navigation }) => {
   const { workoutHistory, userStats, loading, updateWorkout, workoutTemplates, bodyWeights, isDemo } = useApp();
@@ -452,9 +454,12 @@ const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Level Progress Section */}
+        {/* Class Dashboard Widget */}
+        <ClassDashboardWidget navigation={navigation} />
+
+        {/* Enhanced Level Progress Section */}
         {workoutHistory.length > 0 && (
-          <GamificationStats userStats={userStats} />
+          <EnhancedGamificationStats navigation={navigation} />
         )}
 
         {/* Workout Calendar */}
