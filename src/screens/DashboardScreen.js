@@ -19,7 +19,6 @@ import GamificationStats from '../components/GamificationStats';
 import ClassDashboardWidget from '../components/ClassDashboardWidget';
 import EnhancedGamificationStats from '../components/EnhancedGamificationStats';
 import { DESIGN_TOKENS } from '../constants/designTokens';
-import { getRatingColor } from '../utils/dashboardUtils';
 
 // Lazy load the heavy AnalyticsCharts component
 const AnalyticsCharts = React.lazy(() => import('../components/AnalyticsCharts'));
@@ -36,14 +35,16 @@ const DashboardScreen = ({ navigation }) => {
   const { 
     workoutStats, 
     monthlyStats, 
-    recentWorkouts, 
+    recentWorkouts = [], // Add default empty array
     userStats, 
     loading, 
     updateWorkout, 
-    workoutTemplates, 
-    bodyWeights, 
+    workoutTemplates = [], // Add default empty array
+    bodyWeights = [], // Add default empty array
+    workoutHistory = [], // Add default empty array
     isDemo 
   } = useApp();
+  
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [showTemplateMenu, setShowTemplateMenu] = useState(false);
 
@@ -54,6 +55,21 @@ const DashboardScreen = ({ navigation }) => {
 
   // Use memoized stats from context instead of calculating locally
   const dashboardStats = useMemo(() => {
+    // Add safety checks for all data
+    if (!recentWorkouts || !Array.isArray(recentWorkouts)) {
+      return {
+        totalWorkouts: 0,
+        thisWeekCount: 0,
+        selectedMonthCount: 0,
+        avgWorkoutsPerWeek: 0,
+        avgRating: 0,
+        totalDuration: 0,
+        selectedMonthDuration: 0,
+        favoriteExercise: 'None yet',
+        templatesCount: 0
+      };
+    }
+
     const now = new Date();
     const thisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     
@@ -76,9 +92,13 @@ const DashboardScreen = ({ navigation }) => {
     // Most frequent exercise in selected month
     const exerciseCount = {};
     selectedMonthWorkouts.forEach(workout => {
-      workout.exercises.forEach(exercise => {
-        exerciseCount[exercise.name] = (exerciseCount[exercise.name] || 0) + 1;
-      });
+      if (workout.exercises && Array.isArray(workout.exercises)) {
+        workout.exercises.forEach(exercise => {
+          if (exercise.name) {
+            exerciseCount[exercise.name] = (exerciseCount[exercise.name] || 0) + 1;
+          }
+        });
+      }
     });
     
     const favoriteExercise = Object.keys(exerciseCount).length > 0 
@@ -102,15 +122,15 @@ const DashboardScreen = ({ navigation }) => {
     const avgWorkoutsPerWeek = weeksInSelectedMonth > 0 ? selectedMonthWorkouts.length / weeksInSelectedMonth : 0;
 
     return {
-      totalWorkouts: workoutStats.totalWorkouts,
+      totalWorkouts: workoutStats?.totalWorkouts || 0,
       thisWeekCount: thisWeekWorkouts.length,
       selectedMonthCount: selectedMonthWorkouts.length,
       avgWorkoutsPerWeek: avgWorkoutsPerWeek,
       avgRating: selectedMonthAvgRating,
-      totalDuration: workoutStats.totalDuration,
+      totalDuration: workoutStats?.totalDuration || 0,
       selectedMonthDuration: selectedMonthDuration,
       favoriteExercise,
-      templatesCount: workoutTemplates.length
+      templatesCount: Array.isArray(workoutTemplates) ? workoutTemplates.length : 0
     };
   }, [workoutStats, monthlyStats, recentWorkouts, workoutTemplates, selectedMonth]);
 
@@ -175,6 +195,7 @@ const DashboardScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </SafeAreaView>
@@ -221,13 +242,15 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Mini Weekly Chart */}
-        <MiniWeeklyChart />
+        {/* Mini Weekly Chart - Pass workoutHistory as prop */}
+        <MiniWeeklyChart workoutHistory={workoutHistory} />
 
-        {/* Workout Calendar */}
+        {/* Workout Calendar - Pass workoutHistory as prop */}
         <WorkoutCalendar 
+          workoutHistory={workoutHistory}
           selectedMonth={selectedMonth}
           onMonthChange={handleMonthChange}
+          navigation={navigation}
         />
 
         {/* Recent Workouts */}
@@ -247,64 +270,72 @@ const DashboardScreen = ({ navigation }) => {
             showsHorizontalScrollIndicator={false}
             style={styles.recentWorkoutsContainer}
           >
-            {recentWorkouts.map((workout, index) => (
-              <TouchableOpacity
-                key={workout.id}
-                style={styles.workoutCard}
-                onPress={() => handleWorkoutPress(workout)}
-                onLongPress={() => {
-                  Alert.alert(
-                    'Workout Options',
-                    'What would you like to do?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'View', onPress: () => handleWorkoutPress(workout) },
-                      { text: 'Edit', onPress: () => handleWorkoutPress(workout, 'edit') },
-                      { text: 'Delete', style: 'destructive', onPress: () => handleWorkoutPress(workout, 'delete') }
-                    ]
-                  );
-                }}
-              >
-                <View style={styles.workoutCardHeader}>
-                  <Text style={styles.workoutDate}>
-                    {new Date(workout.startTime).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </Text>
-                  <Text style={styles.workoutTime}>
-                    {new Date(workout.startTime).toLocaleTimeString('en-US', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </Text>
-                </View>
-                
-                <Text style={styles.workoutDuration}>
-                  {Math.round(workout.duration)} min
-                </Text>
-                
-                <Text style={styles.workoutExercises}>
-                  {workout.exercises.length} exercises
-                </Text>
-                
-                {workout.ratings?.workoutRating && (
-                  <View style={styles.ratingContainer}>
-                    <Ionicons 
-                      name="star" 
-                      size={12} 
-                      color={getRatingColor(workout.ratings.workoutRating)} 
-                    />
-                    <Text style={[
-                      styles.ratingText,
-                      { color: getRatingColor(workout.ratings.workoutRating) }
-                    ]}>
-                      {workout.ratings.workoutRating}/10
+            {recentWorkouts && recentWorkouts.length > 0 ? (
+              recentWorkouts.map((workout, index) => (
+                <TouchableOpacity
+                  key={workout.id}
+                  style={styles.workoutCard}
+                  onPress={() => handleWorkoutPress(workout)}
+                  onLongPress={() => {
+                    Alert.alert(
+                      'Workout Options',
+                      'What would you like to do?',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'View', onPress: () => handleWorkoutPress(workout) },
+                        { text: 'Edit', onPress: () => handleWorkoutPress(workout, 'edit') },
+                        { text: 'Delete', style: 'destructive', onPress: () => handleWorkoutPress(workout, 'delete') }
+                      ]
+                    );
+                  }}
+                >
+                  <View style={styles.workoutCardHeader}>
+                    <Text style={styles.workoutDate}>
+                      {new Date(workout.startTime).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </Text>
+                    <Text style={styles.workoutTime}>
+                      {new Date(workout.startTime).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
                     </Text>
                   </View>
-                )}
-              </TouchableOpacity>
-            ))}
+                  
+                  <Text style={styles.workoutDuration}>
+                    {Math.round(workout.duration || 0)} min
+                  </Text>
+                  
+                  <Text style={styles.workoutExercises}>
+                    {workout.exercises?.length || 0} exercises
+                  </Text>
+                  
+                  {workout.ratings?.workoutRating && (
+                    <View style={styles.ratingContainer}>
+                      <Ionicons 
+                        name="star" 
+                        size={12} 
+                        color={getRatingColor(workout.ratings.workoutRating)} 
+                      />
+                      <Text style={[
+                        styles.ratingText,
+                        { color: getRatingColor(workout.ratings.workoutRating) }
+                      ]}>
+                        {workout.ratings.workoutRating}/10
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyWorkoutsContainer}>
+                <Ionicons name="fitness-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyWorkoutsText}>No workouts yet</Text>
+                <Text style={styles.emptyWorkoutsSubtext}>Start your fitness journey today!</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
 
@@ -351,7 +382,7 @@ const DashboardScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Analytics Preview</Text>
           <Suspense fallback={<ChartsLoadingFallback />}>
             <AnalyticsCharts 
-              workoutHistory={recentWorkouts}
+              workoutHistory={workoutHistory}
               exerciseHistory={{}}
               userStats={userStats}
               bodyWeights={bodyWeights}
@@ -496,6 +527,26 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  emptyWorkoutsContainer: {
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginRight: 12,
+    width: 200,
+  },
+  emptyWorkoutsText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 12,
+  },
+  emptyWorkoutsSubtext: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
+    textAlign: 'center',
   },
   quickActionsGrid: {
     flexDirection: 'row',

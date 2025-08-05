@@ -15,8 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import EditWorkoutModal from './EditWorkoutModal';
 import { useApp } from '../context/AppContext';
 
-const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthChange, selectedMonth }) => {
-  const { restDays, addRestDay, removeRestDay, updateRestDay } = useApp();
+const WorkoutCalendar = ({ 
+  workoutHistory = [], // Add default empty array
+  onWorkoutPress, 
+  navigation, 
+  onMonthChange, 
+  selectedMonth 
+}) => {
+  const { restDays = [], addRestDay, removeRestDay, updateRestDay } = useApp(); // Add defaults
   const [currentDate, setCurrentDate] = useState(selectedMonth || new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
@@ -77,6 +83,12 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthCh
 
   // Generate workouts by date map
   const workoutsByDate = useMemo(() => {
+    // Add safety check
+    if (!workoutHistory || !Array.isArray(workoutHistory)) {
+      console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory is not an array:', workoutHistory);
+      return {};
+    }
+
     console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory length:', workoutHistory.length);
     console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory:', workoutHistory);
     
@@ -96,6 +108,12 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthCh
 
   // Generate rest days by date map
   const restDaysByDate = useMemo(() => {
+    // Add safety check
+    if (!restDays || !Array.isArray(restDays)) {
+      console.log('WorkoutCalendar - restDaysByDate - restDays is not an array:', restDays);
+      return {};
+    }
+
     const map = {};
     restDays.forEach(restDay => {
       map[restDay.date] = restDay;
@@ -206,7 +224,7 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthCh
   };
 
   const handleAddRestDay = async () => {
-    if (selectedDate) {
+    if (selectedDate && addRestDay) {
       const dateKey = selectedDate.toISOString().split('T')[0];
       await addRestDay(dateKey, restDayNotes, false);
       setRestDayNotes('');
@@ -216,6 +234,8 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthCh
   };
 
   const handleRemoveRestDay = async (date) => {
+    if (!removeRestDay) return;
+    
     Alert.alert(
       'Remove Rest Day',
       'Are you sure you want to remove this rest day?',
@@ -590,15 +610,23 @@ const WorkoutCalendar = ({ workoutHistory, onWorkoutPress, navigation, onMonthCh
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#22c55e' }]} />
-            <Text style={styles.legendText}>Great (7+)</Text>
+            <Text style={styles.legendText}>Excellent (9+)</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#84cc16' }]} />
+            <Text style={styles.legendText}>Great (7-8)</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#eab308' }]} />
             <Text style={styles.legendText}>Good (5-6)</Text>
           </View>
           <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#f97316' }]} />
+            <Text style={styles.legendText}>Poor (3-4)</Text>
+          </View>
+          <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#ef4444' }]} />
-            <Text style={styles.legendText}>Poor (&lt;5)</Text>
+            <Text style={styles.legendText}>Terrible (&lt;3)</Text>
           </View>
         </View>
       </View>
@@ -732,13 +760,16 @@ const styles = StyleSheet.create({
   },
   legendItems: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    minWidth: '30%',
   },
   legendDot: {
     width: 10,

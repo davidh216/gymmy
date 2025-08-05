@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const MiniWeeklyChart = ({ workoutHistory }) => {
+const MiniWeeklyChart = ({ workoutHistory = [] }) => { // Add default empty array
   const weeklyData = useMemo(() => {
-    if (workoutHistory.length === 0) return [];
+    // Add safety check at the beginning
+    if (!workoutHistory || !Array.isArray(workoutHistory) || workoutHistory.length === 0) {
+      return [];
+    }
 
     const weeks = [];
     const now = new Date();
@@ -35,7 +38,17 @@ const MiniWeeklyChart = ({ workoutHistory }) => {
   const chartWidth = screenWidth - 64; // Account for margins and padding
   const barWidth = (chartWidth - (weeklyData.length - 1) * 8) / weeklyData.length;
 
-  if (weeklyData.length === 0) return null;
+  // Return early if no data
+  if (!weeklyData || weeklyData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Weekly Activity Trend</Text>
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>No workout data available</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -123,6 +136,17 @@ const styles = StyleSheet.create({
   barLabel: {
     fontSize: 10,
     fontWeight: '500',
+  },
+  // New styles for no data state
+  noDataContainer: {
+    height: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    fontSize: 14,
+    color: '#999',
+    fontStyle: 'italic',
   },
 });
 
