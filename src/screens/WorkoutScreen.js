@@ -1052,6 +1052,27 @@ const WorkoutScreen = ({ navigation, route }) => {
                             {new Date(workout.startTime).toLocaleDateString()}
                           </Text>
                         </View>
+                        
+                        <View style={styles.workoutSummaryRow}>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="time" size={14} color="#666" />
+                            <Text style={styles.workoutSummaryText}>{workout.duration}min</Text>
+                          </View>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="fitness" size={14} color="#666" />
+                            <Text style={styles.workoutSummaryText}>{workout.exercises.length}ex</Text>
+                          </View>
+                          <View style={styles.workoutSummaryItem}>
+                            <Ionicons name="star" size={14} color="#666" />
+                            <Text style={[
+                              styles.workoutSummaryText,
+                              { color: getRatingColor(workout.ratings?.workoutRating || 5) }
+                            ]}>
+                              {workout.ratings?.workoutRating || 5}/10
+                            </Text>
+                          </View>
+                        </View>
+                        
                         <View style={styles.workoutHeaderActions}>
                           <TouchableOpacity
                             onPress={(e) => {
@@ -1070,26 +1091,6 @@ const WorkoutScreen = ({ navigation, route }) => {
                           />
                         </View>
                       </TouchableOpacity>
-
-                      <View style={styles.workoutSummaryRow}>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="time" size={14} color="#666" />
-                          <Text style={styles.workoutSummaryText}>{workout.duration}min</Text>
-                        </View>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="fitness" size={14} color="#666" />
-                          <Text style={styles.workoutSummaryText}>{workout.exercises.length}ex</Text>
-                        </View>
-                        <View style={styles.workoutSummaryItem}>
-                          <Ionicons name="star" size={14} color="#666" />
-                          <Text style={[
-                            styles.workoutSummaryText,
-                            { color: getRatingColor(workout.ratings?.workoutRating || 5) }
-                          ]}>
-                            {workout.ratings?.workoutRating || 5}/10
-                          </Text>
-                        </View>
-                      </View>
 
                       {isExpanded && (
                         <View style={styles.workoutDetailExpanded}>
@@ -1938,9 +1939,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   workoutDetailTitle: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   workoutDetailDot: {
     width: 12,
@@ -1962,14 +1963,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginLeft: 10,
   },
   workoutSummaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 10,
   },
   workoutSummaryItem: {
     flexDirection: 'row',
