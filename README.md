@@ -1,50 +1,54 @@
 # Gymmy
 
-A comprehensive workout tracking app for weightlifting and cardio activities, built with React Native and Expo. Features an advanced gamification system with World of Warcraft-style leveling, achievements, quests, and muscle group mastery.
+A comprehensive fitness tracking app with advanced gamification, built with React Native and Expo. Features a unique class-based progression system, gacha mechanics, character collection, and World of Warcraft-style leveling for weightlifting and cardio activities.
 
-## Features
+## 🎮 Core Features
 
-### 🏋️ Weightlifting Tracking
+### 🏋️ Advanced Workout Tracking
 - **Exercise Categories**: Chest, Back, Legs, Shoulders, Biceps, Triceps, Abs
-- **Detailed Exercise Library**: 40+ pre-defined exercises
+- **Detailed Exercise Library**: 40+ pre-defined exercises with progression tracking
 - **Set/Rep/Weight Tracking**: Log sets, reps, and weight for each exercise
-- **Notes**: Add personal notes for each exercise
+- **Cardio Integration**: Track duration, distance, heart rate, and pace
+- **Workout Templates**: Pre-built and customizable workout routines
+- **Notes & Ratings**: Add personal notes and rate workout satisfaction
 
-### 🏃‍♂️ Cardio Tracking
-- **Walking Activities**: Track duration, distance, heart rate, pace
-- **Route Tracking**: GPS-based route recording
-- **Intensity Levels**: Rate workout intensity
-- **Notes**: Add notes about your cardio sessions
+### 🎯 Class-Based Progression System
+- **5 Unique Classes**: Powerlifter, Bodybuilder, Athlete, Yogi, Hybrid
+- **Class Bonuses**: Specialized XP multipliers for different training styles
+- **Skill Trees**: Unique progression paths for each class
+- **Class Selection**: Choose your fitness path with permanent bonuses
+- **Stats System**: Power, Technique, Endurance, Flexibility, Mental attributes
 
-### 🎮 Advanced Gamification System
+### 🎰 Gacha & Character Collection
+- **Gacha System**: Pull characters with different rarities (Common to Legendary)
+- **Character Collection**: Collect and display unique fitness characters
+- **Currency System**: Earn gems through workouts and achievements
+- **Pull Mechanics**: Single pulls (10 gems) and 10-pulls (90 gems)
+- **Rarity System**: Common (60%), Rare (30%), Epic (8%), Legendary (2%)
+
+### 🏆 Enhanced Gamification
 - **WoW-Style Leveling**: Exponential XP curve with 100+ levels
-- **Experience Points**: Earn XP through workouts, achievements, and quests
+- **Multiple XP Sources**: Workouts, achievements, quests, class bonuses
 - **Achievement System**: 50+ achievements across 8 categories
 - **Quest System**: Daily and weekly challenges with XP rewards
-- **Muscle Group Mastery**: Separate progression system for each muscle group
-- **Rarity System**: Visual indicators (Common to Immortal) for levels
+- **Muscle Group Mastery**: Separate progression for each muscle group
+- **Rarity Indicators**: Visual progression from Common to Immortal
 
-### 📊 Progress Monitoring
+### 📊 Advanced Analytics & Progress
 - **One-Rep Max Tracking**: Monitor strength gains over time
-- **Progressive Overload**: Track weight increases
+- **Progressive Overload**: Track weight increases and progression
 - **Strength Levels**: Beginner, Intermediate, Advanced classifications
-- **Progress Visualization**: Charts and statistics
 - **Body Weight Tracking**: Record and visualize weight trends
+- **Workout Analytics**: Comprehensive statistics and charts
+- **Class-Specific Stats**: Track progress within your chosen class
 
-### 🎯 Workout Ratings & Analytics
-- **Pre/Post Workout Ratings**: Mood and energy levels (0-10)
-- **Workout Quality**: Rate overall workout satisfaction
-- **Soreness Tracking**: Daily muscle group soreness ratings (0-10)
-- **Analytics Dashboard**: Comprehensive workout statistics
+### 🎨 Social Features
+- **Workout Posts**: Share your achievements with photos and captions
+- **Post Verification**: Verify workout completion with photo evidence
+- **Like System**: Interact with other users' workout posts
+- **Community Features**: Build a fitness community
 
-### 📱 User Experience
-- **Minimalist Design**: Clean, focused interface
-- **Cross-Platform**: Works on mobile and web
-- **Local Storage**: All data stored locally on your device
-- **Settings**: Customizable preferences and units
-- **Demo Mode**: Comprehensive test data for exploration
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
@@ -75,66 +79,84 @@ A comprehensive workout tracking app for weightlifting and cardio activities, bu
    - **iOS**: Press `i` in the terminal (requires iOS Simulator)
    - **Android**: Press `a` in the terminal (requires Android Studio)
 
-## Project Structure
+## 🏗️ Project Structure
 
 ```
-gym-journal/
-├── App.js                 # Main app component with navigation
-├── package.json           # Dependencies and scripts
-├── app.json              # Expo configuration
-├── babel.config.js       # Babel configuration
+gymmy/
+├── App.js                          # Main app with navigation setup
+├── package.json                    # Dependencies and scripts
+├── app.json                       # Expo configuration
 ├── src/
 │   ├── components/
-│   │   ├── AnalyticsCharts.js      # Progress visualization
-│   │   ├── AnalyticsPreview.js     # Stats preview
-│   │   ├── BodyWeightTracker.js    # Weight tracking
-│   │   ├── EditWorkoutModal.js     # Workout editing
-│   │   ├── GamificationStats.js    # Level and XP display
-│   │   ├── MiniWeeklyChart.js      # Weekly progress
-│   │   ├── MotivationalQuote.js    # Daily quotes
-│   │   ├── SimpleCharts.js         # Basic charts
-│   │   └── WorkoutCalendar.js      # Calendar view
+│   │   ├── AchievementQuestDisplay.js  # Achievement and quest UI
+│   │   ├── AnalyticsCharts.js          # Progress visualization
+│   │   ├── AnalyticsPreview.js         # Stats preview
+│   │   ├── BodyWeightTracker.js        # Weight tracking
+│   │   ├── CharacterDetailModal.js     # Character details
+│   │   ├── ClassDashboardWidget.js     # Class-specific dashboard
+│   │   ├── EditWorkoutModal.js         # Workout editing
+│   │   ├── EnhancedGamificationStats.js # Advanced stats display
+│   │   ├── GachaComponents.js          # Gacha pull interface
+│   │   ├── GamificationStats.js        # Level and XP display
+│   │   ├── MiniWeeklyChart.js          # Weekly progress
+│   │   ├── MotivationalQuote.js        # Daily quotes
+│   │   ├── QuestDisplay.js             # Quest tracking
+│   │   ├── SimpleCharts.js             # Basic charts
+│   │   └── WorkoutCalendar.js          # Calendar view
 │   ├── context/
-│   │   └── AppContext.js           # Global state management
+│   │   └── AppContext.js               # Global state management
 │   ├── screens/
-│   │   ├── AchievementsScreen.js   # Achievement system
-│   │   ├── DashboardScreen.js      # Main dashboard
-│   │   ├── ProgressScreen.js       # Progress monitoring
-│   │   ├── SettingsScreen.js       # App settings
-│   │   └── WorkoutScreen.js        # Workout tracking
+│   │   ├── AchievementsScreen.js       # Achievement system
+│   │   ├── CharacterCollectionScreen.js # Character collection
+│   │   ├── ClassSelectionScreen.js     # Class selection
+│   │   ├── DashboardScreen.js          # Main dashboard
+│   │   ├── GachaScreen.js             # Gacha pulls
+│   │   ├── ProgressScreen.js           # Progress monitoring
+│   │   ├── PullResults.js              # Gacha results
+│   │   ├── SettingsScreen.js           # App settings
+│   │   └── WorkoutScreen.js            # Workout tracking
 │   └── utils/
-│       └── StorageManager.js       # Data persistence
+│       └── StorageManager.js           # Data persistence
 └── README.md
 ```
 
-## Usage
+## 🎯 Usage Guide
 
-### Starting a Workout
+### Getting Started
+1. **Choose Your Class**: Select from 5 unique fitness classes
+2. **Start Working Out**: Track your exercises and progress
+3. **Earn Currency**: Complete workouts to earn gems
+4. **Pull Characters**: Use gems to pull characters in the gacha
+5. **Level Up**: Progress through the class system and unlock bonuses
+
+### Class System
+- **Powerlifter**: Strength-focused with compound lift bonuses
+- **Bodybuilder**: Aesthetics-focused with isolation exercise bonuses
+- **Athlete**: Performance-focused with cardio and functional bonuses
+- **Yogi**: Balance-focused with flexibility and mindfulness bonuses
+- **Hybrid**: Versatile with balanced bonuses across all areas
+
+### Gacha System
+- **Single Pull**: 10 gems for one character
+- **10-Pull**: 90 gems for 10 characters (guaranteed rare+)
+- **Rarity Rates**: Common (60%), Rare (30%), Epic (8%), Legendary (2%)
+- **Character Collection**: View and manage your collected characters
+
+### Workout Tracking
 1. Navigate to the **Workout** tab
-2. Tap the "+" button in the top right
-3. Select exercise categories (Chest, Back, etc.)
-4. Add exercises to your workout
-5. Log sets, reps, and weight
-6. Finish workout when complete
+2. Tap the "+" button to start a new workout
+3. Select exercise categories and add exercises
+4. Log sets, reps, and weight for each exercise
+5. Complete the workout to earn XP and gems
 
-### Gamification Features
-1. **Level Up**: Complete workouts to earn XP and level up
-2. **Achievements**: Unlock achievements for milestones
-3. **Quests**: Complete daily and weekly challenges
-4. **Muscle Mastery**: Progress individual muscle group levels
-
-### Tracking Progress
+### Progress Monitoring
 1. Go to the **Progress** tab
-2. View your overall level and XP progress
+2. View your overall level and class progression
 3. Check muscle group mastery levels
 4. Monitor achievements and quests
+5. Track class-specific statistics
 
-### Daily Ratings
-- Rate your mood and energy before/after workouts
-- Track daily soreness for each muscle group
-- Monitor workout quality and satisfaction
-
-## Gamification System
+## 🎮 Gamification System
 
 ### Experience Points (XP)
 - **Base XP**: 100 XP per workout
@@ -142,8 +164,16 @@ gym-journal/
 - **Exercise Bonus**: 15 XP per exercise
 - **Rating Bonus**: Up to 50 XP for high ratings (9+)
 - **Streak Bonus**: Up to 100 XP for workout streaks
+- **Class Bonuses**: Multipliers based on your chosen class
 - **Template Bonus**: 50 XP for completing workout templates
 - **Variety Bonus**: 25 XP for 5+ unique exercises
+
+### Class-Specific Bonuses
+- **Powerlifter**: 2.0x compound lift XP, 1.5x strength training XP
+- **Bodybuilder**: 1.8x isolation XP, 2.0x aesthetic XP
+- **Athlete**: 2.0x cardio XP, 1.7x functional XP
+- **Yogi**: 2.2x flexibility XP, 2.0x balance XP
+- **Hybrid**: 1.5x variety XP, 1.4x adaptability XP
 
 ### Achievement Categories
 - **Consistency**: Workout frequency milestones
@@ -153,6 +183,7 @@ gym-journal/
 - **Cardio**: Cardiovascular fitness achievements
 - **Template Usage**: Workout template completions
 - **Social**: Sharing and community features
+- **Class Mastery**: Class-specific achievements
 
 ### Quest System
 - **Daily Quests**: Daily challenges with XP rewards
@@ -160,95 +191,89 @@ gym-journal/
 - **Progress Tracking**: Visual progress indicators
 - **Completion Rewards**: XP bonuses for quest completion
 
-## Data Management
+## 💎 Currency & Economy
 
-### Local Storage
-- All workout data is stored locally on your device
-- No cloud synchronization required
-- Data is private and secure
+### Gems System
+- **Earning Gems**: Complete workouts, achievements, and quests
+- **Single Pull**: 10 gems
+- **10-Pull**: 90 gems (10% discount)
+- **Guaranteed Rarity**: 10-pulls guarantee at least one rare+ character
 
-### Export/Import
-- Export your data to JSON format
-- Import data from backup files
-- Clear all data if needed
-- Demo mode with comprehensive test data
+### Character Rarities
+- **Common (60%)**: Basic characters with standard bonuses
+- **Rare (30%)**: Enhanced characters with better bonuses
+- **Epic (8%)**: Powerful characters with significant bonuses
+- **Legendary (2%)**: Ultimate characters with maximum bonuses
 
-## Settings
+## 📱 User Experience
 
-### Preferences
-- **Notifications**: Enable/disable workout reminders
-- **Auto Save**: Automatically save workout data
-- **Dark Mode**: Toggle dark/light theme
-- **Units**: Switch between lbs and kg
-- **Demo Mode**: Toggle comprehensive test data
+### Modern UI/UX
+- **Clean Design**: Minimalist, focused interface
+- **Smooth Animations**: React Native Animated API
+- **Responsive Layout**: Adapts to different screen sizes
+- **Intuitive Navigation**: Bottom tab navigation with stack screens
 
-### Tracking Options
-- **Workout Ratings**: Enable/disable rating prompts
-- **Soreness Ratings**: Enable/disable soreness tracking
+### Cross-Platform Support
+- **iOS**: Full native support
+- **Android**: Complete Android compatibility
+- **Web**: Full web browser support
+- **Local Storage**: All data stored locally on your device
 
-## Exercise Categories
+### Settings & Customization
+- **Demo Mode**: Comprehensive test data for exploration
+- **Data Management**: Export/import functionality
+- **App Preferences**: Customizable settings
+- **Reset Options**: Clear data or reset to demo data
 
-### Chest
-- Incline Bench Press (Smith)
-- Bench Press
-- Cable Fly (Low/Middle/High)
-- Incline Dumbbell Bench Press
-- Dumbbell Bench Press
-- Decline Bench Press
+## 🛠️ Technical Stack
 
-### Back
-- Lat Pulldown (Wide-grip/Close-grip)
-- Deadlift
-- Upright Barbell Row
-- Single Arm Dumbbell Row
-- Bent-Over Rows
-- Pull-Ups (Weighted)
+### Core Technologies
+- **React Native**: 0.72.10
+- **Expo**: ~49.0.0
+- **React Navigation**: Bottom Tab + Stack Navigator
+- **AsyncStorage**: Local data persistence
+- **React Context API**: Global state management
+- **React Native Animated API**: UI animations
 
-### Legs
-- Barbell Squat
-- Seated Leg Press
-- Seated Calf Raise
-- Leg Extension
+### Key Dependencies
+- **@react-navigation/bottom-tabs**: Navigation
+- **@react-navigation/stack**: Stack navigation
+- **@react-native-async-storage/async-storage**: Data storage
+- **@expo/vector-icons**: Icon library
+- **react-native-safe-area-context**: Safe area handling
 
-### Shoulders
-- Standing Barbell Shoulder Press
-- Seated Dumbbell Shoulder Press
-- Face Pulls
-- Bent Over Reverse Fly
-- Lateral Raise
-- Arnold Press
+## 🚀 Development
 
-### Biceps
-- Standing Barbell Bicep Curl
-- Preacher Curls
-- Hammer Curls
-- Incline Dumbbell Curls
+### Available Scripts
+- `npm start`: Start Expo development server
+- `npm run web`: Run on web platform
+- `npm run android`: Run on Android
+- `npm run ios`: Run on iOS
 
-### Triceps
-- Tricep Pushdowns
-- Tricep Dips
-- Skullcrushers
+### Data Management
+- **Local Storage**: All data stored locally via AsyncStorage
+- **Demo Data**: Comprehensive test data for development
+- **Data Reset**: Function to clear and populate with test data
+- **Cross-Platform**: Consistent data handling across platforms
 
-### Abs
-- Hanging Leg Raises
-- Upright Ab Pulldowns
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Test thoroughly across platforms
 5. Submit a pull request
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
 
-## Support
+## 🆘 Support
 
 For support or questions, please open an issue in the repository.
 
 ---
 
-**Built with ❤️ using React Native and Expo** 
+**Built with ❤️ using React Native and Expo**
+
+*Gymmy - Level up your fitness journey!* 

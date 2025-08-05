@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Gymmy is a comprehensive React Native/Expo application for tracking weightlifting and cardio workouts. The app features an advanced gamification system with World of Warcraft-style leveling, achievements, quests, and muscle group mastery. Built with a modern UI and local data storage.
+Gymmy is a comprehensive React Native/Expo fitness application with advanced gamification features. The app features a unique class-based progression system, gacha mechanics, character collection, and World of Warcraft-style leveling for weightlifting and cardio workouts. Built with modern UI/UX and local data storage.
 
 **Current Version**: 1.0.0  
 **Framework**: React Native with Expo  
@@ -13,78 +13,114 @@ Gymmy is a comprehensive React Native/Expo application for tracking weightliftin
 ## 🏗️ Technical Architecture
 
 ### Core Technologies
-- **React Native**: 0.72.6
+- **React Native**: 0.72.10
 - **Expo**: ~49.0.0
-- **React Navigation**: Bottom Tab Navigator
+- **React Navigation**: Bottom Tab + Stack Navigator
 - **AsyncStorage**: Local data persistence
 - **React Context API**: Global state management
 - **React Native Animated API**: UI animations
 
 ### Project Structure
 ```
-gym-journal/
+gymmy/
 ├── App.js                          # Main app with navigation setup
 ├── package.json                    # Dependencies and scripts
+├── app.json                       # Expo configuration
 ├── src/
 │   ├── components/
-│   │   ├── AnalyticsCharts.js      # Progress visualization
-│   │   ├── AnalyticsPreview.js     # Stats preview
-│   │   ├── BodyWeightTracker.js    # Weight tracking
-│   │   ├── EditWorkoutModal.js     # Modal for editing workout details
-│   │   ├── GamificationStats.js    # Level and XP display with animations
-│   │   ├── MiniWeeklyChart.js      # Weekly progress charts
-│   │   ├── MotivationalQuote.js    # Daily changing motivational quotes
-│   │   ├── SimpleCharts.js         # Basic chart components
-│   │   └── WorkoutCalendar.js      # Calendar view with workout history
+│   │   ├── AchievementQuestDisplay.js  # Achievement and quest UI
+│   │   ├── AnalyticsCharts.js          # Progress visualization
+│   │   ├── AnalyticsPreview.js         # Stats preview
+│   │   ├── BodyWeightTracker.js        # Weight tracking
+│   │   ├── CharacterDetailModal.js     # Character details
+│   │   ├── ClassDashboardWidget.js     # Class-specific dashboard
+│   │   ├── EditWorkoutModal.js         # Workout editing
+│   │   ├── EnhancedGamificationStats.js # Advanced stats display
+│   │   ├── GachaComponents.js          # Gacha pull interface
+│   │   ├── GamificationStats.js        # Level and XP display
+│   │   ├── MiniWeeklyChart.js          # Weekly progress
+│   │   ├── MotivationalQuote.js        # Daily quotes
+│   │   ├── QuestDisplay.js             # Quest tracking
+│   │   ├── SimpleCharts.js             # Basic charts
+│   │   └── WorkoutCalendar.js          # Calendar view
 │   ├── context/
-│   │   └── AppContext.js           # Global state management
+│   │   └── AppContext.js               # Global state management
 │   ├── screens/
-│   │   ├── AchievementsScreen.js   # Achievement system with XP rewards
-│   │   ├── DashboardScreen.js      # Main dashboard with stats
-│   │   ├── ProgressScreen.js       # Progress tracking with levels and quests
-│   │   ├── SettingsScreen.js       # App settings and demo mode
-│   │   └── WorkoutScreen.js        # Workout tracking interface
+│   │   ├── AchievementsScreen.js       # Achievement system
+│   │   ├── CharacterCollectionScreen.js # Character collection
+│   │   ├── ClassSelectionScreen.js     # Class selection
+│   │   ├── DashboardScreen.js          # Main dashboard
+│   │   ├── GachaScreen.js             # Gacha pulls
+│   │   ├── ProgressScreen.js           # Progress monitoring
+│   │   ├── PullResults.js              # Gacha results
+│   │   ├── SettingsScreen.js           # App settings
+│   │   └── WorkoutScreen.js            # Workout tracking
 │   └── utils/
-│       └── StorageManager.js       # Data persistence layer
+│       └── StorageManager.js           # Data persistence
 ```
 
 ## 🎯 Key Features Implemented
 
-### 1. Advanced Gamification System
+### 1. Class-Based Progression System
+- **5 Unique Classes**: Powerlifter, Bodybuilder, Athlete, Yogi, Hybrid
+- **Class Bonuses**: Specialized XP multipliers for different training styles
+- **Skill Trees**: Unique progression paths for each class
+- **Stats System**: Power, Technique, Endurance, Flexibility, Mental attributes
+- **Class Selection**: Permanent class choice with lasting bonuses
+- **Class-Specific Achievements**: Milestones tailored to each class
+
+### 2. Gacha & Character Collection
+- **Gacha System**: Pull characters with different rarities (Common to Legendary)
+- **Character Collection**: Collect and display unique fitness characters
+- **Currency System**: Earn gems through workouts and achievements
+- **Pull Mechanics**: Single pulls (10 gems) and 10-pulls (90 gems)
+- **Rarity System**: Common (60%), Rare (30%), Epic (8%), Legendary (2%)
+- **Character Details**: Detailed character information and bonuses
+
+### 3. Enhanced Gamification System
 - **WoW-Style Leveling**: Exponential XP curve (XP = baseXP * (level - 1)^1.5)
-- **Experience Points**: Multiple XP sources (workouts, achievements, quests)
+- **Multiple XP Sources**: Workouts, achievements, quests, class bonuses
 - **Achievement System**: 50+ achievements across 8 categories with XP rewards
 - **Quest System**: Daily and weekly challenges with progress tracking
 - **Muscle Group Mastery**: Separate progression system for each muscle group
 - **Rarity System**: Visual indicators (Common to Immortal) for levels
 
-### 2. Workout Tracking System
+### 4. Advanced Workout Tracking System
 - **Weightlifting**: Track sets, reps, weight for 40+ exercises across 7 muscle groups
 - **Cardio**: Track duration, pace, calories burned (no sets)
 - **Ghost Sets**: Editable placeholder sets below each exercise for easy addition
 - **Exercise History**: Shows last workout date, reps, and average weight
 - **Cardio History**: Shows last date, duration, and calories burned
+- **Class Integration**: Workouts provide class-specific XP bonuses
 
-### 3. Workout Management
+### 5. Workout Management
 - **Start/Complete Workouts**: Full workout lifecycle management
 - **Edit Workouts**: Modify date, time, duration, notes, ratings
 - **Delete Workouts**: Remove individual exercises or entire workouts
 - **Workout Ratings**: Pre/post mood, energy, and overall satisfaction (0-10)
 - **Template System**: Pre-built and customizable workout routines
+- **Class Bonuses**: XP multipliers based on chosen class
 
-### 4. Calendar Integration
+### 6. Social Features
+- **Workout Posts**: Share achievements with photos and captions
+- **Post Verification**: Verify workout completion with photo evidence
+- **Like System**: Interact with other users' workout posts
+- **Community Features**: Build a fitness community
+
+### 7. Calendar Integration
 - **Workout Calendar**: Visual calendar showing workout history
 - **Date Selection**: Click dates to view/edit past workouts
 - **Timezone Handling**: Consistent date handling across platforms
 
-### 5. Progress Tracking (Enhanced)
+### 8. Progress Tracking (Enhanced)
 - **Overall Levels**: User's main level with XP progress
+- **Class Levels**: Individual class progression with specialized bonuses
 - **Muscle Group Levels**: Individual levels for each muscle group (200 XP per level)
 - **Exercise Levels**: Specific levels for each exercise
-- **Experience Calculation**: Based on workout frequency and intensity
+- **Experience Calculation**: Based on workout frequency, intensity, and class bonuses
 - **Progress Visualization**: Level titles and animated progress bars
 
-### 6. Data Management
+### 9. Data Management
 - **Local Storage**: All data stored locally via AsyncStorage
 - **Demo Data**: Comprehensive test data for development and exploration
 - **Data Reset**: Function to clear and populate with test data
@@ -93,11 +129,13 @@ gym-journal/
 ## 📱 Screen-by-Screen Breakdown
 
 ### Dashboard Screen (`DashboardScreen.js`)
+- **Class Dashboard Widget**: Class-specific stats and bonuses
 - **Gamification Stats**: Level, experience, animated progress bar
 - **Motivational Quote**: Daily changing inspirational message
-- **Key Metrics**: Moved below calendar for better layout
+- **Key Metrics**: Workout statistics and progress
 - **Navigation Hub**: Access to all app features
 - **Recent Workouts**: Quick access to recent activity
+- **Class Integration**: Display class-specific information
 
 ### Workout Screen (`WorkoutScreen.js`)
 - **Streamlined UI**: "+" button in top right for new workouts
@@ -108,25 +146,49 @@ gym-journal/
 - **Recent Workouts**: Horizontally aligned workout cards
 - **Cardio Support**: Special tracking for cardio exercises
 - **Mood Survey**: Post-workout rating system
+- **Class Bonuses**: XP calculations based on chosen class
 
 ### Progress Screen (`ProgressScreen.js`)
 - **Overall Progress**: User's overall level and experience
+- **Class Progress**: Individual class progression and bonuses
 - **Muscle Group Levels**: Individual progress for each muscle group
 - **Exercise Levels**: Specific exercise progression
 - **Quest Display**: Daily and weekly challenges (demo mode)
 - **Progress Visualization**: Level titles and progress indicators
+
+### Class Selection Screen (`ClassSelectionScreen.js`)
+- **Class Overview**: Detailed information about each class
+- **Class Comparison**: Stats and bonuses comparison
+- **Class Selection**: Permanent class choice with confirmation
+- **Visual Design**: Street Fighter + RPG aesthetic
+- **Class Stats**: Power, Technique, Endurance, Flexibility, Mental
+
+### Gacha Screen (`GachaScreen.js`)
+- **Pull Interface**: Single and 10-pull options
+- **Currency Display**: Gem balance and costs
+- **Pull Animation**: Dramatic pull animations
+- **Rarity Rates**: Display of pull probabilities
+- **Results Modal**: Show pulled characters with rarity indicators
+
+### Character Collection Screen (`CharacterCollectionScreen.js`)
+- **Character Grid**: Display all collected characters
+- **Character Details**: Tap to view character information
+- **Rarity Filtering**: Filter by character rarity
+- **Collection Stats**: Total characters and completion percentage
 
 ### Achievements Screen (`AchievementsScreen.js`)
 - **Achievement Categories**: 8 categories with 50+ achievements
 - **XP Rewards**: Each achievement awards XP
 - **Progress Tracking**: Visual progress indicators
 - **Unlock Dates**: Track when achievements were earned
+- **Class Achievements**: Class-specific achievement categories
 
 ### Settings Screen (`SettingsScreen.js`)
 - **App Preferences**: Basic settings management
 - **Data Management**: Export/import functionality
 - **Demo Mode**: Toggle comprehensive test data
 - **Reset Options**: Clear data or reset to dummy data
+- **Class Information**: View current class and stats
 
 ## 🔧 Technical Implementation Details
 
@@ -136,38 +198,101 @@ gym-journal/
 {
   workoutHistory: [],        // All completed workouts
   currentWorkout: null,      // Active workout session
-  userStats: {},            // Gamification data (level, XP, etc.)
+  userStats: {},            // Gamification data (level, XP, class, etc.)
   exerciseHistory: {},       // Exercise-specific history
   achievements: [],         // Achievement data
   quests: [],              // Quest data
+  selectedClass: null,      // User's chosen class
+  characterCollection: [],  // Collected characters
+  currencies: { gems: 0 }, // In-game currency
   loading: false,           // Loading states
   error: null              // Error handling
 }
 ```
 
-### Gamification System
+### Class System Implementation
 ```javascript
-// XP Calculation (WoW-style exponential curve)
-calculateLevelRequirement(level) {
-  const baseXP = 100;
-  return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+// Class data structure
+const FITNESS_CLASSES = {
+  powerlifter: {
+    name: "POWERLIFTER",
+    subtitle: "The Iron Warrior",
+    bonuses: {
+      compoundLiftXP: 2.0,
+      strengthTrainingXP: 1.5,
+      maxWeightBonus: 1.25,
+      powerMoveXP: 1.8
+    },
+    stats: { power: 10, technique: 6, endurance: 4, flexibility: 2, mental: 8 }
+  },
+  // ... other classes
 }
 
-// Experience Sources
-- Base XP: 100 per workout
-- Duration: 1 XP per 3 minutes
-- Exercise: 15 XP per exercise
-- Rating: Up to 50 XP for 9+ ratings
-- Streak: Up to 100 XP for streaks
-- Template: 50 XP for template completion
-- Variety: 25 XP for 5+ unique exercises
-- Achievements: Variable XP rewards
-- Quests: Variable XP rewards
+// Class XP calculation
+const calculateClassXP = (workout, userStats) => {
+  const classData = FITNESS_CLASSES[userStats.selectedClass];
+  let classXP = 0;
+  
+  // Apply class-specific bonuses
+  if (classData.bonuses.compoundLiftXP) {
+    // Calculate compound lift bonus
+  }
+  
+  return classXP;
+}
 ```
 
-### Data Structure
+### Gacha System Implementation
 ```javascript
-// Workout Object
+// Gacha rates and mechanics
+const GACHA_RATES = {
+  common: 0.60,
+  rare: 0.30,
+  epic: 0.08,
+  legendary: 0.02
+};
+
+const performGachaPull = (pullType = 'single') => {
+  const results = [];
+  const pullCount = pullType === 'single' ? 1 : 10;
+  
+  for (let i = 0; i < pullCount; i++) {
+    const rarity = determineRarity();
+    const character = generateCharacter(rarity);
+    results.push(character);
+  }
+  
+  return results;
+};
+```
+
+### Enhanced XP Calculation
+```javascript
+// XP calculation with class bonuses
+const calculateExperience = (workout) => {
+  let baseXP = 100; // Base workout XP
+  
+  // Duration bonus
+  baseXP += Math.floor(workout.duration / 3);
+  
+  // Exercise bonus
+  baseXP += workout.exercises.length * 15;
+  
+  // Rating bonus
+  if (workout.ratings?.workoutRating >= 9) {
+    baseXP += 50;
+  }
+  
+  // Class bonuses
+  const classXP = calculateClassXP(workout, userStats);
+  
+  return baseXP + classXP;
+};
+```
+
+### Data Structure Updates
+```javascript
+// Enhanced workout object
 {
   id: string,
   startTime: Date,
@@ -175,7 +300,8 @@ calculateLevelRequirement(level) {
   endTime: Date,
   duration: number,
   exercises: [],
-  templateId: string,      // For template completion bonus
+  templateId: string,
+  classXP: number,           // Class-specific XP earned
   ratings: {
     preWorkoutMood: number,
     preWorkoutEnergy: number,
@@ -186,68 +312,67 @@ calculateLevelRequirement(level) {
   notes: string
 }
 
-// Achievement Object
+// Character object
 {
   id: string,
-  title: string,
+  name: string,
+  rarity: 'common' | 'rare' | 'epic' | 'legendary',
+  image: string,
   description: string,
-  category: string,
-  xpReward: number,
-  unlocked: boolean,
-  unlockedDate: Date,
-  progress: number,
-  target: number
+  bonuses: {
+    xpMultiplier: number,
+    specialAbility: string
+  },
+  unlockDate: Date
 }
 
-// Quest Object
+// Enhanced user stats
 {
-  id: string,
-  title: string,
-  description: string,
-  type: 'daily' | 'weekly',
-  xpReward: number,
-  progress: number,
-  target: number,
-  completed: boolean,
-  expiresAt: Date
+  level: number,
+  experience: number,
+  selectedClass: string,
+  classLevel: number,
+  classExperience: number,
+  currencies: {
+    gems: number
+  },
+  characterCollection: string[],
+  achievements: string[],
+  quests: string[]
 }
 ```
 
-### Key Functions
-- `addWorkout()`: Complete workout and update stats with XP calculation
-- `removeWorkout()`: Delete workout from history
-- `removeExercise()`: Remove exercise from current workout
-- `getExerciseHistory()`: Get exercise-specific history
-- `resetToDummyData()`: Populate with comprehensive test data
-- `awardAchievementXP()`: Award XP when achievements are unlocked
-- `generateDailyQuests()`: Create daily quest challenges
-- `generateWeeklyQuests()`: Create weekly quest challenges
-
 ## 🎨 UI/UX Features
 
-### Recent Workouts Section (Enhanced)
-- **Horizontal Layout**: Date, details, and actions aligned horizontally
-- **Compact Design**: Reduced height and font sizes for better fit
+### Class Selection Interface
+- **Visual Design**: Street Fighter + RPG aesthetic
+- **Class Cards**: Detailed class information with stats
+- **Confirmation Modal**: Confirm class selection
+- **Stats Preview**: Show class bonuses and attributes
+
+### Gacha Interface
+- **Pull Animation**: Dramatic pull animations with scaling and opacity
+- **Currency Display**: Clear gem balance and pull costs
+- **Results Modal**: Show pulled characters with rarity colors
+- **Rarity Gradients**: Visual indicators for character rarity
+
+### Character Collection
+- **Grid Layout**: Organized character display
+- **Rarity Filtering**: Filter by character rarity
+- **Character Details**: Modal with character information
+- **Collection Progress**: Completion percentage
+
+### Enhanced Dashboard
+- **Class Widget**: Class-specific information and bonuses
+- **Animated Stats**: Smooth progress bar animations
+- **Recent Workouts**: Improved horizontal layout
+- **Navigation**: Stack navigation for additional screens
+
+### Modern UI Elements
+- **Clean Design**: Minimalist, focused interface
+- **Smooth Animations**: React Native Animated API
 - **Responsive Layout**: Adapts to different screen sizes
-- **Clean Information Display**: Shows key workout details efficiently
-
-### Workout Cards
-- **Modern Design**: Clean, card-based layout
-- **Expandable Details**: Tap to see full workout information
-- **Action Buttons**: Edit, delete, and view options
-- **Visual Hierarchy**: Clear information organization
-
-### Gamification Elements
-- **Animated Level Display**: Subtle animations for progress bars
-- **Experience Bars**: Visual progress with accurate XP calculations
-- **Motivational Quotes**: Daily inspiration
-- **Achievement System**: Milestone tracking with XP rewards
-- **Quest Display**: Progress tracking for challenges
-
-### App Branding
-- **App Name**: "Gymmy" (updated throughout the app)
-- **Clean Headers**: Removed redundant titles
-- **Streamlined UI**: Simplified navigation and layout
+- **Intuitive Navigation**: Bottom tab navigation with stack screens
 
 ## 🐛 Known Issues & Recent Fixes
 
@@ -259,6 +384,9 @@ calculateLevelRequirement(level) {
 5. **Recent Workouts Layout**: Fixed horizontal alignment and height issues
 6. **Level Section Visibility**: Ensured GamificationStats displays correctly
 7. **UI Alignment**: Fixed workout card layout with proper horizontal distribution
+8. **Class System Integration**: Properly integrated class bonuses into XP calculation
+9. **Gacha System**: Implemented complete gacha mechanics with proper rarity distribution
+10. **Character Collection**: Added character management and display features
 
 ### Current State
 - **Stable Data**: All dummy data uses consistent format
@@ -266,6 +394,9 @@ calculateLevelRequirement(level) {
 - **Cross-Platform**: Works consistently on web and mobile
 - **Error-Free**: No known runtime errors
 - **Enhanced Gamification**: Full WoW-style leveling system implemented
+- **Class System**: Complete class-based progression system
+- **Gacha System**: Fully functional gacha mechanics
+- **Character Collection**: Complete character management system
 
 ## 🚀 Development Setup
 
@@ -298,7 +429,9 @@ The app includes comprehensive dummy data for testing:
 - **Mixed Types**: Weightlifting and cardio exercises
 - **Realistic Data**: Proper ratings, notes, and progression
 - **Gamification Data**: Achievements, quests, and XP progression
-- **New Format**: All data uses `workoutDate` field
+- **Class Data**: All classes with proper stats and bonuses
+- **Character Data**: Complete character collection with various rarities
+- **Gacha Data**: Proper currency and pull mechanics
 
 ### Data Reset
 ```javascript
@@ -313,20 +446,23 @@ const { setDemoMode } = useApp();
 1. **User Testing**: Test all features across different devices
 2. **Performance Optimization**: Monitor app performance with large datasets
 3. **Accessibility**: Improve screen reader support
+4. **Class Balance**: Fine-tune class bonuses and progression
 
 ### Feature Enhancements
-1. **Data Export/Import**: Implement backup functionality
-2. **Notifications**: Add workout reminders
-3. **Dark Mode**: Implement theme switching
-4. **Social Features**: Share achievements or progress
-5. **Advanced Analytics**: More detailed progress charts
-6. **Workout Templates**: Expand template system
+1. **Advanced Gacha**: Add pity system and guaranteed pulls
+2. **Character Evolution**: Allow characters to level up and evolve
+3. **Social Features**: Implement real social features with backend
+4. **Notifications**: Add workout reminders and achievement notifications
+5. **Dark Mode**: Implement theme switching
+6. **Advanced Analytics**: More detailed progress charts
+7. **Workout Templates**: Expand template system with class-specific templates
 
 ### Technical Improvements
 1. **Error Boundaries**: Add comprehensive error handling
 2. **Unit Tests**: Implement testing suite
 3. **Performance Monitoring**: Add analytics for app usage
 4. **Code Splitting**: Optimize bundle size
+5. **Backend Integration**: Consider adding cloud sync for social features
 
 ## 🛠️ Development Notes
 
@@ -335,7 +471,9 @@ const { setDemoMode } = useApp();
 2. **Context API**: Used for global state management
 3. **Platform-Specific UI**: Different date pickers for web vs mobile
 4. **Gamification**: WoW-style system to increase user engagement
-5. **App Branding**: Simplified to "Gymmy" for cleaner experience
+5. **Class System**: RPG-inspired progression for long-term engagement
+6. **Gacha Mechanics**: Mobile game-style collection system
+7. **App Branding**: Simplified to "Gymmy" for cleaner experience
 
 ### Code Quality
 - **Consistent Styling**: Using StyleSheet.create throughout
@@ -343,6 +481,7 @@ const { setDemoMode } = useApp();
 - **Null Safety**: Optional chaining (`?.`) for safe property access
 - **Performance**: useMemo and useCallback for optimization
 - **Animations**: Subtle React Native Animated API usage
+- **Modular Design**: Separated concerns into components and screens
 
 ### File Organization
 - **Components**: Reusable UI components
@@ -357,6 +496,9 @@ const { setDemoMode } = useApp();
 - **Tested**: Demo data provides comprehensive testing
 - **Stable**: No known critical bugs
 - **Enhanced**: Advanced gamification system implemented
+- **Class System**: Complete class-based progression
+- **Gacha System**: Fully functional gacha mechanics
+- **Character Collection**: Complete character management
 - **Ready for Enhancement**: Solid foundation for new features
 
 ### Key Contacts
@@ -371,4 +513,4 @@ const { setDemoMode } = useApp();
 
 ---
 
-**Handoff Complete**: The application is ready for continued development with a solid foundation, comprehensive gamification system, and modern UI/UX design. 
+**Handoff Complete**: The application is ready for continued development with a solid foundation, comprehensive gamification system, class-based progression, gacha mechanics, and modern UI/UX design. 
