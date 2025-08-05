@@ -1,0 +1,995 @@
+// src/context/SurveyQuestions.ts
+
+import { FitnessSegment } from './segmentationTypes';
+
+export interface SurveyQuestion {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'single_choice' | 'multiple_choice' | 'ranking' | 'slider';
+  options: SurveyOption[];
+  required: boolean;
+  order: number;
+  category: string;
+}
+
+export interface SurveyOption {
+  id: string;
+  text: string;
+  description?: string;
+  value: number; // 1-5 scale for weighting
+  segmentWeights: Record<FitnessSegment, number>; // How much this option contributes to each segment
+  emoji?: string;
+}
+
+export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
+  {
+    id: 'motivation_primary',
+    title: 'What gets you most excited about working out?',
+    description: 'Choose the option that resonates most with you',
+    type: 'single_choice',
+    required: true,
+    order: 1,
+    category: 'motivation',
+    options: [
+      {
+        id: 'strength_power',
+        text: 'Hitting a new personal record or lifting heavier',
+        description: 'The thrill of strength gains and power',
+        value: 5,
+        emoji: '🏋️',
+        segmentWeights: {
+          strength_seeker: 10,
+          calorie_crusher: 2,
+          body_optimizer: 4,
+          wellness_seeker: 1,
+          endurance_athlete: 3,
+          habit_builder: 3,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'calorie_burn',
+        text: 'Burning calories and feeling energized',
+        description: 'Energy, metabolism, and that post-workout high',
+        value: 5,
+        emoji: '🔥',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 10,
+          body_optimizer: 6,
+          wellness_seeker: 3,
+          endurance_athlete: 4,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'body_changes',
+        text: 'Seeing positive changes in my body',
+        description: 'Physical transformation and body composition',
+        value: 5,
+        emoji: '💪',
+        segmentWeights: {
+          strength_seeker: 4,
+          calorie_crusher: 6,
+          body_optimizer: 10,
+          wellness_seeker: 2,
+          endurance_athlete: 3,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'wellness_mindfulness',
+        text: 'Feeling more flexible and less stressed',
+        description: 'Mind-body connection and overall well-being',
+        value: 5,
+        emoji: '🧘',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 10,
+          endurance_athlete: 2,
+          habit_builder: 5,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'performance_athletics',
+        text: 'Improving my athletic performance',
+        description: 'Speed, endurance, and competitive excellence',
+        value: 5,
+        emoji: '🏃',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 4,
+          body_optimizer: 3,
+          wellness_seeker: 2,
+          endurance_athlete: 10,
+          habit_builder: 3,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'consistency_habits',
+        text: 'Simply showing up and being consistent',
+        description: 'Building sustainable fitness habits',
+        value: 5,
+        emoji: '🎯',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 4,
+          body_optimizer: 4,
+          wellness_seeker: 5,
+          endurance_athlete: 3,
+          habit_builder: 10,
+          social_enthusiast: 6,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'social_community',
+        text: 'Working out with friends or community',
+        description: 'Shared motivation and group energy',
+        value: 5,
+        emoji: '🤝',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 4,
+          endurance_athlete: 4,
+          habit_builder: 6,
+          social_enthusiast: 10,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'progress_definition',
+    title: 'When you think "progress," what comes to mind first?',
+    description: 'Your personal definition of moving forward',
+    type: 'single_choice',
+    required: true,
+    order: 2,
+    category: 'progress_mindset',
+    options: [
+      {
+        id: 'numbers_up',
+        text: 'Numbers on the barbell going up',
+        description: 'Quantifiable strength improvements',
+        value: 5,
+        emoji: '📈',
+        segmentWeights: {
+          strength_seeker: 10,
+          calorie_crusher: 2,
+          body_optimizer: 3,
+          wellness_seeker: 1,
+          endurance_athlete: 2,
+          habit_builder: 2,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'energy_metrics',
+        text: 'Calories burned and energy levels',
+        description: 'Metabolic improvements and vitality',
+        value: 5,
+        emoji: '⚡',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 10,
+          body_optimizer: 5,
+          wellness_seeker: 4,
+          endurance_athlete: 4,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'body_composition',
+        text: 'The scale and how clothes fit',
+        description: 'Physical appearance and body changes',
+        value: 5,
+        emoji: '⚖️',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 6,
+          body_optimizer: 10,
+          wellness_seeker: 2,
+          endurance_athlete: 2,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'wellness_metrics',
+        text: 'Being able to touch my toes and feeling calm',
+        description: 'Flexibility, mobility, and mental well-being',
+        value: 5,
+        emoji: '🕯️',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 2,
+          body_optimizer: 2,
+          wellness_seeker: 10,
+          endurance_athlete: 3,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'performance_times',
+        text: 'Running faster or going further than before',
+        description: 'Athletic performance and endurance gains',
+        value: 5,
+        emoji: '🏃‍♀️',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 4,
+          body_optimizer: 3,
+          wellness_seeker: 2,
+          endurance_athlete: 10,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'consistency_streaks',
+        text: 'Not missing workouts in my schedule',
+        description: 'Reliability and habit formation',
+        value: 5,
+        emoji: '📅',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 3,
+          body_optimizer: 4,
+          wellness_seeker: 5,
+          endurance_athlete: 4,
+          habit_builder: 10,
+          social_enthusiast: 5,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'community_wins',
+        text: 'Celebrating wins with my fitness friends',
+        description: 'Shared achievements and mutual support',
+        value: 5,
+        emoji: '🎉',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 5,
+          social_enthusiast: 10,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'biggest_challenge',
+    title: 'What\'s your biggest fitness challenge right now?',
+    description: 'Be honest - what holds you back most?',
+    type: 'single_choice',
+    required: true,
+    order: 3,
+    category: 'challenges',
+    options: [
+      {
+        id: 'strength_plateaus',
+        text: 'Breaking through strength plateaus',
+        description: 'Stuck at current weight/rep ranges',
+        value: 4,
+        emoji: '🚧',
+        segmentWeights: {
+          strength_seeker: 8,
+          calorie_crusher: 2,
+          body_optimizer: 4,
+          wellness_seeker: 1,
+          endurance_athlete: 3,
+          habit_builder: 2,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'calorie_burn_max',
+        text: 'Maximizing my calorie burn and energy',
+        description: 'Getting the most out of each session',
+        value: 4,
+        emoji: '🔥',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 8,
+          body_optimizer: 5,
+          wellness_seeker: 2,
+          endurance_athlete: 4,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'body_composition_goals',
+        text: 'Reaching my ideal body composition',
+        description: 'Body transformation and aesthetic goals',
+        value: 4,
+        emoji: '🎯',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 5,
+          body_optimizer: 8,
+          wellness_seeker: 2,
+          endurance_athlete: 2,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'stress_mobility',
+        text: 'Managing stress and improving mobility',
+        description: 'Mental health and physical flexibility',
+        value: 4,
+        emoji: '😌',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 2,
+          body_optimizer: 2,
+          wellness_seeker: 8,
+          endurance_athlete: 2,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'performance_goals',
+        text: 'Hitting my athletic performance goals',
+        description: 'Speed, endurance, and competition prep',
+        value: 4,
+        emoji: '🏆',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 1,
+          endurance_athlete: 8,
+          habit_builder: 2,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'consistency_struggle',
+        text: 'Staying consistent with exercise',
+        description: 'Building and maintaining workout habits',
+        value: 4,
+        emoji: '📱',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 4,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 8,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'motivation_accountability',
+        text: 'Finding motivation and accountability',
+        description: 'Staying motivated and supported',
+        value: 4,
+        emoji: '💪',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 3,
+          endurance_athlete: 3,
+          habit_builder: 6,
+          social_enthusiast: 8,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'success_measurement',
+    title: 'How do you prefer to measure success?',
+    description: 'What metrics matter most to you?',
+    type: 'single_choice',
+    required: true,
+    order: 4,
+    category: 'measurement',
+    options: [
+      {
+        id: 'weight_reps_strength',
+        text: 'Weight lifted, reps completed, strength gains',
+        description: 'Quantifiable strength metrics',
+        value: 5,
+        emoji: '🏋️‍♀️',
+        segmentWeights: {
+          strength_seeker: 10,
+          calorie_crusher: 2,
+          body_optimizer: 4,
+          wellness_seeker: 1,
+          endurance_athlete: 3,
+          habit_builder: 2,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'calories_energy_zones',
+        text: 'Calories burned, heart rate zones, energy levels',
+        description: 'Metabolic and energy metrics',
+        value: 5,
+        emoji: '💓',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 10,
+          body_optimizer: 5,
+          wellness_seeker: 3,
+          endurance_athlete: 5,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'body_measurements_photos',
+        text: 'Body weight, measurements, progress photos',
+        description: 'Physical transformation tracking',
+        value: 5,
+        emoji: '📸',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 5,
+          body_optimizer: 10,
+          wellness_seeker: 2,
+          endurance_athlete: 2,
+          habit_builder: 3,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'flexibility_stress_sleep',
+        text: 'Flexibility tests, stress levels, sleep quality',
+        description: 'Wellness and recovery metrics',
+        value: 5,
+        emoji: '🛌',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 10,
+          endurance_athlete: 4,
+          habit_builder: 5,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'times_distances_pace',
+        text: 'Times, distances, pace improvements',
+        description: 'Athletic performance metrics',
+        value: 5,
+        emoji: '⏱️',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 4,
+          body_optimizer: 2,
+          wellness_seeker: 2,
+          endurance_athlete: 10,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'streaks_consistency_frequency',
+        text: 'Workout streaks, habit completion, consistency',
+        description: 'Behavioral and habit metrics',
+        value: 5,
+        emoji: '🗓️',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 3,
+          body_optimizer: 4,
+          wellness_seeker: 5,
+          endurance_athlete: 4,
+          habit_builder: 10,
+          social_enthusiast: 5,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'community_social_shared',
+        text: 'Community engagement, shared goals, group success',
+        description: 'Social and community metrics',
+        value: 5,
+        emoji: '👥',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 5,
+          social_enthusiast: 10,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'proudest_achievement',
+    title: 'What would make you feel most proud?',
+    description: 'Your ultimate fitness achievement',
+    type: 'single_choice',
+    required: true,
+    order: 5,
+    category: 'aspirations',
+    options: [
+      {
+        id: 'strength_milestone',
+        text: 'Deadlifting 2x my bodyweight',
+        description: 'Achieving significant strength milestones',
+        value: 5,
+        emoji: '💪',
+        segmentWeights: {
+          strength_seeker: 10,
+          calorie_crusher: 2,
+          body_optimizer: 4,
+          wellness_seeker: 1,
+          endurance_athlete: 2,
+          habit_builder: 2,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'calorie_milestone',
+        text: 'Burning 500+ calories in a single session',
+        description: 'Achieving high-energy workout milestones',
+        value: 5,
+        emoji: '🔥',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 10,
+          body_optimizer: 5,
+          wellness_seeker: 2,
+          endurance_athlete: 4,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'transformation_milestone',
+        text: 'Losing 20 pounds or gaining muscle definition',
+        description: 'Achieving body transformation goals',
+        value: 5,
+        emoji: '⚖️',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 5,
+          body_optimizer: 10,
+          wellness_seeker: 2,
+          endurance_athlete: 2,
+          habit_builder: 4,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'wellness_milestone',
+        text: 'Doing a full split or feeling zen after yoga',
+        description: 'Achieving flexibility and mindfulness goals',
+        value: 5,
+        emoji: '🧘‍♀️',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 2,
+          body_optimizer: 2,
+          wellness_seeker: 10,
+          endurance_athlete: 3,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'performance_milestone',
+        text: 'Running a sub-6-minute mile or finishing a marathon',
+        description: 'Achieving athletic performance milestones',
+        value: 5,
+        emoji: '🏃‍♀️',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 4,
+          body_optimizer: 2,
+          wellness_seeker: 2,
+          endurance_athlete: 10,
+          habit_builder: 3,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'consistency_milestone',
+        text: 'Working out 5 days a week for 3 months straight',
+        description: 'Achieving consistency and habit milestones',
+        value: 5,
+        emoji: '🗓️',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 4,
+          body_optimizer: 5,
+          wellness_seeker: 5,
+          endurance_athlete: 4,
+          habit_builder: 10,
+          social_enthusiast: 6,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'social_milestone',
+        text: 'Helping a friend reach their fitness goal',
+        description: 'Achieving community and social impact',
+        value: 5,
+        emoji: '🤝',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 6,
+          social_enthusiast: 10,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'workout_preference',
+    title: 'What type of workout sounds most appealing right now?',
+    description: 'Trust your gut - what calls to you?',
+    type: 'single_choice',
+    required: true,
+    order: 6,
+    category: 'preferences',
+    options: [
+      {
+        id: 'heavy_lifting',
+        text: 'Heavy lifting with compound movements',
+        description: 'Squats, deadlifts, bench press, overhead press',
+        value: 4,
+        emoji: '🏋️',
+        segmentWeights: {
+          strength_seeker: 9,
+          calorie_crusher: 2,
+          body_optimizer: 5,
+          wellness_seeker: 1,
+          endurance_athlete: 2,
+          habit_builder: 3,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'high_intensity_cardio',
+        text: 'High-intensity cardio that makes me sweat',
+        description: 'HIIT, running, cycling, circuit training',
+        value: 4,
+        emoji: '🏃‍♂️',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 9,
+          body_optimizer: 6,
+          wellness_seeker: 2,
+          endurance_athlete: 7,
+          habit_builder: 4,
+          social_enthusiast: 5,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'balanced_full_body',
+        text: 'Balanced full-body workout',
+        description: 'Mix of strength, cardio, and mobility',
+        value: 4,
+        emoji: '⚖️',
+        segmentWeights: {
+          strength_seeker: 4,
+          calorie_crusher: 5,
+          body_optimizer: 9,
+          wellness_seeker: 4,
+          endurance_athlete: 4,
+          habit_builder: 6,
+          social_enthusiast: 5,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'yoga_stretching',
+        text: 'Yoga or stretching session',
+        description: 'Flexibility, mobility, and mindfulness',
+        value: 4,
+        emoji: '🧘',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 2,
+          body_optimizer: 3,
+          wellness_seeker: 9,
+          endurance_athlete: 3,
+          habit_builder: 5,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'endurance_training',
+        text: 'Long endurance training session',
+        description: 'Distance running, cycling, swimming',
+        value: 4,
+        emoji: '🚴',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 6,
+          body_optimizer: 3,
+          wellness_seeker: 3,
+          endurance_athlete: 9,
+          habit_builder: 4,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'quick_effective',
+        text: 'Quick, effective 20-minute workout',
+        description: 'Efficient, time-friendly exercise',
+        value: 4,
+        emoji: '⏰',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 5,
+          body_optimizer: 5,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 9,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'group_class',
+        text: 'Group fitness class with others',
+        description: 'Community energy and shared motivation',
+        value: 4,
+        emoji: '👥',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 4,
+          body_optimizer: 4,
+          wellness_seeker: 5,
+          endurance_athlete: 4,
+          habit_builder: 5,
+          social_enthusiast: 9,
+          unassigned: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'improvement_focus',
+    title: 'If you could improve just ONE thing this month, what would it be?',
+    description: 'Focus on what matters most to you right now',
+    type: 'single_choice',
+    required: true,
+    order: 7,
+    category: 'priorities',
+    options: [
+      {
+        id: 'get_stronger',
+        text: 'Get significantly stronger',
+        description: 'Increase my lifts and build raw power',
+        value: 5,
+        emoji: '💪',
+        segmentWeights: {
+          strength_seeker: 10,
+          calorie_crusher: 2,
+          body_optimizer: 4,
+          wellness_seeker: 1,
+          endurance_athlete: 3,
+          habit_builder: 2,
+          social_enthusiast: 2,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'boost_energy',
+        text: 'Boost my daily energy levels',
+        description: 'Feel more energized and metabolically active',
+        value: 5,
+        emoji: '⚡',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 10,
+          body_optimizer: 5,
+          wellness_seeker: 4,
+          endurance_athlete: 4,
+          habit_builder: 5,
+          social_enthusiast: 4,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'transform_body',
+        text: 'Transform how my body looks and feels',
+        description: 'Improve body composition and appearance',
+        value: 5,
+        emoji: '✨',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 6,
+          body_optimizer: 10,
+          wellness_seeker: 2,
+          endurance_athlete: 2,
+          habit_builder: 3,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'reduce_stress',
+        text: 'Reduce stress and improve flexibility',
+        description: 'Better mental health and physical mobility',
+        value: 5,
+        emoji: '😌',
+        segmentWeights: {
+          strength_seeker: 1,
+          calorie_crusher: 3,
+          body_optimizer: 2,
+          wellness_seeker: 10,
+          endurance_athlete: 2,
+          habit_builder: 4,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'athletic_performance',
+        text: 'Dramatically improve my athletic performance',
+        description: 'Get faster, stronger, more skilled',
+        value: 5,
+        emoji: '🏆',
+        segmentWeights: {
+          strength_seeker: 4,
+          calorie_crusher: 4,
+          body_optimizer: 3,
+          wellness_seeker: 1,
+          endurance_athlete: 10,
+          habit_builder: 2,
+          social_enthusiast: 3,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'build_consistency',
+        text: 'Build unshakeable workout consistency',
+        description: 'Never miss a planned workout again',
+        value: 5,
+        emoji: '🎯',
+        segmentWeights: {
+          strength_seeker: 3,
+          calorie_crusher: 4,
+          body_optimizer: 4,
+          wellness_seeker: 5,
+          endurance_athlete: 4,
+          habit_builder: 10,
+          social_enthusiast: 5,
+          unassigned: 0
+        }
+      },
+      {
+        id: 'find_community',
+        text: 'Find my fitness tribe and workout community',
+        description: 'Connect with like-minded fitness enthusiasts',
+        value: 5,
+        emoji: '🤝',
+        segmentWeights: {
+          strength_seeker: 2,
+          calorie_crusher: 3,
+          body_optimizer: 3,
+          wellness_seeker: 4,
+          endurance_athlete: 3,
+          habit_builder: 5,
+          social_enthusiast: 10,
+          unassigned: 0
+        }
+      }
+    ]
+  }
+];
+
+// Utility functions for survey processing
+export const getSurveyQuestionById = (id: string): SurveyQuestion | undefined => {
+  return ONBOARDING_SURVEY_QUESTIONS.find(q => q.id === id);
+};
+
+export const getSurveyQuestionsByCategory = (category: string): SurveyQuestion[] => {
+  return ONBOARDING_SURVEY_QUESTIONS.filter(q => q.category === category);
+};
+
+export const getOrderedSurveyQuestions = (): SurveyQuestion[] => {
+  return ONBOARDING_SURVEY_QUESTIONS.sort((a, b) => a.order - b.order);
+};
+
+export const validateSurveyResponse = (questionId: string, optionId: string): boolean => {
+  const question = getSurveyQuestionById(questionId);
+  if (!question) return false;
+  
+  return question.options.some(option => option.id === optionId);
+};
+
+// Survey flow configuration
+export const SURVEY_CONFIG = {
+  totalQuestions: ONBOARDING_SURVEY_QUESTIONS.length,
+  estimatedTimeMinutes: 3,
+  allowSkipping: false,
+  allowBackNavigation: true,
+  showProgressBar: true,
+  saveProgressLocally: true,
+  version: '1.0.0'
+};
+
+// Survey completion validation
+export const validateSurveyCompletion = (responses: any[]): {
+  isComplete: boolean;
+  missingQuestions: string[];
+  errors: string[];
+} => {
+  const errors: string[] = [];
+  const missingQuestions: string[] = [];
+  
+  // Check if all required questions are answered
+  const requiredQuestions = ONBOARDING_SURVEY_QUESTIONS.filter(q => q.required);
+  
+  requiredQuestions.forEach(question => {
+    const response = responses.find(r => r.questionId === question.id);
+    if (!response) {
+      missingQuestions.push(question.id);
+    } else if (!validateSurveyResponse(question.id, response.selectedOption)) {
+      errors.push(`Invalid response for question: ${question.id}`);
+    }
+  });
+  
+  return {
+    isComplete: missingQuestions.length === 0 && errors.length === 0,
+    missingQuestions,
+    errors
+  };
+};

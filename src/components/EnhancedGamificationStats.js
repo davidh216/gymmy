@@ -94,10 +94,17 @@ const EnhancedGamificationStats = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   gamificationContainer: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   levelSection: {
     marginBottom: 20,
@@ -111,7 +118,7 @@ const styles = StyleSheet.create({
   levelTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
     letterSpacing: 1,
   },
   levelNumber: {
@@ -121,7 +128,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#333',
+    backgroundColor: '#e5e7eb',
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 5,
@@ -133,13 +140,13 @@ const styles = StyleSheet.create({
   },
   experienceText: {
     fontSize: 12,
-    color: '#888',
+    color: '#6b7280',
     textAlign: 'center',
     marginTop: 5,
   },
   classSection: {
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: '#e5e7eb',
     paddingTop: 15,
   },
   classLevelHeader: {
@@ -153,18 +160,18 @@ const styles = StyleSheet.create({
   classLevelTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
     marginLeft: 10,
   },
   classLevelNumber: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
     marginLeft: 10,
   },
   classXPText: {
     fontSize: 12,
-    color: '#888',
+    color: '#6b7280',
     textAlign: 'center',
     marginTop: 5,
   },

@@ -147,13 +147,18 @@ const ClassDashboardWidget = ({ navigation }) => {
 const styles = StyleSheet.create({
   // No Class Selected Styles
   noClassContainer: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
     borderWidth: 2,
-    borderColor: '#333',
+    borderColor: '#e5e7eb',
     borderStyle: 'dashed',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   noClassContent: {
     alignItems: 'center',
@@ -165,12 +170,12 @@ const styles = StyleSheet.create({
   noClassTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
     marginBottom: 5,
   },
   noClassSubtitle: {
     fontSize: 14,
-    color: '#888',
+    color: '#6b7280',
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -188,16 +193,18 @@ const styles = StyleSheet.create({
   
   // Class Widget Styles
   classWidget: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#fff',
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
     borderTopWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   classHeader: {
     flexDirection: 'row',
@@ -216,11 +223,11 @@ const styles = StyleSheet.create({
   className: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
   },
   classSubtitle: {
     fontSize: 12,
-    color: '#888',
+    color: '#6b7280',
     fontStyle: 'italic',
   },
   levelInfo: {
@@ -229,7 +236,7 @@ const styles = StyleSheet.create({
   classLevel: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
   },
   skillPointsBadge: {
     backgroundColor: '#ff6347',
@@ -250,7 +257,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#333',
+    backgroundColor: '#e5e7eb',
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 5,
@@ -262,7 +269,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: '#888',
+    color: '#6b7280',
     textAlign: 'center',
   },
   
@@ -278,11 +285,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1f2937',
   },
   statLabel: {
     fontSize: 10,
-    color: '#888',
+    color: '#6b7280',
     marginTop: 2,
   },
   
@@ -293,7 +300,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#333',
+    backgroundColor: '#6b7280',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
