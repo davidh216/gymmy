@@ -366,6 +366,29 @@ export const appReducer = (state: AppState, action: Action): AppState => {
         }
       };
 
+    // Rest day cases
+    case ActionTypes.ADD_REST_DAY:
+      return {
+        ...state,
+        restDays: [action.payload, ...state.restDays]
+      };
+
+    case ActionTypes.UPDATE_REST_DAY:
+      return {
+        ...state,
+        restDays: state.restDays.map(restDay =>
+          restDay.id === action.payload.id ? action.payload : restDay
+        )
+      };
+
+    case ActionTypes.REMOVE_REST_DAY:
+      return {
+        ...state,
+        restDays: state.restDays.filter(restDay =>
+          restDay.id !== action.payload
+        )
+      };
+
     // Demo mode cases
     case ActionTypes.SET_DEMO_MODE:
       return {

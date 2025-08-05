@@ -11,6 +11,7 @@ A comprehensive fitness tracking app with advanced gamification, built with Reac
 - **Cardio Integration**: Track duration, distance, heart rate, and pace
 - **Workout Templates**: Pre-built and customizable workout routines
 - **Notes & Ratings**: Add personal notes and rate workout satisfaction
+- **Rest Day Management**: Track and manage rest days with notes
 
 ### 🎯 Class-Based Progression System
 - **5 Unique Classes**: Powerlifter, Bodybuilder, Athlete, Yogi, Hybrid
@@ -41,6 +42,7 @@ A comprehensive fitness tracking app with advanced gamification, built with Reac
 - **Body Weight Tracking**: Record and visualize weight trends
 - **Workout Analytics**: Comprehensive statistics and charts
 - **Class-Specific Stats**: Track progress within your chosen class
+- **Workout Calendar**: Visual calendar with rest day integration
 
 ### 🎨 Social Features
 - **Workout Posts**: Share your achievements with photos and captions
@@ -102,9 +104,14 @@ gymmy/
 │   │   ├── MotivationalQuote.js        # Daily quotes
 │   │   ├── QuestDisplay.js             # Quest tracking
 │   │   ├── SimpleCharts.js             # Basic charts
-│   │   └── WorkoutCalendar.js          # Calendar view
+│   │   └── WorkoutCalendar.js          # Calendar view with rest days
 │   ├── context/
-│   │   └── AppContext.js               # Global state management
+│   │   ├── AppContext.tsx              # Global state management
+│   │   ├── GameData.ts                 # Game constants and data
+│   │   ├── GameLogic.ts                # Game calculation functions
+│   │   ├── GameReducer.ts              # State reducer logic
+│   │   ├── index.ts                    # Context exports
+│   │   └── types.ts                    # TypeScript type definitions
 │   ├── screens/
 │   │   ├── AchievementsScreen.js       # Achievement system
 │   │   ├── CharacterCollectionScreen.js # Character collection
@@ -115,8 +122,10 @@ gymmy/
 │   │   ├── PullResults.js              # Gacha results
 │   │   ├── SettingsScreen.js           # App settings
 │   │   └── WorkoutScreen.js            # Workout tracking
-│   └── utils/
-│       └── StorageManager.js           # Data persistence
+│   ├── utils/
+│   │   └── StorageManager.js           # Data persistence
+│   └── constants/
+│       └── designTokens.js             # Design system constants
 └── README.md
 ```
 
@@ -128,6 +137,7 @@ gymmy/
 3. **Earn Currency**: Complete workouts to earn gems
 4. **Pull Characters**: Use gems to pull characters in the gacha
 5. **Level Up**: Progress through the class system and unlock bonuses
+6. **Track Rest Days**: Add rest days to your calendar for recovery
 
 ### Class System
 - **Powerlifter**: Strength-focused with compound lift bonuses
@@ -155,6 +165,12 @@ gymmy/
 3. Check muscle group mastery levels
 4. Monitor achievements and quests
 5. Track class-specific statistics
+
+### Rest Day Management
+1. Use the **Workout Calendar** to view your schedule
+2. Tap on any date to add a rest day
+3. Add optional notes about your recovery activities
+4. Rest days are visually distinguished from workout days
 
 ## 🎮 Gamification System
 
@@ -234,6 +250,7 @@ gymmy/
 - **AsyncStorage**: Local data persistence
 - **React Context API**: Global state management
 - **React Native Animated API**: UI animations
+- **TypeScript**: Type safety for context and game logic
 
 ### Key Dependencies
 - **@react-navigation/bottom-tabs**: Navigation
@@ -255,6 +272,26 @@ gymmy/
 - **Demo Data**: Comprehensive test data for development
 - **Data Reset**: Function to clear and populate with test data
 - **Cross-Platform**: Consistent data handling across platforms
+
+## 🔧 Recent Updates & Fixes
+
+### ✅ Completed Fixes
+1. **WorkoutCalendar.js**: Fixed syntax errors and completed legend section
+2. **AppContext.tsx**: Added missing rest day functions (`addRestDay`, `updateRestDay`, `removeRestDay`)
+3. **ProgressScreen.js**: Fixed critical undefined property errors with comprehensive null checks
+4. **DashboardScreen.js**: Fixed navigation to non-existent Analytics screen
+5. **StorageManager import**: Added missing import in ProgressScreen
+6. **Demo Mode Error**: Fixed undefined currencies property error in gacha system
+7. **Type Safety**: Enhanced TypeScript integration for better error prevention
+8. **Modular Architecture**: Separated game logic into dedicated modules
+
+### 🎯 Current Status
+- ✅ **All Components Functional**: No runtime errors
+- ✅ **Rest Day Integration**: Complete rest day management system
+- ✅ **Demo Mode Stable**: Error-free demo mode activation
+- ✅ **Cross-Platform**: Works consistently on web and mobile
+- ✅ **Type Safety**: Enhanced TypeScript integration
+- ✅ **Performance**: Optimized with proper null checks and error handling
 
 ## 🤝 Contributing
 

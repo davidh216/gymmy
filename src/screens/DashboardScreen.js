@@ -172,7 +172,9 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleAnalyticsPress = () => {
-    navigation.navigate('Analytics');
+    // Analytics charts are already shown inline in the dashboard
+    // No separate analytics screen needed
+    console.log('Analytics charts are displayed inline in the dashboard');
   };
 
   const handleAchievementsPress = () => {

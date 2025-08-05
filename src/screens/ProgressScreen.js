@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
+import StorageManager from '../utils/StorageManager';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import BodyWeightTracker from '../components/BodyWeightTracker';
 import GamificationStats from '../components/GamificationStats';
@@ -93,6 +94,11 @@ const ProgressScreen = ({ navigation, route }) => {
   const muscleGroupStats = useMemo(() => {
     const stats = {};
     
+    // Add safety check for workoutHistory
+    if (!workoutHistory || !Array.isArray(workoutHistory)) {
+      return stats;
+    }
+    
     Object.keys(muscleGroups).forEach(groupName => {
       const group = muscleGroups[groupName];
       let totalExperience = 0;
@@ -100,16 +106,20 @@ const ProgressScreen = ({ navigation, route }) => {
       
       // Calculate experience from workout history
       workoutHistory.forEach(workout => {
-        workout.exercises.forEach(exercise => {
-          if (group.exercises.includes(exercise.name)) {
-            // Calculate experience based on volume (weight * reps * sets)
-            const volume = exercise.sets.reduce((total, set) => {
-              return total + (set.weight || 0) * (set.reps || 0);
-            }, 0);
-            totalExperience += volume;
-            totalWorkouts++;
-          }
-        });
+        if (workout.exercises && Array.isArray(workout.exercises)) {
+          workout.exercises.forEach(exercise => {
+            if (exercise && exercise.name && group.exercises.includes(exercise.name)) {
+              // Calculate experience based on volume (weight * reps * sets)
+              if (exercise.sets && Array.isArray(exercise.sets)) {
+                const volume = exercise.sets.reduce((total, set) => {
+                  return total + (set.weight || 0) * (set.reps || 0);
+                }, 0);
+                totalExperience += volume;
+                totalWorkouts++;
+              }
+            }
+          });
+        }
       });
       
       // Calculate level based on experience
@@ -132,6 +142,11 @@ const ProgressScreen = ({ navigation, route }) => {
   // Prepare data for VirtualizedList
   const sections = useMemo(() => {
     const sectionsData = [];
+    
+    // Add safety check for workoutHistory
+    if (!workoutHistory || !Array.isArray(workoutHistory)) {
+      return sectionsData;
+    }
     
     // Add gamification stats section
     if (workoutHistory.length > 0) {
@@ -176,12 +191,17 @@ const ProgressScreen = ({ navigation, route }) => {
     return 'Beginner';
   };
 
-  const renderMuscleGroupCard = (groupName, stats) => (
-    <TouchableOpacity
-      key={groupName}
-      style={styles.muscleGroupCard}
-      onPress={() => setSelectedMuscleGroup(groupName)}
-    >
+  const renderMuscleGroupCard = (groupName, stats) => {
+    if (!stats || !groupName) {
+      return null;
+    }
+    
+    return (
+      <TouchableOpacity
+        key={groupName}
+        style={styles.muscleGroupCard}
+        onPress={() => setSelectedMuscleGroup(groupName)}
+      >
       <View style={styles.muscleGroupHeader}>
         <View style={[styles.muscleGroupIcon, { backgroundColor: stats.color + '20' }]}>
           <Ionicons name={stats.icon} size={24} color={stats.color} />
@@ -218,13 +238,18 @@ const ProgressScreen = ({ navigation, route }) => {
         <Text style={styles.statText}>Total XP: {stats.totalExperience}</Text>
       </View>
     </TouchableOpacity>
-  );
+    );
+  };
 
   // VirtualizedList render functions
   const getItem = (data, index) => data[index];
   const getItemCount = (data) => data.length;
 
   const renderItem = ({ item, section }) => {
+    if (!section || !section.type) {
+      return null;
+    }
+    
     if (section.type === 'gamification') {
       return (
         <View style={styles.section}>
@@ -255,7 +280,7 @@ const ProgressScreen = ({ navigation, route }) => {
       return (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Muscle Group Progress</Text>
-          {section.data.map(([groupName, stats]) =>
+          {section.data && Array.isArray(section.data) && section.data.map(([groupName, stats]) =>
             renderMuscleGroupCard(groupName, stats)
           )}
         </View>

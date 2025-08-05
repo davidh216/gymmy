@@ -34,7 +34,8 @@ import {
   Character,
   SocialPost,
   FitnessClassKey,
-  UserCurrencies
+  UserCurrencies,
+  RestDay
 } from './types';
 
 // ==============================================================================
@@ -350,18 +351,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Memoized gacha stats
   const gachaStats = useMemo(() => {
-    const { total_pulls, legendary_pity } = state.gacha;
-    const { gems, coins } = state.userStats.currencies;
+    const { total_pulls, legendary_pity } = state.gacha || {};
+    const { gems = 0, coins = 0 } = state.userStats?.currencies || {};
     
     return {
-      totalPulls: total_pulls,
-      legendaryPity: legendary_pity,
+      totalPulls: total_pulls || 0,
+      legendaryPity: legendary_pity || 0,
       availableGems: gems,
       availableCoins: coins,
       canPullSingle: gems >= 10,
       canPullTen: gems >= 90
     };
-  }, [state.gacha, state.userStats.currencies]);
+  }, [state.gacha, state.userStats?.currencies]);
 
   // ==============================================================================
   // LOAD DATA FUNCTION
@@ -488,7 +489,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const cost = costs[pullType];
     
     // Check if user has enough currency
-    if (state.userStats.currencies.gems < (cost.gems || 0) || state.userStats.currencies.coins < (cost.coins || 0)) {
+    if ((state.userStats.currencies?.gems || 0) < (cost.gems || 0) || (state.userStats.currencies?.coins || 0) < (cost.coins || 0)) {
       throw new Error('Insufficient currency for gacha pull');
     }
     
@@ -581,9 +582,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         },
         currencies: {
           ...state.userStats.currencies,
-          gems: state.userStats.currencies.gems + (currencyReward.gems || 0),
-          coins: state.userStats.currencies.coins + (currencyReward.coins || 0),
-          crystals: state.userStats.currencies.crystals + (currencyReward.crystals || 0),
+          gems: (state.userStats.currencies?.gems || 0) + (currencyReward.gems || 0),
+          coins: (state.userStats.currencies?.coins || 0) + (currencyReward.coins || 0),
+          crystals: (state.userStats.currencies?.crystals || 0) + (currencyReward.crystals || 0),
         }
       };
       
@@ -645,6 +646,64 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
     } catch (error) {
       console.error('Error removing workout:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
+
+  // ==============================================================================
+  // REST DAY FUNCTIONS
+  // ==============================================================================
+
+  const addRestDay = async (date: string, notes?: string, isActive: boolean = true): Promise<void> => {
+    try {
+      const restDay: RestDay = {
+        id: `rest_${Date.now()}`,
+        date,
+        notes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.ADD_REST_DAY, payload: restDay });
+      
+      const updatedRestDays = [restDay, ...state.restDays];
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error adding rest day:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
+
+  const updateRestDay = async (restDay: RestDay): Promise<void> => {
+    try {
+      const updatedRestDay = {
+        ...restDay,
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: ActionTypes.UPDATE_REST_DAY, payload: updatedRestDay });
+      
+      const updatedRestDays = state.restDays.map(rd =>
+        rd.id === restDay.id ? updatedRestDay : rd
+      );
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error updating rest day:', error);
+      dispatch({ type: ActionTypes.SET_ERROR, payload: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  };
+
+  const removeRestDay = async (restDayId: string): Promise<void> => {
+    try {
+      dispatch({ type: ActionTypes.REMOVE_REST_DAY, payload: restDayId });
+      
+      const updatedRestDays = state.restDays.filter(restDay => restDay.id !== restDayId);
+      await StorageManager.saveRestDays(updatedRestDays);
+      
+    } catch (error) {
+      console.error('Error removing rest day:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
@@ -716,11 +775,50 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       await StorageManager.resetToDummyData();
       
+      const loadedUserStats = await StorageManager.loadUserStats();
+      
+      // Ensure userStats has all required properties
+      const validatedUserStats: UserStats = {
+        totalWorkouts: loadedUserStats?.totalWorkouts || 0,
+        totalDuration: loadedUserStats?.totalDuration || 0,
+        favoriteExercises: loadedUserStats?.favoriteExercises || [],
+        streaks: {
+          current: loadedUserStats?.streaks?.current || 0,
+          best: loadedUserStats?.streaks?.best || 0,
+          lastWorkout: loadedUserStats?.streaks?.lastWorkout || null
+        },
+        experience: loadedUserStats?.experience || 0,
+        level: loadedUserStats?.level || 1,
+        totalExperience: loadedUserStats?.totalExperience || 0,
+        avgWorkoutsPerWeek: loadedUserStats?.avgWorkoutsPerWeek || 0,
+        avgRating: loadedUserStats?.avgRating || 0,
+        
+        // Class system properties
+        selectedClass: loadedUserStats?.selectedClass || null,
+        classLevel: loadedUserStats?.classLevel || 1,
+        classXP: loadedUserStats?.classXP || 0,
+        skillPoints: loadedUserStats?.skillPoints || 0,
+        unlockedSkills: loadedUserStats?.unlockedSkills || [],
+        classSelectionDate: loadedUserStats?.classSelectionDate || null,
+        classPrestige: loadedUserStats?.classPrestige || 0,
+        
+        // Gacha system properties
+        currencies: {
+          gems: loadedUserStats?.currencies?.gems || 100,
+          coins: loadedUserStats?.currencies?.coins || 500,
+          crystals: loadedUserStats?.currencies?.crystals || 10,
+          energy_potions: loadedUserStats?.currencies?.energy_potions || 3,
+        },
+        total_workouts_verified: loadedUserStats?.total_workouts_verified || 0,
+        total_likes_received: loadedUserStats?.total_likes_received || 0,
+        social_reputation: loadedUserStats?.social_reputation || 100,
+      };
+      
       const demoData = {
         workoutHistory: await StorageManager.loadWorkoutHistory(),
         exerciseHistory: await StorageManager.loadExerciseHistory(),
         oneRepMaxes: await StorageManager.loadOneRepMaxes(),
-        userStats: await StorageManager.loadUserStats(),
+        userStats: validatedUserStats,
         workoutTemplates: await StorageManager.loadWorkoutTemplates(),
         restDays: await StorageManager.loadRestDays(),
         bodyWeights: await StorageManager.loadBodyWeights()
@@ -750,6 +848,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     updateWorkout,
     removeWorkout,
     updateUserStats,
+    
+    // Rest day functions
+    addRestDay,
+    updateRestDay,
+    removeRestDay,
     
     // Class system functions
     selectClass,

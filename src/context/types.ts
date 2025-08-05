@@ -39,6 +39,14 @@ export interface Workout {
   class_bonus?: number;
 }
 
+export interface RestDay {
+  id: string;
+  date: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserStreaks {
   current: number;
   best: number;
@@ -255,7 +263,7 @@ export interface AppState {
   gacha: GachaState;
   social: SocialState;
   workoutTemplates: any[];
-  restDays: any[];
+  restDays: RestDay[];
   bodyWeights: any[];
 }
 
@@ -284,7 +292,10 @@ export type ActionType =
   | 'SET_DEMO_MODE'
   | 'LOAD_DEMO_DATA'
   | 'CLEAR_ALL_DATA'
-  | 'SET_ERROR';
+  | 'SET_ERROR'
+  | 'ADD_REST_DAY'
+  | 'UPDATE_REST_DAY'
+  | 'REMOVE_REST_DAY';
 
 export interface BaseAction {
   type: ActionType;
@@ -401,6 +412,21 @@ export interface SetErrorAction extends BaseAction {
   payload: string;
 }
 
+export interface AddRestDayAction extends BaseAction {
+  type: 'ADD_REST_DAY';
+  payload: RestDay;
+}
+
+export interface UpdateRestDayAction extends BaseAction {
+  type: 'UPDATE_REST_DAY';
+  payload: RestDay;
+}
+
+export interface RemoveRestDayAction extends BaseAction {
+  type: 'REMOVE_REST_DAY';
+  payload: string; // rest day id
+}
+
 export type Action = 
   | LoadDataAction
   | SetLoadingAction
@@ -422,7 +448,10 @@ export type Action =
   | SetDemoModeAction
   | LoadDemoDataAction
   | ClearAllDataAction
-  | SetErrorAction;
+  | SetErrorAction
+  | AddRestDayAction
+  | UpdateRestDayAction
+  | RemoveRestDayAction;
 
 // ==============================================================================
 // FUNCTION TYPES
@@ -497,6 +526,11 @@ export interface ContextValue extends AppState {
   updateWorkout: (workout: Workout) => Promise<void>;
   removeWorkout: (workoutId: string) => Promise<void>;
   updateUserStats: (stats: Partial<UserStats>) => Promise<void>;
+  
+  // Rest day functions
+  addRestDay: (date: string, notes?: string, isActive?: boolean) => Promise<void>;
+  updateRestDay: (restDay: RestDay) => Promise<void>;
+  removeRestDay: (restDayId: string) => Promise<void>;
   
   // Class system functions
   selectClass: (classKey: FitnessClassKey) => void;
