@@ -2,15 +2,15 @@
 // PART 3: CharacterCollectionScreen.js - View All Characters
 // ==============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   Modal,
   Alert,
   StyleSheet,
+  VirtualizedList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -31,94 +31,135 @@ const CharacterCollectionScreen = ({ navigation }) => {
       Alert.alert("Active Character Set!", "Your character is now ready for battle!");
     };
     
-    const groupedCharacters = characters.collection.reduce((acc, char) => {
-      if (!acc[char.rarity]) acc[char.rarity] = [];
-      acc[char.rarity].push(char);
-      return acc;
-    }, {});
+    // Prepare data for VirtualizedList
+    const sections = useMemo(() => {
+      const sectionsData = [];
+      
+      // Group characters by rarity
+      const groupedCharacters = characters.collection.reduce((acc, char) => {
+        if (!acc[char.rarity]) acc[char.rarity] = [];
+        acc[char.rarity].push(char);
+        return acc;
+      }, {});
+      
+      // Add sections for each rarity that has characters
+      ['legendary', 'epic', 'rare', 'common'].forEach(rarity => {
+        const chars = groupedCharacters[rarity] || [];
+        if (chars.length > 0) {
+          sectionsData.push({
+            type: 'rarity',
+            id: rarity,
+            rarity,
+            data: chars
+          });
+        }
+      });
+      
+      return sectionsData;
+    }, [characters.collection]);
+    
+    // VirtualizedList render functions
+    const getItem = (data, index) => data[index];
+    const getItemCount = (data) => data.length;
+
+    const renderCharacterCard = (character) => (
+      <TouchableOpacity
+        key={character.instance_id}
+        style={[
+          styles.characterCard,
+          { borderColor: character.rarity_color },
+          characters.active_character === character.instance_id && styles.activeCharacterCard
+        ]}
+        onPress={() => handleCharacterSelect(character)}
+      >
+        <Text style={styles.characterArtwork}>{character.artwork}</Text>
+        <Text style={styles.characterCardName}>{character.name}</Text>
+        <Text style={styles.characterLevel}>Lv.{character.level}</Text>
+        
+        {characters.active_character === character.instance_id && (
+          <View style={styles.activeBadge}>
+            <Text style={styles.activeBadgeText}>ACTIVE</Text>
+          </View>
+        )}
+        
+        {/* Condition indicators */}
+        {character.condition && (
+          <View style={styles.conditionBadge}>
+            <Text style={styles.conditionText}>✓</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+
+    const renderItem = ({ item, section }) => {
+      if (section.type === 'rarity') {
+        return (
+          <View style={styles.raritySection}>
+            <Text style={[
+              styles.rarityHeader,
+              { color: section.data[0]?.rarity_color || '#fff' }
+            ]}>
+              {section.rarity.toUpperCase()} ({section.data.length})
+            </Text>
+            
+            <View style={styles.characterGrid}>
+              {section.data.map(renderCharacterCard)}
+            </View>
+          </View>
+        );
+      }
+      return null;
+    };
+
+    const renderHeader = () => (
+      <View style={styles.collectionHeader}>
+        <Text style={styles.collectionTitle}>MY CHAMPIONS</Text>
+        <Text style={styles.collectionCount}>
+          {characters.collection.length} Characters Collected
+        </Text>
+      </View>
+    );
+
+    const renderEmptyState = () => (
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyEmoji}>🎭</Text>
+        <Text style={styles.emptyTitle}>No Characters Yet</Text>
+        <Text style={styles.emptySubtitle}>Complete workouts to earn gems and summon your first ally!</Text>
+        <TouchableOpacity
+          style={styles.summonButton}
+          onPress={() => navigation.navigate('GachaScreen')}
+        >
+          <Text style={styles.summonButtonText}>START SUMMONING</Text>
+        </TouchableOpacity>
+      </View>
+    );
     
     return (
       <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.collectionContent}>
-          <View style={styles.collectionHeader}>
-            <Text style={styles.collectionTitle}>MY CHAMPIONS</Text>
-            <Text style={styles.collectionCount}>
-              {characters.collection.length} Characters Collected
-            </Text>
-          </View>
-          
-          {/* Empty State */}
-          {characters.collection.length === 0 && (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>🎭</Text>
-              <Text style={styles.emptyTitle}>No Characters Yet</Text>
-              <Text style={styles.emptySubtitle}>Complete workouts to earn gems and summon your first ally!</Text>
-              <TouchableOpacity
-                style={styles.summonButton}
-                onPress={() => navigation.navigate('GachaScreen')}
-              >
-                <Text style={styles.summonButtonText}>START SUMMONING</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          
-          {/* Character Grid by Rarity */}
-          {['legendary', 'epic', 'rare', 'common'].map(rarity => {
-            const chars = groupedCharacters[rarity] || [];
-            if (chars.length === 0) return null;
-            
-            return (
-              <View key={rarity} style={styles.raritySection}>
-                <Text style={[
-                  styles.rarityHeader,
-                  { color: chars[0]?.rarity_color || '#fff' }
-                ]}>
-                  {rarity.toUpperCase()} ({chars.length})
-                </Text>
-                
-                <View style={styles.characterGrid}>
-                  {chars.map((character) => (
-                    <TouchableOpacity
-                      key={character.instance_id}
-                      style={[
-                        styles.characterCard,
-                        { borderColor: character.rarity_color },
-                        characters.active_character === character.instance_id && styles.activeCharacterCard
-                      ]}
-                      onPress={() => handleCharacterSelect(character)}
-                    >
-                      <Text style={styles.characterArtwork}>{character.artwork}</Text>
-                      <Text style={styles.characterCardName}>{character.name}</Text>
-                      <Text style={styles.characterLevel}>Lv.{character.level}</Text>
-                      
-                      {characters.active_character === character.instance_id && (
-                        <View style={styles.activeBadge}>
-                          <Text style={styles.activeBadgeText}>ACTIVE</Text>
-                        </View>
-                      )}
-                      
-                      {/* Condition indicators */}
-                      <View style={styles.conditionBars}>
-                        <View style={styles.conditionBar}>
-                          <View style={[
-                            styles.conditionFill,
-                            { width: `${character.condition.energy}%`, backgroundColor: '#4CAF50' }
-                          ]} />
-                        </View>
-                        <View style={styles.conditionBar}>
-                          <View style={[
-                            styles.conditionFill,
-                            { width: `${character.condition.mood}%`, backgroundColor: '#FFC107' }
-                          ]} />
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
+        {characters.collection.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <VirtualizedList
+            data={sections}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => item.id || index.toString()}
+            getItemCount={getItemCount}
+            getItem={getItem}
+            ListHeaderComponent={renderHeader}
+            showsVerticalScrollIndicator={false}
+            style={styles.collectionContent}
+            contentContainerStyle={styles.collectionContentContainer}
+            initialNumToRender={2}
+            maxToRenderPerBatch={3}
+            windowSize={5}
+            removeClippedSubviews={true}
+            getItemLayout={(data, index) => ({
+              length: 250, // Approximate height for each rarity section
+              offset: 250 * index,
+              index,
+            })}
+          />
+        )}
         
         {/* Character Details Modal */}
         <CharacterDetailsModal
@@ -126,11 +167,11 @@ const CharacterCollectionScreen = ({ navigation }) => {
           character={selectedCharacter}
           onClose={() => setShowDetails(false)}
           onSetActive={handleSetActive}
-          isActive={characters.active_character === selectedCharacter?.instance_id}
+          isActive={selectedCharacter?.instance_id === characters.active_character}
         />
       </View>
     );
-  };
+};
 
 // Character Details Modal Component
 const CharacterDetailsModal = ({ visible, character, onClose, onSetActive, isActive }) => {
@@ -206,6 +247,9 @@ const styles = StyleSheet.create({
   },
   collectionContent: {
     padding: 20,
+  },
+  collectionContentContainer: {
+    paddingBottom: 100, // Add padding at the bottom for the modal
   },
   collectionHeader: {
     alignItems: 'center',
@@ -305,19 +349,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  conditionBars: {
-    width: '100%',
-    marginTop: 10,
+  conditionBadge: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  conditionBar: {
-    height: 3,
-    backgroundColor: '#333',
-    borderRadius: 2,
-    marginBottom: 2,
-  },
-  conditionFill: {
-    height: '100%',
-    borderRadius: 2,
+  conditionText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   modalOverlay: {
     flex: 1,

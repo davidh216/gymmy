@@ -3,11 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   SafeAreaView,
   TextInput,
   Alert,
+  VirtualizedList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -100,231 +100,139 @@ const ProgressScreen = ({ navigation, route }) => {
       
       // Calculate experience from workout history
       workoutHistory.forEach(workout => {
-        const exercisesInGroup = workout.exercises.filter(exercise => 
-          group.exercises.some(groupExercise => 
-            exercise.name.toLowerCase().includes(groupExercise.toLowerCase())
-          )
-        );
-        
-        if (exercisesInGroup.length > 0) {
-          totalWorkouts++;
-          // Base experience per workout
-          totalExperience += 50;
-          
-          // Bonus experience for good ratings
-          if (workout.ratings?.workoutRating >= 7) {
-            totalExperience += 25;
+        workout.exercises.forEach(exercise => {
+          if (group.exercises.includes(exercise.name)) {
+            // Calculate experience based on volume (weight * reps * sets)
+            const volume = exercise.sets.reduce((total, set) => {
+              return total + (set.weight || 0) * (set.reps || 0);
+            }, 0);
+            totalExperience += volume;
+            totalWorkouts++;
           }
-          
-          // Experience for each exercise
-          exercisesInGroup.forEach(exercise => {
-            if (exercise.cardioData) {
-              // Cardio experience based on duration and calories
-              totalExperience += Math.floor(exercise.cardioData.duration / 5);
-              totalExperience += Math.floor(exercise.cardioData.calories / 50);
-            } else if (exercise.sets) {
-              // Strength experience based on total weight lifted
-              const totalWeight = exercise.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-              totalExperience += Math.floor(totalWeight / 100);
-            }
-          });
-        }
+        });
       });
       
-      // Make muscle group mastery more difficult - require 200 XP per level
-      const level = Math.floor(totalExperience / 200) + 1;
+      // Calculate level based on experience
+      const level = Math.floor(totalExperience / 1000) + 1;
+      const experience = totalExperience % 1000;
       
       stats[groupName] = {
         ...group,
         level,
-        experience: totalExperience,
+        experience,
+        totalExperience,
         totalWorkouts,
-        nextLevelExp: (level * 200),
-        progressToNext: (totalExperience % 200) / 200,
+        progress: (experience / 1000) * 100
       };
     });
     
     return stats;
   }, [workoutHistory, muscleGroups]);
 
-  // Calculate exercise levels within muscle groups
-  const exerciseStats = useMemo(() => {
-    const stats = {};
+  // Prepare data for VirtualizedList
+  const sections = useMemo(() => {
+    const sectionsData = [];
     
-    Object.keys(muscleGroups).forEach(groupName => {
-      const group = muscleGroups[groupName];
-      stats[groupName] = {};
-      
-      group.exercises.forEach(exerciseName => {
-        let totalExperience = 0;
-        let totalWorkouts = 0;
-        let bestWeight = 0;
-        let bestReps = 0;
-        let lastWorkout = null;
-        
-        // Find workouts with this exercise
-        workoutHistory.forEach(workout => {
-          const exercise = workout.exercises.find(ex => 
-            ex.name.toLowerCase().includes(exerciseName.toLowerCase())
-          );
-          
-          if (exercise) {
-            totalWorkouts++;
-            lastWorkout = workout;
-            
-            if (exercise.cardioData) {
-              // Cardio exercise
-              totalExperience += Math.floor(exercise.cardioData.duration / 5);
-              totalExperience += Math.floor(exercise.cardioData.calories / 50);
-            } else if (exercise.sets) {
-              // Strength exercise
-              exercise.sets.forEach(set => {
-                totalExperience += Math.floor((set.weight * set.reps) / 50);
-                if (set.weight > bestWeight) {
-                  bestWeight = set.weight;
-                  bestReps = set.reps;
-                }
-              });
-            }
-          }
-        });
-        
-        const level = Math.floor(totalExperience / 50) + 1;
-        
-        stats[groupName][exerciseName] = {
-          level,
-          experience: totalExperience,
-          totalWorkouts,
-          bestWeight,
-          bestReps,
-          lastWorkout,
-          nextLevelExp: (level * 50),
-          progressToNext: (totalExperience % 50) / 50,
-        };
+    // Add gamification stats section
+    if (workoutHistory.length > 0) {
+      sectionsData.push({
+        type: 'gamification',
+        id: 'gamification',
+        data: [{ id: 'gamification' }]
       });
+    }
+    
+    // Add overall stats section
+    sectionsData.push({
+      type: 'overall',
+      id: 'overall',
+      data: [{ id: 'overall' }]
     });
     
-    return stats;
-  }, [workoutHistory, muscleGroups]);
+    // Add muscle groups section
+    const muscleGroupEntries = Object.entries(muscleGroupStats);
+    if (muscleGroupEntries.length > 0) {
+      sectionsData.push({
+        type: 'muscleGroups',
+        id: 'muscleGroups',
+        data: muscleGroupEntries
+      });
+    }
+    
+    return sectionsData;
+  }, [workoutHistory, muscleGroupStats]);
 
   const getLevelColor = (level) => {
-    if (level >= 10) return '#ff6b6b'; // Red for high levels
-    if (level >= 7) return '#ffa726'; // Orange
-    if (level >= 4) return '#66bb6a'; // Green
-    if (level >= 2) return '#42a5f5'; // Blue
-    return '#9e9e9e'; // Grey for low levels
+    if (level >= 10) return '#ffd700'; // Gold
+    if (level >= 7) return '#c0c0c0'; // Silver
+    if (level >= 4) return '#cd7f32'; // Bronze
+    return '#8b4513'; // Brown
   };
 
   const getLevelTitle = (level) => {
     if (level >= 10) return 'Master';
     if (level >= 7) return 'Expert';
-    if (level >= 4) return 'Advanced';
-    if (level >= 2) return 'Intermediate';
+    if (level >= 4) return 'Intermediate';
     return 'Beginner';
   };
 
   const renderMuscleGroupCard = (groupName, stats) => (
     <TouchableOpacity
       key={groupName}
-      style={[styles.muscleGroupCard, { borderLeftColor: stats.color }]}
-      onPress={() => setSelectedMuscleGroup(selectedMuscleGroup === groupName ? null : groupName)}
+      style={styles.muscleGroupCard}
+      onPress={() => setSelectedMuscleGroup(groupName)}
     >
       <View style={styles.muscleGroupHeader}>
-        <View style={styles.muscleGroupInfo}>
+        <View style={[styles.muscleGroupIcon, { backgroundColor: stats.color + '20' }]}>
           <Ionicons name={stats.icon} size={24} color={stats.color} />
-          <View style={styles.muscleGroupText}>
-            <Text style={styles.muscleGroupName}>{groupName}</Text>
-            <Text style={styles.muscleGroupSubtitle}>
-              Level {stats.level} • {stats.totalWorkouts} workouts
-            </Text>
-          </View>
+        </View>
+        <View style={styles.muscleGroupInfo}>
+          <Text style={styles.muscleGroupName}>{groupName}</Text>
+          <Text style={styles.muscleGroupLevel}>
+            Level {stats.level} {getLevelTitle(stats.level)}
+          </Text>
         </View>
         <View style={styles.levelBadge}>
-          <Text style={[styles.levelText, { color: getLevelColor(stats.level) }]}>
-            {getLevelTitle(stats.level)}
+          <Text style={[styles.levelNumber, { color: getLevelColor(stats.level) }]}>
+            {stats.level}
           </Text>
         </View>
       </View>
       
-      {/* Progress Bar */}
-      <View style={styles.progressContainer}>
+      <View style={styles.progressSection}>
         <View style={styles.progressBar}>
           <View 
             style={[
               styles.progressFill, 
-              { 
-                width: `${stats.progressToNext * 100}%`,
-                backgroundColor: stats.color 
-              }
+              { width: `${stats.progress}%`, backgroundColor: stats.color }
             ]} 
           />
         </View>
         <Text style={styles.progressText}>
-          {stats.experience} / {stats.nextLevelExp} XP
+          {stats.experience}/1000 XP ({Math.round(stats.progress)}%)
         </Text>
       </View>
-
-      {/* Exercise List (when expanded) */}
-      {selectedMuscleGroup === groupName && (
-        <View style={styles.exerciseList}>
-          {stats.exercises.map(exerciseName => {
-            const exerciseStat = exerciseStats[groupName][exerciseName];
-            return (
-              <View key={exerciseName} style={styles.exerciseItem}>
-                <View style={styles.exerciseHeader}>
-                  <Text style={styles.exerciseName}>{exerciseName}</Text>
-                  <View style={styles.exerciseLevel}>
-                    <Text style={[styles.exerciseLevelText, { color: getLevelColor(exerciseStat.level) }]}>
-                      Lv.{exerciseStat.level}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.exerciseStats}>
-                  <Text style={styles.exerciseStatText}>
-                    {exerciseStat.totalWorkouts} workouts • {exerciseStat.experience} XP
-                  </Text>
-                  {exerciseStat.bestWeight > 0 && (
-                    <Text style={styles.exerciseStatText}>
-                      Best: {exerciseStat.bestWeight} lbs × {exerciseStat.bestReps} reps
-                    </Text>
-                  )}
-                  {exerciseStat.lastWorkout && (
-                    <Text style={styles.exerciseStatText}>
-                      Last: {new Date(exerciseStat.lastWorkout.startTime).toLocaleDateString()}
-                    </Text>
-                  )}
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      )}
+      
+      <View style={styles.statsRow}>
+        <Text style={styles.statText}>Total Workouts: {stats.totalWorkouts}</Text>
+        <Text style={styles.statText}>Total XP: {stats.totalExperience}</Text>
+      </View>
     </TouchableOpacity>
   );
 
-  const renderTabContent = () => {
-    if (activeTab === 'analytics') {
-      return <AnalyticsCharts workoutHistory={workoutHistory} exerciseHistory={exerciseHistory} userStats={userStats} bodyWeights={bodyWeights} />;
-    }
-    
-    if (activeTab === 'weight') {
-      return <BodyWeightTracker />;
-    }
-    
-    if (activeTab === 'quests' && isDemo) {
-      return <QuestDisplay quests={quests} achievements={achievements} />;
-    }
-    
-    return (
-      <ScrollView style={styles.scrollView}>
-        {/* Level Progress Section */}
-        {workoutHistory.length > 0 && (
-          <View style={styles.section}>
-            <GamificationStats userStats={userStats} />
-          </View>
-        )}
+  // VirtualizedList render functions
+  const getItem = (data, index) => data[index];
+  const getItemCount = (data) => data.length;
 
-        {/* Overall Stats */}
+  const renderItem = ({ item, section }) => {
+    if (section.type === 'gamification') {
+      return (
+        <View style={styles.section}>
+          <GamificationStats userStats={userStats} />
+        </View>
+      );
+    } else if (section.type === 'overall') {
+      return (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overall Progress</Text>
           <View style={styles.statsGrid}>
@@ -342,15 +250,53 @@ const ProgressScreen = ({ navigation, route }) => {
             </View>
           </View>
         </View>
-
-        {/* Muscle Groups */}
+      );
+    } else if (section.type === 'muscleGroups') {
+      return (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Muscle Group Progress</Text>
-          {Object.entries(muscleGroupStats).map(([groupName, stats]) =>
+          {section.data.map(([groupName, stats]) =>
             renderMuscleGroupCard(groupName, stats)
           )}
         </View>
-      </ScrollView>
+      );
+    }
+    return null;
+  };
+
+  const renderTabContent = () => {
+    if (activeTab === 'analytics') {
+      return <AnalyticsCharts workoutHistory={workoutHistory} exerciseHistory={exerciseHistory} userStats={userStats} bodyWeights={bodyWeights} />;
+    }
+    
+    if (activeTab === 'weight') {
+      return <BodyWeightTracker />;
+    }
+    
+    if (activeTab === 'quests' && isDemo) {
+      return <QuestDisplay quests={quests} achievements={achievements} />;
+    }
+    
+    return (
+      <VirtualizedList
+        data={sections}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        getItemCount={getItemCount}
+        getItem={getItem}
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        initialNumToRender={2}
+        maxToRenderPerBatch={3}
+        windowSize={5}
+        removeClippedSubviews={true}
+        getItemLayout={(data, index) => ({
+          length: 300, // Approximate height for each section
+          offset: 300 * index,
+          index,
+        })}
+      />
     );
   };
 
@@ -437,6 +383,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 20, // Add some padding at the bottom for the last section
+  },
   header: {
     padding: 20,
     backgroundColor: '#fff',
@@ -492,7 +441,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     marginBottom: 16,
-    borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -502,17 +450,18 @@ const styles = StyleSheet.create({
   },
   muscleGroupHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
   },
-  muscleGroupInfo: {
-    flexDirection: 'row',
+  muscleGroupIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
   },
-  muscleGroupText: {
-    marginLeft: 12,
+  muscleGroupInfo: {
+    marginLeft: 15,
     flex: 1,
   },
   muscleGroupName: {
@@ -520,7 +469,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  muscleGroupSubtitle: {
+  muscleGroupLevel: {
     fontSize: 14,
     color: '#666',
     marginTop: 2,
@@ -531,11 +480,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#f8f9fa',
   },
-  levelText: {
+  levelNumber: {
     fontSize: 12,
     fontWeight: 'bold',
   },
-  progressContainer: {
+  progressSection: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
@@ -554,44 +503,14 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  exerciseList: {
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 16,
-  },
-  exerciseItem: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f8f8f8',
-  },
-  exerciseHeader: {
+  statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-  },
-  exerciseLevel: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: '#f8f9fa',
-  },
-  exerciseLevelText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  exerciseStats: {
-    gap: 2,
-  },
-  exerciseStatText: {
-    fontSize: 12,
+  statText: {
+    fontSize: 14,
     color: '#666',
   },
   // Tab styles

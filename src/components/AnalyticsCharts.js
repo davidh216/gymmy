@@ -5,7 +5,7 @@ import { SimpleLineChart, SimpleBarChart, HorizontalBarChart } from './SimpleCha
 const { width: screenWidth } = Dimensions.get('window');
 const chartWidth = screenWidth - 32;
 
-const AnalyticsCharts = ({ workoutHistory, exerciseHistory, userStats, bodyWeights }) => {
+const AnalyticsCharts = React.memo(({ workoutHistory, exerciseHistory, userStats, bodyWeights }) => {
 
   // Workout frequency over time (last 8 weeks)
   const workoutFrequencyData = useMemo(() => {
@@ -100,26 +100,25 @@ const AnalyticsCharts = ({ workoutHistory, exerciseHistory, userStats, bodyWeigh
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       
-      let weekVolume = 0;
       const weekWorkouts = workoutHistory.filter(workout => {
         const workoutDate = new Date(workout.workoutDate || workout.startTime);
         return workoutDate >= weekStart && workoutDate <= weekEnd;
       });
       
+      let totalVolume = 0;
       weekWorkouts.forEach(workout => {
         workout.exercises.forEach(exercise => {
-          if (exercise.sets && !exercise.cardioData) {
+          if (exercise.sets) {
             exercise.sets.forEach(set => {
               if (set.weight && set.reps) {
-                weekVolume += (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0);
+                totalVolume += set.weight * set.reps;
               }
             });
           }
         });
       });
       
-      volumes.push(Math.round(weekVolume));
-      // Create week labels
+      volumes.push(totalVolume);
       if (i === 0) {
         labels.push('This Week');
       } else {
@@ -130,125 +129,130 @@ const AnalyticsCharts = ({ workoutHistory, exerciseHistory, userStats, bodyWeigh
     return { data: volumes, labels };
   }, [workoutHistory]);
 
-  function getRatingColor(rating) {
-    if (rating >= 9) return '#22c55e';
-    if (rating >= 7) return '#84cc16';
-    if (rating >= 5) return '#eab308';
-    if (rating >= 3) return '#f97316';
-    return '#ef4444';
-  }
+  // Body weight trends (last 10 entries)
+  const bodyWeightData = useMemo(() => {
+    if (!bodyWeights || bodyWeights.length === 0) {
+      return { data: [], labels: [] };
+    }
+    
+    const recentWeights = bodyWeights.slice(-10);
+    const data = recentWeights.map(w => w.weight);
+    const labels = recentWeights.map((w, index) => {
+      const date = new Date(w.date);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+    
+    return { data, labels };
+  }, [bodyWeights]);
 
-  if (workoutHistory.length === 0) {
-    return (
-      <View style={styles.emptyState}>
-        <Text style={styles.emptyStateText}>No workout data available</Text>
-        <Text style={styles.emptyStateSubtext}>Complete some workouts to see your analytics</Text>
-      </View>
-    );
+  function getRatingColor(rating) {
+    if (rating >= 8) return '#22c55e';
+    if (rating >= 6) return '#84cc16';
+    if (rating >= 4) return '#eab308';
+    if (rating >= 2) return '#f97316';
+    return '#ef4444';
   }
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Workout Analytics</Text>
-      
       {/* Workout Frequency Chart */}
-      <SimpleLineChart
-        data={workoutFrequencyData}
-        title="Weekly Workout Frequency"
-        subtitle="Workouts completed per week (last 8 weeks)"
-        color="#007AFF"
-      />
+      <View style={styles.chartSection}>
+        <Text style={styles.chartTitle}>Workout Frequency (Last 8 Weeks)</Text>
+        <SimpleBarChart
+          data={workoutFrequencyData.data}
+          labels={workoutFrequencyData.labels}
+          width={chartWidth}
+          height={200}
+          color="#007AFF"
+        />
+      </View>
 
-      {/* Duration Trends Chart */}
-      <SimpleLineChart
-        data={durationTrendData}
-        title="Workout Duration Trends"
-        subtitle="Duration in minutes (last 10 workouts)"
-        color="#22c55e"
-      />
-
-      {/* Volume Trends Chart */}
-      <SimpleLineChart
-        data={volumeTrendData}
-        title="Weekly Training Volume"
-        subtitle="Total weight × reps (last 8 weeks)"
-        color="#ef4444"
-      />
-
-      {/* Exercise Frequency Bar Chart */}
-      <SimpleBarChart
-        data={exerciseFrequencyData.data}
-        labels={exerciseFrequencyData.labels}
-        title="Most Frequent Exercises"
-        subtitle="Times performed across all workouts"
-        color="#8b5cf6"
-      />
-
-      {/* Body Weight Trend Chart */}
-      {bodyWeights && bodyWeights.length > 1 && (
+      {/* Duration Trends */}
+      <View style={styles.chartSection}>
+        <Text style={styles.chartTitle}>Duration Trends (Last 10 Workouts)</Text>
         <SimpleLineChart
-          data={{
-            data: bodyWeights.slice(-12).map(entry => entry.weight),
-            labels: bodyWeights.slice(-12).map(entry => 
-              new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            )
-          }}
-          title="Body Weight Trend"
-          subtitle="Weight changes over time (last 12 entries)"
+          data={durationTrendData.data}
+          labels={durationTrendData.labels}
+          width={chartWidth}
+          height={200}
+          color="#10b981"
+        />
+      </View>
+
+      {/* Ratings Distribution */}
+      <View style={styles.chartSection}>
+        <Text style={styles.chartTitle}>Workout Ratings Distribution</Text>
+        <HorizontalBarChart
+          data={ratingsData}
+          width={chartWidth}
+          height={250}
+        />
+      </View>
+
+      {/* Exercise Frequency */}
+      <View style={styles.chartSection}>
+        <Text style={styles.chartTitle}>Most Frequent Exercises</Text>
+        <SimpleBarChart
+          data={exerciseFrequencyData.data}
+          labels={exerciseFrequencyData.labels}
+          width={chartWidth}
+          height={200}
           color="#8b5cf6"
         />
-      )}
+      </View>
 
-      {/* Workout Ratings Horizontal Bar Chart */}
-      <HorizontalBarChart
-        data={ratingsData}
-        title="Workout Rating Distribution"
-        subtitle="How you've rated your workouts"
-        height={Math.max(200, ratingsData.length * 40 + 80)}
-      />
+      {/* Volume Trends */}
+      <View style={styles.chartSection}>
+        <Text style={styles.chartTitle}>Volume Trends (Last 8 Weeks)</Text>
+        <SimpleLineChart
+          data={volumeTrendData.data}
+          labels={volumeTrendData.labels}
+          width={chartWidth}
+          height={200}
+          color="#f59e0b"
+        />
+      </View>
+
+      {/* Body Weight Trends */}
+      {bodyWeightData.data.length > 0 && (
+        <View style={styles.chartSection}>
+          <Text style={styles.chartTitle}>Body Weight Trends</Text>
+          <SimpleLineChart
+            data={bodyWeightData.data}
+            labels={bodyWeightData.labels}
+            width={chartWidth}
+            height={200}
+            color="#ec4899"
+          />
+        </View>
+      )}
     </ScrollView>
   );
-};
+});
+
+AnalyticsCharts.displayName = 'AnalyticsCharts';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginVertical: 20,
+  chartSection: {
+    backgroundColor: '#fff',
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   chartTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  chartSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    color: '#1f2937',
     marginBottom: 12,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: '#999',
     textAlign: 'center',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,23 @@ import {
   TextInput,
   Alert,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import MotivationalQuote from '../components/MotivationalQuote';
 import GamificationStats from '../components/GamificationStats';
-import { WorkoutVerificationWidget } from '../components/GachaComponents';
+
+// Lazy load the heavy GachaComponents
+const GachaComponents = React.lazy(() => import('../components/GachaComponents'));
+
+// Loading component for lazy-loaded gacha components
+const GachaLoadingFallback = () => (
+  <View style={styles.gachaLoadingContainer}>
+    <ActivityIndicator size="large" color="#007AFF" />
+    <Text style={styles.gachaLoadingText}>Loading verification...</Text>
+  </View>
+);
 
 const WorkoutScreen = ({ navigation, route }) => {
   // Get global state and actions from context
@@ -98,20 +109,22 @@ const WorkoutScreen = ({ navigation, route }) => {
     ],
     Bicep: [
       'Standing Barbell Bicep Curl', 'Preacher Curls', 'Hammer Curls', 
-      'Incline Dumbbell Curls'
+      'Concentration Curls', 'Incline Dumbbell Curls', 'Cable Curls'
     ],
     Tricep: [
-      'Tricep Pushdowns', 'Tricep Dips', 'Skullcrushers'
+      'Tricep Dips', 'Tricep Pushdowns', 'Skull Crushers', 'Overhead Tricep Extension',
+      'Close-Grip Bench Press', 'Diamond Push-Ups'
     ],
-    Abs: [
-      'Hanging Leg Raises', 'Upright Ab Pulldowns'
+    Core: [
+      'Planks', 'Crunches', 'Russian Twists', 'Leg Raises', 'Bicycle Crunches',
+      'Mountain Climbers', 'Dead Bug', 'Bird Dog'
     ],
     Cardio: [
-      'Walking', 'Running', 'Cycling', 'Rowing', 'Elliptical', 'StairMaster'
-    ],
+      'Running', 'Cycling', 'Rowing', 'Elliptical', 'StairMaster', 'Jump Rope',
+      'Swimming', 'Walking', 'HIIT', 'Circuit Training'
+    ]
   }), []);
 
-  // Helper function to check if exercise is cardio
   const isCardioExercise = (exerciseName) => {
     return exerciseCategories.Cardio.includes(exerciseName);
   };
@@ -1294,10 +1307,12 @@ const WorkoutScreen = ({ navigation, route }) => {
       
       {/* Workout Verification Widget */}
       {showVerification && (
-        <WorkoutVerificationWidget 
-          workout={completedWorkout}
-          onVerificationComplete={handleVerificationComplete}
-        />
+        <Suspense fallback={<GachaLoadingFallback />}>
+          <GachaComponents.WorkoutVerificationWidget 
+            workout={completedWorkout}
+            onVerificationComplete={handleVerificationComplete}
+          />
+        </Suspense>
       )}
     </SafeAreaView>
   );
@@ -2081,6 +2096,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  gachaLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  gachaLoadingText: {
+    marginTop: 10,
+    color: '#fff',
+    fontSize: 16,
   },
 });
 
