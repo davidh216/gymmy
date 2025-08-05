@@ -1,13 +1,14 @@
-# Workout Journal - Handoff Document
+# Gymmy - Handoff Document
 
 ## Project Overview
 
-The Workout Journal is a comprehensive React Native/Expo application for tracking weightlifting and cardio workouts. The app features gamification elements, progress tracking, and a modern UI with local data storage.
+Gymmy is a comprehensive React Native/Expo application for tracking weightlifting and cardio workouts. The app features an advanced gamification system with World of Warcraft-style leveling, achievements, quests, and muscle group mastery. Built with a modern UI and local data storage.
 
 **Current Version**: 1.0.0  
 **Framework**: React Native with Expo  
 **Platforms**: iOS, Android, Web  
 **Data Storage**: AsyncStorage (local)  
+**App Name**: Gymmy (formerly Workout Journal)
 
 ## 🏗️ Technical Architecture
 
@@ -17,81 +18,94 @@ The Workout Journal is a comprehensive React Native/Expo application for trackin
 - **React Navigation**: Bottom Tab Navigator
 - **AsyncStorage**: Local data persistence
 - **React Context API**: Global state management
+- **React Native Animated API**: UI animations
 
 ### Project Structure
 ```
-workout-journal/
+gym-journal/
 ├── App.js                          # Main app with navigation setup
 ├── package.json                    # Dependencies and scripts
 ├── src/
 │   ├── components/
-│   │   ├── WorkoutCalendar.js      # Calendar view with workout history
+│   │   ├── AnalyticsCharts.js      # Progress visualization
+│   │   ├── AnalyticsPreview.js     # Stats preview
+│   │   ├── BodyWeightTracker.js    # Weight tracking
 │   │   ├── EditWorkoutModal.js     # Modal for editing workout details
+│   │   ├── GamificationStats.js    # Level and XP display with animations
+│   │   ├── MiniWeeklyChart.js      # Weekly progress charts
 │   │   ├── MotivationalQuote.js    # Daily changing motivational quotes
-│   │   └── GamificationStats.js    # Level and XP display
+│   │   ├── SimpleCharts.js         # Basic chart components
+│   │   └── WorkoutCalendar.js      # Calendar view with workout history
 │   ├── context/
 │   │   └── AppContext.js           # Global state management
 │   ├── screens/
+│   │   ├── AchievementsScreen.js   # Achievement system with XP rewards
 │   │   ├── DashboardScreen.js      # Main dashboard with stats
-│   │   ├── WorkoutScreen.js        # Workout tracking interface
-│   │   ├── ProgressScreen.js       # Progress tracking with levels
-│   │   └── SettingsScreen.js       # App settings
+│   │   ├── ProgressScreen.js       # Progress tracking with levels and quests
+│   │   ├── SettingsScreen.js       # App settings and demo mode
+│   │   └── WorkoutScreen.js        # Workout tracking interface
 │   └── utils/
 │       └── StorageManager.js       # Data persistence layer
 ```
 
 ## 🎯 Key Features Implemented
 
-### 1. Workout Tracking System
+### 1. Advanced Gamification System
+- **WoW-Style Leveling**: Exponential XP curve (XP = baseXP * (level - 1)^1.5)
+- **Experience Points**: Multiple XP sources (workouts, achievements, quests)
+- **Achievement System**: 50+ achievements across 8 categories with XP rewards
+- **Quest System**: Daily and weekly challenges with progress tracking
+- **Muscle Group Mastery**: Separate progression system for each muscle group
+- **Rarity System**: Visual indicators (Common to Immortal) for levels
+
+### 2. Workout Tracking System
 - **Weightlifting**: Track sets, reps, weight for 40+ exercises across 7 muscle groups
 - **Cardio**: Track duration, pace, calories burned (no sets)
 - **Ghost Sets**: Editable placeholder sets below each exercise for easy addition
 - **Exercise History**: Shows last workout date, reps, and average weight
 - **Cardio History**: Shows last date, duration, and calories burned
 
-### 2. Workout Management
+### 3. Workout Management
 - **Start/Complete Workouts**: Full workout lifecycle management
 - **Edit Workouts**: Modify date, time, duration, notes, ratings
 - **Delete Workouts**: Remove individual exercises or entire workouts
 - **Workout Ratings**: Pre/post mood, energy, and overall satisfaction (0-10)
+- **Template System**: Pre-built and customizable workout routines
 
-### 3. Calendar Integration
+### 4. Calendar Integration
 - **Workout Calendar**: Visual calendar showing workout history
 - **Date Selection**: Click dates to view/edit past workouts
 - **Timezone Handling**: Consistent date handling across platforms
 
-### 4. Gamification System
-- **User Levels**: Experience-based leveling system
-- **Experience Points**: Earned through completed workouts
-- **Daily Motivational Quotes**: Changes daily to inspire users
-- **Progress Tracking**: Visual progress indicators
-
-### 5. Progress Tracking (Revamped)
-- **Muscle Group Levels**: Individual levels for each muscle group
+### 5. Progress Tracking (Enhanced)
+- **Overall Levels**: User's main level with XP progress
+- **Muscle Group Levels**: Individual levels for each muscle group (200 XP per level)
 - **Exercise Levels**: Specific levels for each exercise
 - **Experience Calculation**: Based on workout frequency and intensity
-- **Progress Visualization**: Level titles and progress bars
+- **Progress Visualization**: Level titles and animated progress bars
 
 ### 6. Data Management
 - **Local Storage**: All data stored locally via AsyncStorage
-- **Dummy Data**: Comprehensive test data for development
+- **Demo Data**: Comprehensive test data for development and exploration
 - **Data Reset**: Function to clear and populate with test data
 - **Cross-Platform**: Consistent data handling across web/mobile
 
 ## 📱 Screen-by-Screen Breakdown
 
 ### Dashboard Screen (`DashboardScreen.js`)
-- **Gamification Stats**: Level, experience, streaks
+- **Gamification Stats**: Level, experience, animated progress bar
 - **Motivational Quote**: Daily changing inspirational message
-- **Quick Stats**: Recent workout summary
+- **Key Metrics**: Moved below calendar for better layout
 - **Navigation Hub**: Access to all app features
+- **Recent Workouts**: Quick access to recent activity
 
 ### Workout Screen (`WorkoutScreen.js`)
+- **Streamlined UI**: "+" button in top right for new workouts
 - **Workout Start**: Begin new workout with exercise selection
 - **Active Workout**: Real-time workout tracking
 - **Exercise Management**: Add/remove exercises, track sets
 - **Ghost Sets**: Editable placeholders for easy set addition
-- **Recent Workouts**: Collapsible history of last 5 workouts
+- **Recent Workouts**: Horizontally aligned workout cards
 - **Cardio Support**: Special tracking for cardio exercises
 - **Mood Survey**: Post-workout rating system
 
@@ -99,11 +113,19 @@ workout-journal/
 - **Overall Progress**: User's overall level and experience
 - **Muscle Group Levels**: Individual progress for each muscle group
 - **Exercise Levels**: Specific exercise progression
+- **Quest Display**: Daily and weekly challenges (demo mode)
 - **Progress Visualization**: Level titles and progress indicators
+
+### Achievements Screen (`AchievementsScreen.js`)
+- **Achievement Categories**: 8 categories with 50+ achievements
+- **XP Rewards**: Each achievement awards XP
+- **Progress Tracking**: Visual progress indicators
+- **Unlock Dates**: Track when achievements were earned
 
 ### Settings Screen (`SettingsScreen.js`)
 - **App Preferences**: Basic settings management
 - **Data Management**: Export/import functionality
+- **Demo Mode**: Toggle comprehensive test data
 - **Reset Options**: Clear data or reset to dummy data
 
 ## 🔧 Technical Implementation Details
@@ -114,11 +136,33 @@ workout-journal/
 {
   workoutHistory: [],        // All completed workouts
   currentWorkout: null,      // Active workout session
-  userStats: {},            // Gamification data
+  userStats: {},            // Gamification data (level, XP, etc.)
   exerciseHistory: {},       // Exercise-specific history
+  achievements: [],         // Achievement data
+  quests: [],              // Quest data
   loading: false,           // Loading states
   error: null              // Error handling
 }
+```
+
+### Gamification System
+```javascript
+// XP Calculation (WoW-style exponential curve)
+calculateLevelRequirement(level) {
+  const baseXP = 100;
+  return Math.floor(baseXP * Math.pow(level - 1, 1.5));
+}
+
+// Experience Sources
+- Base XP: 100 per workout
+- Duration: 1 XP per 3 minutes
+- Exercise: 15 XP per exercise
+- Rating: Up to 50 XP for 9+ ratings
+- Streak: Up to 100 XP for streaks
+- Template: 50 XP for template completion
+- Variety: 25 XP for 5+ unique exercises
+- Achievements: Variable XP rewards
+- Quests: Variable XP rewards
 ```
 
 ### Data Structure
@@ -127,10 +171,11 @@ workout-journal/
 {
   id: string,
   startTime: Date,
-  workoutDate: "YYYY-MM-DD",  // New format for date consistency
+  workoutDate: "YYYY-MM-DD",
   endTime: Date,
   duration: number,
   exercises: [],
+  templateId: string,      // For template completion bonus
   ratings: {
     preWorkoutMood: number,
     preWorkoutEnergy: number,
@@ -141,34 +186,50 @@ workout-journal/
   notes: string
 }
 
-// Exercise Object
+// Achievement Object
 {
   id: string,
-  name: string,
+  title: string,
+  description: string,
   category: string,
-  sets: [],  // For weightlifting
-  cardioData: {  // For cardio
-    duration: number,
-    pace: string,
-    calories: number
-  }
+  xpReward: number,
+  unlocked: boolean,
+  unlockedDate: Date,
+  progress: number,
+  target: number
+}
+
+// Quest Object
+{
+  id: string,
+  title: string,
+  description: string,
+  type: 'daily' | 'weekly',
+  xpReward: number,
+  progress: number,
+  target: number,
+  completed: boolean,
+  expiresAt: Date
 }
 ```
 
 ### Key Functions
-- `addWorkout()`: Complete workout and update stats
+- `addWorkout()`: Complete workout and update stats with XP calculation
 - `removeWorkout()`: Delete workout from history
 - `removeExercise()`: Remove exercise from current workout
 - `getExerciseHistory()`: Get exercise-specific history
-- `resetToDummyData()`: Populate with test data
+- `resetToDummyData()`: Populate with comprehensive test data
+- `awardAchievementXP()`: Award XP when achievements are unlocked
+- `generateDailyQuests()`: Create daily quest challenges
+- `generateWeeklyQuests()`: Create weekly quest challenges
 
 ## 🎨 UI/UX Features
 
-### Recent Workouts Section
-- **Collapsible Design**: Mimics calendar modal style
-- **Full Width**: Optimized to fill screen width
+### Recent Workouts Section (Enhanced)
+- **Horizontal Layout**: Date, details, and actions aligned horizontally
+- **Compact Design**: Reduced height and font sizes for better fit
 - **Responsive Layout**: Adapts to different screen sizes
-- **Clean Information Display**: Shows key workout details
+- **Clean Information Display**: Shows key workout details efficiently
 
 ### Workout Cards
 - **Modern Design**: Clean, card-based layout
@@ -177,26 +238,34 @@ workout-journal/
 - **Visual Hierarchy**: Clear information organization
 
 ### Gamification Elements
-- **Level Display**: Visual level indicators
-- **Experience Bars**: Progress visualization
+- **Animated Level Display**: Subtle animations for progress bars
+- **Experience Bars**: Visual progress with accurate XP calculations
 - **Motivational Quotes**: Daily inspiration
-- **Achievement System**: Milestone tracking
+- **Achievement System**: Milestone tracking with XP rewards
+- **Quest Display**: Progress tracking for challenges
+
+### App Branding
+- **App Name**: "Gymmy" (updated throughout the app)
+- **Clean Headers**: Removed redundant titles
+- **Streamlined UI**: Simplified navigation and layout
 
 ## 🐛 Known Issues & Recent Fixes
 
 ### Resolved Issues
-1. **Timezone Problems**: Fixed date shifting issues by implementing consistent date handling
-2. **Calendar Display**: Resolved workouts showing on wrong dates
-3. **Data Format**: Migrated to new `workoutDate` format for consistency
-4. **UI Overflow**: Fixed recent workout cards extending beyond screen bounds
-5. **Edit Functionality**: Implemented platform-specific date/time pickers
-6. **Exercise Deletion**: Fixed trashcan functionality for individual exercises
+1. **JSX Syntax Errors**: Fixed missing tags in GamificationStats component
+2. **Demo Button Functionality**: Fixed demo mode toggle in SettingsScreen
+3. **Ionicons Names**: Updated to correct icon names
+4. **Port Conflicts**: Resolved development server port issues
+5. **Recent Workouts Layout**: Fixed horizontal alignment and height issues
+6. **Level Section Visibility**: Ensured GamificationStats displays correctly
+7. **UI Alignment**: Fixed workout card layout with proper horizontal distribution
 
 ### Current State
-- **Stable Data**: All dummy data uses new format
-- **Consistent UI**: Recent workout cards fit properly within screen bounds
+- **Stable Data**: All dummy data uses consistent format
+- **Consistent UI**: Recent workout cards properly aligned
 - **Cross-Platform**: Works consistently on web and mobile
 - **Error-Free**: No known runtime errors
+- **Enhanced Gamification**: Full WoW-style leveling system implemented
 
 ## 🚀 Development Setup
 
@@ -209,7 +278,7 @@ npm or yarn
 
 ### Installation
 ```bash
-git clone <repository-url>
+git clone https://github.com/davidh216/workout-journal.git
 cd workout-journal
 npm install
 npm start
@@ -223,26 +292,27 @@ npm start
 
 ## 📊 Data Management
 
-### Dummy Data
+### Demo Data
 The app includes comprehensive dummy data for testing:
 - **40+ Workouts**: Spread across May, June, July 2025
 - **Mixed Types**: Weightlifting and cardio exercises
 - **Realistic Data**: Proper ratings, notes, and progression
+- **Gamification Data**: Achievements, quests, and XP progression
 - **New Format**: All data uses `workoutDate` field
 
 ### Data Reset
 ```javascript
-// Available in WorkoutScreen (temporarily uncommented)
-const { resetToDummyData } = useApp();
-// Call this to populate with fresh test data
+// Available in SettingsScreen
+const { setDemoMode } = useApp();
+// Toggle demo mode for comprehensive test data
 ```
 
 ## 🔮 Next Steps & Recommendations
 
 ### Immediate Priorities
-1. **Hide Reset Button**: Remove the "Reset to Dummy Data" button from production
-2. **User Testing**: Test all features across different devices
-3. **Performance Optimization**: Monitor app performance with large datasets
+1. **User Testing**: Test all features across different devices
+2. **Performance Optimization**: Monitor app performance with large datasets
+3. **Accessibility**: Improve screen reader support
 
 ### Feature Enhancements
 1. **Data Export/Import**: Implement backup functionality
@@ -250,12 +320,13 @@ const { resetToDummyData } = useApp();
 3. **Dark Mode**: Implement theme switching
 4. **Social Features**: Share achievements or progress
 5. **Advanced Analytics**: More detailed progress charts
+6. **Workout Templates**: Expand template system
 
 ### Technical Improvements
 1. **Error Boundaries**: Add comprehensive error handling
 2. **Unit Tests**: Implement testing suite
 3. **Performance Monitoring**: Add analytics for app usage
-4. **Accessibility**: Improve screen reader support
+4. **Code Splitting**: Optimize bundle size
 
 ## 🛠️ Development Notes
 
@@ -263,13 +334,15 @@ const { resetToDummyData } = useApp();
 1. **Local Storage**: Chose AsyncStorage for simplicity and privacy
 2. **Context API**: Used for global state management
 3. **Platform-Specific UI**: Different date pickers for web vs mobile
-4. **Gamification**: Added to increase user engagement
+4. **Gamification**: WoW-style system to increase user engagement
+5. **App Branding**: Simplified to "Gymmy" for cleaner experience
 
 ### Code Quality
 - **Consistent Styling**: Using StyleSheet.create throughout
 - **Error Handling**: Try-catch blocks for async operations
 - **Null Safety**: Optional chaining (`?.`) for safe property access
 - **Performance**: useMemo and useCallback for optimization
+- **Animations**: Subtle React Native Animated API usage
 
 ### File Organization
 - **Components**: Reusable UI components
@@ -281,12 +354,13 @@ const { resetToDummyData } = useApp();
 
 ### Current State
 - **Functional**: All core features working
-- **Tested**: Dummy data provides comprehensive testing
+- **Tested**: Demo data provides comprehensive testing
 - **Stable**: No known critical bugs
+- **Enhanced**: Advanced gamification system implemented
 - **Ready for Enhancement**: Solid foundation for new features
 
 ### Key Contacts
-- **Repository**: Current codebase location
+- **Repository**: https://github.com/davidh216/workout-journal
 - **Documentation**: This handoff document
 - **Dependencies**: See package.json for full list
 
@@ -297,4 +371,4 @@ const { resetToDummyData } = useApp();
 
 ---
 
-**Handoff Complete**: The application is ready for continued development with a solid foundation and comprehensive feature set. 
+**Handoff Complete**: The application is ready for continued development with a solid foundation, comprehensive gamification system, and modern UI/UX design. 
