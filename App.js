@@ -16,6 +16,8 @@ import WorkoutScreen from './src/screens/WorkoutScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ClassSelectionScreen from './src/screens/ClassSelectionScreen';
+import GachaScreen from './src/screens/GachaScreen';
+import CharacterCollectionScreen from './src/screens/CharacterCollectionScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -26,6 +28,8 @@ const DashboardStack = () => (
     <Stack.Screen name="DashboardMain" component={DashboardScreen} />
     <Stack.Screen name="Achievements" component={AchievementsScreen} />
     <Stack.Screen name="ClassSelection" component={ClassSelectionScreen} />
+    <Stack.Screen name="GachaScreen" component={GachaScreen} />
+    <Stack.Screen name="CharacterCollection" component={CharacterCollectionScreen} />
   </Stack.Navigator>
 );
 

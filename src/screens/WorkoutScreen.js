@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import MotivationalQuote from '../components/MotivationalQuote';
 import GamificationStats from '../components/GamificationStats';
+import { WorkoutVerificationWidget } from '../components/GachaComponents';
 
 const WorkoutScreen = ({ navigation, route }) => {
   // Get global state and actions from context
@@ -52,6 +53,8 @@ const WorkoutScreen = ({ navigation, route }) => {
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [completedWorkout, setCompletedWorkout] = useState(null);
 
   // Load template if templateId is provided
   useEffect(() => {
@@ -458,6 +461,10 @@ const WorkoutScreen = ({ navigation, route }) => {
         await updateExerciseHistory(exerciseHistoryUpdates);
       }
       
+      // Show verification widget
+      setCompletedWorkout(finishedWorkout);
+      setShowVerification(true);
+      
       // Reset state
       setCurrentWorkout(null);
       setExercises([]);
@@ -469,12 +476,6 @@ const WorkoutScreen = ({ navigation, route }) => {
         afterEnergy: 5,
         workoutRating: 5,
       });
-      
-      Alert.alert(
-        'Workout Complete!', 
-        `Great job! You completed ${sortedExercises.length} exercises in ${finishedWorkout.duration} minutes.`,
-        [{ text: 'Awesome!', style: 'default' }]
-      );
       
     } catch (error) {
       console.error('Error saving workout:', error);
@@ -500,6 +501,25 @@ const WorkoutScreen = ({ navigation, route }) => {
       }
     }
   }, [removeWorkout]);
+
+  const handleVerificationComplete = useCallback((pointsEarned) => {
+    setShowVerification(false);
+    setCompletedWorkout(null);
+    
+    if (pointsEarned > 0) {
+      Alert.alert(
+        'Workout Complete! 🎉', 
+        `Great job! You completed ${completedWorkout?.exercises?.length || 0} exercises and earned ${pointsEarned} gacha points!`,
+        [{ text: 'Awesome!', style: 'default' }]
+      );
+    } else {
+      Alert.alert(
+        'Workout Complete!', 
+        `Great job! You completed ${completedWorkout?.exercises?.length || 0} exercises in ${completedWorkout?.duration || 0} minutes.`,
+        [{ text: 'Awesome!', style: 'default' }]
+      );
+    }
+  }, [completedWorkout]);
 
   const toggleWorkoutExpansion = useCallback((workoutId) => {
     setExpandedWorkouts(prev => {
@@ -1271,6 +1291,14 @@ const WorkoutScreen = ({ navigation, route }) => {
       {renderRatingModal()}
       {renderTemplateModal()}
       {renderSaveTemplateModal()}
+      
+      {/* Workout Verification Widget */}
+      {showVerification && (
+        <WorkoutVerificationWidget 
+          workout={completedWorkout}
+          onVerificationComplete={handleVerificationComplete}
+        />
+      )}
     </SafeAreaView>
   );
 };
