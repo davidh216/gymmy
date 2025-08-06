@@ -15,7 +15,9 @@
       "Bash(cp:*)",
       "Bash(mv:*)",
       "Bash(find:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
