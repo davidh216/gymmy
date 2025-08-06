@@ -1,7 +1,13 @@
 // src/screens/DashboardScreen.js
 
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { 
+  View, 
+  StyleSheet, 
+  SafeAreaView, 
+  Text, 
+  TouchableOpacity 
+} from 'react-native';
 import { useApp } from '../context';
 import { AdaptiveDashboard } from '../components/AdaptiveDashboard';
 
@@ -12,7 +18,7 @@ import MotivationalQuote from '../components/MotivationalQuote';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 
 const DashboardScreen = ({ navigation }) => {
-  const { state, isOnboardingComplete, shouldShowOnboarding } = useApp();
+  const { state, shouldShowOnboarding } = useApp();
   const { userStats, personalizedExperience } = state;
 
   // If user hasn't completed onboarding, redirect to onboarding

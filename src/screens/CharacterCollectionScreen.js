@@ -16,161 +16,161 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 
 const CharacterCollectionScreen = ({ navigation }) => {
-    const { characters, setActiveCharacter } = useApp();
-    const [selectedCharacter, setSelectedCharacter] = useState(null);
-    const [showDetails, setShowDetails] = useState(false);
+  const { characters, setActiveCharacter } = useApp();
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
     
-    const handleCharacterSelect = (character) => {
-      setSelectedCharacter(character);
-      setShowDetails(true);
-    };
+  const handleCharacterSelect = (character) => {
+    setSelectedCharacter(character);
+    setShowDetails(true);
+  };
     
-    const handleSetActive = (characterId) => {
-      setActiveCharacter(characterId);
-      setShowDetails(false);
-      Alert.alert("Active Character Set!", "Your character is now ready for battle!");
-    };
+  const handleSetActive = (characterId) => {
+    setActiveCharacter(characterId);
+    setShowDetails(false);
+    Alert.alert('Active Character Set!', 'Your character is now ready for battle!');
+  };
     
-    // Prepare data for VirtualizedList
-    const sections = useMemo(() => {
-      const sectionsData = [];
+  // Prepare data for VirtualizedList
+  const sections = useMemo(() => {
+    const sectionsData = [];
       
-      // Group characters by rarity
-      const groupedCharacters = characters.collection.reduce((acc, char) => {
-        if (!acc[char.rarity]) acc[char.rarity] = [];
-        acc[char.rarity].push(char);
-        return acc;
-      }, {});
+    // Group characters by rarity
+    const groupedCharacters = characters.collection.reduce((acc, char) => {
+      if (!acc[char.rarity]) acc[char.rarity] = [];
+      acc[char.rarity].push(char);
+      return acc;
+    }, {});
       
-      // Add sections for each rarity that has characters
-      ['legendary', 'epic', 'rare', 'common'].forEach(rarity => {
-        const chars = groupedCharacters[rarity] || [];
-        if (chars.length > 0) {
-          sectionsData.push({
-            type: 'rarity',
-            id: rarity,
-            rarity,
-            data: chars
-          });
-        }
-      });
-      
-      return sectionsData;
-    }, [characters.collection]);
-    
-    // VirtualizedList render functions
-    const getItem = (data, index) => data[index];
-    const getItemCount = (data) => data.length;
-
-    const renderCharacterCard = (character) => (
-      <TouchableOpacity
-        key={character.instance_id}
-        style={[
-          styles.characterCard,
-          { borderColor: character.rarity_color },
-          characters.active_character === character.instance_id && styles.activeCharacterCard
-        ]}
-        onPress={() => handleCharacterSelect(character)}
-      >
-        <Text style={styles.characterArtwork}>{character.artwork}</Text>
-        <Text style={styles.characterCardName}>{character.name}</Text>
-        <Text style={styles.characterLevel}>Lv.{character.level}</Text>
-        
-        {characters.active_character === character.instance_id && (
-          <View style={styles.activeBadge}>
-            <Text style={styles.activeBadgeText}>ACTIVE</Text>
-          </View>
-        )}
-        
-        {/* Condition indicators */}
-        {character.condition && (
-          <View style={styles.conditionBadge}>
-            <Text style={styles.conditionText}>✓</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-
-    const renderItem = ({ item, section }) => {
-      if (section.type === 'rarity') {
-        return (
-          <View style={styles.raritySection}>
-            <Text style={[
-              styles.rarityHeader,
-              { color: section.data[0]?.rarity_color || '#fff' }
-            ]}>
-              {section.rarity.toUpperCase()} ({section.data.length})
-            </Text>
-            
-            <View style={styles.characterGrid}>
-              {section.data.map(renderCharacterCard)}
-            </View>
-          </View>
-        );
+    // Add sections for each rarity that has characters
+    ['legendary', 'epic', 'rare', 'common'].forEach(rarity => {
+      const chars = groupedCharacters[rarity] || [];
+      if (chars.length > 0) {
+        sectionsData.push({
+          type: 'rarity',
+          id: rarity,
+          rarity,
+          data: chars,
+        });
       }
-      return null;
-    };
-
-    const renderHeader = () => (
-      <View style={styles.collectionHeader}>
-        <Text style={styles.collectionTitle}>MY CHAMPIONS</Text>
-        <Text style={styles.collectionCount}>
-          {characters.collection.length} Characters Collected
-        </Text>
-      </View>
-    );
-
-    const renderEmptyState = () => (
-      <View style={styles.emptyState}>
-        <Text style={styles.emptyEmoji}>🎭</Text>
-        <Text style={styles.emptyTitle}>No Characters Yet</Text>
-        <Text style={styles.emptySubtitle}>Complete workouts to earn gems and summon your first ally!</Text>
-        <TouchableOpacity
-          style={styles.summonButton}
-          onPress={() => navigation.navigate('GachaScreen')}
-        >
-          <Text style={styles.summonButtonText}>START SUMMONING</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    });
+      
+    return sectionsData;
+  }, [characters.collection]);
     
-    return (
-      <View style={styles.container}>
-        {characters.collection.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <VirtualizedList
-            data={sections}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => item.id || index.toString()}
-            getItemCount={getItemCount}
-            getItem={getItem}
-            ListHeaderComponent={renderHeader}
-            showsVerticalScrollIndicator={false}
-            style={styles.collectionContent}
-            contentContainerStyle={styles.collectionContentContainer}
-            initialNumToRender={2}
-            maxToRenderPerBatch={3}
-            windowSize={5}
-            removeClippedSubviews={true}
-            getItemLayout={(data, index) => ({
-              length: 250, // Approximate height for each rarity section
-              offset: 250 * index,
-              index,
-            })}
-          />
-        )}
+  // VirtualizedList render functions
+  const getItem = (data, index) => data[index];
+  const getItemCount = (data) => data.length;
+
+  const renderCharacterCard = (character) => (
+    <TouchableOpacity
+      key={character.instance_id}
+      style={[
+        styles.characterCard,
+        { borderColor: character.rarity_color },
+        characters.active_character === character.instance_id && styles.activeCharacterCard,
+      ]}
+      onPress={() => handleCharacterSelect(character)}
+    >
+      <Text style={styles.characterArtwork}>{character.artwork}</Text>
+      <Text style={styles.characterCardName}>{character.name}</Text>
+      <Text style={styles.characterLevel}>Lv.{character.level}</Text>
         
-        {/* Character Details Modal */}
-        <CharacterDetailsModal
-          visible={showDetails}
-          character={selectedCharacter}
-          onClose={() => setShowDetails(false)}
-          onSetActive={handleSetActive}
-          isActive={selectedCharacter?.instance_id === characters.active_character}
+      {characters.active_character === character.instance_id && (
+        <View style={styles.activeBadge}>
+          <Text style={styles.activeBadgeText}>ACTIVE</Text>
+        </View>
+      )}
+        
+      {/* Condition indicators */}
+      {character.condition && (
+        <View style={styles.conditionBadge}>
+          <Text style={styles.conditionText}>✓</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  const renderItem = ({ item, section }) => {
+    if (section.type === 'rarity') {
+      return (
+        <View style={styles.raritySection}>
+          <Text style={[
+            styles.rarityHeader,
+            { color: section.data[0]?.rarity_color || '#fff' },
+          ]}>
+            {section.rarity.toUpperCase()} ({section.data.length})
+          </Text>
+            
+          <View style={styles.characterGrid}>
+            {section.data.map(renderCharacterCard)}
+          </View>
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderHeader = () => (
+    <View style={styles.collectionHeader}>
+      <Text style={styles.collectionTitle}>MY CHAMPIONS</Text>
+      <Text style={styles.collectionCount}>
+        {characters.collection.length} Characters Collected
+      </Text>
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyEmoji}>🎭</Text>
+      <Text style={styles.emptyTitle}>No Characters Yet</Text>
+      <Text style={styles.emptySubtitle}>Complete workouts to earn gems and summon your first ally!</Text>
+      <TouchableOpacity
+        style={styles.summonButton}
+        onPress={() => navigation.navigate('GachaScreen')}
+      >
+        <Text style={styles.summonButtonText}>START SUMMONING</Text>
+      </TouchableOpacity>
+    </View>
+  );
+    
+  return (
+    <View style={styles.container}>
+      {characters.collection.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <VirtualizedList
+          data={sections}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => item.id || index.toString()}
+          getItemCount={getItemCount}
+          getItem={getItem}
+          ListHeaderComponent={renderHeader}
+          showsVerticalScrollIndicator={false}
+          style={styles.collectionContent}
+          contentContainerStyle={styles.collectionContentContainer}
+          initialNumToRender={2}
+          maxToRenderPerBatch={3}
+          windowSize={5}
+          removeClippedSubviews={true}
+          getItemLayout={(data, index) => ({
+            length: 250, // Approximate height for each rarity section
+            offset: 250 * index,
+            index,
+          })}
         />
-      </View>
-    );
+      )}
+        
+      {/* Character Details Modal */}
+      <CharacterDetailsModal
+        visible={showDetails}
+        character={selectedCharacter}
+        onClose={() => setShowDetails(false)}
+        onSetActive={handleSetActive}
+        isActive={selectedCharacter?.instance_id === characters.active_character}
+      />
+    </View>
+  );
 };
 
 // Character Details Modal Component

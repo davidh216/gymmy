@@ -67,16 +67,16 @@ const GamificationStats = ({ userStats }) => {
 
   const getLevelTitle = (level) => {
     const titles = {
-      1: "Beginner",
-      2: "Novice",
-      3: "Apprentice",
-      4: "Intermediate",
-      5: "Advanced",
-      6: "Expert",
-      7: "Master",
-      8: "Legend",
-      9: "Champion",
-      10: "Elite"
+      1: 'Beginner',
+      2: 'Novice',
+      3: 'Apprentice',
+      4: 'Intermediate',
+      5: 'Advanced',
+      6: 'Expert',
+      7: 'Master',
+      8: 'Legend',
+      9: 'Champion',
+      10: 'Elite',
     };
     return titles[level] || `Level ${level}`;
   };
@@ -107,7 +107,7 @@ const GamificationStats = ({ userStats }) => {
           { 
             backgroundColor: getLevelColor(userStats.level || 1),
             shadowColor: getLevelColor(userStats.level || 1),
-          }
+          },
         ]}>
           <Text style={styles.levelText}>{userStats.level || 1}</Text>
         </Animated.View>
@@ -132,11 +132,11 @@ const GamificationStats = ({ userStats }) => {
               { 
                 width: progressAnimation.interpolate({
                   inputRange: [0, 100],
-                  outputRange: ['0%', '100%']
+                  outputRange: ['0%', '100%'],
                 }),
                 backgroundColor: getLevelColor(userStats.level || 1),
                 shadowColor: getLevelColor(userStats.level || 1),
-              }
+              },
             ]} 
           />
         </View>

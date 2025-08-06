@@ -9,11 +9,11 @@ export interface Exercise {
   id: string;
   name: string;
   category: string;
-  sets: Array<{
+  sets: {
     reps: number;
     weight: number;
     completed: boolean;
-  }>;
+  }[];
   notes?: string;
 }
 
@@ -207,6 +207,57 @@ export interface CharacterCollection {
 }
 
 // ==============================================================================
+// ENHANCED GACHA SYSTEM
+// ==============================================================================
+
+export interface PityCounters {
+  legendary: number;
+  epic: number;
+  rare: number;
+}
+
+export interface LifetimeStats {
+  total_pulls: number;
+  gems_spent: number;
+  legendary_pulled: number;
+  epic_pulled: number;
+  rare_pulled: number;
+  common_pulled: number;
+}
+
+export interface EvolutionMaterials {
+  [key: string]: number;
+}
+
+export interface EnhancedGachaAchievements {
+  evolution_master: boolean;
+}
+
+export interface EnhancedGachaState {
+  pity_counters: PityCounters;
+  lifetime_stats: LifetimeStats;
+  evolution_materials: EvolutionMaterials;
+  achievements: EnhancedGachaAchievements;
+}
+
+export interface DailyBonuses {
+  free_pull_available: boolean;
+  streak_bonus: number;
+  last_bonus_claim: string | null;
+}
+
+export interface Banner {
+  id: string;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  featured_characters: string[];
+  rate_up_multiplier: number;
+  is_active: boolean;
+}
+
+// ==============================================================================
 // SOCIAL VERIFICATION SYSTEM
 // ==============================================================================
 
@@ -261,6 +312,9 @@ export interface AppState {
   userStats: UserStats;
   characters: CharacterCollection;
   gacha: GachaState;
+  enhancedGacha: EnhancedGachaState;
+  dailyBonuses: DailyBonuses;
+  currentBanner: Banner | null;
   social: SocialState;
   workoutTemplates: any[];
   restDays: RestDay[];
@@ -295,7 +349,14 @@ export type ActionType =
   | 'SET_ERROR'
   | 'ADD_REST_DAY'
   | 'UPDATE_REST_DAY'
-  | 'REMOVE_REST_DAY';
+  | 'REMOVE_REST_DAY'
+  | 'ENHANCED_GACHA_PULL'
+  | 'UPDATE_PITY_COUNTERS'
+  | 'AWARD_EVOLUTION_MATERIALS'
+  | 'EVOLVE_CHARACTER'
+  | 'ACTIVATE_BANNER'
+  | 'CLAIM_DAILY_BONUS'
+  | 'UPDATE_GACHA_STATS';
 
 export interface BaseAction {
   type: ActionType;
@@ -427,6 +488,61 @@ export interface RemoveRestDayAction extends BaseAction {
   payload: string; // rest day id
 }
 
+// Enhanced Gacha Actions
+export interface EnhancedGachaPullAction extends BaseAction {
+  type: 'ENHANCED_GACHA_PULL';
+  payload: {
+    pulls_made: number;
+    gems_spent: number;
+    legendary_count: number;
+    epic_count: number;
+    rare_count: number;
+    common_count: number;
+    pity_reset: boolean;
+    materials?: EvolutionMaterials;
+  };
+}
+
+export interface UpdatePityCountersAction extends BaseAction {
+  type: 'UPDATE_PITY_COUNTERS';
+  payload: {
+    legendary?: number;
+    epic?: number;
+    rare?: number;
+    reset?: boolean;
+  };
+}
+
+export interface AwardEvolutionMaterialsAction extends BaseAction {
+  type: 'AWARD_EVOLUTION_MATERIALS';
+  payload: EvolutionMaterials;
+}
+
+export interface EvolveCharacterAction extends BaseAction {
+  type: 'EVOLVE_CHARACTER';
+  payload: {
+    success: boolean;
+    materials_used?: EvolutionMaterials;
+  };
+}
+
+export interface ActivateBannerAction extends BaseAction {
+  type: 'ACTIVATE_BANNER';
+  payload: {
+    success: boolean;
+    banner?: Banner;
+  };
+}
+
+export interface ClaimDailyBonusAction extends BaseAction {
+  type: 'CLAIM_DAILY_BONUS';
+}
+
+export interface UpdateGachaStatsAction extends BaseAction {
+  type: 'UPDATE_GACHA_STATS';
+  payload: Partial<EnhancedGachaState>;
+}
+
 export type Action = 
   | LoadDataAction
   | SetLoadingAction
@@ -451,7 +567,14 @@ export type Action =
   | SetErrorAction
   | AddRestDayAction
   | UpdateRestDayAction
-  | RemoveRestDayAction;
+  | RemoveRestDayAction
+  | EnhancedGachaPullAction
+  | UpdatePityCountersAction
+  | AwardEvolutionMaterialsAction
+  | EvolveCharacterAction
+  | ActivateBannerAction
+  | ClaimDailyBonusAction
+  | UpdateGachaStatsAction;
 
 // ==============================================================================
 // FUNCTION TYPES

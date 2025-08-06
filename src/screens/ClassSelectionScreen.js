@@ -18,176 +18,176 @@ const { width, height } = Dimensions.get('window');
 // Class Data with Street Fighter + RPG aesthetic
 const FITNESS_CLASSES = {
   powerlifter: {
-    name: "POWERLIFTER",
-    subtitle: "The Iron Warrior",
-    emoji: "🏋️‍♂️",
-    quote: "Strength is earned, not given.",
-    description: "Master of raw strength. Dominates the big three: squat, bench, deadlift.",
-    philosophy: "STRENGTH ABOVE ALL",
-    color: "#8B0000", // Dark red
-    bgGradient: ["#8B0000", "#4A0000"],
+    name: 'POWERLIFTER',
+    subtitle: 'The Iron Warrior',
+    emoji: '🏋️‍♂️',
+    quote: 'Strength is earned, not given.',
+    description: 'Master of raw strength. Dominates the big three: squat, bench, deadlift.',
+    philosophy: 'STRENGTH ABOVE ALL',
+    color: '#8B0000', // Dark red
+    bgGradient: ['#8B0000', '#4A0000'],
     bonuses: {
       compoundLiftXP: 2.0,
       strengthTrainingXP: 1.5,
       maxWeightBonus: 1.25,
-      powerMoveXP: 1.8
+      powerMoveXP: 1.8,
     },
-    preferredExercises: ["squat", "deadlift", "bench_press", "overhead_press"],
-    skillTree: "strength_mastery",
+    preferredExercises: ['squat', 'deadlift', 'bench_press', 'overhead_press'],
+    skillTree: 'strength_mastery',
     stats: {
       power: 10,
       technique: 6,
       endurance: 4,
       flexibility: 2,
-      mental: 8
-    }
+      mental: 8,
+    },
   },
   
   bodybuilder: {
-    name: "BODYBUILDER",
-    subtitle: "The Sculptor",
-    emoji: "💪",
-    quote: "Perfection through precision.",
-    description: "Artist of aesthetics. Masters isolation and perfect form.",
-    philosophy: "AESTHETICS THROUGH PRECISION",
-    color: "#FFD700", // Gold
-    bgGradient: ["#FFD700", "#B8860B"],
+    name: 'BODYBUILDER',
+    subtitle: 'The Sculptor',
+    emoji: '💪',
+    quote: 'Perfection through precision.',
+    description: 'Artist of aesthetics. Masters isolation and perfect form.',
+    philosophy: 'AESTHETICS THROUGH PRECISION',
+    color: '#FFD700', // Gold
+    bgGradient: ['#FFD700', '#B8860B'],
     bonuses: {
       isolationXP: 1.8,
       volumeBonus: 1.4,
       varietyXP: 1.6,
-      aestheticXP: 2.0
+      aestheticXP: 2.0,
     },
-    preferredExercises: ["cable_fly", "lateral_raise", "bicep_curl", "tricep_extension"],
-    skillTree: "aesthetic_mastery",
+    preferredExercises: ['cable_fly', 'lateral_raise', 'bicep_curl', 'tricep_extension'],
+    skillTree: 'aesthetic_mastery',
     stats: {
       power: 6,
       technique: 10,
       endurance: 5,
       flexibility: 4,
-      mental: 5
-    }
+      mental: 5,
+    },
   },
   
   athlete: {
-    name: "ATHLETE",
-    subtitle: "The Competitor",
-    emoji: "🏃‍♂️",
-    quote: "Train like you compete.",
-    description: "Peak performance through functional movement and conditioning.",
-    philosophy: "PERFORMANCE IS EVERYTHING",
-    color: "#1E90FF", // Dodger blue
-    bgGradient: ["#1E90FF", "#0047AB"],
+    name: 'ATHLETE',
+    subtitle: 'The Competitor',
+    emoji: '🏃‍♂️',
+    quote: 'Train like you compete.',
+    description: 'Peak performance through functional movement and conditioning.',
+    philosophy: 'PERFORMANCE IS EVERYTHING',
+    color: '#1E90FF', // Dodger blue
+    bgGradient: ['#1E90FF', '#0047AB'],
     bonuses: {
       cardioXP: 2.0,
       functionalXP: 1.7,
       recoveryBonus: 1.3,
-      explosiveXP: 1.9
+      explosiveXP: 1.9,
     },
-    preferredExercises: ["burpees", "box_jumps", "battle_ropes", "sprints"],
-    skillTree: "performance_mastery",
+    preferredExercises: ['burpees', 'box_jumps', 'battle_ropes', 'sprints'],
+    skillTree: 'performance_mastery',
     stats: {
       power: 7,
       technique: 7,
       endurance: 10,
       flexibility: 6,
-      mental: 7
-    }
+      mental: 7,
+    },
   },
   
   yogi: {
-    name: "YOGI",
-    subtitle: "The Harmonizer",
-    emoji: "🧘‍♀️",
-    quote: "Strength through serenity.",
-    description: "Balance of mind, body, and spirit through flow and control.",
-    philosophy: "MIND BODY SPIRIT UNITY",
-    color: "#9370DB", // Medium purple
-    bgGradient: ["#9370DB", "#4B0082"],
+    name: 'YOGI',
+    subtitle: 'The Harmonizer',
+    emoji: '🧘‍♀️',
+    quote: 'Strength through serenity.',
+    description: 'Balance of mind, body, and spirit through flow and control.',
+    philosophy: 'MIND BODY SPIRIT UNITY',
+    color: '#9370DB', // Medium purple
+    bgGradient: ['#9370DB', '#4B0082'],
     bonuses: {
       flexibilityXP: 2.2,
       mindfulnessXP: 1.8,
       recoveryXP: 1.5,
-      balanceXP: 2.0
+      balanceXP: 2.0,
     },
-    preferredExercises: ["yoga_flow", "meditation", "stretching", "balance_poses"],
-    skillTree: "harmony_mastery",
+    preferredExercises: ['yoga_flow', 'meditation', 'stretching', 'balance_poses'],
+    skillTree: 'harmony_mastery',
     stats: {
       power: 3,
       technique: 8,
       endurance: 6,
       flexibility: 10,
-      mental: 10
-    }
+      mental: 10,
+    },
   },
   
   hybrid: {
-    name: "HYBRID",
-    subtitle: "The Adaptor",
-    emoji: "⚡",
-    quote: "Adaptability is the ultimate strength.",
-    description: "Master of all trades. Adapts to any challenge with versatility.",
-    philosophy: "INFINITE POSSIBILITIES",
-    color: "#FF6347", // Tomato
-    bgGradient: ["#FF6347", "#B22222"],
+    name: 'HYBRID',
+    subtitle: 'The Adaptor',
+    emoji: '⚡',
+    quote: 'Adaptability is the ultimate strength.',
+    description: 'Master of all trades. Adapts to any challenge with versatility.',
+    philosophy: 'INFINITE POSSIBILITIES',
+    color: '#FF6347', // Tomato
+    bgGradient: ['#FF6347', '#B22222'],
     bonuses: {
       varietyXP: 1.5,
       adaptabilityXP: 1.4,
       allAroundBonus: 1.2,
-      masteryXP: 1.3
+      masteryXP: 1.3,
     },
     preferredExercises: [], // All exercises
-    skillTree: "versatility_mastery",
+    skillTree: 'versatility_mastery',
     stats: {
       power: 7,
       technique: 7,
       endurance: 7,
       flexibility: 7,
-      mental: 7
-    }
-  }
+      mental: 7,
+    },
+  },
 };
 
 // Skill Trees with Street Fighter special move naming
 const SKILL_TREES = {
   strength_mastery: {
-    name: "Path of Iron",
+    name: 'Path of Iron',
     branches: {
       raw_power: {
-        name: "Raw Power",
-        color: "#FF0000",
+        name: 'Raw Power',
+        color: '#FF0000',
         skills: [
-          { id: "iron_will", name: "Iron Will", tier: 1, effect: "+10% XP on heavy lifts", icon: "💀" },
-          { id: "compound_devastator", name: "Compound Devastator", tier: 2, effect: "Unlock advanced compound moves", icon: "⚡" },
-          { id: "pr_annihilator", name: "PR Annihilator", tier: 3, effect: "Double XP for personal records", icon: "🔥" },
-          { id: "strength_demon", name: "Strength Demon", tier: 4, effect: "+25% faster strength progression", icon: "👹" },
-          { id: "unstoppable_force", name: "UNSTOPPABLE FORCE", tier: 5, effect: "Ultimate strength mastery", icon: "👑" }
-        ]
+          { id: 'iron_will', name: 'Iron Will', tier: 1, effect: '+10% XP on heavy lifts', icon: '💀' },
+          { id: 'compound_devastator', name: 'Compound Devastator', tier: 2, effect: 'Unlock advanced compound moves', icon: '⚡' },
+          { id: 'pr_annihilator', name: 'PR Annihilator', tier: 3, effect: 'Double XP for personal records', icon: '🔥' },
+          { id: 'strength_demon', name: 'Strength Demon', tier: 4, effect: '+25% faster strength progression', icon: '👹' },
+          { id: 'unstoppable_force', name: 'UNSTOPPABLE FORCE', tier: 5, effect: 'Ultimate strength mastery', icon: '👑' },
+        ],
       },
       technique_master: {
-        name: "Perfect Form",
-        color: "#00FF00",
+        name: 'Perfect Form',
+        color: '#00FF00',
         skills: [
-          { id: "form_focus", name: "Form Focus", tier: 1, effect: "Form tips for all exercises", icon: "🎯" },
-          { id: "movement_analyzer", name: "Movement Analyzer", tier: 2, effect: "AI form feedback", icon: "🤖" },
-          { id: "coaching_master", name: "Coaching Master", tier: 3, effect: "Help friends with technique", icon: "🧠" },
-          { id: "technique_sage", name: "Technique Sage", tier: 4, effect: "Unlock teaching abilities", icon: "🧙‍♂️" },
-          { id: "perfect_execution", name: "PERFECT EXECUTION", tier: 5, effect: "Flawless movement mastery", icon: "💎" }
-        ]
+          { id: 'form_focus', name: 'Form Focus', tier: 1, effect: 'Form tips for all exercises', icon: '🎯' },
+          { id: 'movement_analyzer', name: 'Movement Analyzer', tier: 2, effect: 'AI form feedback', icon: '🤖' },
+          { id: 'coaching_master', name: 'Coaching Master', tier: 3, effect: 'Help friends with technique', icon: '🧠' },
+          { id: 'technique_sage', name: 'Technique Sage', tier: 4, effect: 'Unlock teaching abilities', icon: '🧙‍♂️' },
+          { id: 'perfect_execution', name: 'PERFECT EXECUTION', tier: 5, effect: 'Flawless movement mastery', icon: '💎' },
+        ],
       },
       mental_fortress: {
-        name: "Mental Fortress",
-        color: "#0000FF",
+        name: 'Mental Fortress',
+        color: '#0000FF',
         skills: [
-          { id: "focus_mode", name: "Focus Mode", tier: 1, effect: "Zero distraction workouts", icon: "🧘" },
-          { id: "streak_guardian", name: "Streak Guardian", tier: 2, effect: "Protect workout streaks", icon: "🛡️" },
-          { id: "motivation_surge", name: "Motivation Surge", tier: 3, effect: "Bonus XP on low energy", icon: "⚡" },
-          { id: "iron_mind", name: "Iron Mind", tier: 4, effect: "Mental strength bonuses", icon: "🧠" },
-          { id: "unbreakable_will", name: "UNBREAKABLE WILL", tier: 5, effect: "Ultimate mental mastery", icon: "🗿" }
-        ]
-      }
-    }
-  }
+          { id: 'focus_mode', name: 'Focus Mode', tier: 1, effect: 'Zero distraction workouts', icon: '🧘' },
+          { id: 'streak_guardian', name: 'Streak Guardian', tier: 2, effect: 'Protect workout streaks', icon: '🛡️' },
+          { id: 'motivation_surge', name: 'Motivation Surge', tier: 3, effect: 'Bonus XP on low energy', icon: '⚡' },
+          { id: 'iron_mind', name: 'Iron Mind', tier: 4, effect: 'Mental strength bonuses', icon: '🧠' },
+          { id: 'unbreakable_will', name: 'UNBREAKABLE WILL', tier: 5, effect: 'Ultimate mental mastery', icon: '🗿' },
+        ],
+      },
+    },
+  },
   // Additional skill trees would be defined here
 };
 
@@ -195,12 +195,12 @@ const SKILL_TREES = {
 const ClassCard = ({ classKey, classData, selected, onSelect, animatedValue }) => {
   const scale = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.05]
+    outputRange: [1, 1.05],
   });
 
   const shadowOpacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.2, 0.8]
+    outputRange: [0.2, 0.8],
   });
 
   return (
@@ -213,7 +213,7 @@ const ClassCard = ({ classKey, classData, selected, onSelect, animatedValue }) =
             shadowOpacity,
             borderColor: selected ? classData.color : '#333',
             borderWidth: selected ? 3 : 1,
-          }
+          },
         ]}
       >
         {/* Background gradient effect */}
@@ -238,7 +238,7 @@ const ClassCard = ({ classKey, classData, selected, onSelect, animatedValue }) =
                 <View 
                   style={[
                     styles.statFill, 
-                    { width: `${value * 10}%`, backgroundColor: classData.color }
+                    { width: `${value * 10}%`, backgroundColor: classData.color },
                   ]} 
                 />
               </View>
@@ -329,7 +329,7 @@ const ClassSelectionScreen = ({ navigation }) => {
     Object.keys(FITNESS_CLASSES).reduce((acc, key) => {
       acc[key] = new Animated.Value(0);
       return acc;
-    }, {})
+    }, {}),
   );
 
   // Handle class selection animation
@@ -360,9 +360,9 @@ const ClassSelectionScreen = ({ navigation }) => {
 
     // Show success and navigate
     Alert.alert(
-      "🎉 CLASS SELECTED! 🎉",
+      '🎉 CLASS SELECTED! 🎉',
       `Welcome to the path of the ${classData.name}! Your journey begins now.`,
-      [{ text: "BEGIN TRAINING", onPress: () => navigation.goBack() }]
+      [{ text: 'BEGIN TRAINING', onPress: () => navigation.goBack() }],
     );
   };
 
@@ -397,7 +397,7 @@ const ClassSelectionScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.confirmClassButton,
-              { backgroundColor: FITNESS_CLASSES[selectedClass].color }
+              { backgroundColor: FITNESS_CLASSES[selectedClass].color },
             ]}
             onPress={() => setShowConfirmation(true)}
           >

@@ -26,7 +26,7 @@ export const calculateStreakData = (workoutHistory) => {
     const workoutDay = new Date(
       workoutDate.getFullYear(), 
       workoutDate.getMonth(), 
-      workoutDate.getDate()
+      workoutDate.getDate(),
     );
     
     if (lastWorkoutDate === null) {
@@ -87,7 +87,7 @@ export const calculateMonthlyStats = (workoutHistory, selectedMonth) => {
       duration: 0,
       avgRating: 0,
       favoriteExercise: 'None yet',
-      avgWorkoutsPerWeek: 0
+      avgWorkoutsPerWeek: 0,
     };
   }
 
@@ -95,12 +95,12 @@ export const calculateMonthlyStats = (workoutHistory, selectedMonth) => {
   const selectedMonthStart = new Date(
     selectedMonth.getFullYear(), 
     selectedMonth.getMonth(), 
-    1
+    1,
   );
   const selectedMonthEnd = new Date(
     selectedMonth.getFullYear(), 
     selectedMonth.getMonth() + 1, 
-    0
+    0,
   );
   
   // Filter workouts for selected month
@@ -136,8 +136,8 @@ export const calculateMonthlyStats = (workoutHistory, selectedMonth) => {
   
   const favoriteExercise = Object.keys(exerciseCount).length > 0 
     ? Object.keys(exerciseCount).reduce((a, b) => 
-        exerciseCount[a] > exerciseCount[b] ? a : b
-      )
+      exerciseCount[a] > exerciseCount[b] ? a : b,
+    )
     : 'None yet';
 
   // Calculate average workouts per week for the month
@@ -149,7 +149,7 @@ export const calculateMonthlyStats = (workoutHistory, selectedMonth) => {
     duration,
     avgRating,
     favoriteExercise,
-    avgWorkoutsPerWeek
+    avgWorkoutsPerWeek,
   };
 };
 
@@ -167,7 +167,7 @@ export const calculateWeeklyConsistency = (workoutHistory) => {
   const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
   
   const recentWorkouts = workoutHistory.filter(workout => 
-    new Date(workout.startTime) >= fourWeeksAgo
+    new Date(workout.startTime) >= fourWeeksAgo,
   );
   
   return recentWorkouts.length / 4; // 4 weeks
@@ -260,38 +260,38 @@ export const getMotivationalMessage = (stats) => {
   
   // Based on streak
   if (currentStreak >= 7) {
-    return "🔥 You're on fire! Keep that streak alive!";
+    return '🔥 You\'re on fire! Keep that streak alive!';
   }
   
   if (currentStreak >= 3) {
-    return "💪 Great consistency! You're building a strong habit!";
+    return '💪 Great consistency! You\'re building a strong habit!';
   }
   
   // Based on total workouts
   if (totalWorkouts >= 100) {
-    return "🏆 Wow! You're a fitness legend with 100+ workouts!";
+    return '🏆 Wow! You\'re a fitness legend with 100+ workouts!';
   }
   
   if (totalWorkouts >= 50) {
-    return "⭐ Impressive dedication with 50+ workouts completed!";
+    return '⭐ Impressive dedication with 50+ workouts completed!';
   }
   
   if (totalWorkouts >= 10) {
-    return "🎯 You're building momentum! Keep up the great work!";
+    return '🎯 You\'re building momentum! Keep up the great work!';
   }
   
   // Based on rating
   if (avgRating >= 8) {
-    return "✨ Your workout quality is outstanding!";
+    return '✨ Your workout quality is outstanding!';
   }
   
   // Default messages
   const defaultMessages = [
-    "💪 Every workout counts! You're getting stronger!",
-    "🚀 Progress over perfection - you've got this!",
-    "🌟 Your commitment to fitness is inspiring!",
-    "⚡ Energy invested in fitness always pays dividends!",
-    "🎯 Focus on progress, not perfection!"
+    '💪 Every workout counts! You\'re getting stronger!',
+    '🚀 Progress over perfection - you\'ve got this!',
+    '🌟 Your commitment to fitness is inspiring!',
+    '⚡ Energy invested in fitness always pays dividends!',
+    '🎯 Focus on progress, not perfection!',
   ];
   
   return defaultMessages[Math.floor(Math.random() * defaultMessages.length)];
@@ -363,5 +363,5 @@ export default {
   getMotivationalMessage,
   debounce,
   isSameDay,
-  getWorkoutIntensity
+  getWorkoutIntensity,
 };

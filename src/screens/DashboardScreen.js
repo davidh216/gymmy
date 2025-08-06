@@ -42,7 +42,7 @@ const DashboardScreen = ({ navigation }) => {
     workoutTemplates = [], // Add default empty array
     bodyWeights = [], // Add default empty array
     workoutHistory = [], // Add default empty array
-    isDemo 
+    isDemo, 
   } = useApp();
   
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -66,7 +66,7 @@ const DashboardScreen = ({ navigation }) => {
         totalDuration: 0,
         selectedMonthDuration: 0,
         favoriteExercise: 'None yet',
-        templatesCount: 0
+        templatesCount: 0,
       };
     }
 
@@ -130,7 +130,7 @@ const DashboardScreen = ({ navigation }) => {
       totalDuration: workoutStats?.totalDuration || 0,
       selectedMonthDuration: selectedMonthDuration,
       favoriteExercise,
-      templatesCount: Array.isArray(workoutTemplates) ? workoutTemplates.length : 0
+      templatesCount: Array.isArray(workoutTemplates) ? workoutTemplates.length : 0,
     };
   }, [workoutStats, monthlyStats, recentWorkouts, workoutTemplates, selectedMonth]);
 
@@ -147,7 +147,7 @@ const DashboardScreen = ({ navigation }) => {
       // Navigate to workout screen with edit mode
       navigation.navigate('Workout', { 
         workoutId: workout.id,
-        mode: 'edit'
+        mode: 'edit',
       });
     } else if (action === 'delete') {
       Alert.alert(
@@ -164,9 +164,9 @@ const DashboardScreen = ({ navigation }) => {
               } catch (error) {
                 Alert.alert('Error', 'Failed to delete workout');
               }
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     }
   };
@@ -286,8 +286,8 @@ const DashboardScreen = ({ navigation }) => {
                         { text: 'Cancel', style: 'cancel' },
                         { text: 'View', onPress: () => handleWorkoutPress(workout) },
                         { text: 'Edit', onPress: () => handleWorkoutPress(workout, 'edit') },
-                        { text: 'Delete', style: 'destructive', onPress: () => handleWorkoutPress(workout, 'delete') }
-                      ]
+                        { text: 'Delete', style: 'destructive', onPress: () => handleWorkoutPress(workout, 'delete') },
+                      ],
                     );
                   }}
                 >
@@ -295,13 +295,13 @@ const DashboardScreen = ({ navigation }) => {
                     <Text style={styles.workoutDate}>
                       {new Date(workout.startTime).toLocaleDateString('en-US', { 
                         month: 'short', 
-                        day: 'numeric' 
+                        day: 'numeric', 
                       })}
                     </Text>
                     <Text style={styles.workoutTime}>
                       {new Date(workout.startTime).toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
-                        minute: '2-digit' 
+                        minute: '2-digit', 
                       })}
                     </Text>
                   </View>
@@ -323,7 +323,7 @@ const DashboardScreen = ({ navigation }) => {
                       />
                       <Text style={[
                         styles.ratingText,
-                        { color: getRatingColor(workout.ratings.workoutRating) }
+                        { color: getRatingColor(workout.ratings.workoutRating) },
                       ]}>
                         {workout.ratings.workoutRating}/10
                       </Text>

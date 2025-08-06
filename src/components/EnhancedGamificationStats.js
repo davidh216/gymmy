@@ -78,7 +78,7 @@ const EnhancedGamificationStats = ({ navigation }) => {
             <Animated.View 
               style={[
                 styles.progressFill, 
-                { width: classProgressWidth, backgroundColor: classData.color }
+                { width: classProgressWidth, backgroundColor: classData.color },
               ]} 
             />
           </View>

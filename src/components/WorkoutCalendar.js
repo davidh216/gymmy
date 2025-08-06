@@ -20,7 +20,7 @@ const WorkoutCalendar = ({
   onWorkoutPress, 
   navigation, 
   onMonthChange, 
-  selectedMonth 
+  selectedMonth, 
 }) => {
   const { restDays = [], addRestDay, removeRestDay, updateRestDay } = useApp(); // Add defaults
   const [currentDate, setCurrentDate] = useState(selectedMonth || new Date());
@@ -247,9 +247,9 @@ const WorkoutCalendar = ({
           onPress: async () => {
             await removeRestDay(date);
             setSelectedRestDay(null);
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
@@ -258,7 +258,7 @@ const WorkoutCalendar = ({
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -368,7 +368,7 @@ const WorkoutCalendar = ({
                           <View style={styles.workoutDetailTitle}>
                             <View style={[
                               styles.workoutDetailDot,
-                              { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }
+                              { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) },
                             ]} />
                             <Text style={styles.workoutDetailName}>
                               Workout #{index + 1}
@@ -376,10 +376,10 @@ const WorkoutCalendar = ({
                             <Text style={styles.workoutDetailTime}>
                               {new Date(workout.startTime).toLocaleTimeString('en-US', {
                                 hour: 'numeric',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })} - {new Date(workout.endTime).toLocaleTimeString('en-US', {
                                 hour: 'numeric',
-                                minute: '2-digit'
+                                minute: '2-digit',
                               })}
                             </Text>
                           </View>
@@ -394,7 +394,7 @@ const WorkoutCalendar = ({
                               <Ionicons name="create" size={18} color="#007AFF" />
                             </TouchableOpacity>
                             <Ionicons 
-                              name={isExpanded ? "chevron-up" : "chevron-down"} 
+                              name={isExpanded ? 'chevron-up' : 'chevron-down'} 
                               size={20} 
                               color="#666" 
                             />
@@ -416,7 +416,7 @@ const WorkoutCalendar = ({
                             <Ionicons name="star" size={16} color="#666" />
                             <Text style={[
                               styles.workoutSummaryText,
-                              { color: getRatingColor(workout.ratings?.workoutRating || 5) }
+                              { color: getRatingColor(workout.ratings?.workoutRating || 5) },
                             ]}>
                               {workout.ratings?.workoutRating || 5}/10
                             </Text>
@@ -488,8 +488,8 @@ const WorkoutCalendar = ({
                   <Text style={styles.noWorkoutsTitle}>No workouts on this day</Text>
                   <Text style={styles.noWorkoutsSubtitle}>
                     {selectedDate && selectedDate.toDateString() === new Date().toDateString() 
-                      ? "Ready to start your workout for today?"
-                      : "This was a rest day or you hadn't started tracking yet."
+                      ? 'Ready to start your workout for today?'
+                      : 'This was a rest day or you hadn\'t started tracking yet.'
                     }
                   </Text>
                   {selectedDate && selectedDate.toDateString() === new Date().toDateString() && (
@@ -557,7 +557,7 @@ const WorkoutCalendar = ({
                   styles.day,
                   !day.isCurrentMonth && styles.otherMonth,
                   day.isToday && styles.today,
-                  day.restDay && styles.restDayCell
+                  day.restDay && styles.restDayCell,
                 ]}
                 onPress={() => openDateDetail(day.date, day.workouts, day.restDay)}
                 activeOpacity={0.7}
@@ -565,7 +565,7 @@ const WorkoutCalendar = ({
                 <Text style={[
                   styles.dayNumber,
                   !day.isCurrentMonth && styles.otherMonthText,
-                  day.isToday && styles.todayText
+                  day.isToday && styles.todayText,
                 ]}>
                   {day.date.getDate()}
                 </Text>
@@ -585,7 +585,7 @@ const WorkoutCalendar = ({
                         key={workout.id}
                         style={[
                           styles.workoutDot,
-                          { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }
+                          { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) },
                         ]}
                       />
                     ))}

@@ -45,7 +45,7 @@ const BodyWeightTracker = () => {
         trend: 'stable',
         min: 0,
         max: 0,
-        average: 0
+        average: 0,
       };
     }
 
@@ -77,7 +77,7 @@ const BodyWeightTracker = () => {
       trend,
       min,
       max,
-      average
+      average,
     };
   }, [bodyWeights]);
 
@@ -98,7 +98,7 @@ const BodyWeightTracker = () => {
         await updateBodyWeight(editingEntry.id, {
           weight: weightValue,
           date,
-          notes: notes.trim()
+          notes: notes.trim(),
         });
       } else {
         await addBodyWeight(weightValue, date, notes.trim());
@@ -131,25 +131,25 @@ const BodyWeightTracker = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => removeBodyWeight(entry.id)
-        }
-      ]
+          onPress: () => removeBodyWeight(entry.id),
+        },
+      ],
     );
   };
 
   const getTrendIcon = () => {
     switch (stats.trend) {
-      case 'increasing': return 'trending-up';
-      case 'decreasing': return 'trending-down';
-      default: return 'remove';
+    case 'increasing': return 'trending-up';
+    case 'decreasing': return 'trending-down';
+    default: return 'remove';
     }
   };
 
   const getTrendColor = () => {
     switch (stats.trend) {
-      case 'increasing': return '#ef4444';
-      case 'decreasing': return '#22c55e';
-      default: return '#6b7280';
+    case 'increasing': return '#ef4444';
+    case 'decreasing': return '#22c55e';
+    default: return '#6b7280';
     }
   };
 

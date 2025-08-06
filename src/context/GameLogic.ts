@@ -4,7 +4,7 @@
 import { 
   FITNESS_CLASSES, 
   CHARACTER_TEMPLATES, 
-  GACHA_RATES 
+  GACHA_RATES, 
 } from './GameData';
 
 import {
@@ -20,7 +20,7 @@ import {
   GenerateCharacterFunction,
   PerformGachaPullFunction,
   WorkoutWithCharacterFunction,
-  CreateWorkoutPostFunction
+  CreateWorkoutPostFunction,
 } from './types';
 
 // ==============================================================================
@@ -118,7 +118,7 @@ export const calculateClassXP: CalculateClassXPFunction = (workout: Workout, use
   
   // Check for preferred exercises
   const hasPreferredExercises = workout.exercises?.some(ex => 
-    classData.preferredExercises.includes(ex.name.toLowerCase().replace(/\s+/g, '_'))
+    classData.preferredExercises.includes(ex.name.toLowerCase().replace(/\s+/g, '_')),
   );
   
   if (hasPreferredExercises) {
@@ -132,7 +132,7 @@ export const applyClassBonuses = (
   baseXP: number, 
   workout: Workout, 
   classData: typeof FITNESS_CLASSES[FitnessClassKey], 
-  userStats: UserStats
+  userStats: UserStats,
 ): number => {
   let multiplier = 1.0;
   
@@ -230,7 +230,7 @@ export const workoutWithCharacter: WorkoutWithCharacterFunction = (character: Ch
       mood: Math.min(100, character.condition.mood + moodBoost),
       hunger: Math.min(100, character.condition.hunger + 15),
       rest: Math.max(0, character.condition.rest - 10),
-    }
+    },
   };
 };
 
@@ -254,6 +254,6 @@ export const createWorkoutPost: CreateWorkoutPostFunction = (workout: Workout, p
       duration: workout.duration || 0,
       rating: workout.ratings?.workoutRating || 0,
       class_bonus: workout.class_bonus || 0,
-    }
+    },
   };
 }; 

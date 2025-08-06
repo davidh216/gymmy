@@ -40,7 +40,7 @@ const WorkoutScreen = ({ navigation, route }) => {
     resetToDummyData,
     workoutTemplates,
     addTemplate,
-    removeTemplate
+    removeTemplate,
   } = useApp();
 
   // Check if we should show templates or start with a template
@@ -90,39 +90,39 @@ const WorkoutScreen = ({ navigation, route }) => {
       'Incline Bench Press (Smith)', 'Bench Press', 'Cable Fly (Low)', 
       'Cable Fly (Middle)', 'Cable Fly (High)', 'Bench Press (Smith)', 
       'Incline Bench Press', 'Incline Dumbbell Bench Press', 
-      'Dumbbell Bench Press', 'Decline Bench Press'
+      'Dumbbell Bench Press', 'Decline Bench Press',
     ],
     Back: [
       'Lat Pulldown (Wide-grip)', 'Lat Pulldown (Close-grip)', 'Deadlift', 
       'Deadlift (Smith)', 'Upright Barbell Row (Smith)', 'Upright Barbell Row', 
       'Single Arm Dumbbell Row', 'Bent-Over Rows (Smith)', 'Bent-Over Rows', 
-      'Pull-Ups', 'Pull-Ups (Weighted)'
+      'Pull-Ups', 'Pull-Ups (Weighted)',
     ],
     Legs: [
       'Barbell Squat', 'Barbell Squat (Smith)', 'Seated Leg Press', 
-      'Seated Calf Raise', 'Leg Extension'
+      'Seated Calf Raise', 'Leg Extension',
     ],
     Shoulders: [
       'Standing Barbell Shoulder Press', 'Seated Barbell Shoulder Press (Smith)', 
       'Seated Dumbbell Shoulder Press', 'Face Pulls', 'Bent Over Reverse Fly', 
-      'Lateral Raise', 'Arnold Press'
+      'Lateral Raise', 'Arnold Press',
     ],
     Bicep: [
       'Standing Barbell Bicep Curl', 'Preacher Curls', 'Hammer Curls', 
-      'Concentration Curls', 'Incline Dumbbell Curls', 'Cable Curls'
+      'Concentration Curls', 'Incline Dumbbell Curls', 'Cable Curls',
     ],
     Tricep: [
       'Tricep Dips', 'Tricep Pushdowns', 'Skull Crushers', 'Overhead Tricep Extension',
-      'Close-Grip Bench Press', 'Diamond Push-Ups'
+      'Close-Grip Bench Press', 'Diamond Push-Ups',
     ],
     Core: [
       'Planks', 'Crunches', 'Russian Twists', 'Leg Raises', 'Bicycle Crunches',
-      'Mountain Climbers', 'Dead Bug', 'Bird Dog'
+      'Mountain Climbers', 'Dead Bug', 'Bird Dog',
     ],
     Cardio: [
       'Running', 'Cycling', 'Rowing', 'Elliptical', 'StairMaster', 'Jump Rope',
-      'Swimming', 'Walking', 'HIIT', 'Circuit Training'
-    ]
+      'Swimming', 'Walking', 'HIIT', 'Circuit Training',
+    ],
   }), []);
 
   const isCardioExercise = (exerciseName) => {
@@ -161,7 +161,7 @@ const WorkoutScreen = ({ navigation, route }) => {
       type: 'Weightlifting',
       exercises: [],
       ratings: { ...workoutRatings },
-      templateUsed: template.id
+      templateUsed: template.id,
     };
     
     setCurrentWorkout(workout);
@@ -230,7 +230,7 @@ const WorkoutScreen = ({ navigation, route }) => {
           name: exercise.name,
           isCardio: true,
           targetDuration: exercise.cardioData?.totalTime || 30,
-          targetCalories: exercise.cardioData?.calories || 0
+          targetCalories: exercise.cardioData?.calories || 0,
         };
       } else {
         // Get average weight and reps from sets
@@ -246,7 +246,7 @@ const WorkoutScreen = ({ navigation, route }) => {
           name: exercise.name,
           sets: exercise.sets.length,
           targetReps: avgReps,
-          targetWeight: avgWeight
+          targetWeight: avgWeight,
         };
       }
     });
@@ -254,7 +254,7 @@ const WorkoutScreen = ({ navigation, route }) => {
     const template = {
       name: templateName,
       description: templateDescription,
-      exercises: templateExercises
+      exercises: templateExercises,
     };
     
     await addTemplate(template);
@@ -277,9 +277,9 @@ const WorkoutScreen = ({ navigation, route }) => {
           { text: 'Cancel', style: 'cancel' },
           { 
             text: 'Add Set', 
-            onPress: () => addSet(existingExercise.id)
-          }
-        ]
+            onPress: () => addSet(existingExercise.id),
+          },
+        ],
       );
       return;
     }
@@ -378,8 +378,8 @@ const WorkoutScreen = ({ navigation, route }) => {
           ...exercise,
           cardioData: {
             ...exercise.cardioData,
-            [field]: parsedValue
-          }
+            [field]: parsedValue,
+          },
         };
       }
       return exercise;
@@ -523,13 +523,13 @@ const WorkoutScreen = ({ navigation, route }) => {
       Alert.alert(
         'Workout Complete! 🎉', 
         `Great job! You completed ${completedWorkout?.exercises?.length || 0} exercises and earned ${pointsEarned} gacha points!`,
-        [{ text: 'Awesome!', style: 'default' }]
+        [{ text: 'Awesome!', style: 'default' }],
       );
     } else {
       Alert.alert(
         'Workout Complete!', 
         `Great job! You completed ${completedWorkout?.exercises?.length || 0} exercises in ${completedWorkout?.duration || 0} minutes.`,
-        [{ text: 'Awesome!', style: 'default' }]
+        [{ text: 'Awesome!', style: 'default' }],
       );
     }
   }, [completedWorkout]);
@@ -575,16 +575,16 @@ const WorkoutScreen = ({ navigation, route }) => {
                     key={rating}
                     style={[
                       styles.ratingButton,
-                      workoutRatings[ratingType === 'pre' ? 'beforeMood' : 'afterMood'] === rating && styles.selectedRating
+                      workoutRatings[ratingType === 'pre' ? 'beforeMood' : 'afterMood'] === rating && styles.selectedRating,
                     ]}
                     onPress={() => setWorkoutRatings({
                       ...workoutRatings,
-                      [ratingType === 'pre' ? 'beforeMood' : 'afterMood']: rating
+                      [ratingType === 'pre' ? 'beforeMood' : 'afterMood']: rating,
                     })}
                   >
                     <Text style={[
                       styles.ratingText,
-                      workoutRatings[ratingType === 'pre' ? 'beforeMood' : 'afterMood'] === rating && styles.selectedRatingText
+                      workoutRatings[ratingType === 'pre' ? 'beforeMood' : 'afterMood'] === rating && styles.selectedRatingText,
                     ]}>{rating}</Text>
                   </TouchableOpacity>
                 ))}
@@ -599,16 +599,16 @@ const WorkoutScreen = ({ navigation, route }) => {
                     key={rating}
                     style={[
                       styles.ratingButton,
-                      workoutRatings[ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy'] === rating && styles.selectedRating
+                      workoutRatings[ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy'] === rating && styles.selectedRating,
                     ]}
                     onPress={() => setWorkoutRatings({
                       ...workoutRatings,
-                      [ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy']: rating
+                      [ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy']: rating,
                     })}
                   >
                     <Text style={[
                       styles.ratingText,
-                      workoutRatings[ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy'] === rating && styles.selectedRatingText
+                      workoutRatings[ratingType === 'pre' ? 'beforeEnergy' : 'afterEnergy'] === rating && styles.selectedRatingText,
                     ]}>{rating}</Text>
                   </TouchableOpacity>
                 ))}
@@ -624,16 +624,16 @@ const WorkoutScreen = ({ navigation, route }) => {
                       key={rating}
                       style={[
                         styles.ratingButton,
-                        workoutRatings.workoutRating === rating && styles.selectedRating
+                        workoutRatings.workoutRating === rating && styles.selectedRating,
                       ]}
                       onPress={() => setWorkoutRatings({
                         ...workoutRatings,
-                        workoutRating: rating
+                        workoutRating: rating,
                       })}
                     >
                       <Text style={[
                         styles.ratingText,
-                        workoutRatings.workoutRating === rating && styles.selectedRatingText
+                        workoutRatings.workoutRating === rating && styles.selectedRatingText,
                       ]}>{rating}</Text>
                     </TouchableOpacity>
                   ))}
@@ -666,17 +666,17 @@ const WorkoutScreen = ({ navigation, route }) => {
       'Strength Training': workoutTemplates.filter(t => 
         !t.exercises.some(e => e.isCardio) && 
         !t.name.toLowerCase().includes('cardio') &&
-        !t.name.toLowerCase().includes('abs')
+        !t.name.toLowerCase().includes('abs'),
       ),
       'Cardio & HIIT': workoutTemplates.filter(t => 
         t.exercises.some(e => e.isCardio) || 
         t.name.toLowerCase().includes('cardio') ||
-        t.name.toLowerCase().includes('hiit')
+        t.name.toLowerCase().includes('hiit'),
       ),
       'Core & Abs': workoutTemplates.filter(t => 
         t.name.toLowerCase().includes('abs') || 
-        t.name.toLowerCase().includes('core')
-      )
+        t.name.toLowerCase().includes('core'),
+      ),
     };
 
     const getTemplateIcon = (template) => {
@@ -757,9 +757,9 @@ const WorkoutScreen = ({ navigation, route }) => {
                                   {
                                     text: 'Delete',
                                     style: 'destructive',
-                                    onPress: () => removeTemplate(template.id)
-                                  }
-                                ]
+                                    onPress: () => removeTemplate(template.id),
+                                  },
+                                ],
                               );
                             }}
                             style={styles.deleteTemplateButton}
@@ -1079,7 +1079,7 @@ const WorkoutScreen = ({ navigation, route }) => {
                         <View style={styles.workoutDetailTitle}>
                           <View style={[
                             styles.workoutDetailDot,
-                            { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }
+                            { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) },
                           ]} />
                           <Text style={styles.workoutDetailName}>
                             {new Date(workout.startTime).toLocaleDateString()}
@@ -1099,7 +1099,7 @@ const WorkoutScreen = ({ navigation, route }) => {
                             <Ionicons name="star" size={14} color="#666" />
                             <Text style={[
                               styles.workoutSummaryText,
-                              { color: getRatingColor(workout.ratings?.workoutRating || 5) }
+                              { color: getRatingColor(workout.ratings?.workoutRating || 5) },
                             ]}>
                               {workout.ratings?.workoutRating || 5}/10
                             </Text>
@@ -1118,7 +1118,7 @@ const WorkoutScreen = ({ navigation, route }) => {
                             <Ionicons name="trash" size={18} color="#ff4444" />
                           </TouchableOpacity>
                           <Ionicons 
-                            name={isExpanded ? "chevron-up" : "chevron-down"} 
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'} 
                             size={20} 
                             color="#666" 
                           />
@@ -1289,7 +1289,7 @@ const WorkoutScreen = ({ navigation, route }) => {
               <TouchableOpacity 
                 style={[
                   styles.finishButton,
-                  exercises.length === 0 && styles.finishButtonDisabled
+                  exercises.length === 0 && styles.finishButtonDisabled,
                 ]} 
                 onPress={finishWorkout}
                 disabled={exercises.length === 0}

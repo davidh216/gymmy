@@ -46,8 +46,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 3,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'calorie_burn',
@@ -63,8 +63,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'body_changes',
@@ -80,8 +80,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'wellness_mindfulness',
@@ -97,8 +97,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 5,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'performance_athletics',
@@ -114,8 +114,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 10,
           habit_builder: 3,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'consistency_habits',
@@ -131,8 +131,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 10,
           social_enthusiast: 6,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'social_community',
@@ -148,10 +148,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 6,
           social_enthusiast: 10,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'progress_definition',
@@ -176,8 +176,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 2,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'energy_metrics',
@@ -193,8 +193,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'body_composition',
@@ -210,8 +210,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'wellness_metrics',
@@ -227,8 +227,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'performance_times',
@@ -244,8 +244,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 10,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'consistency_streaks',
@@ -261,8 +261,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 10,
           social_enthusiast: 5,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'community_wins',
@@ -278,10 +278,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 5,
           social_enthusiast: 10,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'biggest_challenge',
@@ -306,8 +306,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 2,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'calorie_burn_max',
@@ -323,8 +323,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'body_composition_goals',
@@ -340,8 +340,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'stress_mobility',
@@ -357,8 +357,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'performance_goals',
@@ -374,8 +374,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 8,
           habit_builder: 2,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'consistency_struggle',
@@ -391,8 +391,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 8,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'motivation_accountability',
@@ -408,10 +408,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 6,
           social_enthusiast: 8,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'success_measurement',
@@ -436,8 +436,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 2,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'calories_energy_zones',
@@ -453,8 +453,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 5,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'body_measurements_photos',
@@ -470,8 +470,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 3,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'flexibility_stress_sleep',
@@ -487,8 +487,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 5,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'times_distances_pace',
@@ -504,8 +504,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 10,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'streaks_consistency_frequency',
@@ -521,8 +521,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 10,
           social_enthusiast: 5,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'community_social_shared',
@@ -538,10 +538,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 5,
           social_enthusiast: 10,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'proudest_achievement',
@@ -566,8 +566,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 2,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'calorie_milestone',
@@ -583,8 +583,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'transformation_milestone',
@@ -600,8 +600,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 4,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'wellness_milestone',
@@ -617,8 +617,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'performance_milestone',
@@ -634,8 +634,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 10,
           habit_builder: 3,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'consistency_milestone',
@@ -651,8 +651,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 10,
           social_enthusiast: 6,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'social_milestone',
@@ -668,10 +668,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 6,
           social_enthusiast: 10,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'workout_preference',
@@ -696,8 +696,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 3,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'high_intensity_cardio',
@@ -713,8 +713,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 7,
           habit_builder: 4,
           social_enthusiast: 5,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'balanced_full_body',
@@ -730,8 +730,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 6,
           social_enthusiast: 5,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'yoga_stretching',
@@ -747,8 +747,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 5,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'endurance_training',
@@ -764,8 +764,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 9,
           habit_builder: 4,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'quick_effective',
@@ -781,8 +781,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 9,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'group_class',
@@ -798,10 +798,10 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 5,
           social_enthusiast: 9,
-          unassigned: 0
-        }
-      }
-    ]
+          unassigned: 0,
+        },
+      },
+    ],
   },
   {
     id: 'improvement_focus',
@@ -826,8 +826,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 2,
           social_enthusiast: 2,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'boost_energy',
@@ -843,8 +843,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 5,
           social_enthusiast: 4,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'transform_body',
@@ -860,8 +860,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 3,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'reduce_stress',
@@ -877,8 +877,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 2,
           habit_builder: 4,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'athletic_performance',
@@ -894,8 +894,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 10,
           habit_builder: 2,
           social_enthusiast: 3,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'build_consistency',
@@ -911,8 +911,8 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 4,
           habit_builder: 10,
           social_enthusiast: 5,
-          unassigned: 0
-        }
+          unassigned: 0,
+        },
       },
       {
         id: 'find_community',
@@ -928,11 +928,11 @@ export const ONBOARDING_SURVEY_QUESTIONS: SurveyQuestion[] = [
           endurance_athlete: 3,
           habit_builder: 5,
           social_enthusiast: 10,
-          unassigned: 0
-        }
-      }
-    ]
-  }
+          unassigned: 0,
+        },
+      },
+    ],
+  },
 ];
 
 // Utility functions for survey processing
@@ -963,7 +963,7 @@ export const SURVEY_CONFIG = {
   allowBackNavigation: true,
   showProgressBar: true,
   saveProgressLocally: true,
-  version: '1.0.0'
+  version: '1.0.0',
 };
 
 // Survey completion validation
@@ -990,6 +990,6 @@ export const validateSurveyCompletion = (responses: any[]): {
   return {
     isComplete: missingQuestions.length === 0 && errors.length === 0,
     missingQuestions,
-    errors
+    errors,
   };
 };

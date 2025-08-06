@@ -78,7 +78,7 @@ const ClassDashboardWidget = ({ navigation }) => {
             <Animated.View 
               style={[
                 styles.skillPointsBadge, 
-                { transform: [{ scale: skillPointPulse }] }
+                { transform: [{ scale: skillPointPulse }] },
               ]}
             >
               <Text style={styles.skillPointsText}>
@@ -95,7 +95,7 @@ const ClassDashboardWidget = ({ navigation }) => {
           <Animated.View 
             style={[
               styles.progressFill, 
-              { width: progressWidth, backgroundColor: classData.color }
+              { width: progressWidth, backgroundColor: classData.color },
             ]} 
           />
         </View>

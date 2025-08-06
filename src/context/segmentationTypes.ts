@@ -230,7 +230,7 @@ export const SEGMENT_CONFIGS: Record<FitnessSegment, SegmentConfig> = {
     motivationTriggers: ['exploration', 'trying_new_things'],
     celebrationStyle: 'moderate',
     colorScheme: '#9E9E9E', // Gray for unassigned
-  }
+  },
 };
 
 export interface SegmentConfig {

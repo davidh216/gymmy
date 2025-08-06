@@ -15,7 +15,7 @@ const AnalyticsPreview = ({ workoutHistory, bodyWeights, navigation }) => {
         avgDuration: 0,
         currentStreak: 0,
         weightTrend: 'stable',
-        weightChange: 0
+        weightChange: 0,
       };
     }
 
@@ -59,23 +59,23 @@ const AnalyticsPreview = ({ workoutHistory, bodyWeights, navigation }) => {
       totalWorkouts: workoutHistory.length,
       avgDuration,
       weightTrend,
-      weightChange: Math.abs(weightChange)
+      weightChange: Math.abs(weightChange),
     };
   }, [workoutHistory, bodyWeights]);
 
   const getTrendIcon = (trend) => {
     switch (trend) {
-      case 'increasing': return 'trending-up';
-      case 'decreasing': return 'trending-down';
-      default: return 'remove';
+    case 'increasing': return 'trending-up';
+    case 'decreasing': return 'trending-down';
+    default: return 'remove';
     }
   };
 
   const getTrendColor = (trend) => {
     switch (trend) {
-      case 'increasing': return '#ef4444';
-      case 'decreasing': return '#22c55e';
-      default: return '#6b7280';
+    case 'increasing': return '#ef4444';
+    case 'decreasing': return '#22c55e';
+    default: return '#6b7280';
     }
   };
 

@@ -19,7 +19,7 @@ const EditWorkoutModal = ({
   visible, 
   workout, 
   onSave, 
-  onCancel 
+  onCancel, 
 }) => {
   const [editedWorkout, setEditedWorkout] = useState(null);
   const [notes, setNotes] = useState('');
@@ -92,7 +92,7 @@ const EditWorkoutModal = ({
       notes: notes.trim(),
       ratings: {
         ...editedWorkout.ratings,
-        workoutRating: rating
+        workoutRating: rating,
       },
       lastModified: new Date().toISOString(),
     };
@@ -141,9 +141,9 @@ const EditWorkoutModal = ({
           style: 'destructive',
           onPress: () => {
             setExercises(prev => prev.filter(ex => ex.id !== exerciseId));
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
@@ -214,7 +214,7 @@ const EditWorkoutModal = ({
             size={24}
             color={i <= rating ? '#FFD700' : '#ccc'}
           />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
     return stars;

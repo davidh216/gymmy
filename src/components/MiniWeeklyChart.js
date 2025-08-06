@@ -27,7 +27,7 @@ const MiniWeeklyChart = ({ workoutHistory = [] }) => { // Add default empty arra
       
       weeks.push({
         count: weekWorkouts.length,
-        week: i === 0 ? 'This Week' : `${i}w ago`
+        week: i === 0 ? 'This Week' : `${i}w ago`,
       });
     }
     

@@ -39,7 +39,7 @@ const SettingsScreen = ({ navigation }) => {
     }
   }, [appSettings]);
 
-    const toggleSetting = async (key) => {
+  const toggleSetting = async (key) => {
     if (key === 'demoMode') {
       const newDemoMode = !settings.demoMode;
       setSettings(prev => ({ ...prev, demoMode: newDemoMode }));
@@ -78,7 +78,7 @@ const SettingsScreen = ({ navigation }) => {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Export', onPress: () => console.log('Exporting data...') },
-      ]
+      ],
     );
   };
 
@@ -90,7 +90,7 @@ const SettingsScreen = ({ navigation }) => {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Import', onPress: () => console.log('Importing data...') },
-      ]
+      ],
     );
   };
 
@@ -107,9 +107,9 @@ const SettingsScreen = ({ navigation }) => {
             // TODO: Clear all data
             console.log('Clearing all data...');
             Alert.alert('Data Cleared', 'All workout data has been deleted.');
-          }
+          },
         },
-      ]
+      ],
     );
   };
 
@@ -117,7 +117,7 @@ const SettingsScreen = ({ navigation }) => {
     Alert.alert(
       'About Gymmy',
       'Version 1.0.0\n\nA comprehensive workout tracking app for weightlifting and cardio.\n\nFeatures:\n• Track weightlifting exercises\n• Monitor cardio activities\n• Progress tracking\n• One-rep max tracking\n• Workout ratings\n• Soreness tracking',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
@@ -201,7 +201,7 @@ const SettingsScreen = ({ navigation }) => {
               <Ionicons 
                 name="eye" 
                 size={20} 
-                color={isDemo ? "#ff6b35" : "#007AFF"} 
+                color={isDemo ? '#ff6b35' : '#007AFF'} 
               />
               <View style={styles.settingTextContainer}>
                 <Text style={[styles.settingLabel, isDemo && styles.demoModeText]}>

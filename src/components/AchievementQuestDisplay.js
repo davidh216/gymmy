@@ -15,7 +15,7 @@ const AchievementQuestDisplay = ({ achievements, activeQuests, completedQuests }
       'streak_30': 'fire',
       'perfect_workout': 'star',
       'template_master': 'bookmark',
-      'template_legend': 'bookmark'
+      'template_legend': 'bookmark',
     };
     return iconMap[achievementId] || 'star-outline';
   };
@@ -24,7 +24,7 @@ const AchievementQuestDisplay = ({ achievements, activeQuests, completedQuests }
     const iconMap = {
       'daily_workout': 'calendar-outline',
       'daily_streak': 'flame-outline',
-      'weekly_consistency': 'calendar'
+      'weekly_consistency': 'calendar',
     };
     return iconMap[questId] || 'bookmark-outline';
   };
@@ -87,7 +87,7 @@ const AchievementQuestDisplay = ({ achievements, activeQuests, completedQuests }
                   <View 
                     style={[
                       styles.progressFill, 
-                      { width: `${(quest.progress / quest.maxProgress) * 100}%` }
+                      { width: `${(quest.progress / quest.maxProgress) * 100}%` },
                     ]} 
                   />
                 </View>

@@ -17,7 +17,7 @@ const STORAGE_KEYS = {
   BACKUP_USER_STATS: '@backup_user_stats',
   BACKUP_WORKOUT_TEMPLATES: '@backup_workout_templates',
   BACKUP_REST_DAYS: '@backup_rest_days',
-  BACKUP_BODY_WEIGHTS: '@backup_body_weights'
+  BACKUP_BODY_WEIGHTS: '@backup_body_weights',
 };
 
 class StorageManager {
@@ -93,7 +93,7 @@ class StorageManager {
       darkMode: false,
       autoTimer: true,
       exportFormat: 'JSON',
-      demoMode: false
+      demoMode: false,
     };
     return await this.loadData(STORAGE_KEYS.SETTINGS, defaultSettings);
   }
@@ -110,7 +110,7 @@ class StorageManager {
       streaks: {
         current: 0,
         best: 0,
-        lastWorkout: null
+        lastWorkout: null,
       },
       experience: 0,
       level: 1,
@@ -169,7 +169,7 @@ class StorageManager {
         restDays: await this.loadRestDays(),
         bodyWeights: await this.loadBodyWeights(),
         exportDate: new Date().toISOString(),
-        appVersion: '1.0.0'
+        appVersion: '1.0.0',
       };
       
       return exportData;
@@ -221,7 +221,7 @@ class StorageManager {
         this.removeData(STORAGE_KEYS.USER_STATS),
         this.removeData(STORAGE_KEYS.WORKOUT_TEMPLATES),
         this.removeData(STORAGE_KEYS.REST_DAYS),
-        this.removeData(STORAGE_KEYS.BODY_WEIGHTS)
+        this.removeData(STORAGE_KEYS.BODY_WEIGHTS),
       ]);
       return true;
     } catch (error) {
@@ -248,9 +248,9 @@ class StorageManager {
             { name: 'Lat Pulldown (Wide-grip)', sets: 3, targetReps: 10, targetWeight: 0 },
             { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
             { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
-            { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 }
+            { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_push_pull_legs',
@@ -262,9 +262,9 @@ class StorageManager {
             { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
             { name: 'Lateral Raise', sets: 3, targetReps: 12, targetWeight: 0 },
             { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
-            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_upper_lower',
@@ -276,9 +276,9 @@ class StorageManager {
             { name: 'Upright Barbell Row', sets: 3, targetReps: 8, targetWeight: 0 },
             { name: 'Standing Barbell Shoulder Press', sets: 3, targetReps: 8, targetWeight: 0 },
             { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
-            { name: 'Tricep Dips', sets: 3, targetReps: 10, targetWeight: 0 }
+            { name: 'Tricep Dips', sets: 3, targetReps: 10, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_chest_back',
@@ -290,9 +290,9 @@ class StorageManager {
             { name: 'Cable Fly (Middle)', sets: 3, targetReps: 12, targetWeight: 0 },
             { name: 'Lat Pulldown (Wide-grip)', sets: 4, targetReps: 8, targetWeight: 0 },
             { name: 'Bent-Over Rows', sets: 3, targetReps: 8, targetWeight: 0 },
-            { name: 'Single Arm Dumbbell Row', sets: 3, targetReps: 10, targetWeight: 0 }
+            { name: 'Single Arm Dumbbell Row', sets: 3, targetReps: 10, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_legs_focus',
@@ -302,9 +302,9 @@ class StorageManager {
             { name: 'Barbell Squat', sets: 4, targetReps: 6, targetWeight: 0 },
             { name: 'Seated Leg Press', sets: 3, targetReps: 10, targetWeight: 0 },
             { name: 'Leg Extension', sets: 3, targetReps: 12, targetWeight: 0 },
-            { name: 'Seated Calf Raise', sets: 4, targetReps: 15, targetWeight: 0 }
+            { name: 'Seated Calf Raise', sets: 4, targetReps: 15, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_shoulders_arms',
@@ -317,9 +317,9 @@ class StorageManager {
             { name: 'Standing Barbell Bicep Curl', sets: 3, targetReps: 10, targetWeight: 0 },
             { name: 'Preacher Curls', sets: 3, targetReps: 12, targetWeight: 0 },
             { name: 'Tricep Pushdowns', sets: 3, targetReps: 12, targetWeight: 0 },
-            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 }
+            { name: 'Skullcrushers', sets: 3, targetReps: 10, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_cardio_mix',
@@ -328,9 +328,9 @@ class StorageManager {
           exercises: [
             { name: 'Running', isCardio: true, targetDuration: 20, targetCalories: 200 },
             { name: 'Cycling', isCardio: true, targetDuration: 15, targetCalories: 150 },
-            { name: 'Rowing', isCardio: true, targetDuration: 10, targetCalories: 100 }
+            { name: 'Rowing', isCardio: true, targetDuration: 10, targetCalories: 100 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_hiit_workout',
@@ -338,9 +338,9 @@ class StorageManager {
           description: 'High-intensity interval training for maximum calorie burn.',
           exercises: [
             { name: 'Running', isCardio: true, targetDuration: 30, targetCalories: 300 },
-            { name: 'Elliptical', isCardio: true, targetDuration: 20, targetCalories: 200 }
+            { name: 'Elliptical', isCardio: true, targetDuration: 20, targetCalories: 200 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_abs_core',
@@ -348,9 +348,9 @@ class StorageManager {
           description: 'Core strengthening workout with bodyweight and weighted exercises.',
           exercises: [
             { name: 'Hanging Leg Raises', sets: 3, targetReps: 12, targetWeight: 0 },
-            { name: 'Upright Ab Pulldowns', sets: 3, targetReps: 15, targetWeight: 0 }
+            { name: 'Upright Ab Pulldowns', sets: 3, targetReps: 15, targetWeight: 0 },
           ],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
         {
           id: 'template_beginner_cardio',
@@ -358,10 +358,10 @@ class StorageManager {
           description: 'Low-impact cardio for beginners starting their fitness journey.',
           exercises: [
             { name: 'Walking', isCardio: true, targetDuration: 30, targetCalories: 150 },
-            { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 120 }
+            { name: 'Cycling', isCardio: true, targetDuration: 20, targetCalories: 120 },
           ],
-          createdAt: new Date().toISOString()
-        }
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       // Generate comprehensive dummy data for May, June, July with ~4 workouts per week
@@ -372,19 +372,19 @@ class StorageManager {
         // May 2025 workouts (4 weeks)
         const mayDates = [
           '2025-05-01', '2025-05-03', '2025-05-06', '2025-05-08', '2025-05-10', '2025-05-13', '2025-05-15', '2025-05-17',
-          '2025-05-20', '2025-05-22', '2025-05-24', '2025-05-27', '2025-05-29', '2025-05-31'
+          '2025-05-20', '2025-05-22', '2025-05-24', '2025-05-27', '2025-05-29', '2025-05-31',
         ];
         
         // June 2025 workouts (4 weeks)
         const juneDates = [
           '2025-06-03', '2025-06-05', '2025-06-07', '2025-06-10', '2025-06-12', '2025-06-14', '2025-06-17', '2025-06-19',
-          '2025-06-21', '2025-06-24', '2025-06-26', '2025-06-28'
+          '2025-06-21', '2025-06-24', '2025-06-26', '2025-06-28',
         ];
         
         // July 2025 workouts (4 weeks)
         const julyDates = [
           '2025-07-01', '2025-07-03', '2025-07-05', '2025-07-08', '2025-07-10', '2025-07-12', '2025-07-15', '2025-07-17',
-          '2025-07-19', '2025-07-22', '2025-07-24', '2025-07-26', '2025-07-29', '2025-07-31'
+          '2025-07-19', '2025-07-22', '2025-07-24', '2025-07-26', '2025-07-29', '2025-07-31',
         ];
         
         const allDates = [...mayDates, ...juneDates, ...julyDates];
@@ -393,43 +393,43 @@ class StorageManager {
           {
             name: 'Bench Press',
             sets: [{ reps: 8, weight: 135 }, { reps: 8, weight: 135 }, { reps: 6, weight: 145 }],
-            isCardio: false
+            isCardio: false,
           },
           {
             name: 'Squats',
             sets: [{ reps: 10, weight: 185 }, { reps: 10, weight: 185 }, { reps: 8, weight: 195 }],
-            isCardio: false
+            isCardio: false,
           },
           {
             name: 'Deadlifts',
             sets: [{ reps: 5, weight: 225 }, { reps: 5, weight: 225 }, { reps: 3, weight: 245 }],
-            isCardio: false
+            isCardio: false,
           },
           {
             name: 'Pull-ups',
             sets: [{ reps: 8, weight: 0 }, { reps: 6, weight: 0 }, { reps: 5, weight: 0 }],
-            isCardio: false
+            isCardio: false,
           },
           {
             name: 'Running',
             cardioData: { duration: 30, pace: '8:30', calories: 320 },
-            isCardio: true
+            isCardio: true,
           },
           {
             name: 'Cycling',
             cardioData: { duration: 45, pace: '15mph', calories: 450 },
-            isCardio: true
+            isCardio: true,
           },
           {
             name: 'Push-ups',
             sets: [{ reps: 15, weight: 0 }, { reps: 12, weight: 0 }, { reps: 10, weight: 0 }],
-            isCardio: false
+            isCardio: false,
           },
           {
             name: 'Overhead Press',
             sets: [{ reps: 8, weight: 95 }, { reps: 8, weight: 95 }, { reps: 6, weight: 105 }],
-            isCardio: false
-          }
+            isCardio: false,
+          },
         ];
         
         allDates.forEach((date, index) => {
@@ -446,9 +446,9 @@ class StorageManager {
               beforeMood: 5 + Math.floor(Math.random() * 5), // 5-9
               afterMood: 6 + Math.floor(Math.random() * 4), // 6-9
               beforeEnergy: 4 + Math.floor(Math.random() * 5), // 4-8
-              afterEnergy: 5 + Math.floor(Math.random() * 4) // 5-8
+              afterEnergy: 5 + Math.floor(Math.random() * 4), // 5-8
             },
-            lastModified: `${date}T13:30:00.000Z`
+            lastModified: `${date}T13:30:00.000Z`,
           };
           
           // Add 2-4 exercises per workout
@@ -459,16 +459,16 @@ class StorageManager {
             const exercise = exerciseTypes[Math.floor(Math.random() * exerciseTypes.length)];
             if (!selectedExercises.includes(exercise.name)) {
               selectedExercises.push(exercise.name);
-                        workout.exercises.push({
-            id: `${workoutId}-${i + 1}`,
-            name: exercise.name,
-            ...(exercise.isCardio ? { cardioData: exercise.cardioData } : { sets: exercise.sets })
-          });
+              workout.exercises.push({
+                id: `${workoutId}-${i + 1}`,
+                name: exercise.name,
+                ...(exercise.isCardio ? { cardioData: exercise.cardioData } : { sets: exercise.sets }),
+              });
           
-          // Add template completion bonus for some workouts
-          if (Math.random() < 0.3) { // 30% chance of template completion
-            workout.templateId = `template_${['beginner_full_body', 'push_pull_legs', 'upper_lower'][Math.floor(Math.random() * 3)]}`;
-          }
+              // Add template completion bonus for some workouts
+              if (Math.random() < 0.3) { // 30% chance of template completion
+                workout.templateId = `template_${['beginner_full_body', 'push_pull_legs', 'upper_lower'][Math.floor(Math.random() * 3)]}`;
+              }
             }
           }
           
@@ -580,7 +580,7 @@ class StorageManager {
       
       exerciseNames.forEach(name => {
         const workoutsWithExercise = dummyWorkouts.filter(w => 
-          w.exercises.some(e => e.name === name)
+          w.exercises.some(e => e.name === name),
         );
         
         if (workoutsWithExercise.length > 0) {
@@ -592,7 +592,7 @@ class StorageManager {
               date: latestWorkout.workoutDate,
               duration: exercise.cardioData.duration,
               pace: exercise.cardioData.pace,
-              calories: exercise.cardioData.calories
+              calories: exercise.cardioData.calories,
             }];
           } else {
             const avgReps = exercise.sets.reduce((sum, set) => sum + set.reps, 0) / exercise.sets.length;
@@ -601,7 +601,7 @@ class StorageManager {
               date: latestWorkout.workoutDate,
               reps: Math.round(avgReps),
               weight: Math.round(avgWeight),
-              sets: exercise.sets.length
+              sets: exercise.sets.length,
             }];
           }
         }
@@ -619,7 +619,7 @@ class StorageManager {
         { date: '2025-05-09', notes: 'Yoga and stretching', planned: false },
         { date: '2025-06-02', notes: 'Rest day', planned: true },
         { date: '2025-06-08', notes: 'Recovery day', planned: true },
-        { date: '2025-07-07', notes: 'Rest - feeling sore', planned: false }
+        { date: '2025-07-07', notes: 'Rest - feeling sore', planned: false },
       ];
       
       await this.saveRestDays(dummyRestDays);
@@ -639,7 +639,7 @@ class StorageManager {
         { id: '11', weight: 176.0, date: '2025-07-10', notes: 'Halfway to goal!', createdAt: '2025-07-10T08:00:00.000Z' },
         { id: '12', weight: 175.7, date: '2025-07-17', notes: '', createdAt: '2025-07-17T08:00:00.000Z' },
         { id: '13', weight: 175.3, date: '2025-07-24', notes: 'Looking leaner', createdAt: '2025-07-24T08:00:00.000Z' },
-        { id: '14', weight: 175.0, date: '2025-07-31', notes: 'Best shape of my life!', createdAt: '2025-07-31T08:00:00.000Z' }
+        { id: '14', weight: 175.0, date: '2025-07-31', notes: 'Best shape of my life!', createdAt: '2025-07-31T08:00:00.000Z' },
       ];
       
       await this.saveBodyWeights(dummyBodyWeights);
@@ -653,7 +653,7 @@ class StorageManager {
             description: 'Complete your first workout',
             icon: 'fitness',
             unlockedAt: '2025-05-01T12:00:00.000Z',
-            xpReward: 50
+            xpReward: 50,
           },
           {
             id: 'workout_5',
@@ -661,7 +661,7 @@ class StorageManager {
             description: 'Complete 5 workouts',
             icon: 'fitness',
             unlockedAt: '2025-05-10T12:00:00.000Z',
-            xpReward: 100
+            xpReward: 100,
           },
           {
             id: 'workout_25',
@@ -669,7 +669,7 @@ class StorageManager {
             description: 'Complete 25 workouts',
             icon: 'trophy',
             unlockedAt: '2025-06-15T12:00:00.000Z',
-            xpReward: 250
+            xpReward: 250,
           },
           {
             id: 'streak_7',
@@ -677,7 +677,7 @@ class StorageManager {
             description: 'Maintain a 7-day workout streak',
             icon: 'flame',
             unlockedAt: '2025-06-20T12:00:00.000Z',
-            xpReward: 300
+            xpReward: 300,
           },
           {
             id: 'hours_10',
@@ -685,7 +685,7 @@ class StorageManager {
             description: 'Log 10 hours of workouts',
             icon: 'time',
             unlockedAt: '2025-07-01T12:00:00.000Z',
-            xpReward: 200
+            xpReward: 200,
           },
           {
             id: 'variety_5',
@@ -693,7 +693,7 @@ class StorageManager {
             description: 'Try 5 different exercises',
             icon: 'list-outline',
             unlockedAt: '2025-06-25T12:00:00.000Z',
-            xpReward: 100
+            xpReward: 100,
           },
           {
             id: 'weight_100',
@@ -701,7 +701,7 @@ class StorageManager {
             description: 'Lift 100 total pounds in a workout',
             icon: 'barbell-outline',
             unlockedAt: '2025-07-05T12:00:00.000Z',
-            xpReward: 200
+            xpReward: 200,
           },
           {
             id: 'cardio_30',
@@ -709,7 +709,7 @@ class StorageManager {
             description: 'Complete 30 minutes of cardio',
             icon: 'heart-outline',
             unlockedAt: '2025-06-30T12:00:00.000Z',
-            xpReward: 150
+            xpReward: 150,
           },
           {
             id: 'template_5',
@@ -717,8 +717,8 @@ class StorageManager {
             description: 'Use workout templates 5 times',
             icon: 'document-text-outline',
             unlockedAt: '2025-07-10T12:00:00.000Z',
-            xpReward: 200
-          }
+            xpReward: 200,
+          },
         ],
         progress: {
           'workout_50': { progress: 40, maxProgress: 50 },
@@ -729,8 +729,8 @@ class StorageManager {
           'variety_20': { progress: 7, maxProgress: 20 },
           'weight_500': { progress: 0, maxProgress: 1 },
           'cardio_60': { progress: 0, maxProgress: 1 },
-          'template_20': { progress: 8, maxProgress: 20 }
-        }
+          'template_20': { progress: 8, maxProgress: 20 },
+        },
       };
       
       await this.saveData('@achievements', demoAchievements);
@@ -747,7 +747,7 @@ class StorageManager {
             progress: 1,
             maxProgress: 1,
             completed: true,
-            expiresAt: new Date().toISOString()
+            expiresAt: new Date().toISOString(),
           },
           {
             id: 'daily_duration',
@@ -758,7 +758,7 @@ class StorageManager {
             progress: 1,
             maxProgress: 1,
             completed: true,
-            expiresAt: new Date().toISOString()
+            expiresAt: new Date().toISOString(),
           },
           {
             id: 'daily_rating',
@@ -769,8 +769,8 @@ class StorageManager {
             progress: 1,
             maxProgress: 1,
             completed: true,
-            expiresAt: new Date().toISOString()
-          }
+            expiresAt: new Date().toISOString(),
+          },
         ],
         weekly: [
           {
@@ -782,7 +782,7 @@ class StorageManager {
             progress: 3,
             maxProgress: 4,
             completed: false,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           },
           {
             id: 'weekly_duration',
@@ -793,7 +793,7 @@ class StorageManager {
             progress: 120,
             maxProgress: 180,
             completed: false,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           },
           {
             id: 'weekly_streak',
@@ -804,9 +804,9 @@ class StorageManager {
             progress: 2,
             maxProgress: 3,
             completed: false,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          }
-        ]
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+        ],
       };
       
       await this.saveData('@quests', demoQuests);
@@ -834,7 +834,7 @@ class StorageManager {
         this.saveData(STORAGE_KEYS.BACKUP_USER_STATS, userStats),
         this.saveData(STORAGE_KEYS.BACKUP_WORKOUT_TEMPLATES, workoutTemplates),
         this.saveData(STORAGE_KEYS.BACKUP_REST_DAYS, restDays),
-        this.saveData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS, bodyWeights)
+        this.saveData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS, bodyWeights),
       ]);
 
       console.log('User data backed up successfully');
@@ -862,7 +862,7 @@ class StorageManager {
         this.saveUserStats(backupUserStats),
         this.saveWorkoutTemplates(backupWorkoutTemplates),
         this.saveRestDays(backupRestDays),
-        this.saveBodyWeights(backupBodyWeights)
+        this.saveBodyWeights(backupBodyWeights),
       ]);
 
       console.log('User data restored successfully');
@@ -882,7 +882,7 @@ class StorageManager {
         this.removeData(STORAGE_KEYS.BACKUP_USER_STATS),
         this.removeData(STORAGE_KEYS.BACKUP_WORKOUT_TEMPLATES),
         this.removeData(STORAGE_KEYS.BACKUP_REST_DAYS),
-        this.removeData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS)
+        this.removeData(STORAGE_KEYS.BACKUP_BODY_WEIGHTS),
       ]);
 
       console.log('Backup data cleared successfully');

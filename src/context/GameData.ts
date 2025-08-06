@@ -6,7 +6,7 @@ import {
   FitnessClassKey, 
   CharacterTemplate, 
   CharacterRarity,
-  UserCurrencies 
+  UserCurrencies, 
 } from './types';
 
 // ==============================================================================
@@ -15,100 +15,100 @@ import {
 
 export const FITNESS_CLASSES: Record<FitnessClassKey, FitnessClass> = {
   powerlifter: {
-    name: "POWERLIFTER",
-    subtitle: "The Iron Warrior",
-    emoji: "🏋️‍♂️",
-    quote: "Strength is earned, not given.",
-    description: "Master of raw strength. Dominates the big three: squat, bench, deadlift.",
-    philosophy: "STRENGTH ABOVE ALL",
-    color: "#8B0000",
-    bgGradient: ["#8B0000", "#4A0000"],
+    name: 'POWERLIFTER',
+    subtitle: 'The Iron Warrior',
+    emoji: '🏋️‍♂️',
+    quote: 'Strength is earned, not given.',
+    description: 'Master of raw strength. Dominates the big three: squat, bench, deadlift.',
+    philosophy: 'STRENGTH ABOVE ALL',
+    color: '#8B0000',
+    bgGradient: ['#8B0000', '#4A0000'],
     bonuses: {
       compoundLiftXP: 2.0,
       strengthTrainingXP: 1.5,
       maxWeightBonus: 1.25,
-      powerMoveXP: 1.8
+      powerMoveXP: 1.8,
     },
-    preferredExercises: ["squat", "deadlift", "bench_press", "overhead_press"],
-    skillTree: "strength_mastery",
-    stats: { power: 10, technique: 6, endurance: 4, flexibility: 2, mental: 8 }
+    preferredExercises: ['squat', 'deadlift', 'bench_press', 'overhead_press'],
+    skillTree: 'strength_mastery',
+    stats: { power: 10, technique: 6, endurance: 4, flexibility: 2, mental: 8 },
   },
   bodybuilder: {
-    name: "BODYBUILDER",
-    subtitle: "The Sculptor",
-    emoji: "💪",
-    quote: "Perfection through precision.",
-    description: "Artist of aesthetics. Masters isolation and perfect form.",
-    philosophy: "AESTHETICS THROUGH PRECISION",
-    color: "#FFD700",
-    bgGradient: ["#FFD700", "#B8860B"],
+    name: 'BODYBUILDER',
+    subtitle: 'The Sculptor',
+    emoji: '💪',
+    quote: 'Perfection through precision.',
+    description: 'Artist of aesthetics. Masters isolation and perfect form.',
+    philosophy: 'AESTHETICS THROUGH PRECISION',
+    color: '#FFD700',
+    bgGradient: ['#FFD700', '#B8860B'],
     bonuses: {
       isolationXP: 1.8,
       volumeBonus: 1.4,
       varietyXP: 1.6,
-      aestheticXP: 2.0
+      aestheticXP: 2.0,
     },
-    preferredExercises: ["cable_fly", "lateral_raise", "bicep_curl", "tricep_extension"],
-    skillTree: "aesthetic_mastery",
-    stats: { power: 6, technique: 10, endurance: 5, flexibility: 4, mental: 5 }
+    preferredExercises: ['cable_fly', 'lateral_raise', 'bicep_curl', 'tricep_extension'],
+    skillTree: 'aesthetic_mastery',
+    stats: { power: 6, technique: 10, endurance: 5, flexibility: 4, mental: 5 },
   },
   athlete: {
-    name: "ATHLETE",
-    subtitle: "The Competitor",
-    emoji: "🏃‍♂️",
-    quote: "Train like you compete.",
-    description: "Peak performance through functional movement and conditioning.",
-    philosophy: "PERFORMANCE IS EVERYTHING",
-    color: "#1E90FF",
-    bgGradient: ["#1E90FF", "#0047AB"],
+    name: 'ATHLETE',
+    subtitle: 'The Competitor',
+    emoji: '🏃‍♂️',
+    quote: 'Train like you compete.',
+    description: 'Peak performance through functional movement and conditioning.',
+    philosophy: 'PERFORMANCE IS EVERYTHING',
+    color: '#1E90FF',
+    bgGradient: ['#1E90FF', '#0047AB'],
     bonuses: {
       cardioXP: 2.0,
       functionalXP: 1.7,
       recoveryBonus: 1.3,
-      explosiveXP: 1.9
+      explosiveXP: 1.9,
     },
-    preferredExercises: ["burpees", "box_jumps", "battle_ropes", "sprints"],
-    skillTree: "performance_mastery",
-    stats: { power: 7, technique: 7, endurance: 10, flexibility: 6, mental: 7 }
+    preferredExercises: ['burpees', 'box_jumps', 'battle_ropes', 'sprints'],
+    skillTree: 'performance_mastery',
+    stats: { power: 7, technique: 7, endurance: 10, flexibility: 6, mental: 7 },
   },
   yogi: {
-    name: "YOGI",
-    subtitle: "The Harmonizer",
-    emoji: "🧘‍♀️",
-    quote: "Strength through serenity.",
-    description: "Balance of mind, body, and spirit through flow and control.",
-    philosophy: "MIND BODY SPIRIT UNITY",
-    color: "#9370DB",
-    bgGradient: ["#9370DB", "#4B0082"],
+    name: 'YOGI',
+    subtitle: 'The Harmonizer',
+    emoji: '🧘‍♀️',
+    quote: 'Strength through serenity.',
+    description: 'Balance of mind, body, and spirit through flow and control.',
+    philosophy: 'MIND BODY SPIRIT UNITY',
+    color: '#9370DB',
+    bgGradient: ['#9370DB', '#4B0082'],
     bonuses: {
       flexibilityXP: 2.2,
       mindfulnessXP: 1.8,
       recoveryXP: 1.5,
-      balanceXP: 2.0
+      balanceXP: 2.0,
     },
-    preferredExercises: ["yoga_flow", "meditation", "stretching", "balance_poses"],
-    skillTree: "harmony_mastery",
-    stats: { power: 3, technique: 8, endurance: 6, flexibility: 10, mental: 10 }
+    preferredExercises: ['yoga_flow', 'meditation', 'stretching', 'balance_poses'],
+    skillTree: 'harmony_mastery',
+    stats: { power: 3, technique: 8, endurance: 6, flexibility: 10, mental: 10 },
   },
   hybrid: {
-    name: "HYBRID",
-    subtitle: "The Adaptor",
-    emoji: "⚡",
-    quote: "Adaptability is the ultimate strength.",
-    description: "Master of all trades. Adapts to any challenge with versatility.",
-    philosophy: "INFINITE POSSIBILITIES",
-    color: "#FF6347",
-    bgGradient: ["#FF6347", "#B22222"],
+    name: 'HYBRID',
+    subtitle: 'The Adaptor',
+    emoji: '⚡',
+    quote: 'Adaptability is the ultimate strength.',
+    description: 'Master of all trades. Adapts to any challenge with versatility.',
+    philosophy: 'INFINITE POSSIBILITIES',
+    color: '#FF6347',
+    bgGradient: ['#FF6347', '#B22222'],
     bonuses: {
       varietyXP: 1.5,
       adaptabilityXP: 1.4,
       allAroundBonus: 1.2,
-      masteryXP: 1.3
+      masteryXP: 1.3,
     },
     preferredExercises: [],
-    skillTree: "versatility_mastery",
-    stats: { power: 7, technique: 7, endurance: 7, flexibility: 7, mental: 7 }
-  }
+    skillTree: 'versatility_mastery',
+    stats: { power: 7, technique: 7, endurance: 7, flexibility: 7, mental: 7 },
+  },
 };
 
 // ==============================================================================
@@ -219,7 +219,7 @@ export const CHARACTER_TEMPLATES: Record<CharacterRarity, CharacterTemplate[]> =
       artwork: '🌟💪',
       rarity_color: '#808080',
     },
-  ]
+  ],
 };
 
 // ==============================================================================
@@ -230,7 +230,7 @@ export const GACHA_RATES: Record<CharacterRarity, number> = {
   legendary: 0.005,  // 0.5%
   epic: 0.02,        // 2%
   rare: 0.10,        // 10% 
-  common: 0.875      // 87.5%
+  common: 0.875,      // 87.5%
 };
 
 // ==============================================================================

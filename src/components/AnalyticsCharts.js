@@ -84,7 +84,7 @@ const AnalyticsCharts = React.memo(({ workoutHistory, exerciseHistory, userStats
     
     return {
       data: sortedExercises.map(([, count]) => count),
-      labels: sortedExercises.map(([name]) => name.length > 10 ? name.substring(0, 10) + '...' : name)
+      labels: sortedExercises.map(([name]) => name.length > 10 ? name.substring(0, 10) + '...' : name),
     };
   }, [workoutHistory]);
 

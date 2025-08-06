@@ -9,7 +9,7 @@ import {
   Animated,
   Dimensions,
   ImageBackground,
-  StatusBar
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
@@ -17,7 +17,7 @@ import { useApp } from '../context';
 const { width, height } = Dimensions.get('window');
 
 const WelcomeScreen = ({ navigation }) => {
-  const { setOnboardingStep } = useApp();
+  const appContext = useApp();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
   const [scaleAnim] = useState(new Animated.Value(0.8));
@@ -42,18 +42,48 @@ const WelcomeScreen = ({ navigation }) => {
         tension: 100,
         friction: 8,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
   }, []);
 
   const handleGetStarted = () => {
-    setOnboardingStep('survey');
-    navigation.navigate('Survey');
+    // Navigate directly to the survey screen
+    navigation.navigate('Onboarding', { screen: 'Survey' });
   };
 
   const handleSkipForNow = () => {
-    // Skip onboarding but allow access to basic app
-    navigation.navigate('MainTabs');
+    // Skip onboarding but mark as completed and navigate properly
+    
+    if (appContext.updateUserStats) {
+      // Mark survey as completed even when skipped
+      appContext.updateUserStats({
+        ...appContext.userStats,
+        surveyCompleted: true,
+        lastSurveyCompletion: new Date().toISOString(),
+        surveySkipped: true, // Add a flag to indicate it was skipped
+      }).then(() => {
+        // Navigate back to root to trigger re-evaluation
+        setTimeout(() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Onboarding' }],
+          });
+        }, 200);
+      }).catch((error) => {
+        console.error('Error updating user stats for skip:', error);
+        // Still try to navigate even if update fails
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Onboarding' }],
+        });
+      });
+    } else {
+      // Fallback navigation
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Onboarding' }],
+      });
+    }
   };
 
   return (
@@ -69,9 +99,9 @@ const WelcomeScreen = ({ navigation }) => {
               opacity: fadeAnim,
               transform: [
                 { translateY: slideAnim },
-                { scale: scaleAnim }
-              ]
-            }
+                { scale: scaleAnim },
+              ],
+            },
           ]}
         >
           {/* Gymmy Logo/Character */}
@@ -94,8 +124,8 @@ const WelcomeScreen = ({ navigation }) => {
           styles.featuresSection,
           {
             opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
+            transform: [{ translateY: slideAnim }],
+          },
         ]}
       >
         <Text style={styles.featuresTitle}>What makes Gymmy special?</Text>
@@ -157,8 +187,8 @@ const WelcomeScreen = ({ navigation }) => {
           styles.ctaSection,
           {
             opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
+            transform: [{ translateY: slideAnim }],
+          },
         ]}
       >
         <Text style={styles.ctaTitle}>Ready to meet your perfect fitness companion?</Text>
@@ -190,7 +220,7 @@ const WelcomeScreen = ({ navigation }) => {
           styles.funFactsSection,
           {
             opacity: fadeAnim,
-          }
+          },
         ]}
       >
         <Text style={styles.funFactText}>
@@ -367,3 +397,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
+
+export default WelcomeScreen;

@@ -7,7 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
@@ -103,7 +103,7 @@ export const AdaptiveDashboard = ({ navigation }) => {
                   styles.priorityBadge,
                   goal.priority === 'high' && styles.highPriority,
                   goal.priority === 'medium' && styles.mediumPriority,
-                  goal.priority === 'low' && styles.lowPriority
+                  goal.priority === 'low' && styles.lowPriority,
                 ]}>
                   <Text style={styles.priorityText}>{goal.priority}</Text>
                 </View>
@@ -116,8 +116,8 @@ export const AdaptiveDashboard = ({ navigation }) => {
                       styles.progressBarFill,
                       { 
                         width: `${Math.min(100, (goal.currentValue / goal.targetValue) * 100)}%`,
-                        backgroundColor: segmentConfig.colorScheme 
-                      }
+                        backgroundColor: segmentConfig.colorScheme, 
+                      },
                     ]} 
                   />
                 </View>
@@ -211,33 +211,33 @@ export const AdaptiveDashboard = ({ navigation }) => {
 
   function handleInsightAction(action) {
     switch (action) {
-      case 'start_workout':
-        navigation.navigate('Workout');
-        break;
-      case 'view_progress':
-        navigation.navigate('Progress');
-        break;
-      case 'set_goals':
-        navigation.navigate('Goals');
-        break;
+    case 'start_workout':
+      navigation.navigate('Workout');
+      break;
+    case 'view_progress':
+      navigation.navigate('Progress');
+      break;
+    case 'set_goals':
+      navigation.navigate('Goals');
+      break;
       // Add more actions as needed
     }
   }
 
   function handleQuickAction(action) {
     switch (action) {
-      case 'start_workout':
-        navigation.navigate('Workout');
-        break;
-      case 'log_progress':
-        navigation.navigate('Progress');
-        break;
-      case 'view_achievements':
-        navigation.navigate('Achievements');
-        break;
-      case 'social_feed':
-        navigation.navigate('Social');
-        break;
+    case 'start_workout':
+      navigation.navigate('Workout');
+      break;
+    case 'log_progress':
+      navigation.navigate('Progress');
+      break;
+    case 'view_achievements':
+      navigation.navigate('Achievements');
+      break;
+    case 'social_feed':
+      navigation.navigate('Social');
+      break;
       // Add more actions as needed
     }
   }
@@ -255,7 +255,7 @@ const getSegmentSpecificData = (segment, config, userStats, workoutHistory) => {
     insightTitle: getInsightTitle(segment, userStats, workoutHistory),
     insightDescription: getInsightDescription(segment, userStats, workoutHistory),
     actionButton: getActionButton(segment),
-    quickActions: getQuickActions(segment)
+    quickActions: getQuickActions(segment),
   };
 
   return baseData;
@@ -263,28 +263,28 @@ const getSegmentSpecificData = (segment, config, userStats, workoutHistory) => {
 
 const getSegmentGreeting = (segment) => {
   const greetings = {
-    strength_seeker: "Ready to dominate?",
-    calorie_crusher: "Time to ignite!",
-    body_optimizer: "Transform today!",
-    wellness_seeker: "Find your flow",
-    endurance_athlete: "Chase your limits",
-    habit_builder: "Consistency wins",
-    social_enthusiast: "Let's do this together!"
+    strength_seeker: 'Ready to dominate?',
+    calorie_crusher: 'Time to ignite!',
+    body_optimizer: 'Transform today!',
+    wellness_seeker: 'Find your flow',
+    endurance_athlete: 'Chase your limits',
+    habit_builder: 'Consistency wins',
+    social_enthusiast: 'Let\'s do this together!',
   };
-  return greetings[segment] || "Let's get moving!";
+  return greetings[segment] || 'Let\'s get moving!';
 };
 
 const getSegmentEmoji = (segment) => {
   const emojis = {
-    strength_seeker: "💪",
-    calorie_crusher: "🔥",
-    body_optimizer: "⚖️",
-    wellness_seeker: "🧘",
-    endurance_athlete: "🏃",
-    habit_builder: "🎯",
-    social_enthusiast: "🤝"
+    strength_seeker: '💪',
+    calorie_crusher: '🔥',
+    body_optimizer: '⚖️',
+    wellness_seeker: '🧘',
+    endurance_athlete: '🏃',
+    habit_builder: '🎯',
+    social_enthusiast: '🤝',
   };
-  return emojis[segment] || "💪";
+  return emojis[segment] || '💪';
 };
 
 const getMotivationalMessage = (segment, userStats) => {
@@ -296,7 +296,7 @@ const getMotivationalMessage = (segment, userStats) => {
     wellness_seeker: `Level ${level} Mindful Mover! Balance grows stronger daily.`,
     endurance_athlete: `Level ${level} Performer! Your potential is limitless.`,
     habit_builder: `Level ${level} Consistency Champion! Small steps, big results.`,
-    social_enthusiast: `Level ${level} Community Builder! Together we're unstoppable.`
+    social_enthusiast: `Level ${level} Community Builder! Together we're unstoppable.`,
   };
   return messages[segment] || `Level ${level} Fitness Enthusiast! Keep growing!`;
 };
@@ -308,17 +308,17 @@ const getPrimaryMetrics = (segment, userStats, workoutHistory) => {
     strength_seeker: [
       { icon: 'barbell-outline', label: 'Max Squat', value: '225 lbs', change: '+10 lbs this month' },
       { icon: 'trending-up', label: 'PR Count', value: '12', change: '+3 this week' },
-      { icon: 'calendar', label: 'Strength Days', value: '4/week', change: 'Consistent!' }
+      { icon: 'calendar', label: 'Strength Days', value: '4/week', change: 'Consistent!' },
     ],
     calorie_crusher: [
       { icon: 'flame', label: 'Calories Burned', value: '2,450', change: '+150 vs last week' },
       { icon: 'time', label: 'Active Minutes', value: '285', change: '+45 this week' },
-      { icon: 'heart', label: 'Avg Heart Rate', value: '145 bpm', change: 'In target zone' }
+      { icon: 'heart', label: 'Avg Heart Rate', value: '145 bpm', change: 'In target zone' },
     ],
     body_optimizer: [
       { icon: 'body', label: 'Weight Change', value: '-2.3 lbs', change: 'This month' },
       { icon: 'resize', label: 'Waist', value: '-1.2 in', change: 'Great progress!' },
-      { icon: 'camera', label: 'Progress Photos', value: '8', change: 'Keep documenting!' }
+      { icon: 'camera', label: 'Progress Photos', value: '8', change: 'Keep documenting!' },
     ],
     // Add more segments...
   };
@@ -334,46 +334,46 @@ const getInsightIcon = (segment) => {
     wellness_seeker: 'leaf',
     endurance_athlete: 'speedometer',
     habit_builder: 'checkmark-circle',
-    social_enthusiast: 'people'
+    social_enthusiast: 'people',
   };
   return icons[segment] || 'analytics';
 };
 
 const getInsightTitle = (segment, userStats, workoutHistory) => {
   const titles = {
-    strength_seeker: "Progressive Overload Opportunity",
-    calorie_crusher: "Metabolic Momentum Building",
-    body_optimizer: "Transformation Accelerating",
-    wellness_seeker: "Mind-Body Connection Strengthening",
-    endurance_athlete: "Performance Peak Approaching",
-    habit_builder: "Consistency Streak Active",
-    social_enthusiast: "Community Engagement Growing"
+    strength_seeker: 'Progressive Overload Opportunity',
+    calorie_crusher: 'Metabolic Momentum Building',
+    body_optimizer: 'Transformation Accelerating',
+    wellness_seeker: 'Mind-Body Connection Strengthening',
+    endurance_athlete: 'Performance Peak Approaching',
+    habit_builder: 'Consistency Streak Active',
+    social_enthusiast: 'Community Engagement Growing',
   };
-  return titles[segment] || "Progress Insight";
+  return titles[segment] || 'Progress Insight';
 };
 
 const getInsightDescription = (segment, userStats, workoutHistory) => {
   const descriptions = {
-    strength_seeker: "Your squat has improved 8% this month. Consider increasing weight by 5-10 lbs next session.",
-    calorie_crusher: "Your calorie burn rate is up 15% from last month. Your metabolism is responding well!",
-    body_optimizer: "Consistent training is showing results. Your body composition is improving steadily.",
-    wellness_seeker: "Your flexibility scores have improved. Consider adding 5 more minutes to your stretching routine.",
-    endurance_athlete: "Your pace has improved by 12 seconds per mile. You're ready for longer distances.",
-    habit_builder: "You've maintained a 6-day streak! Consistency is your superpower.",
-    social_enthusiast: "You've encouraged 5 friends this week. Your community impact is inspiring!"
+    strength_seeker: 'Your squat has improved 8% this month. Consider increasing weight by 5-10 lbs next session.',
+    calorie_crusher: 'Your calorie burn rate is up 15% from last month. Your metabolism is responding well!',
+    body_optimizer: 'Consistent training is showing results. Your body composition is improving steadily.',
+    wellness_seeker: 'Your flexibility scores have improved. Consider adding 5 more minutes to your stretching routine.',
+    endurance_athlete: 'Your pace has improved by 12 seconds per mile. You\'re ready for longer distances.',
+    habit_builder: 'You\'ve maintained a 6-day streak! Consistency is your superpower.',
+    social_enthusiast: 'You\'ve encouraged 5 friends this week. Your community impact is inspiring!',
   };
-  return descriptions[segment] || "Keep up the great work!";
+  return descriptions[segment] || 'Keep up the great work!';
 };
 
 const getActionButton = (segment) => {
   const buttons = {
-    strength_seeker: { text: "Plan Next PR Attempt", action: "start_workout" },
-    calorie_crusher: { text: "Start HIIT Session", action: "start_workout" },
-    body_optimizer: { text: "Log Progress Photo", action: "log_progress" },
-    wellness_seeker: { text: "Begin Meditation", action: "start_workout" },
-    endurance_athlete: { text: "Start Training Run", action: "start_workout" },
-    habit_builder: { text: "Continue Streak", action: "start_workout" },
-    social_enthusiast: { text: "Find Workout Buddy", action: "social_feed" }
+    strength_seeker: { text: 'Plan Next PR Attempt', action: 'start_workout' },
+    calorie_crusher: { text: 'Start HIIT Session', action: 'start_workout' },
+    body_optimizer: { text: 'Log Progress Photo', action: 'log_progress' },
+    wellness_seeker: { text: 'Begin Meditation', action: 'start_workout' },
+    endurance_athlete: { text: 'Start Training Run', action: 'start_workout' },
+    habit_builder: { text: 'Continue Streak', action: 'start_workout' },
+    social_enthusiast: { text: 'Find Workout Buddy', action: 'social_feed' },
   };
   return buttons[segment] || buttons.strength_seeker;
 };
@@ -382,18 +382,18 @@ const getQuickActions = (segment) => {
   const baseActions = [
     { icon: 'add-circle', text: 'Start Workout', action: 'start_workout' },
     { icon: 'analytics', text: 'View Progress', action: 'view_progress' },
-    { icon: 'trophy', text: 'Achievements', action: 'view_achievements' }
+    { icon: 'trophy', text: 'Achievements', action: 'view_achievements' },
   ];
 
   const segmentSpecific = {
     social_enthusiast: [
       ...baseActions,
-      { icon: 'people', text: 'Social Feed', action: 'social_feed' }
+      { icon: 'people', text: 'Social Feed', action: 'social_feed' },
     ],
     body_optimizer: [
       ...baseActions,
-      { icon: 'camera', text: 'Progress Photo', action: 'log_progress' }
-    ]
+      { icon: 'camera', text: 'Progress Photo', action: 'log_progress' },
+    ],
     // Add more segment-specific actions
   };
 
@@ -419,10 +419,10 @@ const DefaultDashboard = ({ navigation }) => (
 );
 
 const getDefaultDashboardData = () => ({
-  greeting: "Welcome to Gymmy!",
-  motivationalMessage: "Let's get to know you better",
+  greeting: 'Welcome to Gymmy!',
+  motivationalMessage: 'Let\'s get to know you better',
   primaryMetrics: [],
-  quickActions: []
+  quickActions: [],
 });
 
 // Utility functions
@@ -438,7 +438,7 @@ const formatWorkoutDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { 
     weekday: 'short', 
     month: 'short', 
-    day: 'numeric' 
+    day: 'numeric', 
   });
 };
 

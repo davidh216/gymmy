@@ -132,7 +132,7 @@ const ProgressScreen = ({ navigation, route }) => {
         experience,
         totalExperience,
         totalWorkouts,
-        progress: (experience / 1000) * 100
+        progress: (experience / 1000) * 100,
       };
     });
     
@@ -153,7 +153,7 @@ const ProgressScreen = ({ navigation, route }) => {
       sectionsData.push({
         type: 'gamification',
         id: 'gamification',
-        data: [{ id: 'gamification' }]
+        data: [{ id: 'gamification' }],
       });
     }
     
@@ -161,7 +161,7 @@ const ProgressScreen = ({ navigation, route }) => {
     sectionsData.push({
       type: 'overall',
       id: 'overall',
-      data: [{ id: 'overall' }]
+      data: [{ id: 'overall' }],
     });
     
     // Add muscle groups section
@@ -170,7 +170,7 @@ const ProgressScreen = ({ navigation, route }) => {
       sectionsData.push({
         type: 'muscleGroups',
         id: 'muscleGroups',
-        data: muscleGroupEntries
+        data: muscleGroupEntries,
       });
     }
     
@@ -202,42 +202,42 @@ const ProgressScreen = ({ navigation, route }) => {
         style={styles.muscleGroupCard}
         onPress={() => setSelectedMuscleGroup(groupName)}
       >
-      <View style={styles.muscleGroupHeader}>
-        <View style={[styles.muscleGroupIcon, { backgroundColor: stats.color + '20' }]}>
-          <Ionicons name={stats.icon} size={24} color={stats.color} />
-        </View>
-        <View style={styles.muscleGroupInfo}>
-          <Text style={styles.muscleGroupName}>{groupName}</Text>
-          <Text style={styles.muscleGroupLevel}>
+        <View style={styles.muscleGroupHeader}>
+          <View style={[styles.muscleGroupIcon, { backgroundColor: stats.color + '20' }]}>
+            <Ionicons name={stats.icon} size={24} color={stats.color} />
+          </View>
+          <View style={styles.muscleGroupInfo}>
+            <Text style={styles.muscleGroupName}>{groupName}</Text>
+            <Text style={styles.muscleGroupLevel}>
             Level {stats.level} {getLevelTitle(stats.level)}
+            </Text>
+          </View>
+          <View style={styles.levelBadge}>
+            <Text style={[styles.levelNumber, { color: getLevelColor(stats.level) }]}>
+              {stats.level}
+            </Text>
+          </View>
+        </View>
+      
+        <View style={styles.progressSection}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill, 
+                { width: `${stats.progress}%`, backgroundColor: stats.color },
+              ]} 
+            />
+          </View>
+          <Text style={styles.progressText}>
+            {stats.experience}/1000 XP ({Math.round(stats.progress)}%)
           </Text>
         </View>
-        <View style={styles.levelBadge}>
-          <Text style={[styles.levelNumber, { color: getLevelColor(stats.level) }]}>
-            {stats.level}
-          </Text>
-        </View>
-      </View>
       
-      <View style={styles.progressSection}>
-        <View style={styles.progressBar}>
-          <View 
-            style={[
-              styles.progressFill, 
-              { width: `${stats.progress}%`, backgroundColor: stats.color }
-            ]} 
-          />
+        <View style={styles.statsRow}>
+          <Text style={styles.statText}>Total Workouts: {stats.totalWorkouts}</Text>
+          <Text style={styles.statText}>Total XP: {stats.totalExperience}</Text>
         </View>
-        <Text style={styles.progressText}>
-          {stats.experience}/1000 XP ({Math.round(stats.progress)}%)
-        </Text>
-      </View>
-      
-      <View style={styles.statsRow}>
-        <Text style={styles.statText}>Total Workouts: {stats.totalWorkouts}</Text>
-        <Text style={styles.statText}>Total XP: {stats.totalExperience}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
 
@@ -281,7 +281,7 @@ const ProgressScreen = ({ navigation, route }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Muscle Group Progress</Text>
           {section.data && Array.isArray(section.data) && section.data.map(([groupName, stats]) =>
-            renderMuscleGroupCard(groupName, stats)
+            renderMuscleGroupCard(groupName, stats),
           )}
         </View>
       );

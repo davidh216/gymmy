@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  Image
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SEGMENT_CONFIGS } from '../context/segmentationTypes';
@@ -22,7 +22,7 @@ export const SegmentResultsScreen = ({
   segment,
   confidence,
   secondarySegment,
-  goals = []
+  goals = [],
 }) => {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
@@ -49,15 +49,15 @@ export const SegmentResultsScreen = ({
         tension: 100,
         friction: 8,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
   }, []);
 
   const getConfidenceMessage = (confidence) => {
-    if (confidence >= 80) return "Perfect match! 🎯";
-    if (confidence >= 60) return "Great fit! 👍";
-    if (confidence >= 40) return "Good match! ✨";
-    return "Let's explore together! 🔍";
+    if (confidence >= 80) return 'Perfect match! 🎯';
+    if (confidence >= 60) return 'Great fit! 👍';
+    if (confidence >= 40) return 'Good match! ✨';
+    return 'Let\'s explore together! 🔍';
   };
 
   const getGradientColors = (segment) => {
@@ -69,7 +69,7 @@ export const SegmentResultsScreen = ({
       endurance_athlete: ['#4CAF50', '#8BC34A'],
       habit_builder: ['#FF9800', '#FFC107'],
       social_enthusiast: ['#E91E63', '#F06292'],
-      unassigned: ['#9E9E9E', '#757575']
+      unassigned: ['#9E9E9E', '#757575'],
     };
     return colorMap[segment] || colorMap.unassigned;
   };
@@ -89,8 +89,8 @@ export const SegmentResultsScreen = ({
           styles.content,
           { 
             opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
+            transform: [{ translateY: slideAnim }],
+          },
         ]}
       >
         {/* Hero Section */}
@@ -126,8 +126,8 @@ export const SegmentResultsScreen = ({
                   styles.confidenceBarFill,
                   { 
                     width: `${confidence}%`,
-                    backgroundColor: segmentConfig?.colorScheme || '#007AFF'
-                  }
+                    backgroundColor: segmentConfig?.colorScheme || '#007AFF',
+                  },
                 ]} 
               />
             </View>
@@ -198,7 +198,7 @@ export const SegmentResultsScreen = ({
                   <View style={[styles.priorityBadge, 
                     goal.priority === 'high' && styles.highPriority,
                     goal.priority === 'medium' && styles.mediumPriority,
-                    goal.priority === 'low' && styles.lowPriority
+                    goal.priority === 'low' && styles.lowPriority,
                   ]}>
                     <Text style={styles.priorityText}>{goal.priority}</Text>
                   </View>

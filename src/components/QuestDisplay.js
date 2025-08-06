@@ -23,8 +23,8 @@ const QuestDisplay = ({ quests, achievements }) => {
               styles.progressFill, 
               { 
                 width: `${(quest.progress / quest.maxProgress) * 100}%`,
-                backgroundColor: quest.completed ? '#22c55e' : '#007AFF'
-              }
+                backgroundColor: quest.completed ? '#22c55e' : '#007AFF',
+              },
             ]} 
           />
         </View>

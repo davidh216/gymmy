@@ -36,7 +36,7 @@ const AchievementsScreen = ({ navigation }) => {
     weight: 'Weight Training',
     cardio: 'Cardio',
     template: 'Templates',
-    social: 'Social'
+    social: 'Social',
   };
 
   const categoryColors = {
@@ -50,7 +50,7 @@ const AchievementsScreen = ({ navigation }) => {
     weight: '#dc2626',
     cardio: '#ec4899',
     template: '#059669',
-    social: '#3b82f6'
+    social: '#3b82f6',
   };
 
   // Prepare data for VirtualizedList
@@ -61,7 +61,7 @@ const AchievementsScreen = ({ navigation }) => {
     sectionsData.push({
       type: 'progress',
       id: 'progress',
-      data: [{ id: 'progress' }]
+      data: [{ id: 'progress' }],
     });
     
     // Add achievement category sections
@@ -72,7 +72,7 @@ const AchievementsScreen = ({ navigation }) => {
           type: 'category',
           id: category,
           category,
-          data: categoryAchievements
+          data: categoryAchievements,
         });
       }
     });
@@ -83,11 +83,11 @@ const AchievementsScreen = ({ navigation }) => {
   const renderAchievementCard = (achievement) => (
     <View key={achievement.id} style={[
       styles.achievementCard,
-      achievement.condition && styles.unlockedCard
+      achievement.condition && styles.unlockedCard,
     ]}>
       <View style={[
         styles.achievementIcon,
-        { backgroundColor: achievement.condition ? achievement.color + '20' : '#f3f4f6' }
+        { backgroundColor: achievement.condition ? achievement.color + '20' : '#f3f4f6' },
       ]}>
         <Ionicons 
           name={achievement.icon} 
@@ -97,7 +97,7 @@ const AchievementsScreen = ({ navigation }) => {
       </View>
       <Text style={[
         styles.achievementTitle,
-        achievement.condition && styles.unlockedTitle
+        achievement.condition && styles.unlockedTitle,
       ]}>
         {achievement.title}
       </Text>
@@ -117,8 +117,8 @@ const AchievementsScreen = ({ navigation }) => {
               styles.progressFill, 
               { 
                 width: `${(achievement.progress / achievement.maxProgress) * 100}%`,
-                backgroundColor: achievement.condition ? achievement.color : '#007AFF'
-              }
+                backgroundColor: achievement.condition ? achievement.color : '#007AFF',
+              },
             ]} 
           />
         </View>
@@ -138,7 +138,7 @@ const AchievementsScreen = ({ navigation }) => {
         <View style={styles.categoryHeader}>
           <View style={[
             styles.categoryIcon,
-            { backgroundColor: categoryColors[category] + '20' }
+            { backgroundColor: categoryColors[category] + '20' },
           ]}>
             <Ionicons 
               name={getCategoryIcon(category)} 
@@ -170,7 +170,7 @@ const AchievementsScreen = ({ navigation }) => {
       weight: 'barbell-outline',
       cardio: 'heart-outline',
       template: 'document-outline',
-      social: 'people-outline'
+      social: 'people-outline',
     };
     return icons[category] || 'help-outline';
   };
@@ -190,7 +190,7 @@ const AchievementsScreen = ({ navigation }) => {
               <View 
                 style={[
                   styles.progressFill, 
-                  { width: `${completionPercentage}%`, backgroundColor: '#10b981' }
+                  { width: `${completionPercentage}%`, backgroundColor: '#10b981' },
                 ]} 
               />
             </View>

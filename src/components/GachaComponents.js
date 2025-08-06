@@ -36,9 +36,9 @@ export const WorkoutVerificationWidget = ({ workout, onVerificationComplete }) =
             onPress: () => {
               setShowModal(false);
               onVerificationComplete && onVerificationComplete(totalPoints);
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to verify workout. Please try again.');

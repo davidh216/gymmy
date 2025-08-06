@@ -34,9 +34,9 @@ const GachaScreen = ({ navigation }) => {
     // Check currency
     if (userStats.currencies.gems < cost.gems) {
       Alert.alert(
-        "Insufficient Gems! 💎",
+        'Insufficient Gems! 💎',
         `You need ${cost.gems} gems for this pull. Complete more workouts to earn gems!`,
-        [{ text: "Got it!", style: "default" }]
+        [{ text: 'Got it!', style: 'default' }],
       );
       return;
     }
@@ -63,7 +63,7 @@ const GachaScreen = ({ navigation }) => {
         setShowResults(true);
         setIsPulling(false);
       } catch (error) {
-        Alert.alert("Pull Failed", error.message);
+        Alert.alert('Pull Failed', error.message);
         setIsPulling(false);
       }
     });
@@ -85,8 +85,8 @@ const GachaScreen = ({ navigation }) => {
       scale: pullAnimation.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: [1, 1.2, 1],
-      })
-    }]
+      }),
+    }],
   };
   
   return (
@@ -157,7 +157,7 @@ const GachaScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.pullButton,
-              { backgroundColor: userStats.currencies.gems >= costs.single.gems ? '#4CAF50' : '#666' }
+              { backgroundColor: userStats.currencies.gems >= costs.single.gems ? '#4CAF50' : '#666' },
             ]}
             onPress={() => handlePull('single')}
             disabled={isPulling || userStats.currencies.gems < costs.single.gems}
@@ -171,7 +171,7 @@ const GachaScreen = ({ navigation }) => {
             style={[
               styles.pullButton,
               styles.tenPullButton,
-              { backgroundColor: userStats.currencies.gems >= costs.ten_pull.gems ? '#FF6347' : '#666' }
+              { backgroundColor: userStats.currencies.gems >= costs.ten_pull.gems ? '#FF6347' : '#666' },
             ]}
             onPress={() => handlePull('ten_pull')}
             disabled={isPulling || userStats.currencies.gems < costs.ten_pull.gems}
@@ -257,11 +257,11 @@ const PullResultsModal = ({ visible, results, onClose, rarityGradients }) => {
 
 const getRarityColor = (rarity) => {
   switch (rarity) {
-    case 'legendary': return '#FFD700';
-    case 'epic': return '#9932CC';
-    case 'rare': return '#4169E1';
-    case 'common': return '#808080';
-    default: return '#666';
+  case 'legendary': return '#FFD700';
+  case 'epic': return '#9932CC';
+  case 'rare': return '#4169E1';
+  case 'common': return '#808080';
+  default: return '#666';
   }
 };
 

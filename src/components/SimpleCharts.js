@@ -32,7 +32,7 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
     x: Math.min(index * pointWidth, actualChartWidth - 6), // Ensure points stay within bounds
     y: Math.max(6, chartHeight - ((value - minValue) / range) * chartHeight), // Ensure points stay within bounds
     value,
-    label: chartLabels[index] || `Point ${index + 1}`
+    label: chartLabels[index] || `Point ${index + 1}`,
   }));
 
   // Generate smooth curve path for SVG-like rendering
@@ -60,7 +60,7 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
           controlX1,
           controlY1,
           controlX2,
-          controlY2
+          controlY2,
         });
       } else {
         // Straight line
@@ -69,7 +69,7 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
           x1: current.x,
           y1: current.y,
           x2: next.x,
-          y2: next.y
+          y2: next.y,
         });
       }
     }
@@ -146,7 +146,7 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
                           backgroundColor: color,
                         },
                       ]}
-                    />
+                    />,
                   );
                 }
                 return segments;
@@ -162,13 +162,13 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
                         top: segment.y1,
                         width: Math.sqrt(
                           Math.pow(segment.x2 - segment.x1, 2) +
-                          Math.pow(segment.y2 - segment.y1, 2)
+                          Math.pow(segment.y2 - segment.y1, 2),
                         ),
                         transform: [
                           {
                             rotate: `${Math.atan2(
                               segment.y2 - segment.y1,
-                              segment.x2 - segment.x1
+                              segment.x2 - segment.x1,
                             )}rad`,
                           },
                         ],
@@ -193,13 +193,13 @@ export const SimpleLineChart = ({ data, height = 180, color = '#007AFF', title, 
                         top: point.y,
                         width: Math.sqrt(
                           Math.pow(points[index + 1].x - point.x, 2) +
-                          Math.pow(points[index + 1].y - point.y, 2)
+                          Math.pow(points[index + 1].y - point.y, 2),
                         ),
                         transform: [
                           {
                             rotate: `${Math.atan2(
                               points[index + 1].y - point.y,
-                              points[index + 1].x - point.x
+                              points[index + 1].x - point.x,
                             )}rad`,
                           },
                         ],

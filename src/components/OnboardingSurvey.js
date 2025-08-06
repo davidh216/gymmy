@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  Alert
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
@@ -17,7 +17,7 @@ import {
   ONBOARDING_SURVEY_QUESTIONS, 
   getOrderedSurveyQuestions,
   validateSurveyCompletion,
-  SURVEY_CONFIG 
+  SURVEY_CONFIG, 
 } from '../context/SurveyQuestions';
 import { SegmentationEngine } from '../context/SegmentationEngine';
 
@@ -59,7 +59,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
         toValue: 1,
         duration: 100,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
   };
 
@@ -76,7 +76,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
       selectedOption: selectedOption.id,
       optionValue: selectedOption.value,
       segmentWeights: selectedOption.segmentWeights,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const updatedResponses = [...responses, newResponse];
@@ -132,7 +132,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
         recommendedSegment: segmentResult.primarySegment,
         confidence: segmentResult.confidence,
         completedAt: new Date().toISOString(),
-        version: SURVEY_CONFIG.version
+        version: SURVEY_CONFIG.version,
       };
 
       // Create segment profile
@@ -140,14 +140,14 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
         surveyRecord,
         segmentResult.primarySegment,
         segmentResult.confidence,
-        segmentResult.secondarySegment
+        segmentResult.secondarySegment,
       );
 
       // Generate personalized goals
       const personalizedGoals = SegmentationEngine.generatePersonalizedGoals(
         segmentResult.primarySegment,
         [], // No workout history yet for new users
-        userStats.level || 1
+        userStats?.level || 1,
       );
 
       // Update user stats with segmentation data
@@ -157,18 +157,28 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
         surveyHistory: [surveyRecord],
         personalizedGoals,
         segmentPreferences: getDefaultSegmentPreferences(segmentResult.primarySegment),
-        segmentMetrics: getInitialSegmentMetrics()
+        segmentMetrics: getInitialSegmentMetrics(),
       };
 
-      await updateUserStats(updatedUserStats);
+      // Try to update user stats, but don't fail if it doesn't work
+      try {
+        if (updateUserStats) {
+          await updateUserStats(updatedUserStats);
+        }
+      } catch (updateError) {
+        console.warn('Could not update user stats:', updateError);
+        // Continue anyway
+      }
 
       // Call completion callback
-      onComplete({
-        segment: segmentResult.primarySegment,
-        confidence: segmentResult.confidence,
-        secondarySegment: segmentResult.secondarySegment,
-        goals: personalizedGoals
-      });
+      if (onComplete) {
+        onComplete({
+          segment: segmentResult.primarySegment,
+          confidence: segmentResult.confidence,
+          secondarySegment: segmentResult.secondarySegment,
+          goals: personalizedGoals,
+        });
+      }
 
     } catch (error) {
       console.error('Error completing survey:', error);
@@ -189,70 +199,70 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
       socialSharing: false,
       dashboardFocus: 'progress',
       chartTypes: ['line', 'bar'],
-      'gymmy-personality': 'encouraging'
+      'gymmy-personality': 'encouraging',
     };
 
     // Customize based on segment
     switch (segment) {
-      case 'strength_seeker':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['weight_lifted', 'one_rep_max', 'total_volume'],
-          celebrationStyle: 'enthusiastic',
-          'gymmy-personality': 'coaching',
-          dashboardFocus: 'progress'
-        };
-      case 'calorie_crusher':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['calories_burned', 'active_minutes', 'heart_rate_zones'],
-          celebrationStyle: 'enthusiastic',
-          'gymmy-personality': 'encouraging',
-          dashboardFocus: 'analytics'
-        };
-      case 'body_optimizer':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['body_weight', 'measurements', 'progress_photos'],
-          celebrationStyle: 'moderate',
-          'gymmy-personality': 'analytical',
-          dashboardFocus: 'progress'
-        };
-      case 'wellness_seeker':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['flexibility', 'stress_levels', 'sleep_quality'],
-          celebrationStyle: 'minimal',
-          'gymmy-personality': 'buddy',
-          dashboardFocus: 'wellness'
-        };
-      case 'endurance_athlete':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['pace', 'distance', 'race_times'],
-          celebrationStyle: 'moderate',
-          'gymmy-personality': 'coaching',
-          dashboardFocus: 'analytics'
-        };
-      case 'habit_builder':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['consistency', 'streaks', 'frequency'],
-          celebrationStyle: 'enthusiastic',
-          'gymmy-personality': 'encouraging',
-          dashboardFocus: 'goals'
-        };
-      case 'social_enthusiast':
-        return {
-          ...basePreferences,
-          preferredMetrics: ['social_engagement', 'group_workouts', 'community'],
-          celebrationStyle: 'enthusiastic',
-          'gymmy-personality': 'buddy',
-          dashboardFocus: 'social',
-          socialSharing: true
-        };
-      default:
-        return basePreferences;
+    case 'strength_seeker':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['weight_lifted', 'one_rep_max', 'total_volume'],
+        celebrationStyle: 'enthusiastic',
+        'gymmy-personality': 'coaching',
+        dashboardFocus: 'progress',
+      };
+    case 'calorie_crusher':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['calories_burned', 'active_minutes', 'heart_rate_zones'],
+        celebrationStyle: 'enthusiastic',
+        'gymmy-personality': 'encouraging',
+        dashboardFocus: 'analytics',
+      };
+    case 'body_optimizer':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['body_weight', 'measurements', 'progress_photos'],
+        celebrationStyle: 'moderate',
+        'gymmy-personality': 'analytical',
+        dashboardFocus: 'progress',
+      };
+    case 'wellness_seeker':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['flexibility', 'stress_levels', 'sleep_quality'],
+        celebrationStyle: 'minimal',
+        'gymmy-personality': 'buddy',
+        dashboardFocus: 'wellness',
+      };
+    case 'endurance_athlete':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['pace', 'distance', 'race_times'],
+        celebrationStyle: 'moderate',
+        'gymmy-personality': 'coaching',
+        dashboardFocus: 'analytics',
+      };
+    case 'habit_builder':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['consistency', 'streaks', 'frequency'],
+        celebrationStyle: 'enthusiastic',
+        'gymmy-personality': 'encouraging',
+        dashboardFocus: 'goals',
+      };
+    case 'social_enthusiast':
+      return {
+        ...basePreferences,
+        preferredMetrics: ['social_engagement', 'group_workouts', 'community'],
+        celebrationStyle: 'enthusiastic',
+        'gymmy-personality': 'buddy',
+        dashboardFocus: 'social',
+        socialSharing: true,
+      };
+    default:
+      return basePreferences;
     }
   };
 
@@ -265,7 +275,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
     averageProgressRate: 0,
     milestoneHitRate: 0,
     consistencyScore: 0,
-    lastCalculated: new Date().toISOString()
+    lastCalculated: new Date().toISOString(),
   });
 
   if (!currentQuestion) {
@@ -285,7 +295,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
             <Animated.View 
               style={[
                 styles.progressBarFill,
-                { width: `${progress * 100}%` }
+                { width: `${progress * 100}%` },
               ]} 
             />
           </View>
@@ -343,14 +353,14 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
                     <View style={styles.optionTextContainer}>
                       <Text style={[
                         styles.optionText,
-                        selectedOption?.id === option.id && styles.selectedOptionText
+                        selectedOption?.id === option.id && styles.selectedOptionText,
                       ]}>
                         {option.text}
                       </Text>
                       {option.description && (
                         <Text style={[
                           styles.optionDescription,
-                          selectedOption?.id === option.id && styles.selectedOptionDescription
+                          selectedOption?.id === option.id && styles.selectedOptionDescription,
                         ]}>
                           {option.description}
                         </Text>
@@ -359,7 +369,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
                   </View>
                   <View style={[
                     styles.radioButton,
-                    selectedOption?.id === option.id && styles.selectedRadio
+                    selectedOption?.id === option.id && styles.selectedRadio,
                   ]}>
                     {selectedOption?.id === option.id && (
                       <Ionicons name="checkmark" size={16} color="white" />
@@ -386,7 +396,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
           />
           <Text style={[
             styles.navButtonText,
-            currentQuestionIndex === 0 && styles.disabledButtonText
+            currentQuestionIndex === 0 && styles.disabledButtonText,
           ]}>
             Back
           </Text>
@@ -397,7 +407,7 @@ export const OnboardingSurvey = ({ onComplete, onSkip }) => {
           style={[
             styles.nextButton,
             !selectedOption && styles.disabledNextButton,
-            isSubmitting && styles.submittingButton
+            isSubmitting && styles.submittingButton,
           ]}
           disabled={!selectedOption || isSubmitting}
         >
