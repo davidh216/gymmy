@@ -22,8 +22,9 @@ import WelcomeScreen from './src/screens/WelcomeScreen';
 import { OnboardingSurvey } from './src/components/OnboardingSurvey';
 import { SegmentResultsScreen } from './src/screens/SegmentResultsScreen';
 
-// Context
-import { AppProvider, useApp } from './src/context';
+// Context - Updated to use new unified architecture
+import { AppProvider } from './src/context/AppProvider';
+import { useUnifiedApp, useAppState } from './src/context/AppProvider';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
