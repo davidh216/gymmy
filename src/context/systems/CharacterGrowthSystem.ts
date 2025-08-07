@@ -5,7 +5,7 @@ import {
   GymmyCharacter,
   GymmyRarity,
   EvolutionMaterials,
-  SpecializationType
+  SpecializationType,
 } from '../types/MultiGymmyTypes';
 
 // ==============================================================================
@@ -139,10 +139,10 @@ export class CharacterGrowthSystem {
   public calculateExperienceGain(
     character: GymmyCharacter,
     source: ExperienceSource,
-    teamContext?: GymmyCharacter[]
+    teamContext?: GymmyCharacter[],
   ): ExperienceGain {
     // Base experience calculation
-    let baseExp = this.getBaseExperience(source);
+    const baseExp = this.getBaseExperience(source);
 
     // Apply character-specific multipliers
     const multipliers: ExperienceMultiplier[] = [];
@@ -152,7 +152,7 @@ export class CharacterGrowthSystem {
       multipliers.push({
         source: 'Specialization Match',
         multiplier: 1.5,
-        description: `${character.specialization} specialization bonus`
+        description: `${character.specialization} specialization bonus`,
       });
     }
 
@@ -162,7 +162,7 @@ export class CharacterGrowthSystem {
       multipliers.push({
         source: 'Rarity Bonus',
         multiplier: rarityMultiplier,
-        description: `${character.rarity} rarity experience bonus`
+        description: `${character.rarity} rarity experience bonus`,
       });
     }
 
@@ -173,7 +173,7 @@ export class CharacterGrowthSystem {
         multipliers.push({
           source: 'Team Synergy',
           multiplier: synergyMultiplier,
-          description: 'Working with compatible team members'
+          description: 'Working with compatible team members',
         });
       }
     }
@@ -184,7 +184,7 @@ export class CharacterGrowthSystem {
       multipliers.push({
         source: 'Level Scaling',
         multiplier: levelMultiplier,
-        description: levelMultiplier > 1 ? 'Catch-up bonus' : 'High-level penalty'
+        description: levelMultiplier > 1 ? 'Catch-up bonus' : 'High-level penalty',
       });
     }
 
@@ -198,7 +198,7 @@ export class CharacterGrowthSystem {
       bonus_exp: Math.round(bonusExp),
       total_exp: Math.round(totalExp),
       source,
-      multipliers
+      multipliers,
     };
   }
 
@@ -209,7 +209,7 @@ export class CharacterGrowthSystem {
       milestone: { easy: 200, medium: 500, hard: 1000, extreme: 2000 },
       event: { easy: 100, medium: 250, hard: 500, extreme: 1000 },
       daily_bonus: { easy: 25, medium: 25, hard: 25, extreme: 25 },
-      team_synergy: { easy: 20, medium: 40, hard: 80, extreme: 160 }
+      team_synergy: { easy: 20, medium: 40, hard: 80, extreme: 160 },
     };
 
     const base = baseRates[source.type]?.[source.difficulty || 'medium'] || 50;
@@ -236,13 +236,13 @@ export class CharacterGrowthSystem {
       flexibility_mobility: ['yoga', 'stretching', 'flexibility', 'mobility'],
       mental_wellness: ['meditation', 'mindfulness', 'stress', 'mental'],
       hybrid_training: ['crossfit', 'functional', 'mixed', 'varied'],
-      recovery_restoration: ['recovery', 'rest', 'sleep', 'restoration']
+      recovery_restoration: ['recovery', 'rest', 'sleep', 'restoration'],
     };
 
     const keywords = matchMap[specialization] || [];
     return keywords.some(keyword => 
       source.activity.toLowerCase().includes(keyword) ||
-      source.type === 'workout' // General workout always matches
+      source.type === 'workout', // General workout always matches
     );
   }
 
@@ -252,7 +252,7 @@ export class CharacterGrowthSystem {
       rare: 1.1,
       epic: 1.2,
       legendary: 1.3,
-      mythical: 1.5
+      mythical: 1.5,
     };
     return multipliers[rarity];
   }
@@ -262,13 +262,13 @@ export class CharacterGrowthSystem {
     
     // Same specialization bonus
     const sameSpecCount = team.filter(c => 
-      c.id !== character.id && c.specialization === character.specialization
+      c.id !== character.id && c.specialization === character.specialization,
     ).length;
     synergy += sameSpecCount * 0.05; // +5% per matching specialization
     
     // Rarity synergy
     const rarityMatches = team.filter(c => 
-      c.id !== character.id && c.rarity === character.rarity
+      c.id !== character.id && c.rarity === character.rarity,
     ).length;
     synergy += rarityMatches * 0.03; // +3% per matching rarity
     
@@ -332,7 +332,7 @@ export class CharacterGrowthSystem {
         stat_increases: statIncreases,
         unlocked_abilities: unlockedAbilities,
         evolution_available: this.canEvolve(character),
-        rewards
+        rewards,
       };
     }
 
@@ -347,7 +347,7 @@ export class CharacterGrowthSystem {
       flexibility_mobility: { strength: 1.0, cardio: 1.5, flexibility: 2.5, focus: 2.2, motivation: 1.5, loyalty: 1.8 },
       mental_wellness: { strength: 1.0, cardio: 1.3, flexibility: 2.0, focus: 2.8, motivation: 2.2, loyalty: 2.0 },
       hybrid_training: { strength: 2.0, cardio: 2.0, flexibility: 1.8, focus: 1.8, motivation: 2.0, loyalty: 1.5 },
-      recovery_restoration: { strength: 1.5, cardio: 1.8, flexibility: 2.2, focus: 2.0, motivation: 1.8, loyalty: 2.5 }
+      recovery_restoration: { strength: 1.5, cardio: 1.8, flexibility: 2.2, focus: 2.0, motivation: 1.8, loyalty: 2.5 },
     };
 
     const rates = growthRates[character.specialization];
@@ -380,7 +380,7 @@ export class CharacterGrowthSystem {
       20: { basic_crystals: 20, training_essence: 10, bond_token: 2 },
       30: { rare_crystals: 5, power_essence: 3, bond_token: 3 },
       40: { rare_crystals: 10, power_essence: 8, bond_token: 5 },
-      50: { epic_crystals: 3, legendary_crystals: 1, bond_token: 8 }
+      50: { epic_crystals: 3, legendary_crystals: 1, bond_token: 8 },
     };
 
     const baseReward = baseRewards[level] || {};
@@ -425,7 +425,7 @@ export class CharacterGrowthSystem {
 
   public evolveCharacter(
     character: GymmyCharacter,
-    availableMaterials: EvolutionMaterials
+    availableMaterials: EvolutionMaterials,
   ): EvolutionResult | null {
     if (!this.canEvolve(character)) return null;
 
@@ -463,7 +463,7 @@ export class CharacterGrowthSystem {
       stat_bonuses: statBonuses,
       new_abilities: newAbilities,
       visual_changes: visualChanges,
-      materials_consumed: requirements.materials
+      materials_consumed: requirements.materials,
     };
   }
 
@@ -476,7 +476,7 @@ export class CharacterGrowthSystem {
 
   private calculateEvolutionStatBonuses(
     character: GymmyCharacter,
-    stage: number
+    stage: number,
   ): Partial<Record<keyof GymmyCharacter['base_stats'], number>> {
     // Evolution stat bonuses scale with rarity and specialization
     const rarityMultiplier = { common: 1, rare: 1.2, epic: 1.5, legendary: 2, mythical: 2.5 }[character.rarity];
@@ -488,7 +488,7 @@ export class CharacterGrowthSystem {
       flexibility_mobility: { strength: 5, cardio: 10, flexibility: 15, focus: 18, motivation: 10, loyalty: 12 },
       mental_wellness: { strength: 5, cardio: 8, flexibility: 12, focus: 20, motivation: 15, loyalty: 15 },
       hybrid_training: { strength: 12, cardio: 12, flexibility: 10, focus: 10, motivation: 15, loyalty: 8 },
-      recovery_restoration: { strength: 8, cardio: 10, flexibility: 12, focus: 12, motivation: 10, loyalty: 18 }
+      recovery_restoration: { strength: 8, cardio: 10, flexibility: 12, focus: 12, motivation: 10, loyalty: 18 },
     };
 
     const baseBonusSet = baseBonuses[character.specialization];
@@ -519,63 +519,63 @@ export class CharacterGrowthSystem {
     const animations: string[] = [];
 
     switch (stage) {
-      case 1:
-        effects.push({
-          id: 'evolution_sparkle',
-          name: 'Awakening Sparkle',
-          type: 'particle',
-          intensity: 0.3,
-          color_scheme: ['#FFD700', '#FFF'],
-          trigger_conditions: ['on_display', 'on_level_up']
-        });
-        changes.push({
-          element: 'border',
-          change_type: 'effect',
-          description: 'Subtle golden glow around character'
-        });
-        animations.push('awakening_pulse');
-        break;
+    case 1:
+      effects.push({
+        id: 'evolution_sparkle',
+        name: 'Awakening Sparkle',
+        type: 'particle',
+        intensity: 0.3,
+        color_scheme: ['#FFD700', '#FFF'],
+        trigger_conditions: ['on_display', 'on_level_up'],
+      });
+      changes.push({
+        element: 'border',
+        change_type: 'effect',
+        description: 'Subtle golden glow around character',
+      });
+      animations.push('awakening_pulse');
+      break;
 
-      case 2:
-        effects.push({
-          id: 'evolution_glow',
-          name: 'Enhanced Aura',
-          type: 'glow',
-          intensity: 0.6,
-          color_scheme: ['#4CAF50', '#8BC34A'],
-          trigger_conditions: ['on_display', 'on_interaction']
-        });
-        changes.push({
-          element: 'background',
-          change_type: 'upgrade',
-          description: 'Radiant energy background'
-        });
-        animations.push('power_surge', 'enhanced_idle');
-        break;
+    case 2:
+      effects.push({
+        id: 'evolution_glow',
+        name: 'Enhanced Aura',
+        type: 'glow',
+        intensity: 0.6,
+        color_scheme: ['#4CAF50', '#8BC34A'],
+        trigger_conditions: ['on_display', 'on_interaction'],
+      });
+      changes.push({
+        element: 'background',
+        change_type: 'upgrade',
+        description: 'Radiant energy background',
+      });
+      animations.push('power_surge', 'enhanced_idle');
+      break;
 
-      case 3:
-        effects.push({
-          id: 'evolution_transcendence',
-          name: 'Transcendent Aura',
-          type: 'distortion',
-          intensity: 1.0,
-          color_scheme: ['#9C27B0', '#E91E63', '#FF9800'],
-          trigger_conditions: ['always', 'on_interaction', 'on_ability_use']
-        });
-        changes.push({
-          element: 'accessory',
-          change_type: 'transformation',
-          description: 'Legendary crown or emblems'
-        });
-        animations.push('transcendence_idle', 'reality_pulse', 'legendary_flex');
-        break;
+    case 3:
+      effects.push({
+        id: 'evolution_transcendence',
+        name: 'Transcendent Aura',
+        type: 'distortion',
+        intensity: 1.0,
+        color_scheme: ['#9C27B0', '#E91E63', '#FF9800'],
+        trigger_conditions: ['always', 'on_interaction', 'on_ability_use'],
+      });
+      changes.push({
+        element: 'accessory',
+        change_type: 'transformation',
+        description: 'Legendary crown or emblems',
+      });
+      animations.push('transcendence_idle', 'reality_pulse', 'legendary_flex');
+      break;
     }
 
     return {
       stage,
       visual_effects: effects,
       appearance_changes: changes,
-      animation_unlocks: animations
+      animation_unlocks: animations,
     };
   }
 
@@ -596,87 +596,87 @@ export class CharacterGrowthSystem {
         {
           level: 20,
           materials: { basic_crystals: 5, training_essence: 3, bond_token: 1 },
-          bond_points: 500
+          bond_points: 500,
         },
         {
           level: 40,
           materials: { rare_crystals: 3, power_essence: 2, bond_token: 2 },
-          bond_points: 1200
+          bond_points: 1200,
         },
         {
           level: 60,
           materials: { epic_crystals: 2, legendary_crystals: 1, bond_token: 3 },
-          bond_points: 2500
-        }
+          bond_points: 2500,
+        },
       ],
       rare: [
         {
           level: 25,
           materials: { basic_crystals: 8, training_essence: 5, bond_token: 2 },
-          bond_points: 800
+          bond_points: 800,
         },
         {
           level: 45,
           materials: { rare_crystals: 5, power_essence: 3, bond_token: 3 },
-          bond_points: 1800
+          bond_points: 1800,
         },
         {
           level: 65,
           materials: { epic_crystals: 3, legendary_crystals: 1, bond_token: 5 },
-          bond_points: 3500
-        }
+          bond_points: 3500,
+        },
       ],
       epic: [
         {
           level: 30,
           materials: { basic_crystals: 12, rare_crystals: 3, training_essence: 8, bond_token: 3 },
-          bond_points: 1200
+          bond_points: 1200,
         },
         {
           level: 50,
           materials: { rare_crystals: 8, power_essence: 5, epic_crystals: 2, bond_token: 5 },
-          bond_points: 2500
+          bond_points: 2500,
         },
         {
           level: 70,
           materials: { epic_crystals: 5, legendary_crystals: 2, transcendence_core: 1, bond_token: 8 },
-          bond_points: 5000
-        }
+          bond_points: 5000,
+        },
       ],
       legendary: [
         {
           level: 35,
           materials: { rare_crystals: 10, power_essence: 8, epic_crystals: 3, bond_token: 5 },
-          bond_points: 2000
+          bond_points: 2000,
         },
         {
           level: 55,
           materials: { epic_crystals: 8, legendary_crystals: 3, transcendence_core: 1, bond_token: 8 },
-          bond_points: 4000
+          bond_points: 4000,
         },
         {
           level: 75,
           materials: { legendary_crystals: 10, transcendence_core: 3, divine_essence: 1, bond_token: 15 },
-          bond_points: 8000
-        }
+          bond_points: 8000,
+        },
       ],
       mythical: [
         {
           level: 40,
           materials: { epic_crystals: 15, legendary_crystals: 5, transcendence_core: 2, bond_token: 10 },
-          bond_points: 5000
+          bond_points: 5000,
         },
         {
           level: 60,
           materials: { legendary_crystals: 15, transcendence_core: 5, divine_essence: 2, bond_token: 15 },
-          bond_points: 10000
+          bond_points: 10000,
         },
         {
           level: 80,
           materials: { transcendence_core: 10, divine_essence: 5, cosmic_fragment: 1, bond_token: 25 },
-          bond_points: 20000
-        }
-      ]
+          bond_points: 20000,
+        },
+      ],
     };
   }
 
@@ -719,7 +719,7 @@ export class CharacterGrowthSystem {
   public simulateWorkout(
     characters: GymmyCharacter[],
     workoutData: ExperienceSource,
-    availableMaterials?: EvolutionMaterials
+    availableMaterials?: EvolutionMaterials,
   ): {
     experience_gains: ExperienceGain[];
     level_ups: LevelUpResult[];
@@ -758,7 +758,7 @@ export class CharacterGrowthSystem {
     return {
       experience_gains: experienceGains,
       level_ups: levelUps,
-      evolutions: evolutions
+      evolutions: evolutions,
     };
   }
 }

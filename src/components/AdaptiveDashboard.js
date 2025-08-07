@@ -1,22 +1,14 @@
 // src/components/AdaptiveDashboard.js
 
 import React, { useMemo } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context';
-import { SEGMENT_CONFIGS } from '../context/segmentationTypes';
+import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
 const { width } = Dimensions.get('window');
 
 export const AdaptiveDashboard = ({ navigation }) => {
-  const { state, getCurrentSegment, getSegmentConfig } = useApp();
+  const { state, getCurrentSegment, getSegmentConfig } = useUnifiedApp();
   const { userStats, workoutHistory, personalizedGoals } = state;
   
   const currentSegment = getCurrentSegment();

@@ -57,7 +57,7 @@ export const CardioExercise = ({
                 updateCardioData(
                   exercise.id,
                   'distance',
-                  parseFloat(value) || 0
+                  parseFloat(value) || 0,
                 )
               }
               placeholder="0.00"

@@ -172,7 +172,7 @@ const WorkoutTemplates = ({
                     ))}
                   </View>
                 );
-              }
+              },
             )}
 
             {/* Bottom padding */}

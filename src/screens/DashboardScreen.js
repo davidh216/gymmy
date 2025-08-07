@@ -11,13 +11,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 import WorkoutCalendar from '../components/WorkoutCalendar';
-import AnalyticsPreview from '../components/AnalyticsPreview';
+import { 
+  AnalyticsPreview,
+  GamificationStats,
+  EnhancedGamificationStats,
+} from '../components/common';
 import MiniWeeklyChart from '../components/MiniWeeklyChart';
-import GamificationStats from '../components/GamificationStats';
 import ClassDashboardWidget from '../components/ClassDashboardWidget';
-import EnhancedGamificationStats from '../components/EnhancedGamificationStats';
 import { DESIGN_TOKENS } from '../constants/designTokens';
 
 // Lazy load the heavy AnalyticsCharts component

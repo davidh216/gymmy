@@ -14,23 +14,23 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 
 // Import new workout components
-import WorkoutHeader from '../components/workout/WorkoutHeader';
-import WorkoutCategorySelector from '../components/workout/WorkoutCategorySelector';
-import ExerciseList from '../components/workout/ExerciseList';
-import ActiveWorkout from '../components/workout/ActiveWorkout';
-import WorkoutHistoryList from '../components/workout/WorkoutHistoryList';
-import WorkoutTemplates from '../components/workout/WorkoutTemplates';
-import {
+import { 
+  WorkoutHeader,
+  WorkoutCategorySelector,
+  ExerciseList,
+  ActiveWorkout,
+  WorkoutHistoryList,
+  WorkoutTemplates,
   WorkoutRatingModal,
   SaveTemplateModal,
-} from '../components/workout/WorkoutModals';
+} from '../components/workout';
 
 // Lazy load the heavy GachaComponents
 const GachaComponents = React.lazy(
-  () => import('../components/GachaComponents')
+  () => import('../components/GachaComponents'),
 );
 
 // Loading component for lazy-loaded gacha components
@@ -163,7 +163,7 @@ const WorkoutScreen = ({ navigation, route }) => {
         'Circuit Training',
       ],
     }),
-    []
+    [],
   );
 
   // Load template if templateId is provided
@@ -255,7 +255,7 @@ const WorkoutScreen = ({ navigation, route }) => {
               order: index,
             };
           }
-        }
+        },
       );
 
       setExercises(templateExercises);
@@ -264,14 +264,14 @@ const WorkoutScreen = ({ navigation, route }) => {
       setRatingType('pre');
       setShowRatingModal(true);
     },
-    [workoutRatings]
+    [workoutRatings],
   );
 
   const saveAsTemplate = useCallback(async () => {
     if (!templateName.trim() || exercises.length === 0) {
       Alert.alert(
         'Error',
-        'Please enter a template name and add some exercises'
+        'Please enter a template name and add some exercises',
       );
       return;
     }
@@ -318,20 +318,20 @@ const WorkoutScreen = ({ navigation, route }) => {
         sets: isCardioExercise(exerciseName)
           ? []
           : [
-              {
-                id: Date.now() + 1,
-                reps: '',
-                weight: '',
-                completed: false,
-              },
-            ],
+            {
+              id: Date.now() + 1,
+              reps: '',
+              weight: '',
+              completed: false,
+            },
+          ],
         cardioData: isCardioExercise(exerciseName)
           ? {
-              totalTime: 0,
-              pace: '',
-              calories: 0,
-              distance: 0,
-            }
+            totalTime: 0,
+            pace: '',
+            calories: 0,
+            distance: 0,
+          }
           : null,
         notes: '',
         order: exercises.length,
@@ -339,7 +339,7 @@ const WorkoutScreen = ({ navigation, route }) => {
 
       setExercises(prev => [...prev, newExercise]);
     },
-    [exercises.length, isCardioExercise]
+    [exercises.length, isCardioExercise],
   );
 
   const addSet = useCallback(exerciseId => {
@@ -355,7 +355,7 @@ const WorkoutScreen = ({ navigation, route }) => {
           return { ...exercise, sets: [...exercise.sets, newSet] };
         }
         return exercise;
-      })
+      }),
     );
   }, []);
 
@@ -373,7 +373,7 @@ const WorkoutScreen = ({ navigation, route }) => {
           };
         }
         return exercise;
-      })
+      }),
     );
   }, []);
 
@@ -384,12 +384,12 @@ const WorkoutScreen = ({ navigation, route }) => {
           return {
             ...exercise,
             sets: exercise.sets.map(set =>
-              set.id === setId ? { ...set, [field]: value } : set
+              set.id === setId ? { ...set, [field]: value } : set,
             ),
           };
         }
         return exercise;
-      })
+      }),
     );
   }, []);
 
@@ -403,7 +403,7 @@ const WorkoutScreen = ({ navigation, route }) => {
           };
         }
         return exercise;
-      })
+      }),
     );
   }, []);
 
@@ -411,7 +411,7 @@ const WorkoutScreen = ({ navigation, route }) => {
     exerciseName => {
       return exerciseHistory[exerciseName] || [];
     },
-    [exerciseHistory]
+    [exerciseHistory],
   );
 
   const finishWorkout = useCallback(() => {
@@ -448,10 +448,10 @@ const WorkoutScreen = ({ navigation, route }) => {
               await removeWorkout(workoutId);
             },
           },
-        ]
+        ],
       );
     },
-    [removeWorkout]
+    [removeWorkout],
   );
 
   const handleVerificationComplete = useCallback(
@@ -477,7 +477,7 @@ const WorkoutScreen = ({ navigation, route }) => {
 
       setShowVerification(false);
     },
-    [completedWorkout, addWorkout, updateExerciseHistory]
+    [completedWorkout, addWorkout, updateExerciseHistory],
   );
 
   const toggleWorkoutExpansion = useCallback(workoutId => {

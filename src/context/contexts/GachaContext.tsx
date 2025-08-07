@@ -185,71 +185,71 @@ const initialGachaState: GachaState = {
 
 const gachaReducer = (state: GachaState, action: GachaAction): GachaState => {
   switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'SET_CHARACTERS':
-      return { ...state, characterCollection: action.payload };
-    case 'ADD_CHARACTER':
-      return {
-        ...state,
-        characterCollection: [...state.characterCollection, action.payload],
-      };
-    case 'UPDATE_CHARACTER':
-      return {
-        ...state,
-        characterCollection: state.characterCollection.map(char =>
-          char.id === action.payload.id
-            ? { ...char, ...action.payload.updates }
-            : char
-        ),
-      };
-    case 'SET_SOCIAL_POSTS':
-      return { ...state, socialPosts: action.payload };
-    case 'ADD_SOCIAL_POST':
-      return { ...state, socialPosts: [action.payload, ...state.socialPosts] };
-    case 'UPDATE_SOCIAL_POST':
-      return {
-        ...state,
-        socialPosts: state.socialPosts.map(post =>
-          post.id === action.payload.id
-            ? { ...post, ...action.payload.updates }
-            : post
-        ),
-      };
-    case 'DELETE_SOCIAL_POST':
-      return {
-        ...state,
-        socialPosts: state.socialPosts.filter(
-          post => post.id !== action.payload
-        ),
-      };
-    case 'SET_CURRENCIES':
-      return { ...state, userCurrencies: action.payload };
-    case 'UPDATE_CURRENCIES':
-      return {
-        ...state,
-        userCurrencies: { ...state.userCurrencies, ...action.payload },
-      };
-    case 'SET_DAILY_BONUSES':
-      return { ...state, dailyBonuses: action.payload };
-    case 'UPDATE_DAILY_BONUSES':
-      return {
-        ...state,
-        dailyBonuses: { ...state.dailyBonuses, ...action.payload },
-      };
-    case 'SET_CURRENT_BANNER':
-      return { ...state, currentBanner: action.payload };
-    case 'SET_ENHANCED_GACHA':
-      return { ...state, enhancedGacha: action.payload };
-    case 'UPDATE_ENHANCED_GACHA':
-      return {
-        ...state,
-        enhancedGacha: { ...state.enhancedGacha, ...action.payload },
-      };
-    default:
-      return state;
+  case 'SET_LOADING':
+    return { ...state, loading: action.payload };
+  case 'SET_ERROR':
+    return { ...state, error: action.payload };
+  case 'SET_CHARACTERS':
+    return { ...state, characterCollection: action.payload };
+  case 'ADD_CHARACTER':
+    return {
+      ...state,
+      characterCollection: [...state.characterCollection, action.payload],
+    };
+  case 'UPDATE_CHARACTER':
+    return {
+      ...state,
+      characterCollection: state.characterCollection.map(char =>
+        char.id === action.payload.id
+          ? { ...char, ...action.payload.updates }
+          : char,
+      ),
+    };
+  case 'SET_SOCIAL_POSTS':
+    return { ...state, socialPosts: action.payload };
+  case 'ADD_SOCIAL_POST':
+    return { ...state, socialPosts: [action.payload, ...state.socialPosts] };
+  case 'UPDATE_SOCIAL_POST':
+    return {
+      ...state,
+      socialPosts: state.socialPosts.map(post =>
+        post.id === action.payload.id
+          ? { ...post, ...action.payload.updates }
+          : post,
+      ),
+    };
+  case 'DELETE_SOCIAL_POST':
+    return {
+      ...state,
+      socialPosts: state.socialPosts.filter(
+        post => post.id !== action.payload,
+      ),
+    };
+  case 'SET_CURRENCIES':
+    return { ...state, userCurrencies: action.payload };
+  case 'UPDATE_CURRENCIES':
+    return {
+      ...state,
+      userCurrencies: { ...state.userCurrencies, ...action.payload },
+    };
+  case 'SET_DAILY_BONUSES':
+    return { ...state, dailyBonuses: action.payload };
+  case 'UPDATE_DAILY_BONUSES':
+    return {
+      ...state,
+      dailyBonuses: { ...state.dailyBonuses, ...action.payload },
+    };
+  case 'SET_CURRENT_BANNER':
+    return { ...state, currentBanner: action.payload };
+  case 'SET_ENHANCED_GACHA':
+    return { ...state, enhancedGacha: action.payload };
+  case 'UPDATE_ENHANCED_GACHA':
+    return {
+      ...state,
+      enhancedGacha: { ...state.enhancedGacha, ...action.payload },
+    };
+  default:
+    return state;
   }
 };
 
@@ -316,7 +316,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         for (let i = 0; i < pullCount; i++) {
           const character = performGachaPull(
             state.characterCollection,
-            state.currentBanner
+            state.currentBanner,
           );
           results.push(character);
           dispatch({ type: 'ADD_CHARACTER', payload: character });
@@ -341,7 +341,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         throw error;
       }
     },
-    [state.userCurrencies.gems, state.characterCollection, state.currentBanner]
+    [state.userCurrencies.gems, state.characterCollection, state.currentBanner],
   );
 
   const performEnhancedPull = useCallback(
@@ -357,14 +357,14 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         throw error;
       }
     },
-    [gachaManager, state.enhancedGacha]
+    [gachaManager, state.enhancedGacha],
   );
 
   const evolveCharacter = useCallback(
     async (characterId: string) => {
       try {
         const character = state.characterCollection.find(
-          c => c.id === characterId
+          c => c.id === characterId,
         );
         if (!character) throw new Error('Character not found');
 
@@ -381,7 +381,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to evolve character' });
       }
     },
-    [state.characterCollection]
+    [state.characterCollection],
   );
 
   const addCharacter = useCallback(
@@ -397,7 +397,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to add character' });
       }
     },
-    [state.characterCollection]
+    [state.characterCollection],
   );
 
   const updateCharacter = useCallback(
@@ -413,7 +413,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to update character' });
       }
     },
-    [state.characterCollection]
+    [state.characterCollection],
   );
 
   const favoriteCharacter = useCallback(
@@ -428,7 +428,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         });
       }
     },
-    [updateCharacter]
+    [updateCharacter],
   );
 
   const updateCurrencies = useCallback(
@@ -442,7 +442,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to update currencies' });
       }
     },
-    [state.userCurrencies]
+    [state.userCurrencies],
   );
 
   const spendGems = useCallback(
@@ -461,7 +461,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         return false;
       }
     },
-    [state.userCurrencies.gems, updateCurrencies]
+    [state.userCurrencies.gems, updateCurrencies],
   );
 
   const earnGems = useCallback(
@@ -474,7 +474,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to earn gems' });
       }
     },
-    [state.userCurrencies.gems, updateCurrencies]
+    [state.userCurrencies.gems, updateCurrencies],
   );
 
   const createPost = useCallback(
@@ -488,7 +488,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to create post' });
       }
     },
-    []
+    [],
   );
 
   const likePost = useCallback(
@@ -512,7 +512,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_ERROR', payload: 'Failed to like post' });
       }
     },
-    [state.socialPosts]
+    [state.socialPosts],
   );
 
   const deletePost = useCallback(async (postId: string) => {
@@ -588,7 +588,7 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
       const cost = pullType === 'single' ? 10 : 90;
       return state.userCurrencies.gems >= cost;
     },
-    [state.userCurrencies.gems]
+    [state.userCurrencies.gems],
   );
 
   const getPullCost = useCallback((pullType: 'single' | 'ten_pull'): number => {

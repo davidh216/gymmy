@@ -1,0 +1,172 @@
+{
+  "total_imports": 223,
+  "total_files": 86,
+  "most_imported": [
+    [
+      "react",
+      51
+    ],
+    [
+      "@expo/vector-icons",
+      32
+    ],
+    [
+      "../context/AppContext",
+      15
+    ],
+    [
+      "react-native",
+      13
+    ],
+    [
+      "../types",
+      8
+    ],
+    [
+      "../context",
+      5
+    ],
+    [
+      "../../utils/StorageManager",
+      4
+    ],
+    [
+      "../types/EnhancedGachaTypes",
+      4
+    ],
+    [
+      "../components/GamificationStats",
+      4
+    ],
+    [
+      "./SimpleCharts",
+      3
+    ],
+    [
+      "./EnhancedGachaSystem",
+      3
+    ],
+    [
+      "./UnifiedAppProvider",
+      3
+    ],
+    [
+      "./types",
+      3
+    ],
+    [
+      "../EnhancedGachaSystem",
+      3
+    ],
+    [
+      "../context/segmentationTypes",
+      2
+    ],
+    [
+      "../screens/ClassSelectionScreen",
+      2
+    ],
+    [
+      "./contexts/WorkoutContext",
+      2
+    ],
+    [
+      "./contexts/UserStatsContext",
+      2
+    ],
+    [
+      "./contexts/GachaContext",
+      2
+    ],
+    [
+      "../utils/StorageManager",
+      2
+    ]
+  ],
+  "external_imports": [
+    [
+      "react",
+      51
+    ],
+    [
+      "@expo/vector-icons",
+      32
+    ],
+    [
+      "react-native",
+      13
+    ],
+    [
+      "@react-native-community/datetimepicker",
+      1
+    ],
+    [
+      "react-native-chart-kit",
+      1
+    ],
+    [
+      "react-error-boundary",
+      1
+    ],
+    [
+      "@react-native-async-storage/async-storage",
+      1
+    ]
+  ],
+  "files_with_many_imports": [],
+  "long_relative_imports": [],
+  "relative_import_stats": {
+    "components\\AdaptiveDashboard.js": 2,
+    "components\\AdaptiveGymmy.js": 1,
+    "components\\AnalyticsCharts.js": 1,
+    "components\\AnalyticsPreview.js": 1,
+    "components\\BodyWeightTracker.js": 2,
+    "components\\ClassDashboardWidget.js": 2,
+    "components\\EnhancedGachaComponents.js": 1,
+    "components\\EnhancedGamificationStats.js": 2,
+    "components\\GachaComponents.js": 1,
+    "components\\OnboardingSurvey.js": 2,
+    "components\\WorkoutCalendar.js": 2,
+    "components\\multi-gymmy\\TeamBuilder.js": 1,
+    "components\\workout\\ActiveWorkout.js": 1,
+    "components\\workout\\WorkoutHeader.js": 2,
+    "context\\AppContext.tsx": 3,
+    "context\\AppContext_Original.tsx": 3,
+    "context\\AppProvider.tsx": 5,
+    "context\\ContextIntegrationManager.tsx": 5,
+    "context\\ContextSelectors.tsx": 1,
+    "context\\EnhancedGachaIntegration.ts": 2,
+    "context\\EnhancedGachaManager.ts": 6,
+    "context\\EnhancedGachaSystem.ts": 1,
+    "context\\GameReducer.ts": 2,
+    "context\\SurveyQuestions.ts": 1,
+    "context\\UnifiedAppProvider.tsx": 7,
+    "context\\contexts\\GachaContext.tsx": 4,
+    "context\\contexts\\SegmentationContext.tsx": 2,
+    "context\\contexts\\UserStatsContext.tsx": 2,
+    "context\\contexts\\WorkoutContext.tsx": 2,
+    "context\\data\\BannerDatabase.ts": 2,
+    "context\\data\\EvolutionMaterials.ts": 1,
+    "context\\managers\\AnalyticsManager.ts": 2,
+    "context\\managers\\BannerManager.ts": 1,
+    "context\\managers\\EvolutionManager.ts": 3,
+    "context\\managers\\PullManager.ts": 3,
+    "context\\systems\\AdvancedGachaSystem.ts": 2,
+    "context\\systems\\TeamManagementSystem.ts": 1,
+    "context\\types\\EnhancedGachaTypes.ts": 1,
+    "context\\types\\MultiGymmyTypes.ts": 1,
+    "screens\\AchievementsScreen.js": 1,
+    "screens\\CharacterCollectionScreen.js": 1,
+    "screens\\ClassSelectionScreen.js": 2,
+    "screens\\DashboardScreen.js": 8,
+    "screens\\GachaScreen.js": 1,
+    "screens\\ProgressScreen.js": 6,
+    "screens\\SegmentResultsScreen.js": 1,
+    "screens\\SettingsScreen.js": 1,
+    "screens\\updated_dashboard_screen.js": 6,
+    "screens\\WelcomeScreen.js": 1,
+    "screens\\WorkoutScreen.js": 7,
+    "screens\\WorkoutScreen_Original.js": 3,
+    "utils\\dashboardUtils.js": 1
+  }
+}

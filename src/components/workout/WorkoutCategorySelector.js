@@ -25,12 +25,12 @@ const WorkoutCategorySelector = ({
       Core: 'diamond',
       Cardio: 'heart',
     }),
-    []
+    [],
   );
 
   const categories = useMemo(
     () => Object.keys(exerciseCategories),
-    [exerciseCategories]
+    [exerciseCategories],
   );
 
   return (

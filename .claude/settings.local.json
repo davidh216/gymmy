@@ -18,7 +18,16 @@
       "Bash(npx prettier:*)",
       "Bash(git push:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(timeout 15s npx expo start --tunnel=false)",
+      "Bash(rm:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(rg:*)",
+      "Bash(python:*)",
+      "Bash(sed:*)",
+      "Bash(timeout 10s npx expo start --no-dev --minify)",
+      "Bash(timeout 10s npx expo start --no-dev --minify --port 8083)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": []
   }

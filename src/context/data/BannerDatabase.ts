@@ -33,12 +33,12 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       rare: 0.25,        // Normal rare rate
       epic: 0.15,        // Increased epic rate
       legendary: 0.045,  // Significantly increased legendary rate
-      mythical: 0.005    // Normal mythical rate
+      mythical: 0.005,    // Normal mythical rate
     },
     
     bonus_materials: {
       basic_crystals: 2,
-      training_essence: 1
+      training_essence: 1,
     } as EvolutionMaterials,
     
     step_up_rewards: [
@@ -46,30 +46,30 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         step: 1,
         pulls_required: 1,
         bonus_materials: { basic_crystals: 5, training_essence: 3 } as EvolutionMaterials,
-        discount: 0
+        discount: 0,
       },
       {
         step: 2,
         pulls_required: 10,
         guaranteed_rarity: 'rare',
         bonus_materials: { rare_crystals: 2, power_essence: 1 } as EvolutionMaterials,
-        discount: 10
+        discount: 10,
       },
       {
         step: 3,
         pulls_required: 20,
         guaranteed_rarity: 'epic',
         bonus_materials: { epic_crystals: 1, mastery_essence: 1 } as EvolutionMaterials,
-        discount: 15
+        discount: 15,
       },
       {
         step: 4,
         pulls_required: 50,
         guaranteed_rarity: 'legendary',
         bonus_materials: { legendary_crystals: 1, transcendence_core: 1 } as EvolutionMaterials,
-        discount: 25
-      }
-    ] as StepUpReward[]
+        discount: 25,
+      },
+    ] as StepUpReward[],
   },
 
   // ========================================
@@ -94,7 +94,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
     bonus_materials: {
       power_essence: 2,
       basic_crystals: 1,
-      sweat_drops: 3
+      sweat_drops: 3,
     } as EvolutionMaterials,
     
     step_up_rewards: [
@@ -102,23 +102,23 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         step: 1,
         pulls_required: 5,
         bonus_materials: { power_essence: 3, basic_crystals: 10 } as EvolutionMaterials,
-        discount: 5
+        discount: 5,
       },
       {
         step: 2,
         pulls_required: 15,
         guaranteed_rarity: 'rare',
         bonus_materials: { rare_crystals: 3, power_essence: 5 } as EvolutionMaterials,
-        discount: 15
+        discount: 15,
       },
       {
         step: 3,
         pulls_required: 30,
         guaranteed_rarity: 'epic',
         bonus_materials: { transformation_core: 1, mastery_essence: 2 } as EvolutionMaterials,
-        discount: 20
-      }
-    ] as StepUpReward[]
+        discount: 20,
+      },
+    ] as StepUpReward[],
   },
 
   // ========================================
@@ -143,7 +143,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
     bonus_materials: {
       endurance_essence: 2,
       sweat_drops: 4,
-      training_essence: 1
+      training_essence: 1,
     } as EvolutionMaterials,
     
     step_up_rewards: [
@@ -151,23 +151,23 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         step: 1,
         pulls_required: 3,
         bonus_materials: { endurance_essence: 2, sweat_drops: 5 } as EvolutionMaterials,
-        discount: 0
+        discount: 0,
       },
       {
         step: 2,
         pulls_required: 12,
         guaranteed_rarity: 'rare',
         bonus_materials: { rare_crystals: 2, endurance_essence: 4 } as EvolutionMaterials,
-        discount: 10
+        discount: 10,
       },
       {
         step: 3,
         pulls_required: 25,
         guaranteed_rarity: 'epic',
         bonus_materials: { epic_crystals: 1, team_synergy_core: 1 } as EvolutionMaterials,
-        discount: 20
-      }
-    ] as StepUpReward[]
+        discount: 20,
+      },
+    ] as StepUpReward[],
   },
 
   // ========================================
@@ -192,7 +192,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
     bonus_materials: {
       flexibility_essence: 2,
       bond_token: 1,
-      training_essence: 2
+      training_essence: 2,
     } as EvolutionMaterials,
     
     special_rates: {
@@ -200,8 +200,8 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       rare: 0.30,        // Higher rare rate
       epic: 0.15,        // Higher epic rate
       legendary: 0.04,   // Higher legendary rate
-      mythical: 0.01     // Doubled mythical rate!
-    }
+      mythical: 0.01,     // Doubled mythical rate!
+    },
   },
 
   // ========================================
@@ -228,7 +228,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       rare: 0.40,        // Much higher rare rate - perfect for beginners
       epic: 0.15,        // Higher epic rate
       legendary: 0.04,   // Higher legendary rate
-      mythical: 0.01     // Doubled mythical rate
+      mythical: 0.01,     // Doubled mythical rate
     },
     
     // Generous materials for new players
@@ -236,7 +236,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       basic_crystals: 3,
       training_essence: 2,
       rare_crystals: 1,
-      bond_token: 1
+      bond_token: 1,
     } as EvolutionMaterials,
     
     step_up_rewards: [
@@ -245,23 +245,23 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         pulls_required: 1,
         guaranteed_rarity: 'rare',
         bonus_materials: { basic_crystals: 10, training_essence: 5 } as EvolutionMaterials,
-        discount: 50 // 50% discount for first pull!
+        discount: 50, // 50% discount for first pull!
       },
       {
         step: 2,
         pulls_required: 5,
         guaranteed_rarity: 'epic',
         bonus_materials: { rare_crystals: 5, bond_token: 3 } as EvolutionMaterials,
-        discount: 30
+        discount: 30,
       },
       {
         step: 3,
         pulls_required: 20,
         guaranteed_rarity: 'legendary',
         bonus_materials: { epic_crystals: 2, mastery_essence: 1 } as EvolutionMaterials,
-        discount: 25
-      }
-    ] as StepUpReward[]
+        discount: 25,
+      },
+    ] as StepUpReward[],
   },
 
   // ========================================
@@ -288,7 +288,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       rare: 0.35,        // High rare rate
       epic: 0.25,        // Very high epic rate
       legendary: 0.08,   // Tripled legendary rate
-      mythical: 0.02     // 4x mythical rate!
+      mythical: 0.02,     // 4x mythical rate!
     },
     
     // Cosmic materials
@@ -296,7 +296,7 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
       cosmic_essence: 1,
       legendary_crystals: 1,
       transcendence_core: 1,
-      infinity_shard: 1
+      infinity_shard: 1,
     } as EvolutionMaterials,
     
     // Modified pity system for this banner
@@ -307,22 +307,22 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         rare: 8,  // Faster rare pity
         epic: 25, // Faster epic pity
         legendary: 60, // Much faster legendary pity
-        mythical: 300  // Faster mythical pity
+        mythical: 300,  // Faster mythical pity
       },
       soft_pity_start: { 
         common: 1, 
         rare: 6, 
         epic: 20, 
         legendary: 45, 
-        mythical: 250 
+        mythical: 250, 
       },
       rate_increase_per_pull: { 
         common: 0, 
         rare: 0.03, 
         epic: 0.08, 
         legendary: 0.15, 
-        mythical: 0.05 
-      }
+        mythical: 0.05, 
+      },
     },
     
     step_up_rewards: [
@@ -331,24 +331,24 @@ export const BANNER_DATABASE: Record<string, BannerConfiguration> = {
         pulls_required: 10,
         guaranteed_rarity: 'epic',
         bonus_materials: { cosmic_essence: 1, legendary_crystals: 2 } as EvolutionMaterials,
-        discount: 20
+        discount: 20,
       },
       {
         step: 2,
         pulls_required: 30,
         guaranteed_rarity: 'legendary',
         bonus_materials: { cosmic_essence: 3, reality_crystal: 1 } as EvolutionMaterials,
-        discount: 30
+        discount: 30,
       },
       {
         step: 3,
         pulls_required: 100,
         guaranteed_rarity: 'mythical',
         bonus_materials: { cosmic_essence: 10, reality_crystal: 5, infinity_shard: 3 } as EvolutionMaterials,
-        discount: 50
-      }
-    ] as StepUpReward[]
-  }
+        discount: 50,
+      },
+    ] as StepUpReward[],
+  },
 };
 
 // ==============================================================================
@@ -379,14 +379,14 @@ export const SEASONAL_EVENTS: Record<string, SeasonalEventConfig> = {
     special_mechanics: {
       login_bonus_multiplier: 2.0,
       xp_bonus: 50,
-      material_drop_bonus: 25
+      material_drop_bonus: 25,
     },
     exclusive_rewards: {
       basic_crystals: 100,
       rare_crystals: 20,
       epic_crystals: 5,
-      bond_token: 10
-    } as EvolutionMaterials
+      bond_token: 10,
+    } as EvolutionMaterials,
   },
 
   spring_training: {
@@ -398,14 +398,14 @@ export const SEASONAL_EVENTS: Record<string, SeasonalEventConfig> = {
     special_mechanics: {
       login_bonus_multiplier: 1.5,
       xp_bonus: 30,
-      material_drop_bonus: 40
+      material_drop_bonus: 40,
     },
     exclusive_rewards: {
       power_essence: 20,
       endurance_essence: 20,
       flexibility_essence: 15,
-      mastery_essence: 5
-    } as EvolutionMaterials
+      mastery_essence: 5,
+    } as EvolutionMaterials,
   },
 
   summer_body_challenge: {
@@ -417,13 +417,13 @@ export const SEASONAL_EVENTS: Record<string, SeasonalEventConfig> = {
     special_mechanics: {
       login_bonus_multiplier: 1.8,
       xp_bonus: 40,
-      material_drop_bonus: 35
+      material_drop_bonus: 35,
     },
     exclusive_rewards: {
       transformation_core: 3,
       team_synergy_core: 2,
-      legendary_crystals: 3
-    } as EvolutionMaterials
+      legendary_crystals: 3,
+    } as EvolutionMaterials,
   },
 
   cosmic_convergence: {
@@ -435,15 +435,15 @@ export const SEASONAL_EVENTS: Record<string, SeasonalEventConfig> = {
     special_mechanics: {
       login_bonus_multiplier: 5.0,
       xp_bonus: 100,
-      material_drop_bonus: 100
+      material_drop_bonus: 100,
     },
     exclusive_rewards: {
       cosmic_essence: 5,
       reality_crystal: 2,
       infinity_shard: 1,
-      transcendence_core: 3
-    } as EvolutionMaterials
-  }
+      transcendence_core: 3,
+    } as EvolutionMaterials,
+  },
 };
 
 // ==============================================================================
@@ -492,7 +492,7 @@ export const createCustomBanner = (
   name: string,
   featuredCharacters: string[],
   duration: number,
-  specialRates?: Record<string, number>
+  specialRates?: Record<string, number>,
 ): BannerConfiguration => {
   const now = new Date();
   const endDate = new Date(now.getTime() + (duration * 24 * 60 * 60 * 1000));
@@ -511,8 +511,8 @@ export const createCustomBanner = (
     special_rates: specialRates as any,
     bonus_materials: {
       basic_crystals: 2,
-      training_essence: 1
-    } as EvolutionMaterials
+      training_essence: 1,
+    } as EvolutionMaterials,
   };
 };
 

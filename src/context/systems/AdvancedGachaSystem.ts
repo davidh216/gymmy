@@ -5,7 +5,7 @@ import {
   GymmyTemplate,
   GymmyCharacter,
   GymmyRarity,
-  EvolutionMaterials
+  EvolutionMaterials,
 } from '../types/MultiGymmyTypes';
 
 import { multiGymmyManager } from '../managers/MultiGymmyManager';
@@ -149,22 +149,22 @@ export class AdvancedGachaSystem {
         rare: 10, 
         epic: 40, 
         legendary: 90, 
-        mythical: 500 
+        mythical: 500, 
       },
       soft_pity_start: { 
         common: 1, 
         rare: 8, 
         epic: 30, 
         legendary: 75, 
-        mythical: 400 
+        mythical: 400, 
       },
       rate_increase_per_pull: { 
         common: 0, 
         rare: 0.02, 
         epic: 0.05, 
         legendary: 0.1, 
-        mythical: 0.02 
-      }
+        mythical: 0.02, 
+      },
     };
   }
 
@@ -180,8 +180,8 @@ export class AdvancedGachaSystem {
       current_streak: {
         pulls_since_legendary: 0,
         pulls_since_epic: 0,
-        pulls_since_rare: 0
-      }
+        pulls_since_rare: 0,
+      },
     };
   }
 
@@ -193,19 +193,19 @@ export class AdvancedGachaSystem {
         rare: { expected: 0.25, actual: 0 },
         epic: { expected: 0.12, actual: 0 },
         legendary: { expected: 0.025, actual: 0 },
-        mythical: { expected: 0.005, actual: 0 }
+        mythical: { expected: 0.005, actual: 0 },
       },
       banner_performance: {},
       pity_effectiveness: {
         average_pulls_to_legendary: 0,
         pity_breaks_percentage: 0,
-        soft_pity_effectiveness: 0
+        soft_pity_effectiveness: 0,
       },
       user_patterns: {
         preferred_pull_type: 'single',
         average_session_pulls: 0,
-        most_active_time: '00:00'
-      }
+        most_active_time: '00:00',
+      },
     };
   }
 
@@ -228,7 +228,7 @@ export class AdvancedGachaSystem {
         featured_character_rate: 0,
         user_satisfaction_score: 0,
         revenue_generated: 0,
-        completion_rate: 0
+        completion_rate: 0,
       };
 
       return true;
@@ -302,7 +302,7 @@ export class AdvancedGachaSystem {
   public performAdvancedPull(
     pullType: 'single' | 'ten_pull' | 'step_up',
     userGems: number,
-    stepUpLevel?: number
+    stepUpLevel?: number,
   ): { success: boolean, result?: PullResult, error?: string } {
     try {
       const cost = this.calculatePullCost(pullType, stepUpLevel);
@@ -353,7 +353,7 @@ export class AdvancedGachaSystem {
         banner_id: activeBanner?.id,
         pity_breaks: pityBreaks,
         guaranteed_triggers: guaranteedTriggers,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       // Update history and analytics
@@ -368,7 +368,7 @@ export class AdvancedGachaSystem {
   }
 
   private performSingleAdvancedPull(
-    banner?: BannerConfiguration | null
+    banner?: BannerConfiguration | null,
   ): { 
     character: GymmyCharacter, 
     materials: EvolutionMaterials, 
@@ -400,7 +400,7 @@ export class AdvancedGachaSystem {
   }
 
   private determineAdvancedRarity(
-    banner?: BannerConfiguration | null
+    banner?: BannerConfiguration | null,
   ): { rarity: GymmyRarity, isPityBreak: boolean, isGuaranteed: boolean, guaranteedReason?: string } {
     // Check hard pity first
     for (const [rarityKey, threshold] of Object.entries(this.pitySystem.thresholds)) {
@@ -421,7 +421,7 @@ export class AdvancedGachaSystem {
             rarity: featuredChar.rarity, 
             isPityBreak: false, 
             isGuaranteed: true, 
-            guaranteedReason: 'banner_guarantee' 
+            guaranteedReason: 'banner_guarantee', 
           };
         }
       }
@@ -454,7 +454,7 @@ export class AdvancedGachaSystem {
       rare: 0.25,
       epic: 0.12,
       legendary: 0.025,
-      mythical: 0.005
+      mythical: 0.005,
     };
 
     const modifiedRates = { ...baseRates };
@@ -484,7 +484,7 @@ export class AdvancedGachaSystem {
 
   private selectCharacterWithBanner(
     rarity: GymmyRarity,
-    banner?: BannerConfiguration | null
+    banner?: BannerConfiguration | null,
   ): GymmyTemplate {
     // If banner is active and has featured characters of this rarity
     if (banner && banner.featured_characters.length > 0) {
@@ -522,9 +522,9 @@ export class AdvancedGachaSystem {
 
   private calculatePullMaterials(
     rarity: GymmyRarity,
-    banner?: BannerConfiguration | null
+    banner?: BannerConfiguration | null,
   ): EvolutionMaterials {
-    let materials = calculateMaterialRewards('gacha_pull', [rarity]);
+    const materials = calculateMaterialRewards('gacha_pull', [rarity]);
     
     // Add banner bonus materials
     if (banner?.bonus_materials) {
@@ -538,7 +538,7 @@ export class AdvancedGachaSystem {
     characters: GymmyCharacter[],
     materials: EvolutionMaterials,
     banner: BannerConfiguration,
-    stepLevel: number
+    stepLevel: number,
   ): void {
     const stepReward = banner.step_up_rewards?.find(r => r.step === stepLevel);
     if (!stepReward) return;
@@ -557,7 +557,7 @@ export class AdvancedGachaSystem {
 
   private apply10PullGuarantee(characters: GymmyCharacter[]): void {
     const hasRareOrBetter = characters.some(c => 
-      c.rarity !== 'common'
+      c.rarity !== 'common',
     );
 
     if (!hasRareOrBetter) {
@@ -583,36 +583,36 @@ export class AdvancedGachaSystem {
     const baseCosts = multiGymmyManager.getPullCosts();
     
     switch (pullType) {
-      case 'single':
-        return baseCosts.single;
+    case 'single':
+      return baseCosts.single;
       
-      case 'ten_pull':
-        return baseCosts.ten_pull;
+    case 'ten_pull':
+      return baseCosts.ten_pull;
       
-      case 'step_up':
-        if (!stepUpLevel) return baseCosts.single;
+    case 'step_up':
+      if (!stepUpLevel) return baseCosts.single;
         
-        const activeBanner = this.getActiveBanner();
-        const stepReward = activeBanner?.step_up_rewards?.find(r => r.step === stepUpLevel);
-        const baseCost = baseCosts.single;
-        const discount = stepReward?.discount || 0;
+      const activeBanner = this.getActiveBanner();
+      const stepReward = activeBanner?.step_up_rewards?.find(r => r.step === stepUpLevel);
+      const baseCost = baseCosts.single;
+      const discount = stepReward?.discount || 0;
         
-        return Math.floor(baseCost * (1 - discount / 100));
+      return Math.floor(baseCost * (1 - discount / 100));
       
-      default:
-        return baseCosts.single;
+    default:
+      return baseCosts.single;
     }
   }
 
   private getPullCount(pullType: 'single' | 'ten_pull' | 'step_up'): number {
     switch (pullType) {
-      case 'single':
-      case 'step_up':
-        return 1;
-      case 'ten_pull':
-        return 10;
-      default:
-        return 1;
+    case 'single':
+    case 'step_up':
+      return 1;
+    case 'ten_pull':
+      return 10;
+    default:
+      return 1;
     }
   }
 
@@ -664,7 +664,7 @@ export class AdvancedGachaSystem {
           character_id: character.id,
           pulls_required: this.pitySystem.counters[rarity],
           banner_id: result.banner_id,
-          timestamp: result.timestamp
+          timestamp: result.timestamp,
         });
       }
     });
@@ -705,7 +705,7 @@ export class AdvancedGachaSystem {
       const banner = this.activeBanners.get(result.banner_id);
       if (banner) {
         const featuredPulls = result.characters.filter(c => 
-          banner.featured_characters.includes(c.id)
+          banner.featured_characters.includes(c.id),
         ).length;
         bannerAnalytics.featured_character_rate = featuredPulls / result.characters.length;
       }
@@ -735,7 +735,7 @@ export class AdvancedGachaSystem {
     const pullTypeCounts = {
       single: 0,
       ten_pull: 0,
-      step_up: 0
+      step_up: 0,
     };
 
     // This is a simplified approach - in a real app, you'd track this over time
@@ -776,7 +776,7 @@ export class AdvancedGachaSystem {
 
   public getActiveBanners(): BannerConfiguration[] {
     return Array.from(this.activeBanners.values()).filter(b => 
-      b.is_active && this.isBannerActive(b)
+      b.is_active && this.isBannerActive(b),
     );
   }
 
@@ -800,7 +800,7 @@ export class AdvancedGachaSystem {
       pitySystem: this.pitySystem,
       pullHistory: this.pullHistory,
       analytics: this.analytics,
-      activeBanners: Array.from(this.activeBanners.entries())
+      activeBanners: Array.from(this.activeBanners.entries()),
     };
   }
 

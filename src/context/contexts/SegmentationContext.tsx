@@ -164,90 +164,90 @@ const initialSegmentationState: SegmentationState = {
 
 const segmentationReducer = (
   state: SegmentationState,
-  action: SegmentationAction
+  action: SegmentationAction,
 ): SegmentationState => {
   switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'SET_AVAILABLE_SEGMENTS':
-      return { ...state, availableSegments: action.payload };
-    case 'SET_SEGMENTATION_LOADED':
-      return { ...state, segmentationLoaded: action.payload };
-    case 'SET_SURVEY_IN_PROGRESS':
-      return { ...state, surveyInProgress: action.payload };
-    case 'SET_PERSONALIZED_EXPERIENCE':
-      return { ...state, personalizedExperience: action.payload };
-    case 'SET_ADAPTIVE_GOALS_ENABLED':
-      return { ...state, adaptiveGoalsEnabled: action.payload };
-    case 'SET_CURRENT_SEGMENT':
-      return { ...state, currentSegment: action.payload };
-    case 'SET_SEGMENT_PROFILE':
-      return { ...state, segmentProfile: action.payload };
-    case 'UPDATE_SEGMENT_PROFILE':
-      return {
-        ...state,
-        segmentProfile: state.segmentProfile
-          ? { ...state.segmentProfile, ...action.payload }
-          : null,
-      };
-    case 'SET_SURVEY_HISTORY':
-      return { ...state, surveyHistory: action.payload };
-    case 'ADD_SURVEY_RESPONSE':
-      return {
-        ...state,
-        surveyHistory: [...state.surveyHistory, action.payload],
-      };
-    case 'SET_PERSONALIZED_GOALS':
-      return { ...state, personalizedGoals: action.payload };
-    case 'UPDATE_PERSONALIZED_GOAL':
-      return {
-        ...state,
-        personalizedGoals: state.personalizedGoals.map(goal =>
-          goal.id === action.payload.goalId
-            ? { ...goal, ...action.payload.updates }
-            : goal
-        ),
-      };
-    case 'SET_SEGMENT_PREFERENCES':
-      return { ...state, segmentPreferences: action.payload };
-    case 'UPDATE_SEGMENT_PREFERENCES':
-      return {
-        ...state,
-        segmentPreferences: state.segmentPreferences
-          ? { ...state.segmentPreferences, ...action.payload }
-          : null,
-      };
-    case 'SET_SEGMENT_METRICS':
-      return { ...state, segmentMetrics: action.payload };
-    case 'UPDATE_SEGMENT_METRICS':
-      return {
-        ...state,
-        segmentMetrics: state.segmentMetrics
-          ? { ...state.segmentMetrics, ...action.payload }
-          : null,
-      };
-    case 'SET_ADAPTIVE_SETTINGS':
-      return { ...state, adaptiveSettings: action.payload };
-    case 'UPDATE_ADAPTIVE_SETTINGS':
-      return {
-        ...state,
-        adaptiveSettings: state.adaptiveSettings
-          ? { ...state.adaptiveSettings, ...action.payload }
-          : null,
-      };
-    case 'SET_ONBOARDING_COMPLETED':
-      return { ...state, onboardingCompleted: action.payload };
-    case 'SET_ONBOARDING_STEP':
-      return { ...state, onboardingStep: action.payload };
-    default:
-      return state;
+  case 'SET_LOADING':
+    return { ...state, loading: action.payload };
+  case 'SET_ERROR':
+    return { ...state, error: action.payload };
+  case 'SET_AVAILABLE_SEGMENTS':
+    return { ...state, availableSegments: action.payload };
+  case 'SET_SEGMENTATION_LOADED':
+    return { ...state, segmentationLoaded: action.payload };
+  case 'SET_SURVEY_IN_PROGRESS':
+    return { ...state, surveyInProgress: action.payload };
+  case 'SET_PERSONALIZED_EXPERIENCE':
+    return { ...state, personalizedExperience: action.payload };
+  case 'SET_ADAPTIVE_GOALS_ENABLED':
+    return { ...state, adaptiveGoalsEnabled: action.payload };
+  case 'SET_CURRENT_SEGMENT':
+    return { ...state, currentSegment: action.payload };
+  case 'SET_SEGMENT_PROFILE':
+    return { ...state, segmentProfile: action.payload };
+  case 'UPDATE_SEGMENT_PROFILE':
+    return {
+      ...state,
+      segmentProfile: state.segmentProfile
+        ? { ...state.segmentProfile, ...action.payload }
+        : null,
+    };
+  case 'SET_SURVEY_HISTORY':
+    return { ...state, surveyHistory: action.payload };
+  case 'ADD_SURVEY_RESPONSE':
+    return {
+      ...state,
+      surveyHistory: [...state.surveyHistory, action.payload],
+    };
+  case 'SET_PERSONALIZED_GOALS':
+    return { ...state, personalizedGoals: action.payload };
+  case 'UPDATE_PERSONALIZED_GOAL':
+    return {
+      ...state,
+      personalizedGoals: state.personalizedGoals.map(goal =>
+        goal.id === action.payload.goalId
+          ? { ...goal, ...action.payload.updates }
+          : goal,
+      ),
+    };
+  case 'SET_SEGMENT_PREFERENCES':
+    return { ...state, segmentPreferences: action.payload };
+  case 'UPDATE_SEGMENT_PREFERENCES':
+    return {
+      ...state,
+      segmentPreferences: state.segmentPreferences
+        ? { ...state.segmentPreferences, ...action.payload }
+        : null,
+    };
+  case 'SET_SEGMENT_METRICS':
+    return { ...state, segmentMetrics: action.payload };
+  case 'UPDATE_SEGMENT_METRICS':
+    return {
+      ...state,
+      segmentMetrics: state.segmentMetrics
+        ? { ...state.segmentMetrics, ...action.payload }
+        : null,
+    };
+  case 'SET_ADAPTIVE_SETTINGS':
+    return { ...state, adaptiveSettings: action.payload };
+  case 'UPDATE_ADAPTIVE_SETTINGS':
+    return {
+      ...state,
+      adaptiveSettings: state.adaptiveSettings
+        ? { ...state.adaptiveSettings, ...action.payload }
+        : null,
+    };
+  case 'SET_ONBOARDING_COMPLETED':
+    return { ...state, onboardingCompleted: action.payload };
+  case 'SET_ONBOARDING_STEP':
+    return { ...state, onboardingStep: action.payload };
+  default:
+    return state;
   }
 };
 
 const SegmentationContext = createContext<SegmentationContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface SegmentationProviderProps {
@@ -259,7 +259,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
 }) => {
   const [state, dispatch] = useReducer(
     segmentationReducer,
-    initialSegmentationState
+    initialSegmentationState,
   );
 
   // Load segmentation data on mount
@@ -347,7 +347,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    []
+    [],
   );
 
   const completeSurvey = useCallback(
@@ -374,14 +374,14 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         const segmentProfile = SegmentationEngine.createSegmentProfile(
           survey,
           segmentResult.segment,
-          segmentResult.confidence
+          segmentResult.confidence,
         );
 
         // Generate personalized goals
         const personalizedGoals = SegmentationEngine.generatePersonalizedGoals(
           segmentResult.segment,
           [], // User history would be passed here
-          1 // User level would be passed here
+          1, // User level would be passed here
         );
 
         dispatch({ type: 'ADD_SURVEY_RESPONSE', payload: survey });
@@ -409,7 +409,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to complete survey' });
       }
     },
-    [state.surveyHistory]
+    [state.surveyHistory],
   );
 
   const retakeSurvey = useCallback(async () => {
@@ -438,7 +438,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [state.segmentProfile]
+    [state.segmentProfile],
   );
 
   const switchSegment = useCallback(
@@ -458,7 +458,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to switch segment' });
       }
     },
-    [state.segmentProfile, updateSegmentProfile]
+    [state.segmentProfile, updateSegmentProfile],
   );
 
   const analyzeWorkoutBehavior = useCallback(
@@ -468,7 +468,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
 
         const analysis = SegmentationEngine.analyzeBehaviorForSegmentAdjustment(
           state.currentSegment,
-          workoutHistory
+          workoutHistory,
         );
 
         // Update segment metrics based on analysis
@@ -487,7 +487,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [state.currentSegment]
+    [state.currentSegment],
   );
 
   const generatePersonalizedGoals = useCallback(
@@ -496,7 +496,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         const goals = SegmentationEngine.generatePersonalizedGoals(
           segment,
           userHistory,
-          level
+          level,
         );
         dispatch({ type: 'SET_PERSONALIZED_GOALS', payload: goals });
         await StorageManager.savePersonalizedGoals(goals);
@@ -508,7 +508,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    []
+    [],
   );
 
   const updatePersonalizedGoal = useCallback(
@@ -527,7 +527,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [state.personalizedGoals]
+    [state.personalizedGoals],
   );
 
   const completePersonalizedGoal = useCallback(
@@ -546,7 +546,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [updatePersonalizedGoal]
+    [updatePersonalizedGoal],
   );
 
   const updateSegmentPreferences = useCallback(
@@ -565,7 +565,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [state.segmentPreferences]
+    [state.segmentPreferences],
   );
 
   const updateAdaptiveSettings = useCallback(
@@ -584,7 +584,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    [state.adaptiveSettings]
+    [state.adaptiveSettings],
   );
 
   const completeOnboarding = useCallback(async () => {
@@ -645,7 +645,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
         });
       }
     },
-    []
+    [],
   );
 
   const getSegmentInsights = useCallback(() => {
@@ -692,7 +692,7 @@ export const SegmentationProvider: React.FC<SegmentationProviderProps> = ({
       // This would typically return the segment configuration from a constants file
       return SegmentationEngine.getSegmentConfig(targetSegment);
     },
-    [state.currentSegment]
+    [state.currentSegment],
   );
 
   const clearSegmentationData = useCallback(async () => {
@@ -827,7 +827,7 @@ export const useSegmentation = (): SegmentationContextValue => {
   const context = useContext(SegmentationContext);
   if (!context) {
     throw new Error(
-      'useSegmentation must be used within a SegmentationProvider'
+      'useSegmentation must be used within a SegmentationProvider',
     );
   }
   return context;

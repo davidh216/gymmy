@@ -13,10 +13,12 @@ import {
 } from './ContextSelectors';
 
 // Multi-Gymmy system imports
-import { characterGrowthSystem } from './systems/CharacterGrowthSystem';
-import { progressionTracker } from './systems/ProgressionTracker';
-import { pullAnalyticsEngine } from './systems/PullAnalytics';
-import { teamManagementSystem } from './systems/TeamManagementSystem';
+import { 
+  characterGrowthSystem,
+  progressionTracker,
+  pullAnalyticsEngine,
+  teamManagementSystem,
+} from './systems';
 
 // ==============================================================================
 // INTEGRATION MANAGER INTERFACE
@@ -91,7 +93,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
         activity: workout.category || 'general_workout',
         duration: workout.duration || 30,
         difficulty: calculateWorkoutDifficulty(workout),
-        performance_rating: workout.rating || 75
+        performance_rating: workout.rating || 75,
       };
 
       const experienceGains = [];
@@ -104,7 +106,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
         const expGain = characterGrowthSystem.calculateExperienceGain(
           character,
           experienceSource,
-          activeCharacters
+          activeCharacters,
         );
 
         experienceGains.push(expGain);
@@ -122,7 +124,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
             // This would need to check available materials
             basic_crystals: 10,
             training_essence: 5,
-            bond_token: 2
+            bond_token: 2,
           });
           
           if (evolutionResult) {
@@ -136,7 +138,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       if (integrationState.progressionTracking) {
         const sessionId = progressionTracker.startSession(
           experienceSource.activity,
-          activeCharacters.map(c => c.id)
+          activeCharacters.map(c => c.id),
         );
 
         progressionTracker.endSession(
@@ -145,7 +147,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           levelUps,
           evolutions,
           workout.duration || 30,
-          workout.rating || 75
+          workout.rating || 75,
         );
       }
 
@@ -153,7 +155,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       if (levelUps.length > 0 || evolutions.length > 0) {
         const bonusXP = (levelUps.length * 50) + (evolutions.length * 200);
         userStatsActions?.updateUserStats({
-          experience: (userStats?.experience || 0) + bonusXP
+          experience: (userStats?.experience || 0) + bonusXP,
         });
       }
 
@@ -168,20 +170,20 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           pity_count: 0,
           is_guaranteed: false,
           banner_id: null,
-          experience_gained: gain.total_exp
+          experience_gained: gain.total_exp,
         })));
       }
 
       // Update last sync timestamp
       setIntegrationState(prev => ({
         ...prev,
-        lastSyncTimestamp: new Date().toISOString()
+        lastSyncTimestamp: new Date().toISOString(),
       }));
 
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Workout sync error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Workout sync error: ${error.message}`],
       }));
     }
   }, [appState, integrationState, characterCollection, userStats, userStatsActions]);
@@ -222,9 +224,9 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
               target: 1,
               reward: {
                 experience: 100,
-                gems: 10
+                gems: 10,
               },
-              deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+              deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             });
           }
         });
@@ -233,7 +235,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Progression sync error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Progression sync error: ${error.message}`],
       }));
     }
   }, [integrationState, userStatsActions]);
@@ -260,7 +262,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'collection',
           rarity: 'rare',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 50, experience: 200 }
+          reward: { gems: 50, experience: 200 },
         });
       }
 
@@ -272,7 +274,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'collection',
           rarity: 'epic',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 100, experience: 500 }
+          reward: { gems: 100, experience: 500 },
         });
       }
 
@@ -286,7 +288,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'progression',
           rarity: 'epic',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 75, experience: 300 }
+          reward: { gems: 75, experience: 300 },
         });
       }
 
@@ -299,7 +301,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'team',
           rarity: 'common',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 25, experience: 100 }
+          reward: { gems: 25, experience: 100 },
         });
       }
 
@@ -311,7 +313,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Achievement sync error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Achievement sync error: ${error.message}`],
       }));
     }
   }, [integrationState, characterCollection, appState, userStatsActions]);
@@ -325,7 +327,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       // Add bonus XP to user stats
       const bonusXP = newLevel * 25; // 25 XP per level
       userStatsActions?.updateUserStats({
-        experience: (userStats?.experience || 0) + bonusXP
+        experience: (userStats?.experience || 0) + bonusXP,
       });
 
       // Check for level-based achievements
@@ -337,7 +339,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'progression',
           rarity: 'common',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 20, experience: 75 }
+          reward: { gems: 20, experience: 75 },
         });
       }
 
@@ -349,7 +351,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'progression',
           rarity: 'rare',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 40, experience: 150 }
+          reward: { gems: 40, experience: 150 },
         });
       }
 
@@ -361,14 +363,14 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'progression',
           rarity: 'epic',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 100, experience: 400 }
+          reward: { gems: 100, experience: 400 },
         });
       }
 
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Level up handler error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Level up handler error: ${error.message}`],
       }));
     }
   }, [userStats, userStatsActions]);
@@ -378,7 +380,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       // Major XP bonus for evolution
       const bonusXP = newStage * 100; // 100 XP per evolution stage
       userStatsActions?.updateUserStats({
-        experience: (userStats?.experience || 0) + bonusXP
+        experience: (userStats?.experience || 0) + bonusXP,
       });
 
       // Evolution achievement
@@ -391,14 +393,14 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
         unlockedAt: new Date().toISOString(),
         reward: { 
           gems: newStage * 50, 
-          experience: newStage * 200 
-        }
+          experience: newStage * 200, 
+        },
       });
 
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Evolution handler error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Evolution handler error: ${error.message}`],
       }));
     }
   }, [userStats, userStatsActions]);
@@ -410,12 +412,12 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
         teamId,
         'Custom Team',
         characterIds,
-        characterCollection.filter(c => characterIds.includes(c.id))
+        characterCollection.filter(c => characterIds.includes(c.id)),
       );
 
       const performance = teamManagementSystem.calculateTeamPerformance(
         team.characters,
-        team.formation || 'balanced_core'
+        team.formation || 'balanced_core',
       );
 
       // Update app state with team info
@@ -424,7 +426,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       // Grant team bonus XP if synergies are high
       if (performance.synergy_score >= 80) {
         userStatsActions?.updateUserStats({
-          experience: (userStats?.experience || 0) + 100
+          experience: (userStats?.experience || 0) + 100,
         });
 
         userStatsActions?.addAchievement({
@@ -434,14 +436,14 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
           category: 'team',
           rarity: 'rare',
           unlockedAt: new Date().toISOString(),
-          reward: { gems: 50, experience: 200 }
+          reward: { gems: 50, experience: 200 },
         });
       }
 
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Team change handler error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Team change handler error: ${error.message}`],
       }));
     }
   }, [characterCollection, userStats, userStatsActions, handleCharacterAction]);
@@ -453,7 +455,7 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
   const clearSyncErrors = useCallback((): void => {
     setIntegrationState(prev => ({
       ...prev,
-      syncErrors: []
+      syncErrors: [],
     }));
   }, []);
 
@@ -465,12 +467,12 @@ export const useContextIntegrationManager = (): IntegrationManagerValue => {
       setIntegrationState(prev => ({
         ...prev,
         lastSyncTimestamp: new Date().toISOString(),
-        syncErrors: []
+        syncErrors: [],
       }));
     } catch (error) {
       setIntegrationState(prev => ({
         ...prev,
-        syncErrors: [...prev.syncErrors, `Force sync error: ${error.message}`]
+        syncErrors: [...prev.syncErrors, `Force sync error: ${error.message}`],
       }));
     }
   }, [syncProgressionData, syncAchievements]);

@@ -1,648 +1,206 @@
 // src/components/WorkoutCalendar.js
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  SafeAreaView,
-  TextInput,
-  Alert,
-} from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import EditWorkoutModal from './EditWorkoutModal';
-import { useApp } from '../context/AppContext';
+import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
-const WorkoutCalendar = ({ 
-  workoutHistory = [], // Add default empty array
-  onWorkoutPress, 
-  navigation, 
-  onMonthChange, 
-  selectedMonth, 
-}) => {
-  const { restDays = [], addRestDay, removeRestDay, updateRestDay } = useApp(); // Add defaults
-  const [currentDate, setCurrentDate] = useState(selectedMonth || new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedWorkouts, setSelectedWorkouts] = useState([]);
-  const [showDateModal, setShowDateModal] = useState(false);
-  const [expandedWorkouts, setExpandedWorkouts] = useState(new Set());
-  const [showRestDayModal, setShowRestDayModal] = useState(false);
-  const [restDayNotes, setRestDayNotes] = useState('');
-  const [selectedRestDay, setSelectedRestDay] = useState(null);
+const WorkoutCalendar = ({ navigation }) => {
+  const { state, addRestDay } = useUnifiedApp();
+  const { workoutHistory, restDays } = state;
   
-  // Edit workout states
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [workoutToEdit, setWorkoutToEdit] = useState(null);
-
-  // Update currentDate when selectedMonth prop changes
-  React.useEffect(() => {
-    if (selectedMonth) {
-      setCurrentDate(selectedMonth);
-    }
-  }, [selectedMonth]);
-
-  // Get workout rating colors
-  const getRatingColor = (rating) => {
-    if (rating >= 9) return '#22c55e'; // Bright green - Excellent
-    if (rating >= 7) return '#84cc16'; // Light green - Great
-    if (rating >= 5) return '#eab308'; // Yellow - Good
-    if (rating >= 3) return '#f97316'; // Orange - Poor
-    return '#ef4444'; // Red - Terrible
-  };
-
-  // Get workout rating text
-  const getRatingText = (rating) => {
-    if (rating >= 9) return 'Excellent';
-    if (rating >= 7) return 'Great';
-    if (rating >= 5) return 'Good';
-    if (rating >= 3) return 'Poor';
-    return 'Terrible';
-  };
-
-  // Helper function to create date key from workout date
-  const createDateKey = (workout) => {
-    // Use workoutDate if available, otherwise fall back to startTime
-    if (workout.workoutDate) {
-      console.log('WorkoutCalendar - createDateKey - using workoutDate:', workout.workoutDate, 'for workout:', workout.id);
-      return workout.workoutDate;
-    }
-    
-    // Fallback for old workouts without workoutDate
-    // Use UTC components to avoid timezone issues with UTC midnight timestamps
-    const date = new Date(workout.startTime);
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Add 1 and pad with 0
-    const day = String(date.getUTCDate()).padStart(2, '0'); // Pad with 0
-    const dateKey = `${year}-${month}-${day}`;
-    
-    console.log('WorkoutCalendar - createDateKey - using startTime fallback:', dateKey, 'for workout:', workout.id);
-    return dateKey;
-  };
-
-  // Generate workouts by date map
-  const workoutsByDate = useMemo(() => {
-    // Add safety check
-    if (!workoutHistory || !Array.isArray(workoutHistory)) {
-      console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory is not an array:', workoutHistory);
-      return {};
-    }
-
-    console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory length:', workoutHistory.length);
-    console.log('WorkoutCalendar - workoutsByDate useMemo - workoutHistory:', workoutHistory);
-    
-    const map = {};
-    workoutHistory.forEach(workout => {
-      const dateKey = createDateKey(workout);
-      
-      if (!map[dateKey]) {
-        map[dateKey] = [];
-      }
-      map[dateKey].push(workout);
-    });
-    
-    console.log('WorkoutCalendar - workoutsByDate useMemo - map:', map);
-    return map;
-  }, [workoutHistory]);
-
-  // Generate rest days by date map
-  const restDaysByDate = useMemo(() => {
-    // Add safety check
-    if (!restDays || !Array.isArray(restDays)) {
-      console.log('WorkoutCalendar - restDaysByDate - restDays is not an array:', restDays);
-      return {};
-    }
-
-    const map = {};
-    restDays.forEach(restDay => {
-      map[restDay.date] = restDay;
-    });
-    return map;
-  }, [restDays]);
-
-  // Calendar generation
-  const generateCalendar = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAddRestDay, setShowAddRestDay] = useState(false);
+  
+  // Generate calendar data for current month
+  const calendarData = useMemo(() => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay()); // Start from Sunday
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
     
-    const endDate = new Date(lastDay);
-    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay())); // End on Saturday
+    const days = [];
+    const currentDate = new Date(startDate);
     
-    const weeks = [];
-    const currentWeekDate = new Date(startDate);
+    while (currentDate <= lastDay || days.length < 42) {
+      const dateString = currentDate.toISOString().split('T')[0];
+      const hasWorkout = workoutHistory.some(w => 
+        w.date === dateString || w.startTime?.startsWith(dateString)
+      );
+      const hasRestDay = restDays.some(r => r.date === dateString);
+      
+      days.push({
+        date: new Date(currentDate),
+        dateString,
+        hasWorkout,
+        hasRestDay,
+        isCurrentMonth: currentDate.getMonth() === month,
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
     
-    while (currentWeekDate <= endDate) {
-      const week = [];
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(currentWeekDate);
-        const dateKey = date.toISOString().split('T')[0]; // Use YYYY-MM-DD format
-        const dayWorkouts = workoutsByDate[dateKey] || [];
-        const restDay = restDaysByDate[dateKey];
-        
-        week.push({
-          date: new Date(date),
-          workouts: dayWorkouts,
-          restDay: restDay,
-          isCurrentMonth: date.getMonth() === month,
-          isToday: 
-            date.getDate() === new Date().getDate() &&
-            date.getMonth() === new Date().getMonth() &&
-            date.getFullYear() === new Date().getFullYear(),
-        });
-        
-        currentWeekDate.setDate(currentWeekDate.getDate() + 1);
+    return days;
+  }, [selectedDate, workoutHistory, restDays]);
+  
+  const handleDatePress = (day) => {
+    if (day.hasWorkout) {
+      // Navigate to workout details
+      const workout = workoutHistory.find(w => 
+        w.date === day.dateString || w.startTime?.startsWith(day.dateString)
+      );
+      if (workout) {
+        navigation.navigate('WorkoutDetails', { workout });
       }
-      weeks.push(week);
-    }
-    
-    return weeks;
-  };
-
-  const calendar = generateCalendar();
-
-  const goToPreviousMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    setCurrentDate(newDate);
-    // Notify parent component about month change
-    if (onMonthChange) {
-      onMonthChange(newDate);
-    }
-  };
-
-  const goToNextMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    setCurrentDate(newDate);
-    // Notify parent component about month change
-    if (onMonthChange) {
-      onMonthChange(newDate);
-    }
-  };
-
-  const openDateDetail = (date, workouts, restDay) => {
-    setSelectedDate(date);
-    setSelectedWorkouts(workouts);
-    setSelectedRestDay(restDay);
-    setShowDateModal(true);
-    
-    // Auto-expand if only one workout, collapse if multiple
-    if (workouts.length === 1) {
-      setExpandedWorkouts(new Set([workouts[0].id]));
+    } else if (day.hasRestDay) {
+      // Show rest day details
+      const restDay = restDays.find(r => r.date === day.dateString);
+      if (restDay) {
+        Alert.alert(
+          'Rest Day',
+          restDay.notes || 'Rest day logged',
+          [{ text: 'OK' }]
+        );
+      }
     } else {
-      setExpandedWorkouts(new Set()); // Start collapsed for multiple workouts
-    }
-  };
-
-  const toggleWorkoutExpansion = (workoutId) => {
-    const newExpanded = new Set(expandedWorkouts);
-    if (newExpanded.has(workoutId)) {
-      newExpanded.delete(workoutId);
-    } else {
-      newExpanded.add(workoutId);
-    }
-    setExpandedWorkouts(newExpanded);
-  };
-
-  const openEditModal = (workout) => {
-    setWorkoutToEdit(workout);
-    setShowEditModal(true);
-    setShowDateModal(false); // Close date modal if open
-  };
-
-  const handleSaveWorkout = async (editedWorkout) => {
-    // This will be handled by the parent component (Dashboard)
-    if (onWorkoutPress) {
-      await onWorkoutPress(editedWorkout, 'update');
-    }
-    setShowEditModal(false);
-    setWorkoutToEdit(null);
-  };
-
-  const handleAddRestDay = async () => {
-    if (selectedDate && addRestDay) {
-      const dateKey = selectedDate.toISOString().split('T')[0];
-      await addRestDay(dateKey, restDayNotes, false);
-      setRestDayNotes('');
-      setShowRestDayModal(false);
-      setShowDateModal(false);
-    }
-  };
-
-  const handleRemoveRestDay = async (date) => {
-    if (!removeRestDay) return;
-    
-    Alert.alert(
-      'Remove Rest Day',
-      'Are you sure you want to remove this rest day?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            await removeRestDay(date);
-            setSelectedRestDay(null);
+      // Show options to add workout or rest day
+      Alert.alert(
+        'Add Activity',
+        'What would you like to add for this day?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Add Workout', 
+            onPress: () => navigation.navigate('Workout', { date: day.dateString })
           },
-        },
-      ],
-    );
+          { 
+            text: 'Add Rest Day', 
+            onPress: () => setShowAddRestDay(true)
+          },
+        ]
+      );
+    }
   };
-
-  const formatDateForDisplay = (date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  
+  const handleAddRestDay = () => {
+    const today = new Date().toISOString().split('T')[0];
+    addRestDay(today, 'Rest day logged');
+    setShowAddRestDay(false);
   };
-
-  const renderRestDayModal = () => (
-    <Modal
-      visible={showRestDayModal}
-      transparent={true}
-      animationType="fade"
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Add Rest Day</Text>
-            <TouchableOpacity 
-              onPress={() => {
-                setShowRestDayModal(false);
-                setRestDayNotes('');
-              }}
-              style={styles.closeButton}
-            >
-              <Ionicons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styles.restDayDate}>
-            {selectedDate && formatDateForDisplay(selectedDate)}
-          </Text>
-          
-          <Text style={styles.inputLabel}>Notes (Optional)</Text>
-          <TextInput
-            style={styles.restDayInput}
-            value={restDayNotes}
-            onChangeText={setRestDayNotes}
-            placeholder="e.g., Active recovery, yoga, stretching..."
-            placeholderTextColor="#999"
-            multiline
-            numberOfLines={3}
-          />
-          
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={handleAddRestDay}
-          >
-            <Text style={styles.modalButtonText}>Add Rest Day</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const renderDateModal = () => (
-    <Modal
-      visible={showDateModal}
-      transparent={true}
-      animationType="slide"
-    >
-      <View style={styles.modalOverlay}>
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {selectedDate && formatDateForDisplay(selectedDate)}
-              </Text>
-              <TouchableOpacity 
-                onPress={() => setShowDateModal(false)}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.modalBody}>
-              {selectedRestDay && (
-                <View style={styles.restDayCard}>
-                  <View style={styles.restDayHeader}>
-                    <View style={styles.restDayInfo}>
-                      <Ionicons name="bed" size={24} color="#8b5cf6" />
-                      <Text style={styles.restDayTitle}>Rest Day</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveRestDay(selectedRestDay.date)}
-                      style={styles.removeRestDayButton}
-                    >
-                      <Ionicons name="trash-outline" size={18} color="#ff4444" />
-                    </TouchableOpacity>
-                  </View>
-                  {selectedRestDay.notes && (
-                    <Text style={styles.restDayNotes}>{selectedRestDay.notes}</Text>
-                  )}
-                </View>
-              )}
-              
-              {selectedWorkouts.length > 0 ? (
-                <>
-                  <Text style={styles.workoutsCount}>
-                    {selectedWorkouts.length} workout{selectedWorkouts.length !== 1 ? 's' : ''} on this day
-                  </Text>
-                  {selectedWorkouts.map((workout, index) => {
-                    const isExpanded = expandedWorkouts.has(workout.id);
-                    return (
-                      <View key={workout.id} style={styles.workoutDetailCard}>
-                        <TouchableOpacity
-                          style={styles.workoutDetailHeader}
-                          onPress={() => toggleWorkoutExpansion(workout.id)}
-                          activeOpacity={0.7}
-                        >
-                          <View style={styles.workoutDetailTitle}>
-                            <View style={[
-                              styles.workoutDetailDot,
-                              { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) },
-                            ]} />
-                            <Text style={styles.workoutDetailName}>
-                              Workout #{index + 1}
-                            </Text>
-                            <Text style={styles.workoutDetailTime}>
-                              {new Date(workout.startTime).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                              })} - {new Date(workout.endTime).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                              })}
-                            </Text>
-                          </View>
-                          <View style={styles.workoutHeaderActions}>
-                            <TouchableOpacity
-                              onPress={(e) => {
-                                e.stopPropagation();
-                                openEditModal(workout);
-                              }}
-                              style={styles.editButton}
-                            >
-                              <Ionicons name="create" size={18} color="#007AFF" />
-                            </TouchableOpacity>
-                            <Ionicons 
-                              name={isExpanded ? 'chevron-up' : 'chevron-down'} 
-                              size={20} 
-                              color="#666" 
-                            />
-                          </View>
-                        </TouchableOpacity>
-
-                        <View style={styles.workoutSummaryRow}>
-                          <View style={styles.workoutSummaryItem}>
-                            <Ionicons name="time" size={16} color="#666" />
-                            <Text style={styles.workoutSummaryText}>{workout.duration} min</Text>
-                          </View>
-                          <View style={styles.workoutSummaryItem}>
-                            <Ionicons name="fitness" size={16} color="#666" />
-                            <Text style={styles.workoutSummaryText}>
-                              {workout.exercises.length} exercises
-                            </Text>
-                          </View>
-                          <View style={styles.workoutSummaryItem}>
-                            <Ionicons name="star" size={16} color="#666" />
-                            <Text style={[
-                              styles.workoutSummaryText,
-                              { color: getRatingColor(workout.ratings?.workoutRating || 5) },
-                            ]}>
-                              {workout.ratings?.workoutRating || 5}/10
-                            </Text>
-                          </View>
-                        </View>
-
-                        {isExpanded && (
-                          <View style={styles.workoutDetailExpanded}>
-                            {/* Ratings Section */}
-                            <View style={styles.detailSection}>
-                              <Text style={styles.detailSectionTitle}>Ratings</Text>
-                              <View style={styles.ratingsGrid}>
-                                <View style={styles.ratingItem}>
-                                  <Text style={styles.ratingLabel}>Pre-Mood</Text>
-                                  <Text style={styles.ratingValue}>{workout.ratings?.beforeMood || 5}/10</Text>
-                                </View>
-                                <View style={styles.ratingItem}>
-                                  <Text style={styles.ratingLabel}>Pre-Energy</Text>
-                                  <Text style={styles.ratingValue}>{workout.ratings?.beforeEnergy || 5}/10</Text>
-                                </View>
-                                <View style={styles.ratingItem}>
-                                  <Text style={styles.ratingLabel}>Post-Mood</Text>
-                                  <Text style={styles.ratingValue}>{workout.ratings?.afterMood || 5}/10</Text>
-                                </View>
-                                <View style={styles.ratingItem}>
-                                  <Text style={styles.ratingLabel}>Post-Energy</Text>
-                                  <Text style={styles.ratingValue}>{workout.ratings?.afterEnergy || 5}/10</Text>
-                                </View>
-                              </View>
-                              <View style={[styles.overallRating, { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) }]}>
-                                <Text style={styles.overallRatingText}>
-                                  Overall: {workout.ratings?.workoutRating || 5}/10 - {getRatingText(workout.ratings?.workoutRating || 5)}
-                                </Text>
-                              </View>
-                            </View>
-
-                            {/* Exercises Section */}
-                            <View style={styles.detailSection}>
-                              <Text style={styles.detailSectionTitle}>Exercises ({workout.exercises.length})</Text>
-                              {workout.exercises.map((exercise, exerciseIndex) => (
-                                <View key={exercise.id} style={styles.exerciseDetailItem}>
-                                  <Text style={styles.exerciseDetailName}>
-                                    {exerciseIndex + 1}. {exercise.name}
-                                  </Text>
-                                  <Text style={styles.exerciseDetailSets}>
-                                    {exercise.sets.filter(set => set.reps && set.weight).length} sets
-                                  </Text>
-                                  <View style={styles.setsDetailContainer}>
-                                    {exercise.sets
-                                      .filter(set => set.reps && set.weight)
-                                      .map((set, setIndex) => (
-                                        <Text key={setIndex} style={styles.setDetailText}>
-                                          {set.reps} reps × {set.weight} lbs
-                                        </Text>
-                                      ))}
-                                  </View>
-                                </View>
-                              ))}
-                            </View>
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
-                </>
-              ) : !selectedRestDay ? (
-                <View style={styles.noWorkoutsContainer}>
-                  <Ionicons name="calendar-outline" size={48} color="#ccc" />
-                  <Text style={styles.noWorkoutsTitle}>No workouts on this day</Text>
-                  <Text style={styles.noWorkoutsSubtitle}>
-                    {selectedDate && selectedDate.toDateString() === new Date().toDateString() 
-                      ? 'Ready to start your workout for today?'
-                      : 'This was a rest day or you hadn\'t started tracking yet.'
-                    }
-                  </Text>
-                  {selectedDate && selectedDate.toDateString() === new Date().toDateString() && (
-                    <TouchableOpacity 
-                      style={styles.startTodayButton}
-                      onPress={() => {
-                        setShowDateModal(false);
-                        if (navigation) {
-                          navigation.navigate('Workout');
-                        }
-                      }}
-                    >
-                      <Ionicons name="add" size={20} color="#fff" />
-                      <Text style={styles.startTodayButtonText}>Start Today's Workout</Text>
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity 
-                    style={styles.addRestDayButton}
-                    onPress={() => setShowRestDayModal(true)}
-                  >
-                    <Ionicons name="bed" size={20} color="#8b5cf6" />
-                    <Text style={styles.addRestDayButtonText}>Mark as Rest Day</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            </ScrollView>
-          </View>
-        </SafeAreaView>
-      </View>
-    </Modal>
-  );
-
+  
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
   return (
     <View style={styles.container}>
-      {/* Calendar Header */}
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={goToPreviousMonth} style={styles.navButton}>
+        <TouchableOpacity onPress={() => {
+          const newDate = new Date(selectedDate);
+          newDate.setMonth(newDate.getMonth() - 1);
+          setSelectedDate(newDate);
+        }}>
           <Ionicons name="chevron-back" size={24} color="#007AFF" />
         </TouchableOpacity>
         
-        <Text style={styles.monthTitle}>
-          {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        <Text style={styles.headerTitle}>
+          {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
         </Text>
         
-        <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
+        <TouchableOpacity onPress={() => {
+          const newDate = new Date(selectedDate);
+          newDate.setMonth(newDate.getMonth() + 1);
+          setSelectedDate(newDate);
+        }}>
           <Ionicons name="chevron-forward" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
-
-      {/* Days of Week Header */}
-      <View style={styles.daysHeader}>
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <Text key={day} style={styles.dayHeader}>{day}</Text>
-        ))}
-      </View>
-
+      
       {/* Calendar Grid */}
-      <ScrollView style={styles.calendarContainer}>
-        {calendar.map((week, weekIndex) => (
-          <View key={weekIndex} style={styles.week}>
-            {week.map((day, dayIndex) => (
-              <TouchableOpacity 
-                key={dayIndex} 
-                style={[
-                  styles.day,
-                  !day.isCurrentMonth && styles.otherMonth,
-                  day.isToday && styles.today,
-                  day.restDay && styles.restDayCell,
-                ]}
-                onPress={() => openDateDetail(day.date, day.workouts, day.restDay)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.dayNumber,
-                  !day.isCurrentMonth && styles.otherMonthText,
-                  day.isToday && styles.todayText,
-                ]}>
-                  {day.date.getDate()}
-                </Text>
-                
-                {/* Rest Day Indicator */}
-                {day.restDay && (
-                  <View style={styles.restDayIndicator}>
-                    <Ionicons name="bed" size={12} color="#8b5cf6" />
-                  </View>
-                )}
-                
-                {/* Workout Indicators */}
-                {day.workouts.length > 0 && (
-                  <View style={styles.workoutIndicators}>
-                    {day.workouts.slice(0, 3).map((workout, workoutIndex) => (
-                      <View
-                        key={workout.id}
-                        style={[
-                          styles.workoutDot,
-                          { backgroundColor: getRatingColor(workout.ratings?.workoutRating || 5) },
-                        ]}
-                      />
-                    ))}
-                    {day.workouts.length > 3 && (
-                      <Text style={styles.moreWorkouts}>+{day.workouts.length - 3}</Text>
-                    )}
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Legend */}
-      <View style={styles.legend}>
-        <Text style={styles.legendTitle}>Legend:</Text>
-        <View style={styles.legendItems}>
-          <View style={styles.legendItem}>
-            <Ionicons name="bed" size={16} color="#8b5cf6" />
-            <Text style={styles.legendText}>Rest Day</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#22c55e' }]} />
-            <Text style={styles.legendText}>Excellent (9+)</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#84cc16' }]} />
-            <Text style={styles.legendText}>Great (7-8)</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#eab308' }]} />
-            <Text style={styles.legendText}>Good (5-6)</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#f97316' }]} />
-            <Text style={styles.legendText}>Poor (3-4)</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#ef4444' }]} />
-            <Text style={styles.legendText}>Terrible (&lt;3)</Text>
-          </View>
+      <View style={styles.calendar}>
+        {/* Day headers */}
+        <View style={styles.dayHeaders}>
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <Text key={day} style={styles.dayHeader}>{day}</Text>
+          ))}
+        </View>
+        
+        {/* Calendar days */}
+        <View style={styles.daysGrid}>
+          {calendarData.map((day, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.dayCell,
+                !day.isCurrentMonth && styles.otherMonthDay,
+                day.hasWorkout && styles.workoutDay,
+                day.hasRestDay && styles.restDay,
+              ]}
+              onPress={() => handleDatePress(day)}
+            >
+              <Text style={[
+                styles.dayText,
+                !day.isCurrentMonth && styles.otherMonthText,
+                day.hasWorkout && styles.workoutDayText,
+                day.hasRestDay && styles.restDayText,
+              ]}>
+                {day.date.getDate()}
+              </Text>
+              {day.hasWorkout && (
+                <View style={styles.workoutIndicator}>
+                  <Ionicons name="fitness" size={8} color="#fff" />
+                </View>
+              )}
+              {day.hasRestDay && (
+                <View style={styles.restIndicator}>
+                  <Ionicons name="bed" size={8} color="#fff" />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
-
-      {renderDateModal()}
-      {renderRestDayModal()}
       
-      <EditWorkoutModal
-        visible={showEditModal}
-        workout={workoutToEdit}
-        onCancel={() => {
-          setShowEditModal(false);
-          setWorkoutToEdit(null);
-        }}
-        onSave={handleSaveWorkout}
-      />
+      {/* Legend */}
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.workoutDay]} />
+          <Text style={styles.legendText}>Workout</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.restDay]} />
+          <Text style={styles.legendText}>Rest Day</Text>
+        </View>
+      </View>
+      
+      {/* Add Rest Day Modal */}
+      {showAddRestDay && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Add Rest Day</Text>
+            <Text style={styles.modalText}>
+              Would you like to log today as a rest day?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowAddRestDay(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleAddRestDay}
+              >
+                <Text style={styles.confirmButtonText}>Add Rest Day</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -665,16 +223,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  navButton: {
-    padding: 8,
-  },
-  monthTitle: {
+  headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
-  daysHeader: {
+  calendar: {
+    marginTop: 16,
+  },
+  dayHeaders: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
     marginBottom: 8,
   },
   dayHeader: {
@@ -685,91 +244,69 @@ const styles = StyleSheet.create({
     color: '#666',
     paddingBottom: 8,
   },
-  calendarContainer: {
-    maxHeight: 400,
-  },
-  week: {
+  daysGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
   },
-  day: {
-    flex: 1,
-    minHeight: 60,
-    padding: 4,
+  dayCell: {
+    width: '14.28%', // 7 days in a week
+    aspectRatio: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
     borderColor: '#e5e5e5',
     backgroundColor: '#fff',
   },
-  otherMonth: {
+  otherMonthDay: {
     opacity: 0.3,
   },
-  today: {
-    backgroundColor: '#e3f2fd',
+  workoutDay: {
+    backgroundColor: '#007AFF',
   },
-  restDayCell: {
-    backgroundColor: '#f3e8ff',
+  restDay: {
+    backgroundColor: '#8b5cf6',
   },
-  dayNumber: {
+  dayText: {
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 2,
   },
-  otherMonthText: {
-    color: '#999',
-  },
-  todayText: {
-    color: '#007AFF',
+  workoutDayText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
-  restDayIndicator: {
+  restDayText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  workoutIndicator: {
     position: 'absolute',
-    top: 4,
+    bottom: 4,
     right: 4,
-  },
-  workoutIndicators: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    marginTop: 4,
-  },
-  workoutDot: {
-    width: 8,
-    height: 8,
+    backgroundColor: '#fff',
     borderRadius: 4,
-    marginHorizontal: 1,
+    padding: 2,
   },
-  moreWorkouts: {
-    fontSize: 10,
-    color: '#666',
-    marginLeft: 2,
+  restIndicator: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    padding: 2,
   },
   legend: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     marginTop: 16,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
   },
-  legendTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
-  },
-  legendItems: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-  },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    minWidth: '30%',
   },
   legendDot: {
     width: 10,
@@ -783,297 +320,62 @@ const styles = StyleSheet.create({
   
   // Modal Styles
   modalOverlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
-    paddingTop: 20,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+  },
+  modal: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    width: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 10,
   },
-  closeButton: {
-    padding: 4,
-  },
-  modalBody: {
-    padding: 20,
-  },
-  modalButton: {
-    backgroundColor: '#8b5cf6',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  modalButtonText: {
-    color: '#fff',
+  modalText: {
     fontSize: 16,
-    fontWeight: '600',
-  },
-  
-  // Rest Day Styles
-  restDayCard: {
-    backgroundColor: '#f3e8ff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  restDayHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  restDayInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  restDayTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#8b5cf6',
-  },
-  restDayNotes: {
-    fontSize: 14,
     color: '#666',
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
-  removeRestDayButton: {
-    padding: 4,
-  },
-  restDayDate: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 16,
     textAlign: 'center',
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  restDayInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  addRestDayButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f3e8ff',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    gap: 8,
-    marginTop: 16,
-  },
-  addRestDayButtonText: {
-    color: '#8b5cf6',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  
-  // Date Modal Styles
-  workoutsCount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  workoutDetailCard: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e5e5e5',
-    overflow: 'hidden',
-  },
-  workoutDetailHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  workoutDetailTitle: {
-    flex: 1,
-  },
-  workoutHeaderActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  editButton: {
-    padding: 4,
-  },
-  workoutDetailDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  workoutDetailName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
-  },
-  workoutDetailTime: {
-    fontSize: 14,
-    color: '#666',
-  },
-  workoutSummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: '#fff',
-  },
-  workoutSummaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  workoutSummaryText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  workoutDetailExpanded: {
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
-  },
-  detailSection: {
     marginBottom: 20,
   },
-  detailSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  ratingsGrid: {
+  modalButtons: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 12,
+    justifyContent: 'space-around',
+    width: '100%',
   },
-  ratingItem: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  ratingLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  ratingValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  overallRating: {
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  overallRatingText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  exerciseDetailItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  exerciseDetailName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  exerciseDetailSets: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 8,
-  },
-  setsDetailContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  setDetailText: {
-    fontSize: 11,
-    color: '#666',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  noWorkoutsContainer: {
-    alignItems: 'center',
-    padding: 40,
-  },
-  noWorkoutsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  noWorkoutsSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  startTodayButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
+  modalButton: {
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    gap: 8,
+    borderRadius: 8,
   },
-  startTodayButtonText: {
+  cancelButton: {
+    backgroundColor: '#e0e0e0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  confirmButton: {
+    backgroundColor: '#8b5cf6',
+    borderWidth: 1,
+    borderColor: '#8b5cf6',
+  },
+  confirmButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
   },
 });

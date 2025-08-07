@@ -12,7 +12,7 @@ import {
   Modal,
   Alert,
   Animated,
-  Platform
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
@@ -39,7 +39,7 @@ const mockProgressionStats = {
   completion_percentage: 78.5,
   daily_experience_average: 541,
   weekly_level_ups: 14,
-  monthly_evolutions: 9
+  monthly_evolutions: 9,
 };
 
 const mockAchievements = [
@@ -50,7 +50,7 @@ const mockAchievements = [
     category: 'milestone',
     rarity: 'common',
     icon: '👶',
-    unlock_date: '2024-01-15T10:00:00Z'
+    unlock_date: '2024-01-15T10:00:00Z',
   },
   {
     id: 'level_up_master',
@@ -59,7 +59,7 @@ const mockAchievements = [
     category: 'experience',
     rarity: 'rare',
     icon: '📈',
-    unlock_date: '2024-01-22T15:30:00Z'
+    unlock_date: '2024-01-22T15:30:00Z',
   },
   {
     id: 'evolution_pioneer',
@@ -68,7 +68,7 @@ const mockAchievements = [
     category: 'evolution',
     rarity: 'epic',
     icon: '🦋',
-    unlock_date: '2024-01-28T09:15:00Z'
+    unlock_date: '2024-01-28T09:15:00Z',
   },
   {
     id: 'dedication_streak',
@@ -77,8 +77,8 @@ const mockAchievements = [
     category: 'special',
     rarity: 'epic',
     icon: '🔥',
-    unlock_date: '2024-02-03T18:45:00Z'
-  }
+    unlock_date: '2024-02-03T18:45:00Z',
+  },
 ];
 
 const mockWeeklyData = {
@@ -86,28 +86,28 @@ const mockWeeklyData = {
   datasets: [{
     data: [1200, 1850, 2100, 1950],
     color: () => '#4CAF50',
-    strokeWidth: 3
-  }]
+    strokeWidth: 3,
+  }],
 };
 
 const mockCharacterProgress = [
   { id: 'titan_forge', name: 'Titan Forge', level: 42, progress: 85, evolution_stage: 2 },
   { id: 'zen_master', name: 'Zen Master', level: 35, progress: 62, evolution_stage: 2 },
   { id: 'cardio_queen', name: 'Cardio Queen', level: 28, progress: 45, evolution_stage: 1 },
-  { id: 'rookie_power', name: 'Rookie Power', level: 22, progress: 78, evolution_stage: 1 }
+  { id: 'rookie_power', name: 'Rookie Power', level: 22, progress: 78, evolution_stage: 1 },
 ];
 
 const ProgressionDashboard = ({ 
   onClose,
   progressionStats = mockProgressionStats,
-  achievements = mockAchievements 
+  achievements = mockAchievements, 
 }) => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [animatedValues] = useState({
     fadeIn: new Animated.Value(0),
-    slideUp: new Animated.Value(50)
+    slideUp: new Animated.Value(50),
   });
 
   useEffect(() => {
@@ -115,13 +115,13 @@ const ProgressionDashboard = ({
       Animated.timing(animatedValues.fadeIn, {
         toValue: 1,
         duration: 500,
-        useNativeDriver: true
+        useNativeDriver: true,
       }),
       Animated.timing(animatedValues.slideUp, {
         toValue: 0,
         duration: 500,
-        useNativeDriver: true
-      })
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
@@ -131,10 +131,10 @@ const ProgressionDashboard = ({
       rare: '#2196F3',
       epic: '#9C27B0',
       legendary: '#FF9800',
-      mythical: '#E91E63'
+      mythical: '#E91E63',
     };
     return colors[rarity] || colors.common;
-  }
+  };
 
   const formatDuration = (minutes) => {
     const hours = Math.floor(minutes / 60);
@@ -195,10 +195,10 @@ const ProgressionDashboard = ({
               labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
               style: { borderRadius: 16 },
               propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#4CAF50"
-              }
+                r: '6',
+                strokeWidth: '2',
+                stroke: '#4CAF50',
+              },
             }}
             bezier
             style={styles.chart}
@@ -222,7 +222,7 @@ const ProgressionDashboard = ({
                   <View 
                     style={[
                       styles.progressBarFill,
-                      { width: `${character.progress}%`, backgroundColor: '#4CAF50' }
+                      { width: `${character.progress}%`, backgroundColor: '#4CAF50' },
                     ]}
                   />
                 </View>
@@ -235,7 +235,7 @@ const ProgressionDashboard = ({
                     key={i}
                     style={[
                       styles.evolutionDot,
-                      { backgroundColor: i < character.evolution_stage ? '#FF9800' : '#E0E0E0' }
+                      { backgroundColor: i < character.evolution_stage ? '#FF9800' : '#E0E0E0' },
                     ]}
                   />
                 ))}
@@ -343,7 +343,7 @@ const ProgressionDashboard = ({
               { name: 'Cardio', population: 25, color: '#4ECDC4', legendFontColor: '#333', legendFontSize: 12 },
               { name: 'Flexibility', population: 20, color: '#45B7D1', legendFontColor: '#333', legendFontSize: 12 },
               { name: 'Mental', population: 15, color: '#96CEB4', legendFontColor: '#333', legendFontSize: 12 },
-              { name: 'Recovery', population: 5, color: '#FFEAA7', legendFontColor: '#333', legendFontSize: 12 }
+              { name: 'Recovery', population: 5, color: '#FFEAA7', legendFontColor: '#333', legendFontSize: 12 },
             ]}
             width={width - 32}
             height={220}
@@ -366,8 +366,8 @@ const ProgressionDashboard = ({
             data={{
               labels: ['1-10', '11-20', '21-30', '31-40', '41-50'],
               datasets: [{
-                data: [1, 2, 3, 1, 1]
-              }]
+                data: [1, 2, 3, 1, 1],
+              }],
             }}
             width={width - 32}
             height={200}
@@ -378,7 +378,7 @@ const ProgressionDashboard = ({
               decimalPlaces: 0,
               color: (opacity = 1) => `rgba(156, 39, 176, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              style: { borderRadius: 16 }
+              style: { borderRadius: 16 },
             }}
             style={styles.chart}
           />
@@ -498,8 +498,8 @@ const ProgressionDashboard = ({
         styles.container,
         {
           opacity: animatedValues.fadeIn,
-          transform: [{ translateY: animatedValues.slideUp }]
-        }
+          transform: [{ translateY: animatedValues.slideUp }],
+        },
       ]}
     >
       {/* Header */}
@@ -516,7 +516,7 @@ const ProgressionDashboard = ({
         {[
           { key: 'overview', label: 'Overview', icon: 'analytics' },
           { key: 'achievements', label: 'Achievements', icon: 'trophy' },
-          { key: 'analytics', label: 'Analytics', icon: 'bar-chart' }
+          { key: 'analytics', label: 'Analytics', icon: 'bar-chart' },
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
@@ -530,7 +530,7 @@ const ProgressionDashboard = ({
             />
             <Text style={[
               styles.tabLabel,
-              selectedTab === tab.key && styles.activeTabLabel
+              selectedTab === tab.key && styles.activeTabLabel,
             ]}>
               {tab.label}
             </Text>
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 4,
-      }
+      },
     }),
   },
   headerTitle: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   statValue: {
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   sectionTitle: {
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   characterProgressCard: {
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   quickStatRow: {
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   achievementStatCard: {
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   achievementIcon: {
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
       },
       android: {
         elevation: 2,
-      }
+      },
     }),
   },
   subsectionTitle: {

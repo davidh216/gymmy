@@ -151,46 +151,46 @@ const initialUserStatsState: UserStatsState = {
 
 const userStatsReducer = (
   state: UserStatsState,
-  action: UserStatsAction
+  action: UserStatsAction,
 ): UserStatsState => {
   switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'SET_USER_STATS':
-      return { ...state, userStats: action.payload };
-    case 'UPDATE_USER_STATS':
-      return { ...state, userStats: { ...state.userStats, ...action.payload } };
-    case 'SET_ACHIEVEMENTS':
-      return { ...state, achievements: action.payload };
-    case 'UPDATE_ACHIEVEMENT':
-      return {
-        ...state,
-        achievements: state.achievements.map(achievement =>
-          achievement.id === action.payload.id
-            ? { ...achievement, ...action.payload.updates }
-            : achievement
-        ),
-      };
-    case 'SET_QUESTS':
-      return { ...state, quests: action.payload };
-    case 'UPDATE_QUEST':
-      return {
-        ...state,
-        quests: state.quests.map(quest =>
-          quest.id === action.payload.id
-            ? { ...quest, ...action.payload.updates }
-            : quest
-        ),
-      };
-    default:
-      return state;
+  case 'SET_LOADING':
+    return { ...state, loading: action.payload };
+  case 'SET_ERROR':
+    return { ...state, error: action.payload };
+  case 'SET_USER_STATS':
+    return { ...state, userStats: action.payload };
+  case 'UPDATE_USER_STATS':
+    return { ...state, userStats: { ...state.userStats, ...action.payload } };
+  case 'SET_ACHIEVEMENTS':
+    return { ...state, achievements: action.payload };
+  case 'UPDATE_ACHIEVEMENT':
+    return {
+      ...state,
+      achievements: state.achievements.map(achievement =>
+        achievement.id === action.payload.id
+          ? { ...achievement, ...action.payload.updates }
+          : achievement,
+      ),
+    };
+  case 'SET_QUESTS':
+    return { ...state, quests: action.payload };
+  case 'UPDATE_QUEST':
+    return {
+      ...state,
+      quests: state.quests.map(quest =>
+        quest.id === action.payload.id
+          ? { ...quest, ...action.payload.updates }
+          : quest,
+      ),
+    };
+  default:
+    return state;
   }
 };
 
 const UserStatsContext = createContext<UserStatsContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface UserStatsProviderProps {
@@ -241,7 +241,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to update user stats' });
       }
     },
-    [state.userStats]
+    [state.userStats],
   );
 
   const addExperience = useCallback(
@@ -271,7 +271,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to add experience' });
       }
     },
-    [state.userStats]
+    [state.userStats],
   );
 
   const selectClass = useCallback(
@@ -289,7 +289,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to select class' });
       }
     },
-    [state.userStats]
+    [state.userStats],
   );
 
   const updateBodyWeight = useCallback(
@@ -325,7 +325,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         });
       }
     },
-    [state.userStats]
+    [state.userStats],
   );
 
   const updateGoal = useCallback(
@@ -334,7 +334,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         const currentStats = state.userStats;
         const personalizedGoals =
           currentStats.personalizedGoals?.map(goal =>
-            goal.id === goalId ? { ...goal, ...updates } : goal
+            goal.id === goalId ? { ...goal, ...updates } : goal,
           ) || [];
 
         const statsUpdates: Partial<UserStats> = {
@@ -352,7 +352,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to update goal' });
       }
     },
-    [state.userStats]
+    [state.userStats],
   );
 
   const unlockAchievement = useCallback(
@@ -376,14 +376,14 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         });
       }
     },
-    [state.achievements]
+    [state.achievements],
   );
 
   const updateAchievementProgress = useCallback(
     async (achievementId: string, progress: number) => {
       try {
         const achievement = state.achievements.find(
-          a => a.id === achievementId
+          a => a.id === achievementId,
         );
         if (!achievement) return;
 
@@ -411,7 +411,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         });
       }
     },
-    [state.achievements]
+    [state.achievements],
   );
 
   const updateQuestProgress = useCallback(
@@ -448,7 +448,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         });
       }
     },
-    [state.quests, addExperience, updateUserStats, state.userStats.gems]
+    [state.quests, addExperience, updateUserStats, state.userStats.gems],
   );
 
   const completeQuest = useCallback(
@@ -463,7 +463,7 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         dispatch({ type: 'SET_ERROR', payload: 'Failed to complete quest' });
       }
     },
-    [updateQuestProgress, state.quests]
+    [updateQuestProgress, state.quests],
   );
 
   const generateDailyQuests = useCallback(async () => {
@@ -474,12 +474,12 @@ export const UserStatsProvider: React.FC<UserStatsProviderProps> = ({
         quest =>
           quest.type !== 'daily' ||
           !quest.completed ||
-          new Date(quest.completedAt || '').toDateString() === today
+          new Date(quest.completedAt || '').toDateString() === today,
       );
 
       // Add new daily quests if needed
       const dailyQuests = activeQuests.filter(
-        q => q.type === 'daily' && !q.completed
+        q => q.type === 'daily' && !q.completed,
       );
 
       if (dailyQuests.length < 3) {

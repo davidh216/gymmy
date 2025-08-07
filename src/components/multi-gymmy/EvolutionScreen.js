@@ -11,7 +11,7 @@ import {
   Dimensions,
   Modal,
   Alert,
-  Animated
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -25,7 +25,7 @@ const mockEvolutionMaterials = {
   power_essence: 8,
   epic_crystals: 3,
   legendary_crystals: 1,
-  bond_token: 15
+  bond_token: 15,
 };
 
 const mockEvolutionStages = {
@@ -35,7 +35,7 @@ const mockEvolutionStages = {
     level_requirement: 1,
     materials_required: {},
     stat_bonuses: { strength: 0, cardio: 0, flexibility: 0, focus: 0, motivation: 0, loyalty: 0 },
-    visual_changes: { effects: [] }
+    visual_changes: { effects: [] },
   },
   1: {
     stage: 1,
@@ -43,7 +43,7 @@ const mockEvolutionStages = {
     level_requirement: 20,
     materials_required: { basic_crystals: 5, training_essence: 3, bond_token: 1 },
     stat_bonuses: { strength: 5, cardio: 5, flexibility: 5, focus: 5, motivation: 5, loyalty: 5 },
-    visual_changes: { effects: ['sparkle'] }
+    visual_changes: { effects: ['sparkle'] },
   },
   2: {
     stage: 2,
@@ -51,7 +51,7 @@ const mockEvolutionStages = {
     level_requirement: 40,
     materials_required: { rare_crystals: 3, power_essence: 2, bond_token: 2 },
     stat_bonuses: { strength: 10, cardio: 10, flexibility: 10, focus: 10, motivation: 10, loyalty: 10 },
-    visual_changes: { effects: ['glow', 'energy_trails'] }
+    visual_changes: { effects: ['glow', 'energy_trails'] },
   },
   3: {
     stage: 3,
@@ -59,8 +59,8 @@ const mockEvolutionStages = {
     level_requirement: 60,
     materials_required: { epic_crystals: 2, legendary_crystals: 1, bond_token: 3 },
     stat_bonuses: { strength: 20, cardio: 20, flexibility: 20, focus: 20, motivation: 20, loyalty: 20 },
-    visual_changes: { effects: ['legendary_aura', 'reality_distortion'] }
-  }
+    visual_changes: { effects: ['legendary_aura', 'reality_distortion'] },
+  },
 };
 
 // Mock character for demonstration
@@ -73,21 +73,21 @@ const mockCharacter = {
   evolution_stage: 1,
   current_stats: { strength: 85, cardio: 60, flexibility: 45, focus: 80, motivation: 85, loyalty: 90 },
   bond_points: 1200,
-  max_evolution: 3
+  max_evolution: 3,
 };
 
 const EvolutionScreen = ({ 
   character = mockCharacter,
   availableMaterials = mockEvolutionMaterials,
   onEvolveCharacter,
-  onClose 
+  onClose, 
 }) => {
   const [selectedStage, setSelectedStage] = useState(character.evolution_stage + 1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showMaterialsModal, setShowMaterialsModal] = useState(false);
   const [animationValues] = useState({
     scale: new Animated.Value(1),
-    opacity: new Animated.Value(1)
+    opacity: new Animated.Value(1),
   });
 
   const evolutionStages = useMemo(() => {
@@ -124,26 +124,26 @@ const EvolutionScreen = ({
         Animated.timing(animationValues.scale, {
           toValue: 1.2,
           duration: 300,
-          useNativeDriver: true
+          useNativeDriver: true,
         }),
         Animated.timing(animationValues.opacity, {
           toValue: 0.5,
           duration: 300,
-          useNativeDriver: true
-        })
+          useNativeDriver: true,
+        }),
       ]),
       Animated.parallel([
         Animated.timing(animationValues.scale, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true
+          useNativeDriver: true,
         }),
         Animated.timing(animationValues.opacity, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true
-        })
-      ])
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
     
     onEvolveCharacter?.(character.id, selectedEvolution.materials_required);
@@ -155,7 +155,7 @@ const EvolutionScreen = ({
       rare: '#2196F3',
       epic: '#9C27B0',
       legendary: '#FF9800',
-      mythical: '#E91E63'
+      mythical: '#E91E63',
     };
     return colors[rarity] || colors.common;
   };
@@ -168,7 +168,7 @@ const EvolutionScreen = ({
       power_essence: '#FF8A65',
       epic_crystals: '#BA68C8',
       legendary_crystals: '#FFB74D',
-      bond_token: '#F06292'
+      bond_token: '#F06292',
     };
     return colors[materialId] || '#90A4AE';
   };
@@ -181,7 +181,7 @@ const EvolutionScreen = ({
       power_essence: 'thunderstorm-outline',
       epic_crystals: 'diamond-sharp',
       legendary_crystals: 'star',
-      bond_token: 'heart'
+      bond_token: 'heart',
     };
     return icons[materialId] || 'square-outline';
   };
@@ -201,7 +201,7 @@ const EvolutionScreen = ({
                 isCompleted && styles.completedStage,
                 isSelected && styles.selectedStage,
                 isNext && styles.nextStage,
-                { borderColor: getRarityColor(character.rarity) }
+                { borderColor: getRarityColor(character.rarity) },
               ]}
               onPress={() => setSelectedStage(index)}
             >
@@ -215,7 +215,7 @@ const EvolutionScreen = ({
             
             <Text style={[
               styles.evolutionStageName,
-              isSelected && styles.selectedStageName
+              isSelected && styles.selectedStageName,
             ]}>
               {stage.name}
             </Text>
@@ -223,7 +223,7 @@ const EvolutionScreen = ({
             {index < evolutionStages.length - 1 && (
               <View style={[
                 styles.evolutionConnector,
-                { backgroundColor: isCompleted ? getRarityColor(character.rarity) : '#E0E0E0' }
+                { backgroundColor: isCompleted ? getRarityColor(character.rarity) : '#E0E0E0' },
               ]} />
             )}
           </View>
@@ -239,13 +239,13 @@ const EvolutionScreen = ({
           styles.characterContainer,
           {
             transform: [{ scale: animationValues.scale }],
-            opacity: animationValues.opacity
-          }
+            opacity: animationValues.opacity,
+          },
         ]}
       >
         <View style={[
           styles.characterCard,
-          { borderColor: getRarityColor(character.rarity) }
+          { borderColor: getRarityColor(character.rarity) },
         ]}>
           <Text style={styles.characterEmoji}>{character.emoji}</Text>
           
@@ -328,11 +328,11 @@ const EvolutionScreen = ({
         </View>
         <View style={[
           styles.requirementStatus,
-          character.level >= selectedEvolution.level_requirement ? styles.metStatus : styles.unmetStatus
+          character.level >= selectedEvolution.level_requirement ? styles.metStatus : styles.unmetStatus,
         ]}>
           <Text style={[
             styles.requirementStatusText,
-            character.level >= selectedEvolution.level_requirement ? styles.metStatusText : styles.unmetStatusText
+            character.level >= selectedEvolution.level_requirement ? styles.metStatusText : styles.unmetStatusText,
           ]}>
             {character.level >= selectedEvolution.level_requirement ? 'Met' : 'Not Met'}
           </Text>
@@ -354,7 +354,7 @@ const EvolutionScreen = ({
               />
               <Text style={styles.requirementLabel}>
                 {materialId.replace('_', ' ').split(' ').map(word => 
-                  word.charAt(0).toUpperCase() + word.slice(1)
+                  word.charAt(0).toUpperCase() + word.slice(1),
                 ).join(' ')}
               </Text>
             </View>
@@ -362,7 +362,7 @@ const EvolutionScreen = ({
             <View style={styles.materialCount}>
               <Text style={[
                 styles.materialCountText,
-                !hasEnough && styles.insufficientMaterial
+                !hasEnough && styles.insufficientMaterial,
               ]}>
                 {available}/{required}
               </Text>
@@ -370,11 +370,11 @@ const EvolutionScreen = ({
             
             <View style={[
               styles.requirementStatus,
-              hasEnough ? styles.metStatus : styles.unmetStatus
+              hasEnough ? styles.metStatus : styles.unmetStatus,
             ]}>
               <Text style={[
                 styles.requirementStatusText,
-                hasEnough ? styles.metStatusText : styles.unmetStatusText
+                hasEnough ? styles.metStatusText : styles.unmetStatusText,
               ]}>
                 {hasEnough ? 'Ready' : 'Need More'}
               </Text>
@@ -412,7 +412,7 @@ const EvolutionScreen = ({
                 <View style={styles.materialInfo}>
                   <Text style={styles.materialName}>
                     {materialId.replace('_', ' ').split(' ').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
+                      word.charAt(0).toUpperCase() + word.slice(1),
                     ).join(' ')}
                   </Text>
                   <Text style={styles.materialDescription}>
@@ -525,14 +525,14 @@ const EvolutionScreen = ({
               style={[
                 styles.evolveActionButton,
                 { backgroundColor: canEvolve ? getRarityColor(character.rarity) : '#CCC' },
-                !canEvolve && styles.disabledButton
+                !canEvolve && styles.disabledButton,
               ]}
               onPress={handleEvolvePress}
               disabled={!canEvolve}
             >
               <Text style={[
                 styles.evolveActionButtonText,
-                !canEvolve && styles.disabledButtonText
+                !canEvolve && styles.disabledButtonText,
               ]}>
                 {canEvolve ? 'Evolve Character' : 'Requirements Not Met'}
               </Text>

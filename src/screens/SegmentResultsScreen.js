@@ -265,7 +265,7 @@ export const SegmentResultsScreen = ({
         {/* Footer Note */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Don't worry - you can always adjust your preferences and goals as you grow! 
+            Don&apos;t worry - you can always adjust your preferences and goals as you grow! 
             Gymmy evolves with you on your fitness journey.
           </Text>
         </View>

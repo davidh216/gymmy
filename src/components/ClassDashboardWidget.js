@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 import { FITNESS_CLASSES } from '../screens/ClassSelectionScreen';
 
 const ClassDashboardWidget = ({ navigation }) => {
-  const { userStats, selectClass, calculateClassXPRequired } = useApp();
+  const { userStats, calculateClassXPRequired } = useApp();
   const [progressAnim] = useState(new Animated.Value(0));
   const [skillPointPulse] = useState(new Animated.Value(1));
   

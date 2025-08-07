@@ -6,7 +6,7 @@ import {
   StyleSheet, 
   SafeAreaView, 
   Text, 
-  TouchableOpacity 
+  TouchableOpacity, 
 } from 'react-native';
 import { useApp } from '../context';
 import { AdaptiveDashboard } from '../components/AdaptiveDashboard';

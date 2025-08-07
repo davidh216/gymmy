@@ -9,7 +9,7 @@ import {
   GymmyType,
   SpecializationType,
   GymmyStats,
-  EvolutionMaterials
+  EvolutionMaterials,
 } from '../types/MultiGymmyTypes';
 
 import { multiGymmyManager } from '../managers/MultiGymmyManager';
@@ -170,7 +170,7 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
         name: 'Team Leader',
         role: 'leader',
         stat_multipliers: { strength: 1.2, cardio: 1.2, flexibility: 1.2, focus: 1.3, motivation: 1.4, loyalty: 1.3 },
-        special_abilities: ['leadership_aura', 'team_coordination']
+        special_abilities: ['leadership_aura', 'team_coordination'],
       },
       support: [
         {
@@ -178,44 +178,44 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
           name: 'Team Motivator',
           role: 'motivator',
           stat_multipliers: { motivation: 1.5, loyalty: 1.3, focus: 1.2 },
-          special_abilities: ['motivation_boost', 'morale_support']
+          special_abilities: ['motivation_boost', 'morale_support'],
         },
         {
           id: 'specialist',
           name: 'Specialist',
           role: 'specialist',
           stat_multipliers: { strength: 1.3, cardio: 1.3, flexibility: 1.3 },
-          special_abilities: ['expertise_share', 'technique_guidance']
+          special_abilities: ['expertise_share', 'technique_guidance'],
         },
         {
           id: 'support_main',
           name: 'Main Support',
           role: 'support',
           stat_multipliers: { loyalty: 1.4, focus: 1.2, motivation: 1.2 },
-          special_abilities: ['team_support', 'backup_assistance']
-        }
-      ]
+          special_abilities: ['team_support', 'backup_assistance'],
+        },
+      ],
     },
     position_bonuses: {
       leader: {
         stat_boost: { motivation: 10, focus: 10 },
         ability_unlock: 'team_rally',
-        synergy_requirement: 'leadership_synergy'
+        synergy_requirement: 'leadership_synergy',
       },
       motivator: {
         stat_boost: { motivation: 15, loyalty: 10 },
-        ability_unlock: 'inspirational_speech'
+        ability_unlock: 'inspirational_speech',
       },
       specialist: {
         stat_boost: { strength: 10, cardio: 10, flexibility: 10 },
-        ability_unlock: 'expert_guidance'
+        ability_unlock: 'expert_guidance',
       },
       support_main: {
         stat_boost: { loyalty: 12, focus: 8 },
-        ability_unlock: 'reliable_backup'
-      }
+        ability_unlock: 'reliable_backup',
+      },
     },
-    description: 'A well-rounded formation that provides balanced coverage across all aspects of fitness training.'
+    description: 'A well-rounded formation that provides balanced coverage across all aspects of fitness training.',
   },
 
   power_house: {
@@ -226,7 +226,7 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
         name: 'Powerhouse Leader',
         role: 'leader',
         stat_multipliers: { strength: 1.5, focus: 1.3, motivation: 1.2 },
-        special_abilities: ['strength_dominance', 'power_coordination']
+        special_abilities: ['strength_dominance', 'power_coordination'],
       },
       support: [
         {
@@ -234,44 +234,44 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
           name: 'Strength Specialist Alpha',
           role: 'specialist',
           stat_multipliers: { strength: 1.4, focus: 1.2 },
-          special_abilities: ['compound_mastery', 'heavy_lift_support']
+          special_abilities: ['compound_mastery', 'heavy_lift_support'],
         },
         {
           id: 'strength_specialist_2',
           name: 'Strength Specialist Beta',
           role: 'specialist',
           stat_multipliers: { strength: 1.4, motivation: 1.2 },
-          special_abilities: ['power_training', 'pr_pursuit']
+          special_abilities: ['power_training', 'pr_pursuit'],
         },
         {
           id: 'power_support',
           name: 'Power Support',
           role: 'support',
           stat_multipliers: { strength: 1.3, loyalty: 1.3 },
-          special_abilities: ['spotting_assistance', 'safety_focus']
-        }
-      ]
+          special_abilities: ['spotting_assistance', 'safety_focus'],
+        },
+      ],
     },
     position_bonuses: {
       powerhouse_leader: {
         stat_boost: { strength: 20, focus: 15 },
         ability_unlock: 'powerhouse_command',
-        synergy_requirement: 'strength_mastery'
+        synergy_requirement: 'strength_mastery',
       },
       strength_specialist_1: {
         stat_boost: { strength: 15, focus: 10 },
-        ability_unlock: 'alpha_strength'
+        ability_unlock: 'alpha_strength',
       },
       strength_specialist_2: {
         stat_boost: { strength: 15, motivation: 10 },
-        ability_unlock: 'beta_power'
+        ability_unlock: 'beta_power',
       },
       power_support: {
         stat_boost: { strength: 12, loyalty: 12 },
-        ability_unlock: 'power_backup'
-      }
+        ability_unlock: 'power_backup',
+      },
     },
-    description: 'Maximize strength training potential with specialized roles focused on power and heavy lifting.'
+    description: 'Maximize strength training potential with specialized roles focused on power and heavy lifting.',
   },
 
   cardio_squad: {
@@ -282,7 +282,7 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
         name: 'Pace Leader',
         role: 'leader',
         stat_multipliers: { cardio: 1.5, motivation: 1.3, focus: 1.2 },
-        special_abilities: ['pace_setting', 'endurance_leadership']
+        special_abilities: ['pace_setting', 'endurance_leadership'],
       },
       support: [
         {
@@ -290,44 +290,44 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
           name: 'Endurance Specialist',
           role: 'specialist',
           stat_multipliers: { cardio: 1.4, focus: 1.2 },
-          special_abilities: ['endurance_mastery', 'stamina_support']
+          special_abilities: ['endurance_mastery', 'stamina_support'],
         },
         {
           id: 'cardio_motivator',
           name: 'Cardio Motivator',
           role: 'motivator',
           stat_multipliers: { cardio: 1.3, motivation: 1.4 },
-          special_abilities: ['cardio_enthusiasm', 'energy_boost']
+          special_abilities: ['cardio_enthusiasm', 'energy_boost'],
         },
         {
           id: 'recovery_support',
           name: 'Recovery Support',
           role: 'support',
           stat_multipliers: { cardio: 1.2, loyalty: 1.3, flexibility: 1.2 },
-          special_abilities: ['recovery_assistance', 'cool_down_guidance']
-        }
-      ]
+          special_abilities: ['recovery_assistance', 'cool_down_guidance'],
+        },
+      ],
     },
     position_bonuses: {
       pace_leader: {
         stat_boost: { cardio: 20, motivation: 15 },
         ability_unlock: 'pace_mastery',
-        synergy_requirement: 'cardio_leadership'
+        synergy_requirement: 'cardio_leadership',
       },
       endurance_specialist: {
         stat_boost: { cardio: 18, focus: 12 },
-        ability_unlock: 'endurance_expert'
+        ability_unlock: 'endurance_expert',
       },
       cardio_motivator: {
         stat_boost: { cardio: 15, motivation: 15 },
-        ability_unlock: 'cardio_inspiration'
+        ability_unlock: 'cardio_inspiration',
       },
       recovery_support: {
         stat_boost: { cardio: 10, loyalty: 12, flexibility: 10 },
-        ability_unlock: 'recovery_mastery'
-      }
+        ability_unlock: 'recovery_mastery',
+      },
     },
-    description: 'Optimized for cardiovascular training with focus on endurance, pacing, and recovery.'
+    description: 'Optimized for cardiovascular training with focus on endurance, pacing, and recovery.',
   },
 
   zen_circle: {
@@ -338,7 +338,7 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
         name: 'Zen Master',
         role: 'leader',
         stat_multipliers: { flexibility: 1.5, focus: 1.5, motivation: 1.3 },
-        special_abilities: ['inner_peace', 'mindful_guidance']
+        special_abilities: ['inner_peace', 'mindful_guidance'],
       },
       support: [
         {
@@ -346,44 +346,44 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
           name: 'Flexibility Guide',
           role: 'specialist',
           stat_multipliers: { flexibility: 1.4, focus: 1.3 },
-          special_abilities: ['flexibility_mastery', 'mobility_support']
+          special_abilities: ['flexibility_mastery', 'mobility_support'],
         },
         {
           id: 'mindfulness_coach',
           name: 'Mindfulness Coach',
           role: 'motivator',
           stat_multipliers: { focus: 1.4, motivation: 1.3, loyalty: 1.2 },
-          special_abilities: ['mindfulness_training', 'mental_clarity']
+          special_abilities: ['mindfulness_training', 'mental_clarity'],
         },
         {
           id: 'balance_keeper',
           name: 'Balance Keeper',
           role: 'support',
           stat_multipliers: { flexibility: 1.3, focus: 1.3, loyalty: 1.3 },
-          special_abilities: ['balance_maintenance', 'harmony_preservation']
-        }
-      ]
+          special_abilities: ['balance_maintenance', 'harmony_preservation'],
+        },
+      ],
     },
     position_bonuses: {
       zen_master: {
         stat_boost: { flexibility: 20, focus: 20, motivation: 15 },
         ability_unlock: 'zen_mastery',
-        synergy_requirement: 'mindful_harmony'
+        synergy_requirement: 'mindful_harmony',
       },
       flexibility_guide: {
         stat_boost: { flexibility: 18, focus: 15 },
-        ability_unlock: 'flexibility_wisdom'
+        ability_unlock: 'flexibility_wisdom',
       },
       mindfulness_coach: {
         stat_boost: { focus: 18, motivation: 15, loyalty: 10 },
-        ability_unlock: 'mindful_coaching'
+        ability_unlock: 'mindful_coaching',
       },
       balance_keeper: {
         stat_boost: { flexibility: 15, focus: 15, loyalty: 15 },
-        ability_unlock: 'perfect_balance'
-      }
+        ability_unlock: 'perfect_balance',
+      },
     },
-    description: 'Centered on mindfulness, flexibility, and mental wellness for holistic fitness development.'
+    description: 'Centered on mindfulness, flexibility, and mental wellness for holistic fitness development.',
   },
 
   adaptive_hybrid: {
@@ -394,7 +394,7 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
         name: 'Hybrid Commander',
         role: 'leader',
         stat_multipliers: { strength: 1.25, cardio: 1.25, flexibility: 1.25, focus: 1.3, motivation: 1.3, loyalty: 1.2 },
-        special_abilities: ['adaptive_leadership', 'versatile_command']
+        special_abilities: ['adaptive_leadership', 'versatile_command'],
       },
       support: [
         {
@@ -402,45 +402,45 @@ export const TEAM_FORMATIONS: Record<string, TeamFormation> = {
           name: 'Power Adapter',
           role: 'specialist',
           stat_multipliers: { strength: 1.3, cardio: 1.2, focus: 1.2 },
-          special_abilities: ['power_adaptation', 'strength_flexibility']
+          special_abilities: ['power_adaptation', 'strength_flexibility'],
         },
         {
           id: 'cardio_adapter',
           name: 'Cardio Adapter',
           role: 'specialist',
           stat_multipliers: { cardio: 1.3, flexibility: 1.2, motivation: 1.2 },
-          special_abilities: ['cardio_adaptation', 'endurance_flexibility']
+          special_abilities: ['cardio_adaptation', 'endurance_flexibility'],
         },
         {
           id: 'flex_supporter',
           name: 'Flexibility Supporter',
           role: 'support',
           stat_multipliers: { flexibility: 1.3, focus: 1.2, loyalty: 1.3 },
-          special_abilities: ['adaptive_support', 'versatile_assistance']
-        }
-      ]
+          special_abilities: ['adaptive_support', 'versatile_assistance'],
+        },
+      ],
     },
     position_bonuses: {
       hybrid_commander: {
         stat_boost: { strength: 12, cardio: 12, flexibility: 12, focus: 15, motivation: 15, loyalty: 10 },
         ability_unlock: 'hybrid_mastery',
-        synergy_requirement: 'adaptive_synergy'
+        synergy_requirement: 'adaptive_synergy',
       },
       power_adapter: {
         stat_boost: { strength: 15, cardio: 10, focus: 10 },
-        ability_unlock: 'power_adaptation'
+        ability_unlock: 'power_adaptation',
       },
       cardio_adapter: {
         stat_boost: { cardio: 15, flexibility: 10, motivation: 10 },
-        ability_unlock: 'cardio_adaptation'
+        ability_unlock: 'cardio_adaptation',
       },
       flex_supporter: {
         stat_boost: { flexibility: 15, focus: 10, loyalty: 12 },
-        ability_unlock: 'flexible_support'
-      }
+        ability_unlock: 'flexible_support',
+      },
     },
-    description: 'Versatile formation that adapts to any training style with balanced stat distribution.'
-  }
+    description: 'Versatile formation that adapts to any training style with balanced stat distribution.',
+  },
 };
 
 // ==============================================================================
@@ -454,20 +454,20 @@ export const STRATEGY_TYPES: Record<string, StrategyType> = {
     ideal_compositions: [
       { type: 'rarity', condition: 'same_rarity_count >= 3', minimum: 3, weight: 30 },
       { type: 'specialization', condition: 'diverse_specializations', minimum: 3, weight: 25 },
-      { type: 'character_type', condition: 'complementary_types', minimum: 2, weight: 20 }
+      { type: 'character_type', condition: 'complementary_types', minimum: 2, weight: 20 },
     ],
     bonuses: [
       {
         condition: 'active_synergies >= 3',
         effect: { type: 'xp_bonus', value: 25 },
-        description: '+25% XP when 3+ synergies are active'
+        description: '+25% XP when 3+ synergies are active',
       },
       {
         condition: 'synergy_effectiveness >= 80',
         effect: { type: 'stat_boost', value: 15 },
-        description: '+15% to all stats when synergy effectiveness is high'
-      }
-    ]
+        description: '+15% to all stats when synergy effectiveness is high',
+      },
+    ],
   },
 
   power_focused: {
@@ -476,20 +476,20 @@ export const STRATEGY_TYPES: Record<string, StrategyType> = {
     ideal_compositions: [
       { type: 'specialization', condition: 'strength_training >= 3', minimum: 3, weight: 40 },
       { type: 'rarity', condition: 'rare_plus >= 2', minimum: 2, weight: 25 },
-      { type: 'character_type', condition: 'power_types', minimum: 2, weight: 15 }
+      { type: 'character_type', condition: 'power_types', minimum: 2, weight: 15 },
     ],
     bonuses: [
       {
         condition: 'team_strength >= 400',
         effect: { type: 'stat_boost', value: 20 },
-        description: '+20% strength bonus when team strength exceeds 400'
+        description: '+20% strength bonus when team strength exceeds 400',
       },
       {
         condition: 'strength_specialists >= 3',
         effect: { type: 'xp_bonus', value: 30, conditions: ['strength_exercises'] },
-        description: '+30% XP for strength exercises with 3+ strength specialists'
-      }
-    ]
+        description: '+30% XP for strength exercises with 3+ strength specialists',
+      },
+    ],
   },
 
   balanced_growth: {
@@ -498,20 +498,20 @@ export const STRATEGY_TYPES: Record<string, StrategyType> = {
     ideal_compositions: [
       { type: 'specialization', condition: 'all_specializations_covered', minimum: 4, weight: 35 },
       { type: 'character_type', condition: 'diverse_types', minimum: 3, weight: 25 },
-      { type: 'level', condition: 'average_level >= 15', minimum: 15, weight: 20 }
+      { type: 'level', condition: 'average_level >= 15', minimum: 15, weight: 20 },
     ],
     bonuses: [
       {
         condition: 'stat_balance_score >= 80',
         effect: { type: 'xp_bonus', value: 20 },
-        description: '+20% XP when team has excellent stat balance'
+        description: '+20% XP when team has excellent stat balance',
       },
       {
         condition: 'all_stats >= 50_average',
         effect: { type: 'material_bonus', value: 15 },
-        description: '+15% evolution materials when all stats are well developed'
-      }
-    ]
+        description: '+15% evolution materials when all stats are well developed',
+      },
+    ],
   },
 
   efficiency_optimizer: {
@@ -520,21 +520,21 @@ export const STRATEGY_TYPES: Record<string, StrategyType> = {
     ideal_compositions: [
       { type: 'character_type', condition: 'specialist_types >= 3', minimum: 3, weight: 30 },
       { type: 'rarity', condition: 'high_rarity_mix', minimum: 2, weight: 25 },
-      { type: 'specialization', condition: 'complementary_specs', minimum: 3, weight: 25 }
+      { type: 'specialization', condition: 'complementary_specs', minimum: 3, weight: 25 },
     ],
     bonuses: [
       {
         condition: 'team_efficiency >= 85',
         effect: { type: 'material_bonus', value: 25 },
-        description: '+25% evolution materials from efficient team composition'
+        description: '+25% evolution materials from efficient team composition',
       },
       {
         condition: 'synergy_count >= 2',
         effect: { type: 'xp_bonus', value: 15 },
-        description: '+15% XP when multiple synergies create efficiency'
-      }
-    ]
-  }
+        description: '+15% XP when multiple synergies create efficiency',
+      },
+    ],
+  },
 };
 
 // ==============================================================================
@@ -567,7 +567,7 @@ export class TeamManagementSystem {
     name: string,
     characters: GymmyCharacter[],
     formationId: string = 'balanced_core',
-    strategyId: string = 'balanced_growth'
+    strategyId: string = 'balanced_growth',
   ): GymmyTeam {
     if (characters.length === 0 || characters.length > 5) {
       throw new Error('Team must have 1-5 characters');
@@ -587,7 +587,7 @@ export class TeamManagementSystem {
     const team = multiGymmyManager.createTeam(
       name,
       characters[0].instance_id,
-      characters.slice(1).map(c => c.instance_id)
+      characters.slice(1).map(c => c.instance_id),
     );
 
     // Create team configuration
@@ -595,7 +595,7 @@ export class TeamManagementSystem {
       formation,
       role_assignments: this.generateRoleAssignments(characters, formation),
       synergy_focus: this.determineSynergyFocus(characters),
-      strategy_type: strategy
+      strategy_type: strategy,
     };
 
     // Store team and configuration
@@ -643,7 +643,7 @@ export class TeamManagementSystem {
 
   private generateRoleAssignments(
     characters: GymmyCharacter[],
-    formation: TeamFormation
+    formation: TeamFormation,
   ): RoleAssignment[] {
     const assignments: RoleAssignment[] = [];
     const positions = [formation.layout.primary, ...formation.layout.support];
@@ -651,7 +651,7 @@ export class TeamManagementSystem {
     // Sort characters by their suitability for different roles
     const characterScores = characters.map(char => ({
       character: char,
-      scores: this.calculateRoleScores(char, positions)
+      scores: this.calculateRoleScores(char, positions),
     }));
 
     // Assign characters to positions using Hungarian algorithm approximation
@@ -669,14 +669,14 @@ export class TeamManagementSystem {
       if (availablePositions.length === 0) break;
 
       const bestPosition = availablePositions.reduce((best, pos) => 
-        scores[pos.id] > scores[best.id] ? pos : best
+        scores[pos.id] > scores[best.id] ? pos : best,
       );
 
       assignments.push({
         character_id: character.instance_id,
         position_id: bestPosition.id,
         role_compatibility: scores[bestPosition.id],
-        assignment_date: new Date().toISOString()
+        assignment_date: new Date().toISOString(),
       });
 
       assignedPositions.add(bestPosition.id);
@@ -694,21 +694,21 @@ export class TeamManagementSystem {
 
       // Role-based scoring
       switch (position.role) {
-        case 'leader':
-          score += this.calculateLeadershipScore(character);
-          break;
-        case 'motivator':
-          score += this.calculateMotivationScore(character);
-          break;
-        case 'specialist':
-          score += this.calculateSpecialistScore(character);
-          break;
-        case 'support':
-          score += this.calculateSupportScore(character);
-          break;
-        case 'wildcard':
-          score += this.calculateWildcardScore(character);
-          break;
+      case 'leader':
+        score += this.calculateLeadershipScore(character);
+        break;
+      case 'motivator':
+        score += this.calculateMotivationScore(character);
+        break;
+      case 'specialist':
+        score += this.calculateSpecialistScore(character);
+        break;
+      case 'support':
+        score += this.calculateSupportScore(character);
+        break;
+      case 'wildcard':
+        score += this.calculateWildcardScore(character);
+        break;
       }
 
       // Stat compatibility
@@ -760,7 +760,7 @@ export class TeamManagementSystem {
     const highestStat = Math.max(
       character.current_stats.strength,
       character.current_stats.cardio,
-      character.current_stats.flexibility
+      character.current_stats.flexibility,
     );
     score += (highestStat / 100) * 30;
     
@@ -867,7 +867,7 @@ export class TeamManagementSystem {
     return {
       primary_focus: primaryFocus,
       target_synergies: this.identifyTargetSynergies(characters, primaryFocus),
-      avoided_conflicts: this.identifyAvoidedConflicts(characters)
+      avoided_conflicts: this.identifyAvoidedConflicts(characters),
     };
   }
 
@@ -881,7 +881,7 @@ export class TeamManagementSystem {
     const count: Record<SpecializationType, number> = {
       strength_training: 0, cardio_endurance: 0, flexibility_mobility: 0,
       mental_wellness: 0, athletic_performance: 0, habit_formation: 0,
-      social_motivation: 0, versatile_training: 0
+      social_motivation: 0, versatile_training: 0,
     };
     characters.forEach(char => count[char.specialization]++);
     return count;
@@ -890,7 +890,7 @@ export class TeamManagementSystem {
   private countByType(characters: GymmyCharacter[]): Record<GymmyType, number> {
     const count: Record<GymmyType, number> = {
       power: 0, blaze: 0, transform: 0, zen: 0, pace: 0, steady: 0, rally: 0,
-      rookie: 0, specialist: 0, seasonal: 0, legendary: 0, community: 0
+      rookie: 0, specialist: 0, seasonal: 0, legendary: 0, community: 0,
     };
     characters.forEach(char => count[char.type]++);
     return count;
@@ -903,11 +903,11 @@ export class TeamManagementSystem {
     // Specific complementary combinations
     const complementaryPairs = [
       ['power', 'zen'], ['blaze', 'steady'], ['transform', 'rally'],
-      ['specialist', 'community'], ['legendary', 'rookie']
+      ['specialist', 'community'], ['legendary', 'rookie'],
     ];
     
     return complementaryPairs.some(pair => 
-      activeTypes.includes(pair[0]) && activeTypes.includes(pair[1])
+      activeTypes.includes(pair[0]) && activeTypes.includes(pair[1]),
     );
   }
 
@@ -915,18 +915,18 @@ export class TeamManagementSystem {
     const synergies: string[] = [];
     
     switch (focus) {
-      case 'power':
-        synergies.push('legendary_dominance', 'power_overwhelming', 'elite_mastery');
-        break;
-      case 'balance':
-        synergies.push('balanced_harmony', 'versatile_mastery', 'adaptive_excellence');
-        break;
-      case 'synergy':
-        synergies.push('perfect_synergy', 'complementary_boost', 'team_resonance');
-        break;
-      case 'flexibility':
-        synergies.push('adaptive_formation', 'flexible_strategy', 'dynamic_composition');
-        break;
+    case 'power':
+      synergies.push('legendary_dominance', 'power_overwhelming', 'elite_mastery');
+      break;
+    case 'balance':
+      synergies.push('balanced_harmony', 'versatile_mastery', 'adaptive_excellence');
+      break;
+    case 'synergy':
+      synergies.push('perfect_synergy', 'complementary_boost', 'team_resonance');
+      break;
+    case 'flexibility':
+      synergies.push('adaptive_formation', 'flexible_strategy', 'dynamic_composition');
+      break;
     }
     
     return synergies;
@@ -955,7 +955,7 @@ export class TeamManagementSystem {
 
   public analyzeTeamPerformance(
     team: GymmyTeam, 
-    characters: GymmyCharacter[]
+    characters: GymmyCharacter[],
   ): TeamPerformanceMetrics {
     const statDistribution = this.calculateStatDistribution(characters);
     const roleCoverage = this.analyzeRoleCoverage(team, characters);
@@ -976,13 +976,13 @@ export class TeamManagementSystem {
       stat_distribution: statDistribution,
       role_coverage: roleCoverage,
       synergy_analysis: synergyAnalysis,
-      optimization_suggestions: this.generateOptimizationSuggestions(team, characters)
+      optimization_suggestions: this.generateOptimizationSuggestions(team, characters),
     };
   }
 
   private calculateStatDistribution(characters: GymmyCharacter[]): TeamStatDistribution {
     const totalStats: GymmyStats = {
-      strength: 0, cardio: 0, flexibility: 0, focus: 0, motivation: 0, loyalty: 0
+      strength: 0, cardio: 0, flexibility: 0, focus: 0, motivation: 0, loyalty: 0,
     };
     
     // Sum all stats
@@ -1026,7 +1026,7 @@ export class TeamManagementSystem {
       average_stats: averageStats,
       stat_balance: statBalance,
       strongest_areas: strongestAreas,
-      weakest_areas: weakestAreas
+      weakest_areas: weakestAreas,
     };
   }
 
@@ -1037,13 +1037,13 @@ export class TeamManagementSystem {
         covered_roles: [],
         missing_roles: [],
         role_redundancy: {},
-        coverage_score: 0
+        coverage_score: 0,
       };
     }
     
     const requiredRoles = [
       config.formation.layout.primary.role,
-      ...config.formation.layout.support.map(p => p.role)
+      ...config.formation.layout.support.map(p => p.role),
     ];
     
     const assignedRoles = config.role_assignments.map(assignment => {
@@ -1068,7 +1068,7 @@ export class TeamManagementSystem {
       covered_roles: coveredRoles,
       missing_roles: missingRoles,
       role_redundancy: roleRedundancy,
-      coverage_score: Math.round(coverageScore)
+      coverage_score: Math.round(coverageScore),
     };
   }
 
@@ -1077,7 +1077,7 @@ export class TeamManagementSystem {
       synergy,
       contributing_characters: characters.map(c => c.instance_id), // Simplified
       effectiveness: 85, // Placeholder calculation
-      bonus_value: 20 // Placeholder calculation
+      bonus_value: 20, // Placeholder calculation
     }));
     
     // This would be much more complex in a real implementation
@@ -1086,7 +1086,7 @@ export class TeamManagementSystem {
       potential_synergies: [], // Would calculate potential synergies
       synergy_conflicts: [], // Would identify conflicts
       synergy_effectiveness: activeSynergies.length > 0 ? 
-        activeSynergies.reduce((sum, s) => sum + s.effectiveness, 0) / activeSynergies.length : 0
+        activeSynergies.reduce((sum, s) => sum + s.effectiveness, 0) / activeSynergies.length : 0,
     };
   }
 
@@ -1126,7 +1126,7 @@ export class TeamManagementSystem {
 
   private generateOptimizationSuggestions(
     team: GymmyTeam, 
-    characters: GymmyCharacter[]
+    characters: GymmyCharacter[],
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
     const performance = this.analyzeTeamPerformance(team, characters);
@@ -1141,7 +1141,7 @@ export class TeamManagementSystem {
         description: `Consider adding a character with higher ${weakestStat} stats to improve team balance.`,
         expected_improvement: 15,
         implementation_cost: 'medium',
-        specific_actions: [`Find character with ${weakestStat} > 70`, 'Replace weakest team member', 'Reassess team composition']
+        specific_actions: [`Find character with ${weakestStat} > 70`, 'Replace weakest team member', 'Reassess team composition'],
       });
     }
     
@@ -1154,7 +1154,7 @@ export class TeamManagementSystem {
         description: 'Your team has low synergy effectiveness. Consider restructuring for better character combinations.',
         expected_improvement: 25,
         implementation_cost: 'low',
-        specific_actions: ['Review character compatibility', 'Adjust team formation', 'Focus on complementary specializations']
+        specific_actions: ['Review character compatibility', 'Adjust team formation', 'Focus on complementary specializations'],
       });
     }
     
@@ -1168,7 +1168,7 @@ export class TeamManagementSystem {
         description: 'Some key roles are missing or poorly filled. Consider changing formation or reassigning characters.',
         expected_improvement: 20,
         implementation_cost: 'free',
-        specific_actions: ['Try different formation', 'Reassign character roles', 'Fill missing role gaps']
+        specific_actions: ['Try different formation', 'Reassign character roles', 'Fill missing role gaps'],
       });
     }
     
@@ -1195,7 +1195,7 @@ export class TeamManagementSystem {
     return {
       activeTeams: Array.from(this.activeTeams.entries()),
       teamConfigurations: Array.from(this.teamConfigurations.entries()),
-      performanceHistory: Array.from(this.teamPerformanceHistory.entries())
+      performanceHistory: Array.from(this.teamPerformanceHistory.entries()),
     };
   }
 

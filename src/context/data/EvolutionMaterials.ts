@@ -16,7 +16,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'common',
     sources: ['daily_workout', 'streak_maintenance', 'basic_achievements'],
     icon: '💎',
-    value: 1
+    value: 1,
   },
   
   training_essence: {
@@ -26,7 +26,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'common',
     sources: ['workout_completion', 'personal_records', 'consistent_training'],
     icon: '✨',
-    value: 2
+    value: 2,
   },
 
   sweat_drops: {
@@ -36,7 +36,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'common',
     sources: ['intense_workouts', 'cardio_sessions', 'strength_training'],
     icon: '💧',
-    value: 1
+    value: 1,
   },
 
   // Rare Materials (Rare rewards)
@@ -47,7 +47,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'rare',
     sources: ['achievement_unlock', 'streak_milestones', 'rare_achievements'],
     icon: '🔮',
-    value: 5
+    value: 5,
   },
 
   power_essence: {
@@ -57,7 +57,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'rare',
     sources: ['strength_breakthroughs', 'heavy_lift_sessions', 'powerlifter_class'],
     icon: '⚡',
-    value: 8
+    value: 8,
   },
 
   endurance_essence: {
@@ -67,7 +67,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'rare',
     sources: ['long_cardio_sessions', 'endurance_achievements', 'athlete_class'],
     icon: '🌊',
-    value: 8
+    value: 8,
   },
 
   flexibility_essence: {
@@ -77,7 +77,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'rare',
     sources: ['flexibility_improvements', 'yoga_sessions', 'yogi_class'],
     icon: '🍃',
-    value: 8
+    value: 8,
   },
 
   bond_token: {
@@ -87,7 +87,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'rare',
     sources: ['character_bonding', 'loyalty_milestones', 'daily_interactions'],
     icon: '🤝',
-    value: 10
+    value: 10,
   },
 
   // Epic Materials (Epic rewards)
@@ -98,7 +98,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'epic',
     sources: ['epic_achievements', 'major_milestones', 'transformation_moments'],
     icon: '💜',
-    value: 15
+    value: 15,
   },
 
   transformation_core: {
@@ -108,7 +108,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'epic',
     sources: ['body_transformation', 'lifestyle_change', 'major_breakthroughs'],
     icon: '🔆',
-    value: 20
+    value: 20,
   },
 
   mastery_essence: {
@@ -118,7 +118,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'epic',
     sources: ['skill_mastery', 'perfect_form', 'expert_achievements'],
     icon: '🎯',
-    value: 25
+    value: 25,
   },
 
   team_synergy_core: {
@@ -128,7 +128,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'epic',
     sources: ['team_workouts', 'synergy_achievements', 'group_milestones'],
     icon: '🌟',
-    value: 30
+    value: 30,
   },
 
   // Legendary Materials (Legendary rewards)
@@ -139,7 +139,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'legendary',
     sources: ['legendary_achievements', 'ultimate_goals', 'transcendent_moments'],
     icon: '🏆',
-    value: 50
+    value: 50,
   },
 
   transcendence_core: {
@@ -149,7 +149,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'legendary',
     sources: ['transcendent_achievements', 'ultimate_transformation', 'legendary_status'],
     icon: '👑',
-    value: 100
+    value: 100,
   },
 
   eternal_bond: {
@@ -159,7 +159,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'legendary',
     sources: ['maximum_bond_level', 'loyalty_legend', 'eternal_companionship'],
     icon: '💖',
-    value: 150
+    value: 150,
   },
 
   infinity_shard: {
@@ -169,7 +169,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'legendary',
     sources: ['infinite_achievements', 'cosmic_events', 'reality_transcendence'],
     icon: '♾️',
-    value: 200
+    value: 200,
   },
 
   // Mythical Materials (Mythical rewards)
@@ -180,7 +180,7 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'mythical',
     sources: ['cosmic_achievements', 'universe_alignment', 'dimensional_breakthrough'],
     icon: '🌌',
-    value: 500
+    value: 500,
   },
 
   reality_crystal: {
@@ -190,8 +190,8 @@ export const EVOLUTION_MATERIALS: Record<string, EvolutionMaterial> = {
     rarity: 'mythical',
     sources: ['reality_manipulation', 'dimensional_mastery', 'cosmic_transcendence'],
     icon: '🔮',
-    value: 1000
-  }
+    value: 1000,
+  },
 };
 
 // ==============================================================================
@@ -202,61 +202,61 @@ export const MATERIAL_SOURCES: Record<string, { materials: string[], rates: numb
   // Daily Activities
   daily_workout: {
     materials: ['basic_crystals', 'training_essence', 'sweat_drops'],
-    rates: [0.8, 0.6, 0.9] // 80% basic crystals, 60% training essence, 90% sweat drops
+    rates: [0.8, 0.6, 0.9], // 80% basic crystals, 60% training essence, 90% sweat drops
   },
   
   personal_record: {
     materials: ['training_essence', 'power_essence', 'rare_crystals'],
-    rates: [1.0, 0.3, 0.2] // 100% training essence, 30% power essence, 20% rare crystals
+    rates: [1.0, 0.3, 0.2], // 100% training essence, 30% power essence, 20% rare crystals
   },
   
   streak_milestone: {
     materials: ['rare_crystals', 'bond_token', 'epic_crystals'],
-    rates: [0.7, 0.5, 0.1] // 70% rare crystals, 50% bond token, 10% epic crystals
+    rates: [0.7, 0.5, 0.1], // 70% rare crystals, 50% bond token, 10% epic crystals
   },
 
   // Specialized Training
   strength_session: {
     materials: ['sweat_drops', 'power_essence', 'basic_crystals'],
-    rates: [1.0, 0.4, 0.8]
+    rates: [1.0, 0.4, 0.8],
   },
 
   cardio_session: {
     materials: ['sweat_drops', 'endurance_essence', 'basic_crystals'],
-    rates: [1.0, 0.4, 0.8]
+    rates: [1.0, 0.4, 0.8],
   },
 
   flexibility_session: {
     materials: ['training_essence', 'flexibility_essence', 'basic_crystals'],
-    rates: [0.9, 0.4, 0.8]
+    rates: [0.9, 0.4, 0.8],
   },
 
   // Achievements
   major_achievement: {
     materials: ['epic_crystals', 'mastery_essence', 'transformation_core'],
-    rates: [0.8, 0.6, 0.3]
+    rates: [0.8, 0.6, 0.3],
   },
 
   legendary_achievement: {
     materials: ['legendary_crystals', 'transcendence_core', 'eternal_bond'],
-    rates: [0.9, 0.5, 0.2]
+    rates: [0.9, 0.5, 0.2],
   },
 
   cosmic_achievement: {
     materials: ['cosmic_essence', 'reality_crystal', 'infinity_shard'],
-    rates: [0.7, 0.3, 0.5]
+    rates: [0.7, 0.3, 0.5],
   },
 
   // Social & Team Activities
   team_workout: {
     materials: ['bond_token', 'team_synergy_core', 'training_essence'],
-    rates: [0.8, 0.3, 1.0]
+    rates: [0.8, 0.3, 1.0],
   },
 
   character_bonding: {
     materials: ['bond_token', 'training_essence', 'rare_crystals'],
-    rates: [1.0, 0.7, 0.4]
-  }
+    rates: [1.0, 0.7, 0.4],
+  },
 };
 
 // ==============================================================================
@@ -268,76 +268,76 @@ export const EVOLUTION_RECIPES: Record<string, Record<string, Record<string, num
     stage_1: {
       basic_crystals: 5,
       training_essence: 3,
-      sweat_drops: 10
+      sweat_drops: 10,
     },
     stage_2: {
       rare_crystals: 3,
       bond_token: 1,
-      training_essence: 8
-    }
+      training_essence: 8,
+    },
   },
   
   rare: {
     stage_1: {
       basic_crystals: 8,
       rare_crystals: 3,
-      power_essence: 2
+      power_essence: 2,
     },
     stage_2: {
       rare_crystals: 5,
       epic_crystals: 2,
-      mastery_essence: 1
-    }
+      mastery_essence: 1,
+    },
   },
   
   epic: {
     stage_1: {
       rare_crystals: 10,
       epic_crystals: 5,
-      transformation_core: 2
+      transformation_core: 2,
     },
     stage_2: {
       epic_crystals: 8,
       legendary_crystals: 3,
-      transcendence_core: 1
-    }
+      transcendence_core: 1,
+    },
   },
   
   legendary: {
     stage_1: {
       epic_crystals: 15,
       legendary_crystals: 8,
-      transcendence_core: 3
+      transcendence_core: 3,
     },
     stage_2: {
       legendary_crystals: 12,
       eternal_bond: 2,
-      infinity_shard: 1
+      infinity_shard: 1,
     },
     stage_3: {
       legendary_crystals: 20,
       cosmic_essence: 5,
-      reality_crystal: 2
-    }
+      reality_crystal: 2,
+    },
   },
   
   mythical: {
     stage_1: {
       legendary_crystals: 25,
       cosmic_essence: 10,
-      infinity_shard: 5
+      infinity_shard: 5,
     },
     stage_2: {
       cosmic_essence: 15,
       reality_crystal: 8,
-      transcendence_core: 10
+      transcendence_core: 10,
     },
     stage_3: {
       reality_crystal: 12,
       cosmic_essence: 20,
-      eternal_bond: 5
-    }
-  }
+      eternal_bond: 5,
+    },
+  },
 };
 
 // ==============================================================================
@@ -351,8 +351,8 @@ export const ACTIVITY_REWARDS: Record<string, { base_materials: string[], bonus_
       'perfect_form': ['power_essence'],
       'personal_record': ['rare_crystals'],
       'long_session': ['endurance_essence'],
-      'team_workout': ['bond_token']
-    }
+      'team_workout': ['bond_token'],
+    },
   },
   
   achievement_unlock: {
@@ -360,17 +360,17 @@ export const ACTIVITY_REWARDS: Record<string, { base_materials: string[], bonus_
     bonus_conditions: {
       'first_achievement': ['epic_crystals'],
       'rare_achievement': ['transformation_core'],
-      'legendary_achievement': ['legendary_crystals']
-    }
+      'legendary_achievement': ['legendary_crystals'],
+    },
   },
   
   character_evolution: {
     base_materials: ['bond_token', 'transformation_core'],
     bonus_conditions: {
       'first_evolution': ['epic_crystals'],
-      'max_evolution': ['legendary_crystals']
-    }
-  }
+      'max_evolution': ['legendary_crystals'],
+    },
+  },
 };
 
 // ==============================================================================
@@ -394,7 +394,7 @@ export const calculateEvolutionCost = (rarity: GymmyRarity, stage: number): Reco
 export const canEvolve = (
   rarity: GymmyRarity, 
   stage: number, 
-  inventory: Record<string, number>
+  inventory: Record<string, number>,
 ): boolean => {
   const requirements = calculateEvolutionCost(rarity, stage);
   
@@ -409,7 +409,7 @@ export const canEvolve = (
 
 export const calculateMaterialRewards = (
   activityType: string, 
-  conditions: string[] = []
+  conditions: string[] = [],
 ): Record<string, number> => {
   const activity = ACTIVITY_REWARDS[activityType];
   if (!activity) return {};

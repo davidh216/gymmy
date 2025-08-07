@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 import { FITNESS_CLASSES } from '../screens/ClassSelectionScreen';
 
 const EnhancedGamificationStats = ({ navigation }) => {

@@ -15,7 +15,7 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 
 const { width, height } = Dimensions.get('window');
 

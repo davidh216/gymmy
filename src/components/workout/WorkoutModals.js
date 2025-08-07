@@ -82,12 +82,12 @@ export const WorkoutRatingModal = ({
                 {renderRatingSection(
                   'beforeMood',
                   'How is your mood?',
-                  workoutRatings.beforeMood
+                  workoutRatings.beforeMood,
                 )}
                 {renderRatingSection(
                   'beforeEnergy',
                   'How is your energy level?',
-                  workoutRatings.beforeEnergy
+                  workoutRatings.beforeEnergy,
                 )}
                 <Text style={styles.modalDescription}>
                   Take a moment to check in with yourself before starting your
@@ -99,17 +99,17 @@ export const WorkoutRatingModal = ({
                 {renderRatingSection(
                   'afterMood',
                   'How is your mood now?',
-                  workoutRatings.afterMood
+                  workoutRatings.afterMood,
                 )}
                 {renderRatingSection(
                   'afterEnergy',
                   'How is your energy level now?',
-                  workoutRatings.afterEnergy
+                  workoutRatings.afterEnergy,
                 )}
                 {renderRatingSection(
                   'workoutRating',
                   'How would you rate this workout?',
-                  workoutRatings.workoutRating
+                  workoutRatings.workoutRating,
                 )}
                 <Text style={styles.modalDescription}>
                   Reflect on how you feel after your workout. This helps track

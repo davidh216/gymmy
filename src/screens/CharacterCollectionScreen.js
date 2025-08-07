@@ -13,7 +13,7 @@ import {
   VirtualizedList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 
 const CharacterCollectionScreen = ({ navigation }) => {
   const { characters, setActiveCharacter } = useApp();

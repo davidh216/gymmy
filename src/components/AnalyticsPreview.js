@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SimpleLineChart } from './SimpleCharts';
 
-const { width: screenWidth } = Dimensions.get('window');
+// const { width } = Dimensions.get('window');
 
 const AnalyticsPreview = ({ workoutHistory, bodyWeights, navigation }) => {
   // Calculate key metrics for preview

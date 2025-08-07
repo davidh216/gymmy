@@ -3,14 +3,14 @@
 
 import {
   GymmyCharacter,
-  EvolutionMaterials
+  EvolutionMaterials,
 } from '../types/MultiGymmyTypes';
 
 import {
   ExperienceGain,
   LevelUpResult,
   EvolutionResult,
-  CharacterGrowthSystem
+  CharacterGrowthSystem,
 } from './CharacterGrowthSystem';
 
 // ==============================================================================
@@ -178,7 +178,7 @@ export class ProgressionTracker {
       level_ups: [],
       evolutions: [],
       achievements_unlocked: [],
-      session_rating: 0
+      session_rating: 0,
     };
     
     this.sessions.push(session);
@@ -191,7 +191,7 @@ export class ProgressionTracker {
     levelUps: LevelUpResult[],
     evolutions: EvolutionResult[],
     duration: number,
-    sessionRating: number = 0
+    sessionRating: number = 0,
   ): ProgressionSession {
     const session = this.sessions.find(s => s.id === sessionId);
     if (!session) throw new Error('Session not found');
@@ -243,38 +243,38 @@ export class ProgressionTracker {
     const totalStats = this.calculateTotalStats();
 
     switch (achievement.id) {
-      case 'first_steps':
-        return session.experience_gains.length > 0;
+    case 'first_steps':
+      return session.experience_gains.length > 0;
       
-      case 'level_up_master':
-        return session.level_ups.length >= 3;
+    case 'level_up_master':
+      return session.level_ups.length >= 3;
       
-      case 'evolution_pioneer':
-        return session.evolutions.length > 0;
+    case 'evolution_pioneer':
+      return session.evolutions.length > 0;
       
-      case 'experience_hoarder':
-        return session.experience_gains.reduce((sum, gain) => sum + gain.total_exp, 0) >= 1000;
+    case 'experience_hoarder':
+      return session.experience_gains.reduce((sum, gain) => sum + gain.total_exp, 0) >= 1000;
       
-      case 'dedication_streak':
-        return this.calculateCurrentStreak() >= 7;
+    case 'dedication_streak':
+      return this.calculateCurrentStreak() >= 7;
       
-      case 'marathon_trainer':
-        return session.duration >= 120; // 2 hours
+    case 'marathon_trainer':
+      return session.duration >= 120; // 2 hours
       
-      case 'team_builder':
-        return session.characters_involved.length >= 4;
+    case 'team_builder':
+      return session.characters_involved.length >= 4;
       
-      case 'perfectionist':
-        return session.session_rating >= 95;
+    case 'perfectionist':
+      return session.session_rating >= 95;
       
-      case 'character_collector':
-        return totalStats.characters_owned >= 10;
+    case 'character_collector':
+      return totalStats.characters_owned >= 10;
       
-      case 'evolution_master':
-        return totalStats.total_evolutions_completed >= 25;
+    case 'evolution_master':
+      return totalStats.total_evolutions_completed >= 25;
       
-      default:
-        return false;
+    default:
+      return false;
     }
   }
 
@@ -306,7 +306,7 @@ export class ProgressionTracker {
           rarity: 'rare',
           icon: '🏆',
           unlock_date: new Date().toISOString(),
-          rewards: milestone.reward
+          rewards: milestone.reward,
         };
 
         session.achievements_unlocked.push(milestoneAchievement);
@@ -318,23 +318,23 @@ export class ProgressionTracker {
     const stats = this.calculateTotalStats();
 
     switch (milestone.id) {
-      case 'experience_milestone_1000':
-        return stats.total_experience_gained;
+    case 'experience_milestone_1000':
+      return stats.total_experience_gained;
       
-      case 'level_milestone_100':
-        return stats.total_levels_gained;
+    case 'level_milestone_100':
+      return stats.total_levels_gained;
       
-      case 'evolution_milestone_10':
-        return stats.total_evolutions_completed;
+    case 'evolution_milestone_10':
+      return stats.total_evolutions_completed;
       
-      case 'session_milestone_50':
-        return stats.workout_sessions_completed;
+    case 'session_milestone_50':
+      return stats.workout_sessions_completed;
       
-      case 'streak_milestone_30':
-        return stats.longest_streak;
+    case 'streak_milestone_30':
+      return stats.longest_streak;
       
-      default:
-        return 0;
+    default:
+      return 0;
     }
   }
 
@@ -344,7 +344,7 @@ export class ProgressionTracker {
 
   public calculateTotalStats(): ProgressionStats {
     const totalExperience = this.sessions.reduce((sum, session) => 
-      sum + session.experience_gains.reduce((expSum, gain) => expSum + gain.total_exp, 0), 0
+      sum + session.experience_gains.reduce((expSum, gain) => expSum + gain.total_exp, 0), 0,
     );
 
     const totalLevelUps = this.sessions.reduce((sum, session) => sum + session.level_ups.length, 0);
@@ -381,7 +381,7 @@ export class ProgressionTracker {
       
       daily_experience_average: activeDays > 0 ? totalExperience / activeDays : 0,
       weekly_level_ups: this.calculateWeeklyAverage('level_ups'),
-      monthly_evolutions: this.calculateMonthlyAverage('evolutions')
+      monthly_evolutions: this.calculateMonthlyAverage('evolutions'),
     };
   }
 
@@ -393,7 +393,7 @@ export class ProgressionTracker {
     });
 
     return Object.keys(activityCount).reduce((a, b) => 
-      activityCount[a] > activityCount[b] ? a : b, 'workout'
+      activityCount[a] > activityCount[b] ? a : b, 'workout',
     );
   }
 
@@ -401,14 +401,14 @@ export class ProgressionTracker {
     if (this.sessions.length === 0) return 0;
 
     const sortedSessions = [...this.sessions].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
 
     const uniqueDays = Array.from(new Set(sortedSessions.map(s => s.timestamp.split('T')[0]))).sort().reverse();
     
     let streak = 0;
     const today = new Date().toISOString().split('T')[0];
-    let checkDate = new Date();
+    const checkDate = new Date();
 
     for (let i = 0; i < uniqueDays.length; i++) {
       const sessionDate = uniqueDays[i];
@@ -456,7 +456,7 @@ export class ProgressionTracker {
   private calculateAchievementScore(): number {
     const rarityScores = { common: 10, rare: 25, epic: 50, legendary: 100 };
     return this.achievements.reduce((score, achievement) => 
-      score + rarityScores[achievement.rarity], 0
+      score + rarityScores[achievement.rarity], 0,
     );
   }
 
@@ -497,7 +497,7 @@ export class ProgressionTracker {
         level_ups: 0,
         evolutions: 0,
         current_level: 1,
-        evolution_stage: 0
+        evolution_stage: 0,
       };
 
       stats.sessions_participated++;
@@ -541,11 +541,11 @@ export class ProgressionTracker {
     const summary = {
       sessions_completed: weeklySessions.length,
       total_experience: weeklySessions.reduce((sum, session) => 
-        sum + session.experience_gains.reduce((expSum, gain) => expSum + gain.total_exp, 0), 0
+        sum + session.experience_gains.reduce((expSum, gain) => expSum + gain.total_exp, 0), 0,
       ),
       levels_gained: weeklySessions.reduce((sum, session) => sum + session.level_ups.length, 0),
       evolutions_completed: weeklySessions.reduce((sum, session) => sum + session.evolutions.length, 0),
-      new_achievements: weeklySessions.reduce((sum, session) => sum + session.achievements_unlocked.length, 0)
+      new_achievements: weeklySessions.reduce((sum, session) => sum + session.achievements_unlocked.length, 0),
     };
 
     const highlights = this.generateCharacterHighlights(weeklySessions);
@@ -558,7 +558,7 @@ export class ProgressionTracker {
       summary,
       character_highlights: highlights,
       recommendations,
-      next_week_goals: goals
+      next_week_goals: goals,
     };
   }
 
@@ -602,7 +602,7 @@ export class ProgressionTracker {
             character_name: `Character ${characterId}`,
             highlight_type: 'evolution',
             description: `Completed ${progress.evolutions} evolution(s) this week!`,
-            impact_rating: 95
+            impact_rating: 95,
           });
         } else if (progress.level_ups >= 5) {
           highlights.push({
@@ -610,7 +610,7 @@ export class ProgressionTracker {
             character_name: `Character ${characterId}`,
             highlight_type: 'level_up',
             description: `Gained ${progress.level_ups} levels this week`,
-            impact_rating: 75
+            impact_rating: 75,
           });
         }
       });
@@ -630,7 +630,7 @@ export class ProgressionTracker {
         title: 'Increase Training Frequency',
         description: 'Try to complete at least 3-4 training sessions per week for optimal character growth.',
         expected_benefit: 'Faster character progression and better consistency',
-        time_investment: '30-45 minutes per session'
+        time_investment: '30-45 minutes per session',
       });
     }
 
@@ -646,7 +646,7 @@ export class ProgressionTracker {
         title: 'Evolution Opportunities Available',
         description: `You have ${evolutionOpportunities} character(s) ready for evolution.`,
         expected_benefit: 'Significant stat boosts and new abilities',
-        time_investment: 'Collect required materials'
+        time_investment: 'Collect required materials',
       });
     }
 
@@ -659,7 +659,7 @@ export class ProgressionTracker {
         title: 'Achievement Progress',
         description: `${unlockedAchievements} achievements remaining to unlock.`,
         expected_benefit: 'Bonus rewards and progression tracking',
-        time_investment: 'Varies by achievement'
+        time_investment: 'Varies by achievement',
       });
     }
 
@@ -679,8 +679,8 @@ export class ProgressionTracker {
       progress_tracking: {
         current: 0,
         target: Math.max(2000, stats.daily_experience_average * 7),
-        unit: 'EXP'
-      }
+        unit: 'EXP',
+      },
     });
 
     // Session goal
@@ -692,8 +692,8 @@ export class ProgressionTracker {
       progress_tracking: {
         current: 0,
         target: Math.max(4, Math.round(stats.workout_sessions_completed / Math.max(1, stats.active_days) * 7)),
-        unit: 'sessions'
-      }
+        unit: 'sessions',
+      },
     });
 
     return goals;
@@ -718,7 +718,7 @@ export class ProgressionTracker {
         requirement_value: 1000,
         current_progress: 0,
         is_completed: false,
-        reward: { basic_crystals: 20, training_essence: 10, bond_token: 5 }
+        reward: { basic_crystals: 20, training_essence: 10, bond_token: 5 },
       },
       {
         id: 'level_milestone_100',
@@ -729,7 +729,7 @@ export class ProgressionTracker {
         requirement_value: 100,
         current_progress: 0,
         is_completed: false,
-        reward: { rare_crystals: 15, power_essence: 8, bond_token: 10 }
+        reward: { rare_crystals: 15, power_essence: 8, bond_token: 10 },
       },
       {
         id: 'evolution_milestone_10',
@@ -740,8 +740,8 @@ export class ProgressionTracker {
         requirement_value: 10,
         current_progress: 0,
         is_completed: false,
-        reward: { epic_crystals: 5, legendary_crystals: 2, transcendence_core: 1 }
-      }
+        reward: { epic_crystals: 5, legendary_crystals: 2, transcendence_core: 1 },
+      },
     ];
   }
 
@@ -755,7 +755,7 @@ export class ProgressionTracker {
         rarity: 'common',
         icon: '👶',
         unlock_date: '',
-        rewards: { basic_crystals: 5, bond_token: 1 }
+        rewards: { basic_crystals: 5, bond_token: 1 },
       },
       {
         id: 'level_up_master',
@@ -765,7 +765,7 @@ export class ProgressionTracker {
         rarity: 'rare',
         icon: '📈',
         unlock_date: '',
-        rewards: { training_essence: 10, bond_token: 3 }
+        rewards: { training_essence: 10, bond_token: 3 },
       },
       {
         id: 'evolution_pioneer',
@@ -775,7 +775,7 @@ export class ProgressionTracker {
         rarity: 'epic',
         icon: '🦋',
         unlock_date: '',
-        rewards: { rare_crystals: 5, power_essence: 3 }
+        rewards: { rare_crystals: 5, power_essence: 3 },
       },
       {
         id: 'experience_hoarder',
@@ -785,7 +785,7 @@ export class ProgressionTracker {
         rarity: 'rare',
         icon: '💰',
         unlock_date: '',
-        rewards: { basic_crystals: 25, training_essence: 15 }
+        rewards: { basic_crystals: 25, training_essence: 15 },
       },
       {
         id: 'dedication_streak',
@@ -795,7 +795,7 @@ export class ProgressionTracker {
         rarity: 'epic',
         icon: '🔥',
         unlock_date: '',
-        rewards: { rare_crystals: 8, bond_token: 5 }
+        rewards: { rare_crystals: 8, bond_token: 5 },
       },
       {
         id: 'marathon_trainer',
@@ -805,7 +805,7 @@ export class ProgressionTracker {
         rarity: 'rare',
         icon: '⏱️',
         unlock_date: '',
-        rewards: { power_essence: 5, bond_token: 3 }
+        rewards: { power_essence: 5, bond_token: 3 },
       },
       {
         id: 'team_builder',
@@ -815,7 +815,7 @@ export class ProgressionTracker {
         rarity: 'rare',
         icon: '👥',
         unlock_date: '',
-        rewards: { training_essence: 12, bond_token: 4 }
+        rewards: { training_essence: 12, bond_token: 4 },
       },
       {
         id: 'perfectionist',
@@ -825,7 +825,7 @@ export class ProgressionTracker {
         rarity: 'legendary',
         icon: '⭐',
         unlock_date: '',
-        rewards: { epic_crystals: 3, legendary_crystals: 1 }
+        rewards: { epic_crystals: 3, legendary_crystals: 1 },
       },
       {
         id: 'character_collector',
@@ -835,7 +835,7 @@ export class ProgressionTracker {
         rarity: 'epic',
         icon: '📚',
         unlock_date: '',
-        rewards: { rare_crystals: 10, epic_crystals: 2 }
+        rewards: { rare_crystals: 10, epic_crystals: 2 },
       },
       {
         id: 'evolution_master',
@@ -845,8 +845,8 @@ export class ProgressionTracker {
         rarity: 'legendary',
         icon: '👑',
         unlock_date: '',
-        rewards: { legendary_crystals: 5, transcendence_core: 2, divine_essence: 1 }
-      }
+        rewards: { legendary_crystals: 5, transcendence_core: 2, divine_essence: 1 },
+      },
     ];
   }
 
@@ -860,7 +860,7 @@ export class ProgressionTracker {
       achievements: this.achievements,
       milestones: this.milestones,
       goals: this.goals,
-      characterStats: Array.from(this.characterStats.entries())
+      characterStats: Array.from(this.characterStats.entries()),
     };
   }
 

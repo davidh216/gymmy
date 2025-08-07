@@ -2,29 +2,25 @@
 // UI components for the refined gacha system
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  StyleSheet,
-  Modal,
-  Dimensions,
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  ScrollView, 
+  Modal, 
   Alert,
-  LinearGradient,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context/AppContext';
-
-const { width, height } = Dimensions.get('window');
+import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
 // ==============================================================================
 // ENHANCED GACHA SCREEN WITH PITY DISPLAY
 // ==============================================================================
 
 export const EnhancedGachaScreen = ({ navigation }) => {
-  const { userStats, gachaStats, pullGacha, getPullCosts } = useApp();
+  const { userStats, gachaStats, pullGacha, getPullCosts } = useUnifiedApp();
   const [showPityDetails, setShowPityDetails] = useState(false);
   const [showBannerDetails, setShowBannerDetails] = useState(false);
   const [pullAnimation] = useState(new Animated.Value(0));
@@ -261,7 +257,7 @@ const FeaturedBannerCard = ({ onPress }) => {
           2x rates for legendary strength characters!
         </Text>
         
-        <View style={styles.bannerTimer}>
+        <View style={styles.bannerTimerContainer}>
           <Ionicons name="time" size={16} color="#FFD700" />
           <Text style={styles.bannerTimeText}>12d 5h 23m remaining</Text>
         </View>
@@ -358,7 +354,7 @@ const PullButton = ({ type, cost, available, onPress, disabled, featured = false
 // ==============================================================================
 
 const MaterialsInventory = () => {
-  const { userStats } = useApp();
+  // const { state } = useUnifiedApp();
   
   // Mock materials data - replace with actual data from context
   const materials = [
@@ -527,7 +523,7 @@ const BannerDetailsModal = ({ visible, onClose }) => {
               <Text style={styles.bonusText}>• Enhanced base stats (+20%)</Text>
             </View>
             
-            <View style={styles.bannerTimer}>
+            <View style={styles.bannerTimerContainer}>
               <Text style={styles.timerTitle}>Time Remaining:</Text>
               <Text style={styles.timerText}>12 days, 5 hours, 23 minutes</Text>
             </View>
@@ -1196,7 +1192,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 5,
   },
-  bannerTimer: {
+  bannerTimerContainer: {
     backgroundColor: 'rgba(255,69,0,0.1)',
     borderRadius: 10,
     padding: 15,
@@ -1407,7 +1403,7 @@ const styles = StyleSheet.create({
 // ==============================================================================
 
 export const EvolutionLab = ({ navigation }) => {
-  const { characters, userStats } = useApp();
+  const { characters } = useUnifiedApp();
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [showEvolutionModal, setShowEvolutionModal] = useState(false);
   

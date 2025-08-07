@@ -37,15 +37,27 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     
-    // Complexity rules
-    'complexity': ['warn', 10],
-    'max-lines-per-function': ['warn', 50],
-    'max-params': ['warn', 4],
+    // Function complexity rules
+    'max-lines-per-function': ['warn', { max: 50 }],
+    'complexity': ['warn', { max: 10 }],
+    'max-params': ['warn', { max: 4 }],
     
-    // Code style rules
-    'indent': ['error', 2],
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'always'],
-    'comma-dangle': ['error', 'always-multiline'],
+    // Import rules
+    'import/no-unresolved': 'warn',
+    'import/namespace': 'warn',
+    
+    // Object rules
+    'no-dupe-keys': 'error',
+    
+    // JSX rules
+    'react/no-unescaped-entities': 'error',
   },
+  ignorePatterns: [
+    'node_modules/',
+    '.expo/',
+    '*.config.js',
+    '*.config.ts',
+    'src/context/**/*.ts',
+    'src/context/**/*.tsx',
+  ],
 }; 

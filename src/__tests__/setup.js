@@ -1,69 +1,96 @@
-// Test setup file for React Native/Expo
-import 'react-native-gesture-handler/jestSetup';
-
-// Mock expo modules
-jest.mock('expo-status-bar');
-jest.mock('@expo/vector-icons', () => ({
-  Ionicons: 'Ionicons',
-}));
+/* global jest */
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}));
 
-// Mock react-native-reanimated
-jest.mock('react-native-reanimated', () => {
-  const Reanimated = require('react-native-reanimated/mock');
-  Reanimated.default.call = () => {};
-  return Reanimated;
-});
+// Mock React Native components
+jest.mock('react-native', () => ({
+  Dimensions: {
+    get: jest.fn(() => ({ width: 375, height: 812 })),
+  },
+  Platform: {
+    OS: 'ios',
+  },
+  StyleSheet: {
+    create: jest.fn((styles) => styles),
+  },
+  View: 'View',
+  Text: 'Text',
+  TouchableOpacity: 'TouchableOpacity',
+  ScrollView: 'ScrollView',
+  FlatList: 'FlatList',
+  Image: 'Image',
+  Alert: {
+    alert: jest.fn(),
+  },
+  Modal: 'Modal',
+  TextInput: 'TextInput',
+  Animated: {
+    Value: jest.fn(() => ({
+      setValue: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    })),
+    timing: jest.fn(() => ({
+      start: jest.fn(),
+    })),
+    spring: jest.fn(() => ({
+      start: jest.fn(),
+    })),
+  },
+}));
 
-// Mock react-native-gesture-handler
-jest.mock('react-native-gesture-handler', () => {
-  const View = require('react-native/Libraries/Components/View/View');
-  return {
-    Swipeable: View,
-    DrawerLayout: View,
-    State: {},
-    ScrollView: View,
-    Slider: View,
-    Switch: View,
-    TextInput: View,
-    ToolbarAndroid: View,
-    ViewPagerAndroid: View,
-    DrawerLayoutAndroid: View,
-    WebView: View,
-    NativeViewGestureHandler: View,
-    TapGestureHandler: View,
-    FlingGestureHandler: View,
-    ForceTouchGestureHandler: View,
-    LongPressGestureHandler: View,
-    PanGestureHandler: View,
-    PinchGestureHandler: View,
-    RotationGestureHandler: View,
-    State: {},
-    Directions: {},
-    gestureHandlerRootHOC: jest.fn((el) => el),
-    GestureHandlerRootView: View,
-  };
-});
+// Mock React Navigation
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: jest.fn(() => ({
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+  })),
+  useRoute: jest.fn(() => ({
+    params: {},
+  })),
+}));
 
-// Silence the warning: Animated: `useNativeDriver` is not supported
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+// Mock Expo
+jest.mock('expo', () => ({
+  LinearGradient: 'LinearGradient',
+  StatusBar: 'StatusBar',
+}));
 
-// Mock Dimensions
-jest.mock('react-native/Libraries/Utilities/Dimensions', () => ({
-  get: jest.fn().mockReturnValue({ width: 375, height: 812 }),
+// Mock react-native-chart-kit
+jest.mock('react-native-chart-kit', () => ({
+  LineChart: 'LineChart',
+  BarChart: 'BarChart',
+  PieChart: 'PieChart',
+}));
+
+// Mock @react-native-community/datetimepicker
+jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker');
+
+// Mock react-native-svg
+jest.mock('react-native-svg', () => ({
+  Svg: 'Svg',
+  Path: 'Path',
+  Circle: 'Circle',
+  Rect: 'Rect',
+}));
+
+// Mock @expo/vector-icons
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: 'Ionicons',
+  MaterialIcons: 'MaterialIcons',
+  FontAwesome: 'FontAwesome',
 }));
 
 // Global test utilities
 global.console = {
   ...console,
-  // Uncomment to ignore a specific log level
-  // log: jest.fn(),
-  // debug: jest.fn(),
-  // info: jest.fn(),
-  // warn: jest.fn(),
-  // error: jest.fn(),
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
 }; 

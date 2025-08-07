@@ -19,7 +19,7 @@ const WorkoutHistoryList = ({
     return [...workoutHistory]
       .sort(
         (a, b) =>
-          new Date(b.date || b.startTime) - new Date(a.date || a.startTime)
+          new Date(b.date || b.startTime) - new Date(a.date || a.startTime),
       )
       .slice(0, 10);
   }, [workoutHistory]);
@@ -104,7 +104,7 @@ const WorkoutHistoryList = ({
                       styles.workoutDetailDot,
                       {
                         backgroundColor: getRatingColor(
-                          workout.ratings?.workoutRating || 5
+                          workout.ratings?.workoutRating || 5,
                         ),
                       },
                     ]}
@@ -174,7 +174,7 @@ const WorkoutHistoryList = ({
                               {
                                 color: getShiftColor(
                                   workout.ratings.beforeMood,
-                                  workout.ratings.afterMood
+                                  workout.ratings.afterMood,
                                 ),
                               },
                             ]}
@@ -196,7 +196,7 @@ const WorkoutHistoryList = ({
                               {
                                 color: getShiftColor(
                                   workout.ratings.beforeEnergy,
-                                  workout.ratings.afterEnergy
+                                  workout.ratings.afterEnergy,
                                 ),
                               },
                             ]}
@@ -210,7 +210,7 @@ const WorkoutHistoryList = ({
                           styles.overallRating,
                           {
                             backgroundColor: getRatingColor(
-                              workout.ratings.workoutRating
+                              workout.ratings.workoutRating,
                             ),
                           },
                         ]}

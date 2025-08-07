@@ -627,7 +627,7 @@ export interface MonthlyStats {
   avgRating: number;
 }
 
-export interface CharacterStats {
+export interface CharacterCollectionStats {
   totalCharacters: number;
   rarityCounts: Record<string, number>;
   completionPercentage: number;
@@ -685,6 +685,6 @@ export interface ContextValue extends AppState {
   achievements: Achievement[];
   recentWorkouts: Workout[];
   monthlyStats: MonthlyStats;
-  characterStats: CharacterStats;
+  characterStats: CharacterCollectionStats;
   gachaStats: GachaStats;
 } 

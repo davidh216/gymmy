@@ -201,7 +201,7 @@ const WelcomeScreen = ({ navigation }) => {
           onPress={handleGetStarted}
           activeOpacity={0.8}
         >
-          <Text style={styles.primaryButtonText}>Let's Get Started!</Text>
+          <Text style={styles.primaryButtonText}>Let&apos;s Get Started!</Text>
           <Ionicons name="arrow-forward" size={20} color="white" />
         </TouchableOpacity>
 

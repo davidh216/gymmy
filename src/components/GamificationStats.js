@@ -9,17 +9,9 @@ const GamificationStats = ({ userStats }) => {
   // Debug logging
   console.log('GamificationStats - userStats:', userStats);
   
-  // Handle null/undefined userStats
-  if (!userStats) {
-    console.log('GamificationStats - userStats is null/undefined');
-    return (
-      <View style={styles.container}>
-        <Text style={styles.levelTitle}>Loading stats...</Text>
-      </View>
-    );
-  }
-
   useEffect(() => {
+    if (!userStats) return;
+    
     const progress = calculateProgress();
     
     // Animate progress bar with more subtle timing
@@ -36,7 +28,17 @@ const GamificationStats = ({ userStats }) => {
       friction: 8,
       useNativeDriver: true,
     }).start();
-  }, [userStats.totalExperience]);
+  }, [userStats?.totalExperience]);
+  
+  // Handle null/undefined userStats
+  if (!userStats) {
+    console.log('GamificationStats - userStats is null/undefined');
+    return (
+      <View style={styles.container}>
+        <Text style={styles.levelTitle}>Loading stats...</Text>
+      </View>
+    );
+  }
 
   const calculateProgress = () => {
     // Use the new exponential XP system
@@ -90,14 +92,14 @@ const GamificationStats = ({ userStats }) => {
     return '#007AFF'; // Blue
   };
 
-  const getLevelGradient = (level) => {
-    if (level >= 10) return ['#FF6B35', '#FF8E53']; // Legendary gradient
-    if (level >= 8) return ['#FFD700', '#FFA500']; // Gold gradient
-    if (level >= 6) return ['#C0C0C0', '#E5E5E5']; // Silver gradient
-    if (level >= 4) return ['#CD7F32', '#DAA520']; // Bronze gradient
-    if (level >= 2) return ['#4ECDC4', '#45B7D1']; // Teal gradient
-    return ['#007AFF', '#0056CC']; // Blue gradient
-  };
+  // const getLevelGradient = (level) => {
+  //   if (level >= 10) return ['#FF6B35', '#FF8E53']; // Legendary gradient
+  //   if (level >= 8) return ['#FFD700', '#FFA500']; // Gold gradient
+  //   if (level >= 6) return ['#C0C0C0', '#E5E5E5']; // Silver gradient
+  //   if (level >= 4) return ['#CD7F32', '#DAA520']; // Bronze gradient
+  //   if (level >= 2) return ['#4ECDC4', '#45B7D1']; // Teal gradient
+  //   return ['#007AFF', '#0056CC']; // Blue gradient
+  // };
 
   return (
     <Animated.View style={[styles.container, { transform: [{ scale: scaleAnimation }] }]}>

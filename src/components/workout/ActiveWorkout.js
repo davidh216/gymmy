@@ -28,7 +28,7 @@ const ActiveWorkout = ({
     if (!currentWorkout?.startTime) return '0:00';
     const now = new Date();
     const duration = Math.floor(
-      (now - new Date(currentWorkout.startTime)) / 1000 / 60
+      (now - new Date(currentWorkout.startTime)) / 1000 / 60,
     );
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;

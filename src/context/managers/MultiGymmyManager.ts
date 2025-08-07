@@ -14,21 +14,21 @@ import {
   MultiGymmyState,
   EvolutionMaterials,
   GymmyMessage,
-  BondMilestone
+  BondMilestone,
 } from '../types/MultiGymmyTypes';
 
 import { 
   MULTI_GYMMY_DATABASE,
   MULTI_GYMMY_RARITY_RATES,
   getGymmyTemplate,
-  getRandomGymmyByRarity
+  getRandomGymmyByRarity,
 } from '../data/MultiGymmyDatabase';
 
 import {
   EVOLUTION_MATERIALS,
   calculateEvolutionCost,
   canEvolve,
-  calculateMaterialRewards
+  calculateMaterialRewards,
 } from '../data/EvolutionMaterials';
 
 // ==============================================================================
@@ -59,7 +59,7 @@ export class MultiGymmyManager {
   public performGachaPull(
     pullType: 'single' | 'ten_pull',
     pityCounters: Record<GymmyRarity, number> = { common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0 },
-    bannerId?: string
+    bannerId?: string,
   ): { characters: GymmyTemplate[], updatedPityCounters: Record<GymmyRarity, number> } {
     const pullCount = pullType === 'single' ? 1 : 10;
     const characters: GymmyTemplate[] = [];
@@ -74,7 +74,7 @@ export class MultiGymmyManager {
     // Guarantee at least one rare+ in 10-pull
     if (pullType === 'ten_pull') {
       const hasRareOrBetter = characters.some(c => 
-        c.rarity === 'rare' || c.rarity === 'epic' || c.rarity === 'legendary' || c.rarity === 'mythical'
+        c.rarity === 'rare' || c.rarity === 'epic' || c.rarity === 'legendary' || c.rarity === 'mythical',
       );
       
       if (!hasRareOrBetter) {
@@ -94,7 +94,7 @@ export class MultiGymmyManager {
    */
   private performSinglePull(
     pityCounters: Record<GymmyRarity, number>,
-    bannerId?: string
+    bannerId?: string,
   ): { character: GymmyTemplate, newPityCounters: Record<GymmyRarity, number> } {
     const newPityCounters = { ...pityCounters };
     
@@ -118,7 +118,7 @@ export class MultiGymmyManager {
    */
   private determineRarityWithPity(
     pityCounters: Record<GymmyRarity, number>,
-    bannerId?: string
+    bannerId?: string,
   ): GymmyRarity {
     // Pity thresholds
     const PITY_THRESHOLDS = {
@@ -126,7 +126,7 @@ export class MultiGymmyManager {
       legendary: 90,  // Guaranteed legendary at 90 pulls
       epic: 40,       // Guaranteed epic at 40 pulls
       rare: 10,       // Guaranteed rare at 10 pulls
-      common: 1       // Always get at least common
+      common: 1,       // Always get at least common
     };
 
     // Check pity triggers in order of rarity
@@ -207,7 +207,7 @@ export class MultiGymmyManager {
    */
   public createCharacterInstance(
     template: GymmyTemplate,
-    userId: string = 'default_user'
+    userId: string = 'default_user',
   ): GymmyCharacter {
     const now = new Date().toISOString();
     
@@ -225,13 +225,13 @@ export class MultiGymmyManager {
         happiness: 80,
         hunger: 20,
         bond_level: 1,
-        last_interaction: now
+        last_interaction: now,
       },
       is_favorite: false,
       total_workouts_together: 0,
       last_interaction: now,
       bond_points: 0,
-      active_effects: []
+      active_effects: [],
     };
   }
 
@@ -240,7 +240,7 @@ export class MultiGymmyManager {
    */
   public levelUpCharacter(
     character: GymmyCharacter,
-    experienceGained: number
+    experienceGained: number,
   ): { updatedCharacter: GymmyCharacter, leveledUp: boolean, materialsAwarded: EvolutionMaterials } {
     const updatedCharacter = { ...character };
     updatedCharacter.experience += experienceGained;
@@ -286,7 +286,7 @@ export class MultiGymmyManager {
       
       character.current_stats[key] = Math.min(
         character.current_stats[key] + growth,
-        maxStat
+        maxStat,
       );
     });
   }
@@ -322,7 +322,7 @@ export class MultiGymmyManager {
    */
   public canCharacterEvolve(
     character: GymmyCharacter,
-    materials: Record<string, number>
+    materials: Record<string, number>,
   ): boolean {
     const nextStage = character.evolution_stage + 1;
     const template = getGymmyTemplate(character.id);
@@ -347,7 +347,7 @@ export class MultiGymmyManager {
    */
   public evolveCharacter(
     character: GymmyCharacter,
-    materials: Record<string, number>
+    materials: Record<string, number>,
   ): { success: boolean, updatedCharacter?: GymmyCharacter, materialsUsed?: EvolutionMaterials, error?: string } {
     if (!this.canCharacterEvolve(character, materials)) {
       return { success: false, error: 'Character cannot evolve at this time' };
@@ -378,8 +378,8 @@ export class MultiGymmyManager {
         flexibility: Math.min(character.current_stats.flexibility + evolutionStage.stat_bonuses.flexibility, template.max_stats.flexibility),
         focus: Math.min(character.current_stats.focus + evolutionStage.stat_bonuses.focus, template.max_stats.focus),
         motivation: Math.min(character.current_stats.motivation + evolutionStage.stat_bonuses.motivation, template.max_stats.motivation),
-        loyalty: Math.min(character.current_stats.loyalty + evolutionStage.stat_bonuses.loyalty, template.max_stats.loyalty)
-      }
+        loyalty: Math.min(character.current_stats.loyalty + evolutionStage.stat_bonuses.loyalty, template.max_stats.loyalty),
+      },
     };
 
     // Update visual appearance if specified
@@ -400,7 +400,7 @@ export class MultiGymmyManager {
   public createTeam(
     name: string,
     primaryCharacterId: string,
-    supportCharacterIds: string[] = []
+    supportCharacterIds: string[] = [],
   ): GymmyTeam {
     const now = new Date().toISOString();
     
@@ -411,13 +411,13 @@ export class MultiGymmyManager {
       support_gymmys: supportCharacterIds.slice(0, 4), // Max 4 support characters
       formation: {
         primary_position: 'leader',
-        support_positions: supportCharacterIds.map(() => 'backup') as ('backup' | 'cheerleader' | 'analyst' | 'wildcard')[]
+        support_positions: supportCharacterIds.map(() => 'backup') as ('backup' | 'cheerleader' | 'analyst' | 'wildcard')[],
       },
       synergies: [],
       team_level: 1,
       total_experience: 0,
       created_at: now,
-      last_used: now
+      last_used: now,
     };
   }
 
@@ -426,11 +426,11 @@ export class MultiGymmyManager {
    */
   public calculateTeamSynergies(
     team: GymmyTeam,
-    characters: GymmyCharacter[]
+    characters: GymmyCharacter[],
   ): TeamSynergy[] {
     const teamCharacters = [
       characters.find(c => c.instance_id === team.primary_gymmy),
-      ...team.support_gymmys.map(id => characters.find(c => c.instance_id === id))
+      ...team.support_gymmys.map(id => characters.find(c => c.instance_id === id)),
     ].filter(Boolean) as GymmyCharacter[];
 
     const synergies: TeamSynergy[] = [];
@@ -459,7 +459,7 @@ export class MultiGymmyManager {
   private countByType(characters: GymmyCharacter[]): Record<GymmyType, number> {
     const count: Record<GymmyType, number> = { 
       power: 0, blaze: 0, transform: 0, zen: 0, pace: 0, steady: 0, rally: 0,
-      rookie: 0, specialist: 0, seasonal: 0, legendary: 0, community: 0 
+      rookie: 0, specialist: 0, seasonal: 0, legendary: 0, community: 0, 
     };
     characters.forEach(char => count[char.type]++);
     return count;
@@ -469,7 +469,7 @@ export class MultiGymmyManager {
     const count: Record<SpecializationType, number> = {
       strength_training: 0, cardio_endurance: 0, flexibility_mobility: 0,
       mental_wellness: 0, athletic_performance: 0, habit_formation: 0,
-      social_motivation: 0, versatile_training: 0
+      social_motivation: 0, versatile_training: 0,
     };
     characters.forEach(char => count[char.specialization]++);
     return count;
@@ -485,7 +485,7 @@ export class MultiGymmyManager {
         description: '+50% XP from all activities when 2+ legendary characters are active',
         required_characters: [{ type: 'rarity', value: 'legendary', count: 2 }],
         effects: [{ type: 'xp_boost', value: 50 }],
-        activation_conditions: ['team_active']
+        activation_conditions: ['team_active'],
       });
     }
 
@@ -496,7 +496,7 @@ export class MultiGymmyManager {
         description: 'Reality bends to your will - all activities have enhanced success rates',
         required_characters: [{ type: 'rarity', value: 'mythical', count: 1 }],
         effects: [{ type: 'special_unlock', value: 25 }],
-        activation_conditions: ['mythical_active']
+        activation_conditions: ['mythical_active'],
       });
     }
 
@@ -513,7 +513,7 @@ export class MultiGymmyManager {
         description: '+30% efficiency in specialized activities',
         required_characters: [{ type: 'type', value: 'specialist', count: 3 }],
         effects: [{ type: 'xp_boost', value: 30, conditions: ['specialized_activity'] }],
-        activation_conditions: ['team_active']
+        activation_conditions: ['team_active'],
       });
     }
 
@@ -532,7 +532,7 @@ export class MultiGymmyManager {
         description: '+25% XP from all fitness categories due to balanced team composition',
         required_characters: [{ type: 'specialization', value: 'diverse', count: 4 }],
         effects: [{ type: 'xp_boost', value: 25 }],
-        activation_conditions: ['team_active']
+        activation_conditions: ['team_active'],
       });
     }
 
@@ -561,7 +561,7 @@ export class MultiGymmyManager {
       type_counts: typeCount,
       highest_level_character: Math.max(...collection.map(c => c.level), 0),
       total_bond_points: collection.reduce((sum, c) => sum + c.bond_points, 0),
-      collection_value: this.calculateCollectionValue(collection)
+      collection_value: this.calculateCollectionValue(collection),
     };
   }
 
@@ -585,7 +585,7 @@ export class MultiGymmyManager {
       rare: 500,
       epic: 2000,
       legendary: 10000,
-      mythical: 50000
+      mythical: 50000,
     };
     return values[rarity] || 100;
   }
@@ -600,7 +600,7 @@ export class MultiGymmyManager {
   public getCharacterMessage(
     character: GymmyCharacter,
     context: keyof GymmyMessage['messages'],
-    additionalContext: Record<string, any> = {}
+    additionalContext: Record<string, any> = {},
   ): GymmyMessage | null {
     const template = getGymmyTemplate(character.id);
     if (!template) return null;
@@ -610,7 +610,7 @@ export class MultiGymmyManager {
 
     // Filter messages based on conditions
     const eligibleMessages = messages.filter(message => 
-      this.checkMessageConditions(message, character, additionalContext)
+      this.checkMessageConditions(message, character, additionalContext),
     );
 
     if (eligibleMessages.length === 0) {
@@ -637,37 +637,37 @@ export class MultiGymmyManager {
   private checkMessageConditions(
     message: GymmyMessage,
     character: GymmyCharacter,
-    context: Record<string, any>
+    context: Record<string, any>,
   ): boolean {
     if (!message.conditions) return true;
 
     return message.conditions.every(condition => {
       switch (condition.type) {
-        case 'time_of_day':
-          const hour = new Date().getHours();
-          const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-          return condition.operator === 'equals' && timeOfDay === condition.value;
+      case 'time_of_day':
+        const hour = new Date().getHours();
+        const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+        return condition.operator === 'equals' && timeOfDay === condition.value;
         
-        case 'user_mood':
-          const mood = context.mood || 'neutral';
-          return condition.operator === 'equals' && mood === condition.value;
+      case 'user_mood':
+        const mood = context.mood || 'neutral';
+        return condition.operator === 'equals' && mood === condition.value;
         
-        case 'streak':
-          const streak = context.streak || 0;
-          return this.checkNumericCondition(streak, condition.operator, condition.value as number);
+      case 'streak':
+        const streak = context.streak || 0;
+        return this.checkNumericCondition(streak, condition.operator, condition.value as number);
         
-        default:
-          return true;
+      default:
+        return true;
       }
     });
   }
 
   private checkNumericCondition(value: number, operator: string, target: number): boolean {
     switch (operator) {
-      case 'equals': return value === target;
-      case 'greater_than': return value > target;
-      case 'less_than': return value < target;
-      default: return true;
+    case 'equals': return value === target;
+    case 'greater_than': return value > target;
+    case 'less_than': return value < target;
+    default: return true;
     }
   }
 
@@ -677,7 +677,7 @@ export class MultiGymmyManager {
   public increaseBond(
     character: GymmyCharacter,
     points: number,
-    reason: string = 'interaction'
+    reason: string = 'interaction',
   ): { updatedCharacter: GymmyCharacter, milestoneReached: BondMilestone | null } {
     const updatedCharacter = { ...character };
     updatedCharacter.bond_points += points;
@@ -694,7 +694,7 @@ export class MultiGymmyManager {
       character_id: character.instance_id,
       milestone: newLevel,
       unlocked_at: new Date().toISOString(),
-      rewards: this.getBondMilestoneRewards(newLevel)
+      rewards: this.getBondMilestoneRewards(newLevel),
     } : null;
 
     return { updatedCharacter, milestoneReached };
@@ -769,7 +769,7 @@ export class MultiGymmyManager {
   public getPullCosts(): { single: number, ten_pull: number } {
     return {
       single: 160,    // 160 gems for single pull
-      ten_pull: 1440  // 1440 gems for 10-pull (10% discount)
+      ten_pull: 1440,  // 1440 gems for 10-pull (10% discount)
     };
   }
 

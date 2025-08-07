@@ -1,196 +1,218 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context/AppContext';
+import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
-// WorkoutVerificationWidget component for gacha system
-export const WorkoutVerificationWidget = ({ workout, onVerificationComplete }) => {
-  const { addGachaPoints, userStats } = useApp();
-  const [showModal, setShowModal] = useState(true);
-  const [verificationStep, setVerificationStep] = useState(0);
-
-  const handleVerification = async () => {
+const GachaComponents = ({ navigation }) => {
+  const { state, pullGacha } = useUnifiedApp();
+  const { userStats, gachaStats } = state;
+  
+  const [showResults, setShowResults] = useState(false);
+  const [results, setResults] = useState([]);
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullAnimation] = useState(new Animated.Value(1));
+  
+  const handlePull = async (pullType) => {
+    if (isPulling) return;
+    
+    setIsPulling(true);
+    
     try {
-      // Calculate points based on workout duration and intensity
-      const basePoints = Math.floor(workout.duration / 60) * 10; // 10 points per minute
-      const intensityBonus = workout.exercises.length * 5; // 5 points per exercise
-      const totalPoints = basePoints + intensityBonus;
-
-      // Add points to user's gacha currency
-      await addGachaPoints(totalPoints);
-
-      // Show success message
-      Alert.alert(
-        'Workout Verified! 🎉',
-        `You earned ${totalPoints} gacha points for completing your workout!`,
-        [
-          {
-            text: 'Claim Rewards',
-            onPress: () => {
-              setShowModal(false);
-              onVerificationComplete && onVerificationComplete(totalPoints);
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      Alert.alert('Error', 'Failed to verify workout. Please try again.');
+      const newResults = pullGacha(pullType);
+      setResults(newResults);
+      setShowResults(true);
+      
+      // Animate pull button
+      Animated.sequence([
+        Animated.timing(pullAnimation, { toValue: 0.8, duration: 100, useNativeDriver: true }),
+        Animated.timing(pullAnimation, { toValue: 1, duration: 200, useNativeDriver: true }),
+      ]).start();
+      
+    } catch (_error) {
+      Alert.alert('Error', 'Failed to perform gacha pull. Please try again.');
+    } finally {
+      setIsPulling(false);
     }
   };
 
-  const handleSkip = () => {
-    setShowModal(false);
-    onVerificationComplete && onVerificationComplete(0);
-  };
-
   return (
-    <Modal
-      visible={showModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={handleSkip}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Ionicons name="trophy" size={32} color="#FFD700" />
-            <Text style={styles.title}>Workout Verification</Text>
-          </View>
-
-          <View style={styles.workoutInfo}>
-            <Text style={styles.workoutTitle}>Completed Workout</Text>
-            <Text style={styles.workoutDetails}>
-              Duration: {Math.floor(workout.duration / 60)}m {workout.duration % 60}s
-            </Text>
-            <Text style={styles.workoutDetails}>
-              Exercises: {workout.exercises.length}
-            </Text>
-          </View>
-
-          <View style={styles.pointsPreview}>
-            <Text style={styles.pointsTitle}>Potential Rewards:</Text>
-            <Text style={styles.pointsAmount}>
-              +{Math.floor(workout.duration / 60) * 10 + workout.exercises.length * 5} Gacha Points
-            </Text>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.verifyButton]}
-              onPress={handleVerification}
-            >
-              <Ionicons name="checkmark-circle" size={20} color="#fff" />
-              <Text style={styles.buttonText}>Verify Workout</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.skipButton]}
-              onPress={handleSkip}
-            >
-              <Text style={styles.skipButtonText}>Skip</Text>
-            </TouchableOpacity>
-          </View>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#4CAF50', '#81C784']}
+        style={styles.background}
+      >
+        <View style={styles.header}>
+          <Ionicons name="gift" size={40} color="#fff" />
+          <Text style={styles.title}>Gacha System</Text>
         </View>
-      </View>
-    </Modal>
+
+        <View style={styles.gachaInfo}>
+          <Text style={styles.gachaTitle}>Your Gacha Currency:</Text>
+          <Text style={styles.gachaAmount}>{userStats.gachaCurrency} Gacha Points</Text>
+        </View>
+
+        <View style={styles.gachaInfo}>
+          <Text style={styles.gachaTitle}>Total Pulls:</Text>
+          <Text style={styles.gachaAmount}>{gachaStats.totalPulls}</Text>
+        </View>
+
+        <View style={styles.gachaInfo}>
+          <Text style={styles.gachaTitle}>Total Rewards:</Text>
+          <Text style={styles.gachaAmount}>{gachaStats.totalRewards}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.pullButton}
+          onPress={() => handlePull('normal')}
+          disabled={isPulling}
+        >
+          <Animated.View style={{ transform: [{ scale: pullAnimation }] }}>
+            <LinearGradient
+              colors={['#FFD700', '#FFC107']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pullButtonContent}
+            >
+              <Ionicons name="dice" size={24} color="#fff" />
+              <Text style={styles.pullButtonText}>Pull Gacha</Text>
+            </LinearGradient>
+          </Animated.View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.pullButton}
+          onPress={() => handlePull('premium')}
+          disabled={isPulling}
+        >
+          <Animated.View style={{ transform: [{ scale: pullAnimation }] }}>
+            <LinearGradient
+              colors={['#4CAF50', '#81C784']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pullButtonContent}
+            >
+              <Ionicons name="star" size={24} color="#fff" />
+              <Text style={styles.pullButtonText}>Premium Pull</Text>
+            </LinearGradient>
+          </Animated.View>
+        </TouchableOpacity>
+
+        {showResults && (
+          <ScrollView style={styles.resultsContainer}>
+            <Text style={styles.resultsTitle}>Your Gacha Results:</Text>
+            {results.map((item, index) => (
+              <View key={index} style={styles.resultItem}>
+                <Text style={styles.resultText}>{item.name}</Text>
+                <Text style={styles.resultValue}>{item.value}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 24,
-    margin: 20,
-    width: '90%',
-    maxWidth: 400,
+  background: {
+    flex: 1,
+    width: '100%',
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   title: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: 'bold',
-    marginLeft: 12,
-    color: '#333',
+    marginLeft: 10,
+    color: '#fff',
   },
-  workoutInfo: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
+  gachaInfo: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    padding: 20,
     marginBottom: 20,
-  },
-  workoutTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  workoutDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  pointsPreview: {
+    width: '100%',
     alignItems: 'center',
-    marginBottom: 24,
   },
-  pointsTitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 8,
+  gachaTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 10,
   },
-  pointsAmount: {
-    fontSize: 28,
+  gachaAmount: {
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: '#fff',
   },
-  buttonContainer: {
-    gap: 12,
+  pullButton: {
+    width: '100%',
+    height: 60,
+    borderRadius: 30,
+    marginBottom: 20,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-  button: {
+  pullButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
   },
-  verifyButton: {
-    backgroundColor: '#22c55e',
-  },
-  buttonText: {
+  pullButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
-  skipButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#ddd',
+  resultsContainer: {
+    width: '100%',
+    padding: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    marginTop: 20,
   },
-  skipButtonText: {
-    color: '#666',
-    fontSize: 16,
+  resultsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  resultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  resultText: {
+    fontSize: 18,
+    color: '#fff',
     fontWeight: '500',
+  },
+  resultValue: {
+    fontSize: 18,
+    color: '#FFD700',
+    fontWeight: 'bold',
   },
 });
 
-// Export other gacha components as needed
-export { WorkoutVerificationWidget as default }; 
+export default GachaComponents; 

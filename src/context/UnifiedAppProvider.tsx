@@ -2,15 +2,23 @@
 // Unified context architecture with performance optimization and proper state management
 
 import React, { createContext, useContext, useReducer, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { WorkoutProvider } from './contexts/WorkoutContext';
-import { UserStatsProvider } from './contexts/UserStatsContext';
-import { GachaProvider } from './contexts/GachaContext';
-import { SegmentationProvider } from './contexts/SegmentationContext';
+import { 
+  WorkoutProvider, 
+  useWorkout,
+  UserStatsProvider,
+  useUserStats,
+  GachaProvider,
+  useGacha,
+  SegmentationProvider,
+  useSegmentation,
+} from './contexts';
 
 // Multi-Gymmy imports
-import { characterGrowthSystem } from './systems/CharacterGrowthSystem';
-import { progressionTracker } from './systems/ProgressionTracker';
-import { pullAnalyticsEngine } from './systems/PullAnalytics';
+import { 
+  characterGrowthSystem,
+  progressionTracker,
+  pullAnalyticsEngine,
+} from './systems';
 
 // ==============================================================================
 // UNIFIED STATE INTERFACES
@@ -102,69 +110,69 @@ const initialUnifiedState: UnifiedAppState = {
 
 function unifiedAppReducer(state: UnifiedAppState, action: UnifiedAppAction): UnifiedAppState {
   switch (action.type) {
-    case 'INITIALIZE_APP':
-      return { ...state, initialized: true, loading: false };
+  case 'INITIALIZE_APP':
+    return { ...state, initialized: true, loading: false };
       
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
+  case 'SET_LOADING':
+    return { ...state, loading: action.payload };
       
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, loading: false };
+  case 'SET_ERROR':
+    return { ...state, error: action.payload, loading: false };
       
-    case 'ENABLE_CHARACTER_SYSTEM':
-      return { ...state, characterSystemEnabled: action.payload };
+  case 'ENABLE_CHARACTER_SYSTEM':
+    return { ...state, characterSystemEnabled: action.payload };
       
-    case 'SET_ACTIVE_CHARACTERS':
-      return { ...state, activeCharacters: action.payload };
+  case 'SET_ACTIVE_CHARACTERS':
+    return { ...state, activeCharacters: action.payload };
       
-    case 'SET_CURRENT_TEAM':
-      return { ...state, currentTeam: action.payload };
+  case 'SET_CURRENT_TEAM':
+    return { ...state, currentTeam: action.payload };
       
-    case 'ADD_PENDING_EXPERIENCE':
-      return {
-        ...state,
-        pendingExperience: {
-          ...state.pendingExperience,
-          [action.payload.characterId]: (state.pendingExperience[action.payload.characterId] || 0) + action.payload.experience
-        }
-      };
+  case 'ADD_PENDING_EXPERIENCE':
+    return {
+      ...state,
+      pendingExperience: {
+        ...state.pendingExperience,
+        [action.payload.characterId]: (state.pendingExperience[action.payload.characterId] || 0) + action.payload.experience,
+      },
+    };
       
-    case 'CLEAR_PENDING_EXPERIENCE':
-      const { [action.payload]: removed, ...remainingExp } = state.pendingExperience;
-      return { ...state, pendingExperience: remainingExp };
+  case 'CLEAR_PENDING_EXPERIENCE':
+    const { [action.payload]: removed, ...remainingExp } = state.pendingExperience;
+    return { ...state, pendingExperience: remainingExp };
       
-    case 'ADD_PENDING_LEVELUP':
-      return {
-        ...state,
-        pendingLevelUps: [...state.pendingLevelUps, action.payload]
-      };
+  case 'ADD_PENDING_LEVELUP':
+    return {
+      ...state,
+      pendingLevelUps: [...state.pendingLevelUps, action.payload],
+    };
       
-    case 'CLEAR_PENDING_LEVELUPS':
-      return { ...state, pendingLevelUps: [] };
+  case 'CLEAR_PENDING_LEVELUPS':
+    return { ...state, pendingLevelUps: [] };
       
-    case 'ADD_PENDING_EVOLUTION':
-      return {
-        ...state,
-        pendingEvolutions: [...state.pendingEvolutions, action.payload]
-      };
+  case 'ADD_PENDING_EVOLUTION':
+    return {
+      ...state,
+      pendingEvolutions: [...state.pendingEvolutions, action.payload],
+    };
       
-    case 'CLEAR_PENDING_EVOLUTIONS':
-      return { ...state, pendingEvolutions: [] };
+  case 'CLEAR_PENDING_EVOLUTIONS':
+    return { ...state, pendingEvolutions: [] };
       
-    case 'TOGGLE_WORKOUT_INTEGRATION':
-      return { ...state, workoutCharacterIntegration: action.payload };
+  case 'TOGGLE_WORKOUT_INTEGRATION':
+    return { ...state, workoutCharacterIntegration: action.payload };
       
-    case 'TOGGLE_PROGRESSION_SYNC':
-      return { ...state, progressionSyncEnabled: action.payload };
+  case 'TOGGLE_PROGRESSION_SYNC':
+    return { ...state, progressionSyncEnabled: action.payload };
       
-    case 'TOGGLE_ANALYTICS':
-      return { ...state, analyticsEnabled: action.payload };
+  case 'TOGGLE_ANALYTICS':
+    return { ...state, analyticsEnabled: action.payload };
       
-    case 'RESET_STATE':
-      return { ...initialUnifiedState, initialized: state.initialized };
+  case 'RESET_STATE':
+    return { ...initialUnifiedState, initialized: state.initialized };
       
-    default:
-      return state;
+  default:
+    return state;
   }
 }
 
@@ -187,12 +195,12 @@ interface UnifiedAppProviderProps {
 export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
   children,
   enableMultiGymmy = true,
-  enableAnalytics = true
+  enableAnalytics = true,
 }) => {
   const [appState, dispatch] = useReducer(unifiedAppReducer, {
     ...initialUnifiedState,
     characterSystemEnabled: enableMultiGymmy,
-    analyticsEnabled: enableAnalytics
+    analyticsEnabled: enableAnalytics,
   });
 
   // ==============================================================================
@@ -205,16 +213,14 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
       
       // Initialize Multi-Gymmy systems if enabled
       if (enableMultiGymmy) {
-        // Initialize character growth system
-        characterGrowthSystem.getInstance();
-        
-        // Initialize progression tracker
-        progressionTracker.getInstance();
-        
-        // Initialize pull analytics if analytics enabled
-        if (enableAnalytics) {
-          pullAnalyticsEngine.getInstance();
-        }
+        // Systems are already initialized as singletons via the barrel export
+        // characterGrowthSystem, progressionTracker, and pullAnalyticsEngine
+        // are already instances, not classes that need getInstance() calls
+        console.log('Multi-Gymmy systems initialized:', {
+          characterGrowthSystem: !!characterGrowthSystem,
+          progressionTracker: !!progressionTracker,
+          pullAnalyticsEngine: enableAnalytics ? !!pullAnalyticsEngine : 'disabled',
+        });
       }
       
       dispatch({ type: 'INITIALIZE_APP' });
@@ -240,7 +246,7 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
         activity: workoutData.category || 'general_workout',
         duration: workoutData.duration,
         difficulty: workoutData.difficulty || 'medium' as const,
-        performance_rating: workoutData.rating || 75
+        performance_rating: workoutData.rating || 75,
       };
 
       // Calculate experience for each active character
@@ -252,13 +258,13 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
         const experienceGain = characterGrowthSystem.calculateExperienceGain(
           mockCharacter as any,
           experienceSource,
-          activeCharacters.map(id => ({ id, specialization: 'strength_training' })) as any[]
+          activeCharacters.map(id => ({ id, specialization: 'strength_training' })) as any[],
         );
 
         // Add pending experience
         dispatch({
           type: 'ADD_PENDING_EXPERIENCE',
-          payload: { characterId, experience: experienceGain.total_exp }
+          payload: { characterId, experience: experienceGain.total_exp },
         });
 
         // Check for level up (simplified)
@@ -271,7 +277,7 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
       if (appState.progressionSyncEnabled) {
         const sessionId = progressionTracker.startSession(
           experienceSource.activity,
-          activeCharacters
+          activeCharacters,
         );
         
         // End session with experience gains (this would be more complex in reality)
@@ -282,12 +288,12 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
             bonus_exp: 25, 
             total_exp: 75,
             source: experienceSource,
-            multipliers: []
+            multipliers: [],
           })),
           [], // level ups would be calculated
           [], // evolutions would be calculated
           workoutData.duration || 30,
-          workoutData.rating || 75
+          workoutData.rating || 75,
         );
       }
 
@@ -317,34 +323,34 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
   const handleCharacterAction = useCallback(async (action: string, data: any): Promise<void> => {
     try {
       switch (action) {
-        case 'SET_ACTIVE_TEAM':
-          dispatch({ type: 'SET_CURRENT_TEAM', payload: data.teamId });
-          dispatch({ type: 'SET_ACTIVE_CHARACTERS', payload: data.characterIds });
-          break;
+      case 'SET_ACTIVE_TEAM':
+        dispatch({ type: 'SET_CURRENT_TEAM', payload: data.teamId });
+        dispatch({ type: 'SET_ACTIVE_CHARACTERS', payload: data.characterIds });
+        break;
           
-        case 'ADD_ACTIVE_CHARACTER':
-          if (!appState.activeCharacters.includes(data.characterId)) {
-            dispatch({ 
-              type: 'SET_ACTIVE_CHARACTERS', 
-              payload: [...appState.activeCharacters, data.characterId] 
-            });
-          }
-          break;
-          
-        case 'REMOVE_ACTIVE_CHARACTER':
-          dispatch({
-            type: 'SET_ACTIVE_CHARACTERS',
-            payload: appState.activeCharacters.filter(id => id !== data.characterId)
+      case 'ADD_ACTIVE_CHARACTER':
+        if (!appState.activeCharacters.includes(data.characterId)) {
+          dispatch({ 
+            type: 'SET_ACTIVE_CHARACTERS', 
+            payload: [...appState.activeCharacters, data.characterId], 
           });
-          break;
+        }
+        break;
           
-        case 'EVOLVE_CHARACTER':
-          // Handle character evolution
-          dispatch({ type: 'ADD_PENDING_EVOLUTION', payload: data.characterId });
-          break;
+      case 'REMOVE_ACTIVE_CHARACTER':
+        dispatch({
+          type: 'SET_ACTIVE_CHARACTERS',
+          payload: appState.activeCharacters.filter(id => id !== data.characterId),
+        });
+        break;
           
-        default:
-          console.warn(`Unknown character action: ${action}`);
+      case 'EVOLVE_CHARACTER':
+        // Handle character evolution
+        dispatch({ type: 'ADD_PENDING_EVOLUTION', payload: data.characterId });
+        break;
+          
+      default:
+        console.warn(`Unknown character action: ${action}`);
       }
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: `Character action failed: ${error.message}` });
@@ -444,21 +450,43 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
 // This component bridges the individual contexts with the unified context
 const ContextBridge: React.FC<{ children: ReactNode }> = ({ children }) => {
   const unifiedContext = useContext(UnifiedAppContext);
-  const workout = useContext(WorkoutProvider as any); // This would need proper typing
-  const userStats = useContext(UserStatsProvider as any);
-  const gacha = useContext(GachaProvider as any);
-  const segmentation = useContext(SegmentationProvider as any);
-
-  // Update the unified context with individual context values
+  const workout = useWorkout();
+  const userStats = useUserStats();
+  const gacha = useGacha();
+  const segmentation = useSegmentation();
+  
+  // Force re-render when userStats changes, especially surveyCompleted flag
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+  
   useEffect(() => {
-    if (unifiedContext) {
-      // This is a simplified approach - in reality, we'd need more sophisticated state bridging
-      (unifiedContext as any).workout = workout;
-      (unifiedContext as any).userStats = userStats;
-      (unifiedContext as any).gacha = gacha;
-      (unifiedContext as any).segmentation = segmentation;
+    if (userStats?.userStats?.surveyCompleted) {
+      console.log('ContextBridge: Survey completion detected, forcing re-render');
+      forceUpdate();
     }
+  }, [userStats?.userStats?.surveyCompleted]);
+
+  // Update the unified context with individual context values using proper state management
+  const bridgedContext = useMemo(() => {
+    if (!unifiedContext) return null;
+    
+    const contextWithBridgedValues = {
+      ...unifiedContext,
+      workout,
+      userStats,
+      gacha,
+      segmentation,
+    };
+    
+    return contextWithBridgedValues;
   }, [unifiedContext, workout, userStats, gacha, segmentation]);
+
+  // Store the bridged context back to the provider using a ref
+  useEffect(() => {
+    if (unifiedContext && bridgedContext) {
+      // Update the context object properties for backward compatibility
+      Object.assign(unifiedContext, bridgedContext);
+    }
+  }, [unifiedContext, bridgedContext]);
 
   return <>{children}</>;
 };
@@ -508,6 +536,72 @@ export const useWorkoutIntegration = () => {
     enabled: appState.workoutCharacterIntegration,
     onWorkoutComplete: handleWorkoutComplete,
   }), [appState.workoutCharacterIntegration, handleWorkoutComplete]);
+};
+
+// ==============================================================================
+// LEGACY COMPATIBILITY HOOK
+// ==============================================================================
+
+// This hook provides backward compatibility with the old context interface
+export const useLegacyApp = () => {
+  const unifiedContext = useUnifiedApp();
+  
+  return useMemo(() => {
+    // Map the new unified context to the old interface
+    const legacyContext = {
+      // Direct access to sub-contexts
+      workout: unifiedContext.workout,
+      userStats: unifiedContext.userStats?.userStats || {},
+      gacha: unifiedContext.gacha,
+      segmentation: unifiedContext.segmentation,
+      
+      // Legacy compatibility - flatten userStats methods
+      updateUserStats: unifiedContext.userStats?.updateUserStats,
+      achievements: unifiedContext.userStats?.achievements || [],
+      quests: unifiedContext.userStats?.quests || [],
+      
+      // Workout data (legacy)
+      workoutHistory: unifiedContext.workout?.workoutHistory || [],
+      exerciseHistory: unifiedContext.workout?.exerciseHistory || {},
+      addWorkout: unifiedContext.workout?.addWorkout,
+      removeWorkout: unifiedContext.workout?.removeWorkout,
+      updateExerciseHistory: unifiedContext.workout?.updateExerciseHistory,
+      
+      // Character/Gacha data (legacy)
+      characterCollection: unifiedContext.gacha?.characterCollection || [],
+      socialPosts: unifiedContext.gacha?.socialPosts || [],
+      userCurrencies: unifiedContext.gacha?.userCurrencies || { gems: 0, coins: 0 },
+      performPull: unifiedContext.gacha?.performPull,
+      
+      // App state  
+      loading: unifiedContext.appState?.loading || false,
+      error: unifiedContext.appState?.error || null,
+      isDemo: false,
+      
+      // Segmentation
+      getCurrentSegment: unifiedContext.segmentation?.getCurrentSegment,
+      getSegmentConfig: unifiedContext.segmentation?.getSegmentConfig,
+      personalizedGoals: unifiedContext.segmentation?.personalizedGoals || [],
+      onboardingCompleted: unifiedContext.segmentation?.onboardingCompleted || false,
+      
+      // Multi-Gymmy integration
+      characterSystemEnabled: unifiedContext.appState?.characterSystemEnabled || false,
+      activeCharacters: unifiedContext.appState?.activeCharacters || [],
+      
+      // Utility methods
+      resetToDummyData: async () => {
+        console.log('resetToDummyData called - implement if needed');
+      },
+      clearAllData: async () => {
+        console.log('clearAllData called - implement if needed');  
+      },
+      loadDemoData: async () => {
+        console.log('loadDemoData called - implement if needed');
+      },
+    };
+    
+    return legacyContext;
+  }, [unifiedContext]);
 };
 
 // ==============================================================================

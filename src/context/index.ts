@@ -1,7 +1,30 @@
 // src/context/index.ts
 // Main exports from the context module
 
-export { default as AppContext, AppProvider, useApp } from './AppContext';
+// Export the old AppContext for backward compatibility
+export { default as AppContext, AppProvider as OldAppProvider, useApp as useOldApp } from './AppContext';
+
+// Export unified architecture as the main providers
+export { 
+  AppProvider,
+} from './AppProvider';
+
+export { 
+  useLegacyApp as useApp,
+  useUnifiedApp,
+  useAppState, 
+  useCharacterSystem, 
+  useWorkoutIntegration, 
+} from './UnifiedAppProvider';
+
+// Export specialized contexts
+export * from './contexts';
+
+// Export Multi-Gymmy systems
+export * from './systems';
+
+// Export managers
+export * from './managers';
 export { 
   FITNESS_CLASSES, 
   CHARACTER_TEMPLATES, 

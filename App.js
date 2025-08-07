@@ -23,8 +23,7 @@ import { OnboardingSurvey } from './src/components/OnboardingSurvey';
 import { SegmentResultsScreen } from './src/screens/SegmentResultsScreen';
 
 // Context - Updated to use new unified architecture
-import { AppProvider } from './src/context/AppProvider';
-import { useUnifiedApp, useAppState } from './src/context/AppProvider';
+import { AppProvider, useApp } from './src/context';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -123,42 +122,60 @@ const OnboardingStackNavigator = () => {
 // Main App Stack Navigator (includes both onboarding and main app)
 const AppStackNavigator = () => {
   const appContext = useApp();
+  const [navigationKey, setNavigationKey] = React.useState(0);
+  const [isOnboarding, setIsOnboarding] = React.useState(true);
   
-  // Simple fallback for onboarding logic
-  const shouldShowOnboarding = () => {
-    // Check if user has completed onboarding by looking at userStats
-    // Also check for survey completion flag
-    // Prioritize survey completion over total workouts
-    const hasCompletedSurvey = appContext.userStats?.surveyCompleted === true;
-    const hasWorkouts = appContext.userStats?.totalWorkouts > 0;
-    const hasUserStats = !!appContext.userStats;
-    
-    // If survey is completed, show main app regardless of workout count
-    if (hasCompletedSurvey) {
+  // Track survey completion more aggressively
+  const surveyCompleted = appContext.userStats?.surveyCompleted;
+  const hasWorkouts = appContext.userStats?.totalWorkouts > 0;
+  const hasUserStats = !!appContext.userStats;
+  
+  // Determine onboarding state with immediate updates
+  React.useEffect(() => {
+    const shouldShow = (() => {
+      // If survey is completed, show main app
+      if (surveyCompleted === true) {
+        console.log('AppStackNavigator: Survey completed - showing main app');
+        return false;
+      }
+      
+      // If no user stats, show onboarding
+      if (!hasUserStats) {
+        return true;
+      }
+      
+      // If no workouts and no survey completion, show onboarding
+      if (!hasWorkouts && !surveyCompleted) {
+        return true;
+      }
+      
+      // Otherwise show main app
       return false;
-    }
+    })();
     
-    // If no user stats, show onboarding
-    if (!hasUserStats) {
-      return true;
-    }
+    console.log('AppStackNavigator: Onboarding decision:', {
+      shouldShow,
+      surveyCompleted,
+      hasWorkouts,
+      hasUserStats,
+      currentState: isOnboarding,
+    });
     
-    // If no workouts and no survey completion, show onboarding
-    if (!hasWorkouts && !hasCompletedSurvey) {
-      return true;
+    if (isOnboarding !== shouldShow) {
+      setIsOnboarding(shouldShow);
+      setNavigationKey(prev => prev + 1); // Force navigation re-render
     }
-    
-    // Otherwise show main app
-    return false;
-  };
+  }, [surveyCompleted, hasWorkouts, hasUserStats, isOnboarding]);
+  
   
   return (
     <Stack.Navigator
+      key={navigationKey}
       screenOptions={{
         headerShown: false,
       }}
     >
-      {shouldShowOnboarding() ? (
+      {isOnboarding ? (
         // Onboarding flow
         <Stack.Screen 
           name="Onboarding" 
@@ -239,91 +256,54 @@ const AppStackNavigator = () => {
 
 // Survey Screen Wrapper Component
 const OnboardingSurveyScreen = ({ navigation, route }) => {
-  const appContext = useApp(); // Changed from destructuring completeSurvey, setOnboardingStep
+  const appContext = useApp();
 
   const handleSurveyComplete = async (result) => {
     try {
       console.log('OnboardingSurveyScreen: Survey completed with result:', result);
       
-      // The survey completion has already updated user stats in the OnboardingSurvey component
-      // Now we need to ensure the surveyCompleted flag is set
+      // Update user stats with survey completion flag
       if (appContext.updateUserStats) {
         console.log('OnboardingSurveyScreen: Updating user stats with survey completion flag');
         await appContext.updateUserStats({
           ...appContext.userStats,
           surveyCompleted: true,
           lastSurveyCompletion: new Date().toISOString(),
+          segmentResult: result,
         });
         console.log('OnboardingSurveyScreen: User stats updated successfully');
+        console.log('OnboardingSurveyScreen: Navigation should automatically update via AppStackNavigator useEffect');
       } else {
         console.log('OnboardingSurveyScreen: updateUserStats function not available');
+        console.log('Available context methods:', Object.keys(appContext));
       }
-      
-      // Try to navigate directly to the main app using the parent navigator
-      console.log('OnboardingSurveyScreen: Attempting to navigate to main app');
-      
-      // Since we're in the onboarding flow, we need to update user stats
-      // and then let the app re-render to show the main app
-      // The shouldShowOnboarding() function should return false after we update user stats
-      
-      // Wait a moment for the state update to propagate, then navigate back to root
-      setTimeout(() => {
-        console.log('OnboardingSurveyScreen: Navigating back to root to trigger re-evaluation');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Onboarding' }],
-        });
-      }, 200);
       
     } catch (error) {
       console.error('Error completing survey:', error);
-      // Fallback - try to reset navigation
-      try {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Onboarding' }],
-        });
-      } catch (fallbackError) {
-        console.error('Fallback navigation also failed:', fallbackError);
-      }
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     console.log('OnboardingSurveyScreen: Survey skipped');
     
     // Mark survey as completed even when skipped
     if (appContext.updateUserStats) {
-      console.log('OnboardingSurveyScreen: Updating user stats for skipped survey');
-      appContext.updateUserStats({
-        ...appContext.userStats,
-        surveyCompleted: true,
-        lastSurveyCompletion: new Date().toISOString(),
-        surveySkipped: true, // Add a flag to indicate it was skipped
-      }).then(() => {
-        console.log('OnboardingSurveyScreen: User stats updated for skipped survey');
-        // Navigate back to root to trigger re-evaluation
-        setTimeout(() => {
-          console.log('OnboardingSurveyScreen: Navigating back to root after skip');
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Onboarding' }],
-          });
-        }, 200);
-      }).catch((error) => {
-        console.error('OnboardingSurveyScreen: Error updating user stats for skip:', error);
-        // Still try to navigate even if update fails
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Onboarding' }],
+      try {
+        console.log('OnboardingSurveyScreen: Updating user stats for skipped survey');
+        await appContext.updateUserStats({
+          ...appContext.userStats,
+          surveyCompleted: true,
+          lastSurveyCompletion: new Date().toISOString(),
+          surveySkipped: true,
         });
-      });
+        console.log('OnboardingSurveyScreen: User stats updated for skipped survey');
+        console.log('OnboardingSurveyScreen: Navigation should automatically update via AppStackNavigator useEffect');
+      } catch (error) {
+        console.error('OnboardingSurveyScreen: Error updating user stats for skip:', error);
+      }
     } else {
-      console.log('OnboardingSurveyScreen: updateUserStats not available, using fallback navigation');
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Onboarding' }],
-      });
+      console.log('OnboardingSurveyScreen: updateUserStats not available');
+      console.log('Available context methods:', Object.keys(appContext));
     }
   };
 
@@ -354,18 +334,18 @@ const AppContent = () => {
     return <LoadingScreen />;
   }
   
-  // The context structure has state properties directly on the object
+  // The context structure uses legacy compatibility wrapper
   const state = {
-    loading: appContext.loading,
-    error: appContext.error,
-    isDemo: appContext.isDemo,
-    workoutHistory: appContext.workoutHistory,
-    userStats: appContext.userStats,
-    characters: appContext.characters,
-    enhancedGacha: appContext.enhancedGacha,
-    dailyBonuses: appContext.dailyBonuses,
-    currentBanner: appContext.currentBanner,
-    segmentationLoaded: appContext.segmentationLoaded || false,
+    loading: appContext.loading || false,
+    error: appContext.error || null,
+    isDemo: appContext.isDemo || false,
+    workoutHistory: appContext.workoutHistory || [],
+    userStats: appContext.userStats || {},
+    characters: appContext.characterCollection || [],
+    enhancedGacha: appContext.gacha?.enhancedGacha || null,
+    dailyBonuses: appContext.gacha?.dailyBonuses || null,
+    currentBanner: appContext.gacha?.currentBanner || null,
+    segmentationLoaded: appContext.segmentation?.segmentationLoaded || false,
   };
   
   // Show loading screen while app is initializing

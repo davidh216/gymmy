@@ -11,7 +11,7 @@ import {
   Dimensions,
   Modal,
   Alert,
-  TextInput
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CharacterGallery from './CharacterGallery';
@@ -24,26 +24,26 @@ const FORMATIONS = {
     name: 'Balanced Core',
     description: 'A well-rounded formation providing balanced coverage',
     positions: ['Leader', 'Motivator', 'Specialist', 'Support'],
-    bonuses: { balance: 20, synergy: 15 }
+    bonuses: { balance: 20, synergy: 15 },
   },
   power_house: {
     name: 'Power House',
     description: 'Maximize strength training potential',
     positions: ['Powerhouse Leader', 'Strength Alpha', 'Strength Beta', 'Power Support'],
-    bonuses: { strength: 30, power: 25 }
+    bonuses: { strength: 30, power: 25 },
   },
   cardio_squad: {
     name: 'Cardio Squadron',
     description: 'Optimized for cardiovascular training',
     positions: ['Pace Leader', 'Endurance Specialist', 'Cardio Motivator', 'Recovery Support'],
-    bonuses: { cardio: 30, endurance: 25 }
+    bonuses: { cardio: 30, endurance: 25 },
   },
   zen_circle: {
     name: 'Zen Circle',
     description: 'Centered on mindfulness and flexibility',
     positions: ['Zen Master', 'Flexibility Guide', 'Mindfulness Coach', 'Balance Keeper'],
-    bonuses: { flexibility: 30, focus: 25 }
-  }
+    bonuses: { flexibility: 30, focus: 25 },
+  },
 };
 
 // Mock team performance calculation
@@ -55,7 +55,7 @@ const calculateTeamPerformance = (characters, formation) => {
       balance_score: 0,
       potential_score: 0,
       synergies: [],
-      optimization_suggestions: []
+      optimization_suggestions: [],
     };
   }
 
@@ -66,12 +66,12 @@ const calculateTeamPerformance = (characters, formation) => {
     flexibility: sum.flexibility + char.current_stats.flexibility,
     focus: sum.focus + char.current_stats.focus,
     motivation: sum.motivation + char.current_stats.motivation,
-    loyalty: sum.loyalty + char.current_stats.loyalty
+    loyalty: sum.loyalty + char.current_stats.loyalty,
   }), { strength: 0, cardio: 0, flexibility: 0, focus: 0, motivation: 0, loyalty: 0 });
 
   const averageStats = Object.keys(totalStats).reduce((avg, key) => ({
     ...avg,
-    [key]: Math.round(totalStats[key] / characters.length)
+    [key]: Math.round(totalStats[key] / characters.length),
   }), {});
 
   // Calculate balance score
@@ -115,7 +115,7 @@ const calculateTeamPerformance = (characters, formation) => {
       name: 'Legendary Duo',
       description: '+50% XP from all activities',
       active: true,
-      bonus: 50
+      bonus: 50,
     });
   }
   if (uniqueSpecs >= 4) {
@@ -123,7 +123,7 @@ const calculateTeamPerformance = (characters, formation) => {
       name: 'Balanced Mastery',
       description: '+25% XP from diverse training',
       active: true,
-      bonus: 25
+      bonus: 25,
     });
   }
 
@@ -134,7 +134,7 @@ const calculateTeamPerformance = (characters, formation) => {
       type: 'balance',
       priority: 'medium',
       title: 'Improve Stat Balance',
-      description: 'Consider adding characters with different stat focuses'
+      description: 'Consider adding characters with different stat focuses',
     });
   }
   if (synergyScore < 60) {
@@ -142,7 +142,7 @@ const calculateTeamPerformance = (characters, formation) => {
       type: 'synergy',
       priority: 'high',
       title: 'Activate More Synergies',
-      description: 'Try combinations with similar rarities or complementary types'
+      description: 'Try combinations with similar rarities or complementary types',
     });
   }
 
@@ -153,7 +153,7 @@ const calculateTeamPerformance = (characters, formation) => {
     potential_score: Math.round(potentialScore),
     synergies,
     optimization_suggestions: suggestions,
-    average_stats: averageStats
+    average_stats: averageStats,
   };
 };
 
@@ -161,7 +161,7 @@ const TeamBuilder = ({
   availableCharacters = [], 
   existingTeam = null,
   onSaveTeam,
-  onClose 
+  onClose, 
 }) => {
   const [teamName, setTeamName] = useState(existingTeam?.name || '');
   const [selectedFormation, setSelectedFormation] = useState(existingTeam?.formation || 'balanced_core');
@@ -174,7 +174,7 @@ const TeamBuilder = ({
   const formation = FORMATIONS[selectedFormation];
   const teamPerformance = useMemo(() => 
     calculateTeamPerformance(teamCharacters, formation), 
-    [teamCharacters, formation]
+  [teamCharacters, formation],
   );
 
   const handleCharacterSelect = (character) => {
@@ -207,7 +207,7 @@ const TeamBuilder = ({
       name: teamName,
       formation: selectedFormation,
       characters: teamCharacters,
-      performance: teamPerformance
+      performance: teamPerformance,
     };
 
     onSaveTeam?.(team);
@@ -219,7 +219,7 @@ const TeamBuilder = ({
       rare: '#2196F3',
       epic: '#9C27B0',
       legendary: '#FF9800',
-      mythical: '#E91E63'
+      mythical: '#E91E63',
     };
     return colors[rarity] || colors.common;
   };
@@ -234,7 +234,7 @@ const TeamBuilder = ({
         style={[
           styles.positionSlot,
           isEmpty && styles.emptyPositionSlot,
-          character && { borderColor: getRarityColor(character.rarity) }
+          character && { borderColor: getRarityColor(character.rarity) },
         ]}
         onPress={() => handlePositionPress(index)}
       >
@@ -264,8 +264,8 @@ const TeamBuilder = ({
                     { 
                       backgroundColor: i < character.evolution_stage 
                         ? getRarityColor(character.rarity) 
-                        : '#E0E0E0' 
-                    }
+                        : '#E0E0E0', 
+                    },
                   ]}
                 />
               ))}
@@ -305,7 +305,7 @@ const TeamBuilder = ({
                 key={key}
                 style={[
                   styles.formationOption,
-                  selectedFormation === key && styles.selectedFormationOption
+                  selectedFormation === key && styles.selectedFormationOption,
                 ]}
                 onPress={() => {
                   setSelectedFormation(key);
@@ -379,7 +379,7 @@ const TeamBuilder = ({
                     <View 
                       style={[
                         styles.scoreBarFill, 
-                        { width: `${teamPerformance.synergy_score}%`, backgroundColor: '#4CAF50' }
+                        { width: `${teamPerformance.synergy_score}%`, backgroundColor: '#4CAF50' },
                       ]} 
                     />
                   </View>
@@ -394,7 +394,7 @@ const TeamBuilder = ({
                     <View 
                       style={[
                         styles.scoreBarFill, 
-                        { width: `${teamPerformance.balance_score}%`, backgroundColor: '#2196F3' }
+                        { width: `${teamPerformance.balance_score}%`, backgroundColor: '#2196F3' },
                       ]} 
                     />
                   </View>
@@ -409,7 +409,7 @@ const TeamBuilder = ({
                     <View 
                       style={[
                         styles.scoreBarFill, 
-                        { width: `${teamPerformance.potential_score}%`, backgroundColor: '#FF9800' }
+                        { width: `${teamPerformance.potential_score}%`, backgroundColor: '#FF9800' },
                       ]} 
                     />
                   </View>
@@ -448,7 +448,7 @@ const TeamBuilder = ({
                         <View 
                           style={[
                             styles.statBarFill, 
-                            { width: `${value}%`, backgroundColor: '#9C27B0' }
+                            { width: `${value}%`, backgroundColor: '#9C27B0' },
                           ]} 
                         />
                       </View>
@@ -608,7 +608,7 @@ const TeamBuilder = ({
       >
         <CharacterGallery
           characters={availableCharacters.filter(char => 
-            !teamCharacters.find(tc => tc.id === char.id)
+            !teamCharacters.find(tc => tc.id === char.id),
           )}
           onCharacterSelect={handleCharacterSelect}
           showTeamBuilder={true}

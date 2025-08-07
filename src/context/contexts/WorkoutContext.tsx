@@ -92,96 +92,96 @@ const initialWorkoutState: WorkoutState = {
 
 const workoutReducer = (
   state: WorkoutState,
-  action: WorkoutAction
+  action: WorkoutAction,
 ): WorkoutState => {
   switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'SET_WORKOUTS':
-      return { ...state, workoutHistory: action.payload };
-    case 'ADD_WORKOUT':
-      return {
-        ...state,
-        workoutHistory: [...state.workoutHistory, action.payload],
-      };
-    case 'REMOVE_WORKOUT':
-      return {
-        ...state,
-        workoutHistory: state.workoutHistory.filter(
-          w => w.id !== action.payload
-        ),
-      };
-    case 'SET_EXERCISE_HISTORY':
-      return { ...state, exerciseHistory: action.payload };
-    case 'UPDATE_EXERCISE_HISTORY':
-      const updatedHistory = { ...state.exerciseHistory };
-      action.payload.forEach(exercise => {
-        if (!updatedHistory[exercise.name]) {
-          updatedHistory[exercise.name] = [];
-        }
+  case 'SET_LOADING':
+    return { ...state, loading: action.payload };
+  case 'SET_ERROR':
+    return { ...state, error: action.payload };
+  case 'SET_WORKOUTS':
+    return { ...state, workoutHistory: action.payload };
+  case 'ADD_WORKOUT':
+    return {
+      ...state,
+      workoutHistory: [...state.workoutHistory, action.payload],
+    };
+  case 'REMOVE_WORKOUT':
+    return {
+      ...state,
+      workoutHistory: state.workoutHistory.filter(
+        w => w.id !== action.payload,
+      ),
+    };
+  case 'SET_EXERCISE_HISTORY':
+    return { ...state, exerciseHistory: action.payload };
+  case 'UPDATE_EXERCISE_HISTORY':
+    const updatedHistory = { ...state.exerciseHistory };
+    action.payload.forEach(exercise => {
+      if (!updatedHistory[exercise.name]) {
+        updatedHistory[exercise.name] = [];
+      }
 
-        const sessionData = {
-          date: new Date().toISOString(),
-          ...(exercise.sets &&
+      const sessionData = {
+        date: new Date().toISOString(),
+        ...(exercise.sets &&
             exercise.sets.length > 0 && {
-              bestSet: exercise.sets.reduce((best, set) => {
-                const weight = parseFloat(set.weight) || 0;
-                const reps = parseInt(set.reps) || 0;
-                const volume = weight * reps;
-                const bestVolume =
+          bestSet: exercise.sets.reduce((best, set) => {
+            const weight = parseFloat(set.weight) || 0;
+            const reps = parseInt(set.reps) || 0;
+            const volume = weight * reps;
+            const bestVolume =
                   (parseFloat(best?.weight) || 0) * (parseInt(best?.reps) || 0);
-                return volume > bestVolume ? set : best;
-              }, exercise.sets[0]),
-              totalVolume: exercise.sets.reduce((sum, set) => {
-                return (
-                  sum +
+            return volume > bestVolume ? set : best;
+          }, exercise.sets[0]),
+          totalVolume: exercise.sets.reduce((sum, set) => {
+            return (
+              sum +
                   (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0)
-                );
-              }, 0),
-            }),
-          ...(exercise.cardioData && {
-            totalTime: exercise.cardioData.totalTime,
-            distance: exercise.cardioData.distance,
-            calories: exercise.cardioData.calories,
-            pace: exercise.cardioData.pace,
-          }),
-        };
+            );
+          }, 0),
+        }),
+        ...(exercise.cardioData && {
+          totalTime: exercise.cardioData.totalTime,
+          distance: exercise.cardioData.distance,
+          calories: exercise.cardioData.calories,
+          pace: exercise.cardioData.pace,
+        }),
+      };
 
-        updatedHistory[exercise.name].push(sessionData);
-      });
-      return { ...state, exerciseHistory: updatedHistory };
-    case 'SET_TEMPLATES':
-      return { ...state, workoutTemplates: action.payload };
-    case 'ADD_TEMPLATE':
-      return {
-        ...state,
-        workoutTemplates: [...state.workoutTemplates, action.payload],
-      };
-    case 'REMOVE_TEMPLATE':
-      return {
-        ...state,
-        workoutTemplates: state.workoutTemplates.filter(
-          t => t.id !== action.payload
-        ),
-      };
-    case 'SET_REST_DAYS':
-      return { ...state, restDays: action.payload };
-    case 'ADD_REST_DAY':
-      return { ...state, restDays: [...state.restDays, action.payload] };
-    case 'REMOVE_REST_DAY':
-      return {
-        ...state,
-        restDays: state.restDays.filter(r => r.date !== action.payload),
-      };
-    default:
-      return state;
+      updatedHistory[exercise.name].push(sessionData);
+    });
+    return { ...state, exerciseHistory: updatedHistory };
+  case 'SET_TEMPLATES':
+    return { ...state, workoutTemplates: action.payload };
+  case 'ADD_TEMPLATE':
+    return {
+      ...state,
+      workoutTemplates: [...state.workoutTemplates, action.payload],
+    };
+  case 'REMOVE_TEMPLATE':
+    return {
+      ...state,
+      workoutTemplates: state.workoutTemplates.filter(
+        t => t.id !== action.payload,
+      ),
+    };
+  case 'SET_REST_DAYS':
+    return { ...state, restDays: action.payload };
+  case 'ADD_REST_DAY':
+    return { ...state, restDays: [...state.restDays, action.payload] };
+  case 'REMOVE_REST_DAY':
+    return {
+      ...state,
+      restDays: state.restDays.filter(r => r.date !== action.payload),
+    };
+  default:
+    return state;
   }
 };
 
 const WorkoutContext = createContext<WorkoutContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface WorkoutProviderProps {
@@ -253,7 +253,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
         });
       }
     },
-    [state.exerciseHistory]
+    [state.exerciseHistory],
   );
 
   const addTemplate = useCallback(async (template: WorkoutTemplate) => {

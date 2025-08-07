@@ -10,11 +10,13 @@ import {
   VirtualizedList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 import StorageManager from '../utils/StorageManager';
-import AnalyticsCharts from '../components/AnalyticsCharts';
+import { 
+  AnalyticsCharts,
+  GamificationStats,
+} from '../components/common';
 import BodyWeightTracker from '../components/BodyWeightTracker';
-import GamificationStats from '../components/GamificationStats';
 import QuestDisplay from '../components/QuestDisplay';
 
 const ProgressScreen = ({ navigation, route }) => {

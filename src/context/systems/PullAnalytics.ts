@@ -4,14 +4,14 @@
 import {
   GymmyRarity,
   GymmyCharacter,
-  EvolutionMaterials
+  EvolutionMaterials,
 } from '../types/MultiGymmyTypes';
 
 import {
   PullResult,
   PullHistory,
   GachaAnalytics,
-  BannerAnalytics
+  BannerAnalytics,
 } from '../systems/AdvancedGachaSystem';
 
 // ==============================================================================
@@ -237,7 +237,7 @@ export class PullAnalyticsEngine {
       behavioral_patterns: this.identifyBehaviorPatterns(),
       predictions: this.generatePredictions(),
       recommendations: this.generateRecommendations(),
-      performance_metrics: this.calculatePerformanceMetrics()
+      performance_metrics: this.calculatePerformanceMetrics(),
     };
   }
 
@@ -247,11 +247,11 @@ export class PullAnalyticsEngine {
     
     // Calculate rarity breakdown
     const rarityCount: Record<GymmyRarity, number> = {
-      common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0
+      common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0,
     };
     
     const rarityGems: Record<GymmyRarity, number> = {
-      common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0
+      common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0,
     };
 
     this.pullHistory.forEach(result => {
@@ -268,7 +268,7 @@ export class PullAnalyticsEngine {
         count,
         percentage: totalPulls > 0 ? (count / totalPulls) * 100 : 0,
         gems_spent: rarityGems[r],
-        average_gems_per_character: count > 0 ? rarityGems[r] / count : 0
+        average_gems_per_character: count > 0 ? rarityGems[r] / count : 0,
       };
       return acc;
     }, {} as any);
@@ -293,14 +293,14 @@ export class PullAnalyticsEngine {
       pulls_per_legendary: pullsPerLegendary,
       efficiency_rating: efficiency,
       luck_score: luckScore,
-      luck_rating: this.getLuckRating(luckScore)
+      luck_rating: this.getLuckRating(luckScore),
     };
   }
 
   private calculateLuckScore(
     breakdown: any,
     expected: Record<GymmyRarity, number>,
-    totalPulls: number
+    totalPulls: number,
   ): number {
     if (totalPulls === 0) return 0;
 
@@ -351,11 +351,11 @@ export class PullAnalyticsEngine {
     
     // Find most active times
     const mostActiveHour = Object.keys(hourActivity).reduce((a, b) => 
-      hourActivity[a] > hourActivity[b] ? a : b, '0'
+      hourActivity[a] > hourActivity[b] ? a : b, '0',
     );
     
     const mostActiveDay = Object.keys(dayActivity).reduce((a, b) => 
-      dayActivity[a] > dayActivity[b] ? a : b, 'Monday'
+      dayActivity[a] > dayActivity[b] ? a : b, 'Monday',
     );
 
     // Calculate session metrics
@@ -369,7 +369,7 @@ export class PullAnalyticsEngine {
     // Find longest session
     const longestSession = sessions.reduce((longest, current) => 
       current.duration > longest.duration ? current : longest, 
-      { duration: 0, pulls: 0, date: new Date().toISOString() }
+    { duration: 0, pulls: 0, date: new Date().toISOString() },
     );
 
     // Calculate streaks
@@ -385,11 +385,11 @@ export class PullAnalyticsEngine {
       longest_dry_streak: streaks.longestDry,
       current_dry_streak: streaks.currentDry,
       hot_streaks: streaks.hotStreaks,
-      monthly_activity: this.calculateMonthlyActivity()
+      monthly_activity: this.calculateMonthlyActivity(),
     };
   }
 
-  private calculateSessions(): Array<{duration: number, pulls: number, date: string}> {
+  private calculateSessions(): {duration: number, pulls: number, date: string}[] {
     const sessions = [];
     let currentSession = null;
     const SESSION_GAP_HOURS = 2; // If gap > 2 hours, it's a new session
@@ -405,7 +405,7 @@ export class PullAnalyticsEngine {
           duration: 0,
           pulls: result.characters.length,
           date: result.timestamp,
-          lastPull: result.timestamp
+          lastPull: result.timestamp,
         };
       } else {
         // Continue current session
@@ -427,7 +427,7 @@ export class PullAnalyticsEngine {
     
     this.pullHistory.forEach(result => {
       const hasLegendaryOrBetter = result.characters.some(c => 
-        c.rarity === 'legendary' || c.rarity === 'mythical'
+        c.rarity === 'legendary' || c.rarity === 'mythical',
       );
       
       if (hasLegendaryOrBetter) {
@@ -470,7 +470,7 @@ export class PullAnalyticsEngine {
           pulls: 0,
           gems_spent: 0,
           characters_obtained: { common: 0, rare: 0, epic: 0, legendary: 0, mythical: 0 },
-          efficiency_score: 0
+          efficiency_score: 0,
         };
       }
       
@@ -507,14 +507,14 @@ export class PullAnalyticsEngine {
         description: 'Prefers 10-pulls over single pulls',
         confidence: 85,
         evidence: ['70%+ of pulls are 10-pulls', 'Consistent bulk pulling behavior'],
-        implications: ['Values efficiency', 'Plans spending carefully', 'May respond well to bulk discounts']
+        implications: ['Values efficiency', 'Plans spending carefully', 'May respond well to bulk discounts'],
       });
     }
     
     // Pattern: Time-based pulling
     const hourActivity = this.userPatterns.get('hour_activity') || {};
     const peakHours = Object.keys(hourActivity).filter(hour => 
-      hourActivity[hour] > Object.values(hourActivity).reduce((sum: number, count) => sum + (count as number), 0) / Object.keys(hourActivity).length * 1.5
+      hourActivity[hour] > Object.values(hourActivity).reduce((sum: number, count) => sum + (count as number), 0) / Object.keys(hourActivity).length * 1.5,
     );
     
     if (peakHours.length <= 2) {
@@ -524,7 +524,7 @@ export class PullAnalyticsEngine {
         description: 'Pulls at consistent times',
         confidence: 75,
         evidence: [`Primary activity during ${peakHours.join(' and ')} hour(s)`],
-        implications: ['Habitual user', 'May respond to time-based promotions', 'Values routine']
+        implications: ['Habitual user', 'May respond to time-based promotions', 'Values routine'],
       });
     }
     
@@ -537,7 +537,7 @@ export class PullAnalyticsEngine {
         description: 'Experiencing below-average luck',
         confidence: 90,
         evidence: ['Luck score below -30', 'Below expected legendary rate'],
-        implications: ['May be frustrated', 'At risk of churning', 'Needs encouragement']
+        implications: ['May be frustrated', 'At risk of churning', 'Needs encouragement'],
       });
     }
     
@@ -570,18 +570,18 @@ export class PullAnalyticsEngine {
       next_legendary_prediction: {
         estimated_pulls: estimatedPulls,
         confidence,
-        factors: currentStreak >= pitySoftStart ? ['Soft pity active'] : ['Historical average', 'Current streak']
+        factors: currentStreak >= pitySoftStart ? ['Soft pity active'] : ['Historical average', 'Current streak'],
       },
       monthly_spending_prediction: {
         estimated_gems: Math.round(avgMonthlyGems),
         estimated_cost: Math.round(avgMonthlyGems * 0.01), // Assuming 100 gems = $1
-        confidence: recentActivity.length >= 3 ? 80 : 40
+        confidence: recentActivity.length >= 3 ? 80 : 40,
       },
       retention_prediction: {
         likelihood_to_continue: this.calculateRetentionLikelihood(),
         risk_factors: this.identifyRiskFactors(),
-        positive_indicators: this.identifyPositiveIndicators()
-      }
+        positive_indicators: this.identifyPositiveIndicators(),
+      },
     };
   }
 
@@ -647,7 +647,7 @@ export class PullAnalyticsEngine {
         title: 'Consider Guaranteed Banners',
         description: 'Focus on banners with guaranteed legendary characters to break your unlucky streak.',
         rationale: 'Your current luck score indicates below-average results',
-        potential_benefit: 'Guaranteed progress toward collection goals'
+        potential_benefit: 'Guaranteed progress toward collection goals',
       });
     }
     
@@ -659,7 +659,7 @@ export class PullAnalyticsEngine {
         title: 'Try 10-Pull Strategy',
         description: 'Switch to 10-pulls for better value and guaranteed rare characters.',
         rationale: 'Your gems-per-legendary ratio suggests room for improvement',
-        potential_benefit: 'Better value and guaranteed minimum rarity per pull session'
+        potential_benefit: 'Better value and guaranteed minimum rarity per pull session',
       });
     }
     
@@ -672,7 +672,7 @@ export class PullAnalyticsEngine {
         title: 'Watch for Step-Up Banners',
         description: 'Step-up banners offer excellent value for bulk pullers like you.',
         rationale: 'Your pulling pattern shows preference for bulk purchases',
-        potential_benefit: 'Discounted pulls with escalating rewards'
+        potential_benefit: 'Discounted pulls with escalating rewards',
       });
     }
     
@@ -697,16 +697,16 @@ export class PullAnalyticsEngine {
       vs_average: {
         pulls_efficiency: this.compareToAverage('efficiency'),
         luck_factor: basicStats.luck_score,
-        spending_efficiency: this.compareToAverage('spending')
+        spending_efficiency: this.compareToAverage('spending'),
       },
       best_session: bestSession,
       best_streak: {
         start_date: new Date().toISOString(),
         duration: 0,
-        characters_obtained: 0
+        characters_obtained: 0,
       },
       milestones_reached: this.getReachedMilestones(),
-      upcoming_milestones: this.getUpcomingMilestones()
+      upcoming_milestones: this.getUpcomingMilestones(),
     };
   }
 
@@ -732,7 +732,7 @@ export class PullAnalyticsEngine {
         name: 'Centurion',
         description: 'Complete 100 pulls',
         requirement: 100,
-        current_progress: basicStats.total_pulls
+        current_progress: basicStats.total_pulls,
       });
     }
     
@@ -751,7 +751,7 @@ export class PullAnalyticsEngine {
         requirement: 500,
         current_progress: basicStats.total_pulls,
         reward: { legendary_crystals: 5, transcendence_core: 1 } as EvolutionMaterials,
-        estimated_completion: this.estimateMilestoneCompletion(500, basicStats.total_pulls)
+        estimated_completion: this.estimateMilestoneCompletion(500, basicStats.total_pulls),
       });
     }
     
@@ -795,7 +795,7 @@ export class PullAnalyticsEngine {
       average_gems_per_legendary: 14400,
       average_luck_score: 0,
       median_session_duration: 15, // minutes
-      average_pulls_per_session: 8
+      average_pulls_per_session: 8,
     };
   }
 
@@ -807,7 +807,7 @@ export class PullAnalyticsEngine {
     return {
       pullHistory: this.pullHistory,
       userPatterns: Array.from(this.userPatterns.entries()),
-      benchmarkData: this.benchmarkData
+      benchmarkData: this.benchmarkData,
     };
   }
 

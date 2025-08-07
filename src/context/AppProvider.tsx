@@ -2,16 +2,18 @@
 // Main application provider with unified context architecture and Multi-Gymmy integration
 
 import React, { ReactNode, Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 // Unified context providers
 import { UnifiedAppProvider } from './UnifiedAppProvider';
 import { AllSelectorsProvider } from './ContextSelectors';
 import { ContextIntegrationProvider } from './ContextIntegrationManager';
 
-// Loading and error components
-import LoadingFallback from '../components/LoadingFallback';
-import ErrorFallback from '../components/ErrorFallback';
+// Common components
+import { 
+  LoadingFallback, 
+  ErrorFallback, 
+  ErrorBoundary, 
+} from '../components/common';
 
 // ==============================================================================
 // MAIN APP PROVIDER COMPONENT
@@ -28,7 +30,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   children,
   enableMultiGymmy = true,
   enableAnalytics = true,
-  enableDevTools = process.env.NODE_ENV === 'development'
+  enableDevTools = process.env.NODE_ENV === 'development',
 }) => {
   return (
     <ErrorBoundary
@@ -84,7 +86,7 @@ const DevTools: React.FC = () => {
           padding: '5px 10px',
           borderRadius: '5px',
           fontSize: '12px',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
         onClick={() => setShowDebugger(!showDebugger)}
       >
@@ -118,7 +120,7 @@ const DebugPanel: React.FC = () => {
         borderRadius: '8px',
         zIndex: 9999,
         fontSize: '12px',
-        overflow: 'auto'
+        overflow: 'auto',
       }}
     >
       {/* Debug Tabs */}
@@ -134,7 +136,7 @@ const DebugPanel: React.FC = () => {
               color: 'white',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '11px'
+              fontSize: '11px',
             }}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -242,87 +244,7 @@ const IntegrationDebug: React.FC = () => {
   );
 };
 
-// ==============================================================================
-// FALLBACK COMPONENTS
-// ==============================================================================
-
-// These would normally be separate components, but including inline for completeness
-const LoadingFallback: React.FC = () => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '100vh',
-    backgroundColor: '#F8F9FA'
-  }}>
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ 
-        width: '40px', 
-        height: '40px', 
-        border: '4px solid #E0E0E0', 
-        borderTop: '4px solid #007AFF',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto 20px'
-      }} />
-      <p style={{ color: '#666', fontSize: '16px' }}>Loading Gymmy...</p>
-      <p style={{ color: '#999', fontSize: '12px' }}>Initializing character systems...</p>
-    </div>
-  </div>
-);
-
-interface ErrorFallbackProps {
-  error: Error;
-  resetError: () => void;
-}
-
-const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#FFEBEE',
-    padding: '20px'
-  }}>
-    <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-      <h2 style={{ color: '#D32F2F', marginBottom: '20px' }}>
-        Oops! Something went wrong
-      </h2>
-      <p style={{ color: '#666', marginBottom: '20px' }}>
-        Gymmy encountered an unexpected error. Don't worry, your progress is safe!
-      </p>
-      <details style={{ 
-        backgroundColor: '#FFCDD2', 
-        padding: '10px', 
-        borderRadius: '4px',
-        marginBottom: '20px',
-        textAlign: 'left'
-      }}>
-        <summary style={{ cursor: 'pointer', color: '#D32F2F', fontWeight: 'bold' }}>
-          Error Details
-        </summary>
-        <pre style={{ fontSize: '12px', marginTop: '10px', overflow: 'auto' }}>
-          {error.message}
-        </pre>
-      </details>
-      <button
-        onClick={resetError}
-        style={{
-          backgroundColor: '#007AFF',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px'
-        }}
-      >
-        Try Again
-      </button>
-    </div>
-  </div>
-);
+// LoadingFallback and ErrorFallback are imported from separate files above
 
 // ==============================================================================
 // CONTEXT ACCESS HOOKS
@@ -333,14 +255,14 @@ export {
   useUnifiedApp,
   useAppState,
   useCharacterSystem,
-  useWorkoutIntegration
+  useWorkoutIntegration,
 } from './UnifiedAppProvider';
 
 export {
   useWorkoutHistory,
   useUserStatsData,
   useCharacterCollection,
-  useUserSegment
+  useUserSegment,
 } from './ContextSelectors';
 
 export { useContextIntegrationManager } from './ContextIntegrationManager';

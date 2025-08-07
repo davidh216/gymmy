@@ -12,7 +12,7 @@ import {
   Image,
   Modal,
   Alert,
-  TextInput
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -32,7 +32,7 @@ const mockCharacters = [
     current_stats: { strength: 60, cardio: 30, flexibility: 25, focus: 40, motivation: 70, loyalty: 80 },
     bond_points: 250,
     is_favorite: true,
-    total_workouts_together: 45
+    total_workouts_together: 45,
   },
   {
     id: 'cardio_queen',
@@ -46,7 +46,7 @@ const mockCharacters = [
     current_stats: { strength: 50, cardio: 90, flexibility: 60, focus: 80, motivation: 85, loyalty: 75 },
     bond_points: 680,
     is_favorite: false,
-    total_workouts_together: 78
+    total_workouts_together: 78,
   },
   {
     id: 'zen_master',
@@ -60,7 +60,7 @@ const mockCharacters = [
     current_stats: { strength: 60, cardio: 70, flexibility: 95, focus: 99, motivation: 85, loyalty: 90 },
     bond_points: 1200,
     is_favorite: true,
-    total_workouts_together: 156
+    total_workouts_together: 156,
   },
   {
     id: 'titan_forge',
@@ -74,15 +74,15 @@ const mockCharacters = [
     current_stats: { strength: 95, cardio: 70, flexibility: 50, focus: 90, motivation: 95, loyalty: 99 },
     bond_points: 2500,
     is_favorite: true,
-    total_workouts_together: 234
-  }
+    total_workouts_together: 234,
+  },
 ];
 
 const CharacterGallery = ({ 
   characters = mockCharacters, 
   onCharacterSelect, 
   onCharacterFavorite,
-  showTeamBuilder = false 
+  showTeamBuilder = false, 
 }) => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('level'); // 'level', 'rarity', 'name', 'bond_points'
@@ -95,7 +95,7 @@ const CharacterGallery = ({
 
   // Filter and sort characters
   const filteredAndSortedCharacters = useMemo(() => {
-    let filtered = characters.filter(char => {
+    const filtered = characters.filter(char => {
       // Search filter
       if (searchQuery && !char.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
@@ -117,17 +117,17 @@ const CharacterGallery = ({
     // Sort characters
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'level':
-          return b.level - a.level;
-        case 'rarity':
-          const rarityOrder = { mythical: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
-          return rarityOrder[b.rarity] - rarityOrder[a.rarity];
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'bond_points':
-          return b.bond_points - a.bond_points;
-        default:
-          return 0;
+      case 'level':
+        return b.level - a.level;
+      case 'rarity':
+        const rarityOrder = { mythical: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+        return rarityOrder[b.rarity] - rarityOrder[a.rarity];
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'bond_points':
+        return b.bond_points - a.bond_points;
+      default:
+        return 0;
       }
     });
 
@@ -153,7 +153,7 @@ const CharacterGallery = ({
       rare: '#2196F3',
       epic: '#9C27B0',
       legendary: '#FF9800',
-      mythical: '#E91E63'
+      mythical: '#E91E63',
     };
     return colors[rarity] || colors.common;
   };
@@ -200,7 +200,7 @@ const CharacterGallery = ({
                     key={i}
                     style={[
                       styles.evolutionDot,
-                      { backgroundColor: i < character.evolution_stage ? rarityColor : '#E0E0E0' }
+                      { backgroundColor: i < character.evolution_stage ? rarityColor : '#E0E0E0' },
                     ]}
                   />
                 ))}
@@ -245,7 +245,7 @@ const CharacterGallery = ({
                 <View 
                   style={[
                     styles.statBarFill, 
-                    { width: `${character.current_stats.strength}%`, backgroundColor: rarityColor }
+                    { width: `${character.current_stats.strength}%`, backgroundColor: rarityColor },
                   ]} 
                 />
               </View>
@@ -257,7 +257,7 @@ const CharacterGallery = ({
                 <View 
                   style={[
                     styles.statBarFill, 
-                    { width: `${character.current_stats.cardio}%`, backgroundColor: rarityColor }
+                    { width: `${character.current_stats.cardio}%`, backgroundColor: rarityColor },
                   ]} 
                 />
               </View>
@@ -269,7 +269,7 @@ const CharacterGallery = ({
                 <View 
                   style={[
                     styles.statBarFill, 
-                    { width: `${character.current_stats.focus}%`, backgroundColor: rarityColor }
+                    { width: `${character.current_stats.focus}%`, backgroundColor: rarityColor },
                   ]} 
                 />
               </View>
@@ -282,7 +282,7 @@ const CharacterGallery = ({
                 key={i}
                 style={[
                   styles.gridEvolutionDot,
-                  { backgroundColor: i < character.evolution_stage ? rarityColor : '#E0E0E0' }
+                  { backgroundColor: i < character.evolution_stage ? rarityColor : '#E0E0E0' },
                 ]}
               />
             ))}
@@ -422,8 +422,8 @@ const CharacterGallery = ({
                               styles.detailedStatBarFill, 
                               { 
                                 width: `${value}%`, 
-                                backgroundColor: getRarityColor(selectedCharacter.rarity) 
-                              }
+                                backgroundColor: getRarityColor(selectedCharacter.rarity), 
+                              },
                             ]} 
                           />
                         </View>

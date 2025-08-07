@@ -11,7 +11,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -225,7 +225,7 @@ const ClassCard = ({ classKey, classData, selected, onSelect, animatedValue }) =
           <View style={styles.classInfo}>
             <Text style={styles.className}>{classData.name}</Text>
             <Text style={styles.classSubtitle}>{classData.subtitle}</Text>
-            <Text style={styles.classQuote}>"{classData.quote}"</Text>
+            <Text style={styles.classQuote}>&quot;{classData.quote}&quot;</Text>
           </View>
         </View>
 
