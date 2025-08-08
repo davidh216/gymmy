@@ -29,7 +29,8 @@
       "Bash(timeout 10s npx expo start --no-dev --minify --port 8083)",
       "Bash(npm uninstall:*)",
       "Bash(timeout:*)",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
