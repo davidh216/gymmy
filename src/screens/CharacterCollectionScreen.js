@@ -10,15 +10,21 @@ import {
   Modal,
   Alert,
   StyleSheet,
-  VirtualizedList,
+  FlatList,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
 
 const CharacterCollectionScreen = ({ navigation }) => {
   const { characters, setActiveCharacter } = useApp();
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Error recovery function
+  const handleError = (error, context) => {
+    console.error(`Error in CharacterCollectionScreen ${context}:`, error);
+    setError({ message: `Error ${context}`, details: error.message });
+  };
     
   const handleCharacterSelect = (character) => {
     setSelectedCharacter(character);
@@ -31,9 +37,14 @@ const CharacterCollectionScreen = ({ navigation }) => {
     Alert.alert('Active Character Set!', 'Your character is now ready for battle!');
   };
     
-  // Prepare data for VirtualizedList
-  const sections = useMemo(() => {
-    const sectionsData = [];
+  // Prepare data for FlatList - group characters by rarity for proper display
+  const sectionsData = useMemo(() => {
+    const sections = [];
+    
+    // Check if characters collection exists
+    if (!characters?.collection || !Array.isArray(characters.collection)) {
+      return sections;
+    }
       
     // Group characters by rarity
     const groupedCharacters = characters.collection.reduce((acc, char) => {
@@ -42,80 +53,105 @@ const CharacterCollectionScreen = ({ navigation }) => {
       return acc;
     }, {});
       
-    // Add sections for each rarity that has characters
+    // Create sections with rarity header and character grid
     ['legendary', 'epic', 'rare', 'common'].forEach(rarity => {
       const chars = groupedCharacters[rarity] || [];
       if (chars.length > 0) {
-        sectionsData.push({
-          type: 'rarity',
-          id: rarity,
+        sections.push({
+          type: 'raritySection',
+          id: `section_${rarity}`,
           rarity,
-          data: chars,
+          characters: chars,
+          rarity_color: chars[0]?.rarity_color || '#fff',
         });
       }
     });
       
-    return sectionsData;
-  }, [characters.collection]);
-    
-  // VirtualizedList render functions
-  const getItem = (data, index) => data[index];
-  const getItemCount = (data) => data.length;
+    return sections;
+  }, [characters?.collection]);
+  const renderCharacterCard = (character) => {
+    if (!character || !character.instance_id) {
+      console.warn('Invalid character data:', character);
+      return null;
+    }
 
-  const renderCharacterCard = (character) => (
-    <TouchableOpacity
-      key={character.instance_id}
-      style={[
-        styles.characterCard,
-        { borderColor: character.rarity_color },
-        characters.active_character === character.instance_id && styles.activeCharacterCard,
-      ]}
-      onPress={() => handleCharacterSelect(character)}
-    >
-      <Text style={styles.characterArtwork}>{character.artwork}</Text>
-      <Text style={styles.characterCardName}>{character.name}</Text>
-      <Text style={styles.characterLevel}>Lv.{character.level}</Text>
-        
-      {characters.active_character === character.instance_id && (
-        <View style={styles.activeBadge}>
-          <Text style={styles.activeBadgeText}>ACTIVE</Text>
-        </View>
-      )}
-        
-      {/* Condition indicators */}
-      {character.condition && (
-        <View style={styles.conditionBadge}>
-          <Text style={styles.conditionText}>✓</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-
-  const renderItem = ({ item, section }) => {
-    if (section.type === 'rarity') {
-      return (
-        <View style={styles.raritySection}>
-          <Text style={[
-            styles.rarityHeader,
-            { color: section.data[0]?.rarity_color || '#fff' },
-          ]}>
-            {section.rarity.toUpperCase()} ({section.data.length})
-          </Text>
-            
-          <View style={styles.characterGrid}>
-            {section.data.map(renderCharacterCard)}
+    return (
+      <TouchableOpacity
+        key={character.instance_id}
+        style={[
+          styles.characterCard,
+          { borderColor: character.rarity_color || '#666' },
+          characters?.active_character === character.instance_id && styles.activeCharacterCard,
+        ]}
+        onPress={() => handleCharacterSelect(character)}
+      >
+        <Text style={styles.characterArtwork}>{character.artwork || '❓'}</Text>
+        <Text style={styles.characterCardName}>{character.name || 'Unknown'}</Text>
+        <Text style={styles.characterLevel}>Lv.{character.level || 1}</Text>
+          
+        {characters?.active_character === character.instance_id && (
+          <View style={styles.activeBadge}>
+            <Text style={styles.activeBadgeText}>ACTIVE</Text>
           </View>
+        )}
+          
+        {/* Condition indicators */}
+        {character.condition && (
+          <View style={styles.conditionBadge}>
+            <Text style={styles.conditionText}>✓</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  // Render function for FlatList items
+  const renderItem = ({ item }) => {
+    try {
+      if (!item || !item.type) {
+        console.warn('Invalid item in renderItem:', item);
+        return null;
+      }
+
+      if (item.type === 'raritySection') {
+        const characters = Array.isArray(item.characters) ? item.characters : [];
+        
+        return (
+          <View style={styles.raritySection}>
+            <Text style={[
+              styles.rarityHeader,
+              { color: item.rarity_color || '#fff' },
+            ]}>
+              {(item.rarity || 'unknown').toUpperCase()} ({characters.length})
+            </Text>
+            
+            <View style={styles.characterGrid}>
+              {characters.map((character, index) => {
+                // Ensure each character has a unique key
+                const key = character?.instance_id || `char-${item.rarity}-${index}`;
+                return renderCharacterCard({ ...character, key });
+              }).filter(Boolean)}
+            </View>
+          </View>
+        );
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error rendering item:', error, item);
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error displaying characters</Text>
         </View>
       );
     }
-    return null;
   };
 
   const renderHeader = () => (
     <View style={styles.collectionHeader}>
       <Text style={styles.collectionTitle}>MY CHAMPIONS</Text>
       <Text style={styles.collectionCount}>
-        {characters.collection.length} Characters Collected
+        {characters?.collection?.length || 0} Characters Collected
       </Text>
     </View>
   );
@@ -134,48 +170,75 @@ const CharacterCollectionScreen = ({ navigation }) => {
     </View>
   );
     
-  return (
-    <View style={styles.container}>
-      {characters.collection.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <VirtualizedList
-          data={sections}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => item.id || index.toString()}
-          getItemCount={getItemCount}
-          getItem={getItem}
-          ListHeaderComponent={renderHeader}
-          showsVerticalScrollIndicator={false}
-          style={styles.collectionContent}
-          contentContainerStyle={styles.collectionContentContainer}
-          initialNumToRender={2}
-          maxToRenderPerBatch={3}
-          windowSize={5}
-          removeClippedSubviews={true}
-          getItemLayout={(data, index) => ({
-            length: 250, // Approximate height for each rarity section
-            offset: 250 * index,
-            index,
-          })}
+  // If there's an error, show error screen
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Something went wrong</Text>
+          <Text style={styles.errorText}>{error.message}</Text>
+          <TouchableOpacity
+            style={styles.summonButton}
+            onPress={() => setError(null)}
+          >
+            <Text style={styles.summonButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  try {
+    return (
+      <View style={styles.container}>
+        {!characters?.collection || characters.collection.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <FlatList
+            data={sectionsData}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => item.id || index.toString()}
+            ListHeaderComponent={renderHeader}
+            showsVerticalScrollIndicator={false}
+            style={styles.collectionContent}
+            contentContainerStyle={styles.collectionContentContainer}
+            onError={(error) => handleError(error, 'rendering FlatList')}
+          />
+        )}
+          
+        {/* Character Details Modal */}
+        <CharacterDetailsModal
+          visible={showDetails}
+          character={selectedCharacter}
+          onClose={() => setShowDetails(false)}
+          onSetActive={handleSetActive}
+          isActive={selectedCharacter?.instance_id === characters?.active_character}
         />
-      )}
-        
-      {/* Character Details Modal */}
-      <CharacterDetailsModal
-        visible={showDetails}
-        character={selectedCharacter}
-        onClose={() => setShowDetails(false)}
-        onSetActive={handleSetActive}
-        isActive={selectedCharacter?.instance_id === characters.active_character}
-      />
-    </View>
-  );
+      </View>
+    );
+  } catch (error) {
+    handleError(error, 'rendering component');
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Unable to load character collection</Text>
+          <TouchableOpacity
+            style={styles.summonButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.summonButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 };
 
 // Character Details Modal Component
 const CharacterDetailsModal = ({ visible, character, onClose, onSetActive, isActive }) => {
   if (!visible || !character) return null;
+
+  try {
 
   return (
     <Modal
@@ -198,32 +261,37 @@ const CharacterDetailsModal = ({ visible, character, onClose, onSetActive, isAct
             <Text style={[styles.characterRarity, { color: character.rarity_color }]}>
               {character.rarity.toUpperCase()}
             </Text>
-            <Text style={styles.characterDescription}>{character.description}</Text>
+            <Text style={styles.characterDescription}>{character.description || 'No description available'}</Text>
             
             <View style={styles.statsSection}>
               <Text style={styles.statsTitle}>STATS</Text>
               <View style={styles.statsGrid}>
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>Level</Text>
-                  <Text style={styles.statValue}>{character.level}</Text>
+                  <Text style={styles.statValue}>{character.level || 1}</Text>
                 </View>
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>Energy</Text>
-                  <Text style={styles.statValue}>{character.condition.energy}%</Text>
+                  <Text style={styles.statValue}>{character.condition?.energy || 100}%</Text>
                 </View>
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>Mood</Text>
-                  <Text style={styles.statValue}>{character.condition.mood}%</Text>
+                  <Text style={styles.statValue}>{character.condition?.mood || 80}%</Text>
                 </View>
               </View>
             </View>
             
             <View style={styles.skillsSection}>
-              <Text style={styles.skillsTitle}>SKILLS</Text>
-              {character.skills.map((skill, index) => (
-                <View key={index} style={styles.skillItem}>
-                  <Text style={styles.skillName}>{skill.name}</Text>
-                  <Text style={styles.skillDescription}>{skill.description}</Text>
+              <Text style={styles.skillsTitle}>SPECIAL ABILITY</Text>
+              <View style={styles.skillItem}>
+                <Text style={styles.skillName}>{character.special_ability || 'No special ability'}</Text>
+              </View>
+              
+              <Text style={styles.skillsTitle}>BASE STATS</Text>
+              {Object.entries(character.base_stats || {}).map(([stat, value]) => (
+                <View key={stat} style={styles.skillItem}>
+                  <Text style={styles.skillName}>{stat.charAt(0).toUpperCase() + stat.slice(1)}</Text>
+                  <Text style={styles.skillDescription}>{value}</Text>
                 </View>
               ))}
             </View>
@@ -238,6 +306,21 @@ const CharacterDetailsModal = ({ visible, character, onClose, onSetActive, isAct
       </View>
     </Modal>
   );
+  } catch (error) {
+    console.error('Error in CharacterDetailsModal:', error);
+    return (
+      <Modal visible={visible} transparent={true} onRequestClose={onClose}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Error loading character details</Text>
+            <TouchableOpacity style={styles.summonButton} onPress={onClose}>
+              <Text style={styles.summonButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -306,7 +389,8 @@ const styles = StyleSheet.create({
   characterGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
   characterCard: {
     width: '48%',
@@ -316,6 +400,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: 'transparent',
+    marginBottom: 10,
   },
   activeCharacterCard: {
     borderColor: '#4CAF50',
@@ -472,6 +557,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  errorContainer: {
+    backgroundColor: '#2a2a3e',
+    borderRadius: 10,
+    padding: 20,
+    margin: 10,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

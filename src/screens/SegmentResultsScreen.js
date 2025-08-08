@@ -1,6 +1,6 @@
 // src/screens/SegmentResultsScreen.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ const { width, height } = Dimensions.get('window');
 export const SegmentResultsScreen = ({ 
   route, 
   navigation,
+  navigationControl, // Accept as prop from wrapper component
   segment,
   confidence,
   secondarySegment,
@@ -75,7 +76,32 @@ export const SegmentResultsScreen = ({
   };
 
   const handleContinue = () => {
-    navigation.navigate('Dashboard');
+    console.log('SegmentResultsScreen: Start My Journey pressed - using direct navigation control');
+    
+    // Use the same direct navigation control as the skip button
+    if (navigationControl?.forceMainApp) {
+      console.log('SegmentResultsScreen: Using NavigationControlContext.forceMainApp');
+      navigationControl.forceMainApp();
+    } else {
+      console.log('SegmentResultsScreen: NavigationControlContext not available, using fallback navigation');
+      // Fallback - try to navigate to MainTabs directly
+      try {
+        const rootNavigation = navigation.getParent()?.getParent();
+        if (rootNavigation) {
+          console.log('SegmentResultsScreen: Using root navigation to go to MainTabs');
+          rootNavigation.reset({
+            index: 0,
+            routes: [{ name: 'MainTabs' }],
+          });
+        } else {
+          console.log('SegmentResultsScreen: Root navigation not found, using navigation.goBack');
+          navigation.goBack();
+        }
+      } catch (error) {
+        console.error('SegmentResultsScreen: Navigation error:', error);
+        navigation.goBack();
+      }
+    }
   };
 
   const handleRetakeSurvey = () => {

@@ -111,7 +111,7 @@ const ClassDashboardWidget = ({ navigation }) => {
           <Text style={styles.statLabel}>Battles</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{userStats.unlockedSkills.length}</Text>
+          <Text style={styles.statValue}>{userStats.unlockedSkills?.length || 0}</Text>
           <Text style={styles.statLabel}>Skills</Text>
         </View>
         <View style={styles.statItem}>
@@ -126,7 +126,7 @@ const ClassDashboardWidget = ({ navigation }) => {
       <View style={styles.actionButtons}>
         <TouchableOpacity 
           style={[styles.actionButton, { backgroundColor: classData.color }]}
-          onPress={() => navigation.navigate('SkillTree')}
+          onPress={() => navigation.navigate('ClassSelection')}
         >
           <Text style={styles.actionButtonText}>SKILL TREE</Text>
         </TouchableOpacity>
@@ -134,7 +134,7 @@ const ClassDashboardWidget = ({ navigation }) => {
         {userStats.skillPoints > 0 && (
           <TouchableOpacity 
             style={[styles.actionButton, styles.urgentButton]}
-            onPress={() => navigation.navigate('SkillTree')}
+            onPress={() => navigation.navigate('ClassSelection')}
           >
             <Text style={styles.actionButtonText}>SPEND SP!</Text>
           </TouchableOpacity>

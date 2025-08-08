@@ -15,12 +15,12 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import { useApp } from '../context';
+import { useApp, getPullCosts, GACHA_RATES } from '../context';
 
 const { width, height } = Dimensions.get('window');
 
 const GachaScreen = ({ navigation }) => {
-  const { userStats, pullGacha, getPullCosts, GACHA_RATES } = useApp();
+  const { userStats, gacha } = useApp();
   const [pullAnimation] = useState(new Animated.Value(0));
   const [showResults, setShowResults] = useState(false);
   const [pullResults, setPullResults] = useState([]);
@@ -32,7 +32,7 @@ const GachaScreen = ({ navigation }) => {
     const cost = costs[pullType];
     
     // Check currency
-    if (userStats.currencies.gems < cost.gems) {
+    if ((gacha?.userCurrencies?.gems ?? 0) < cost.gems) {
       Alert.alert(
         'Insufficient Gems! 💎',
         `You need ${cost.gems} gems for this pull. Complete more workouts to earn gems!`,
@@ -55,10 +55,14 @@ const GachaScreen = ({ navigation }) => {
         duration: 500,
         useNativeDriver: true,
       }),
-    ]).start(() => {
+    ]).start(async () => {
       // Perform the actual gacha pull
       try {
-        const results = pullGacha(pullType);
+        if (!gacha?.performPull) {
+          throw new Error('Gacha system not available');
+        }
+        const results = await gacha.performPull(pullType);
+        console.log('Gacha pull results:', results);
         setPullResults(results);
         setShowResults(true);
         setIsPulling(false);
@@ -98,15 +102,15 @@ const GachaScreen = ({ navigation }) => {
           <View style={styles.currencyDisplay}>
             <View style={styles.currencyItem}>
               <Text style={styles.currencyIcon}>💎</Text>
-              <Text style={styles.currencyAmount}>{userStats.currencies.gems}</Text>
+              <Text style={styles.currencyAmount}>{gacha?.userCurrencies?.gems ?? 0}</Text>
             </View>
             <View style={styles.currencyItem}>
               <Text style={styles.currencyIcon}>🪙</Text>
-              <Text style={styles.currencyAmount}>{userStats.currencies.coins}</Text>
+              <Text style={styles.currencyAmount}>{gacha?.userCurrencies?.coins ?? 0}</Text>
             </View>
             <View style={styles.currencyItem}>
               <Text style={styles.currencyIcon}>💠</Text>
-              <Text style={styles.currencyAmount}>{userStats.currencies.crystals}</Text>
+              <Text style={styles.currencyAmount}>{gacha?.userCurrencies?.crystals ?? 0}</Text>
             </View>
           </View>
         </View>
@@ -157,10 +161,10 @@ const GachaScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.pullButton,
-              { backgroundColor: userStats.currencies.gems >= costs.single.gems ? '#4CAF50' : '#666' },
+              { backgroundColor: (gacha?.userCurrencies?.gems ?? 0) >= costs.single.gems ? '#4CAF50' : '#666' },
             ]}
             onPress={() => handlePull('single')}
-            disabled={isPulling || userStats.currencies.gems < costs.single.gems}
+            disabled={isPulling || (gacha?.userCurrencies?.gems ?? 0) < costs.single.gems}
           >
             <Text style={styles.pullButtonTitle}>SINGLE SUMMON</Text>
             <Text style={styles.pullButtonCost}>💎 {costs.single.gems}</Text>
@@ -171,10 +175,10 @@ const GachaScreen = ({ navigation }) => {
             style={[
               styles.pullButton,
               styles.tenPullButton,
-              { backgroundColor: userStats.currencies.gems >= costs.ten_pull.gems ? '#FF6347' : '#666' },
+              { backgroundColor: (gacha?.userCurrencies?.gems ?? 0) >= costs.ten_pull.gems ? '#FF6347' : '#666' },
             ]}
             onPress={() => handlePull('ten_pull')}
-            disabled={isPulling || userStats.currencies.gems < costs.ten_pull.gems}
+            disabled={isPulling || (gacha?.userCurrencies?.gems ?? 0) < costs.ten_pull.gems}
           >
             <Text style={styles.pullButtonTitle}>10x SUMMON</Text>
             <Text style={styles.pullButtonCost}>💎 {costs.ten_pull.gems}</Text>
@@ -236,11 +240,11 @@ const PullResultsModal = ({ visible, results, onClose, rarityGradients }) => {
             {results.map((result, index) => (
               <View key={index} style={styles.resultItem}>
                 <View style={styles.characterCard}>
-                  <Text style={styles.characterName}>{result.name}</Text>
-                  <Text style={[styles.characterRarity, { color: getRarityColor(result.rarity) }]}>
-                    {result.rarity.toUpperCase()}
-                  </Text>
-                  <Text style={styles.characterDescription}>{result.description}</Text>
+                                     <Text style={styles.characterName}>{result.name || 'Unknown Character'}</Text>
+                                     <Text style={[styles.characterRarity, { color: getRarityColor(result.rarity || 'common') }]}>
+                     {(result.rarity || 'common').toUpperCase()}
+                   </Text>
+                                     <Text style={styles.characterDescription}>{result.description || 'A mysterious character with unknown abilities.'}</Text>
                 </View>
               </View>
             ))}

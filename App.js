@@ -110,7 +110,7 @@ const OnboardingStackNavigator = () => {
       />
       <Stack.Screen 
         name="Results" 
-        component={SegmentResultsScreen}
+        component={SegmentResultsScreenWrapper}
         options={{
           animationTypeForReplace: 'push',
         }}
@@ -119,19 +119,102 @@ const OnboardingStackNavigator = () => {
   );
 };
 
+// Create a context to share the setIsOnboarding function
+const NavigationControlContext = React.createContext();
+
+// ============================================================================
+// DEMO MODE TOGGLE (Persistent)
+// Reads from unified context settings/state so it persists across views
+// ============================================================================
+
 // Main App Stack Navigator (includes both onboarding and main app)
 const AppStackNavigator = () => {
   const appContext = useApp();
   const [navigationKey, setNavigationKey] = React.useState(0);
   const [isOnboarding, setIsOnboarding] = React.useState(true);
   
-  // Track survey completion more aggressively
-  const surveyCompleted = appContext.userStats?.surveyCompleted;
-  const hasWorkouts = appContext.userStats?.totalWorkouts > 0;
-  const hasUserStats = !!appContext.userStats;
+  // Provide the setIsOnboarding function to children
+  const navigationControl = React.useMemo(() => ({
+    forceMainApp: () => {
+      console.log('AppStackNavigator: FORCE MAIN APP called directly');
+      setIsOnboarding(false);
+      setNavigationKey(prev => prev + 1);
+    }
+  }), []);
   
+  // Track survey completion more aggressively - check multiple possible locations
+  const surveyCompleted = appContext.userStats?.surveyCompleted || 
+                          appContext.userStats?.userStats?.surveyCompleted ||
+                          appContext.segmentation?.onboardingCompleted;
+  const hasWorkouts = (appContext.userStats?.totalWorkouts || 0) > 0 || 
+                     (appContext.userStats?.userStats?.totalWorkouts || 0) > 0;
+  const hasUserStats = !!(appContext.userStats && Object.keys(appContext.userStats).length > 0);
+  
+  // DEMO MODE: Initialize demo data and skip onboarding
+  React.useEffect(() => {
+    const demoEnabled = appContext?.settings?.demoMode || appContext?.isDemo;
+    if (demoEnabled) {
+      console.log('AppStackNavigator: DEMO MODE ENABLED - Setting up demo data and bypassing survey');
+      // Seed comprehensive demo data via context helper
+      if (typeof appContext.resetToDummyData === 'function') {
+        appContext.resetToDummyData();
+      }
+      // Top-up gems for gacha testing in demo
+      if (typeof appContext.gacha?.updateCurrencies === 'function') {
+        appContext.gacha.updateCurrencies({ gems: 1000000, coins: 1000000, crystals: 1000 });
+      }
+      
+      // Force main app immediately
+      setIsOnboarding(false);
+      setNavigationKey(prev => prev + 1);
+      return; // Skip normal onboarding logic
+    }
+  }, [appContext?.settings?.demoMode, appContext?.isDemo, appContext.updateUserStats]);
+
   // Determine onboarding state with immediate updates
   React.useEffect(() => {
+    if (appContext?.settings?.demoMode || appContext?.isDemo) return; // Skip if demo mode is enabled
+    // Debug: Log the complete userStats structure with full expansion
+    console.log('AppStackNavigator: appContext.userStats =', JSON.stringify(appContext.userStats, null, 2));
+    console.log('AppStackNavigator: appContext.segmentation =', JSON.stringify(appContext.segmentation, null, 2));
+    console.log('AppStackNavigator: All context keys =', Object.keys(appContext));
+    console.log('AppStackNavigator: Survey status check:', {
+      'userStats?.surveyCompleted': appContext.userStats?.surveyCompleted,
+      'userStats?.userStats?.surveyCompleted': appContext.userStats?.userStats?.surveyCompleted,  
+      'segmentation?.onboardingCompleted': appContext.segmentation?.onboardingCompleted,
+      'final surveyCompleted': surveyCompleted,
+    });
+    
+    // Force immediate check if survey completion is detected anywhere
+    if (surveyCompleted === true) {
+      console.log('AppStackNavigator: *** SURVEY COMPLETION DETECTED - FORCING MAIN APP ***');
+    }
+    
+    // MANUAL OVERRIDE: If we detect survey data but surveyCompleted is still undefined,
+    // check for other indicators of completion
+    const manualOverride = appContext.userStats?.lastSurveyCompletion || 
+                          appContext.userStats?.segmentResult ||
+                          appContext.userStats?.surveySkipped ||
+                          appContext.userStats?.userStats?.lastSurveyCompletion ||
+                          appContext.userStats?.userStats?.segmentResult ||
+                          appContext.userStats?.userStats?.surveySkipped;
+                          
+    const hasAnyUserData = appContext.userStats && Object.keys(appContext.userStats).length > 1;
+    
+    if ((manualOverride || hasAnyUserData) && surveyCompleted === undefined) {
+      console.log('AppStackNavigator: *** MANUAL OVERRIDE - SURVEY/USER DATA DETECTED ***', {
+        manualOverride,
+        hasAnyUserData,
+        userStatsKeys: appContext.userStats ? Object.keys(appContext.userStats) : null
+      });
+      // Force navigation to main app
+      if (isOnboarding === true) {
+        console.log('AppStackNavigator: Forcing navigation to main app via manual override');
+        setIsOnboarding(false);
+        setNavigationKey(prev => prev + 1);
+      }
+    }
+    
     const shouldShow = (() => {
       // If survey is completed, show main app
       if (surveyCompleted === true) {
@@ -165,28 +248,46 @@ const AppStackNavigator = () => {
       setIsOnboarding(shouldShow);
       setNavigationKey(prev => prev + 1); // Force navigation re-render
     }
-  }, [surveyCompleted, hasWorkouts, hasUserStats, isOnboarding]);
+  }, [
+    surveyCompleted, 
+    hasWorkouts, 
+    hasUserStats, 
+    isOnboarding, 
+    appContext.userStats, 
+    appContext.segmentation?.onboardingCompleted,
+    appContext.userStats?.surveyCompleted,
+    appContext.userStats?.userStats?.surveyCompleted,
+    appContext.userStats?.totalWorkouts,
+    appContext.userStats?.userStats?.totalWorkouts,
+    appContext.userStats?.lastSurveyCompletion,
+    appContext.userStats?.segmentResult,
+    appContext.userStats?.surveySkipped,
+    appContext.userStats?.userStats?.lastSurveyCompletion,
+    appContext.userStats?.userStats?.segmentResult,
+    appContext.userStats?.userStats?.surveySkipped,
+  ]);
   
   
   return (
-    <Stack.Navigator
-      key={navigationKey}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      {isOnboarding ? (
-        // Onboarding flow
-        <Stack.Screen 
-          name="Onboarding" 
-          component={OnboardingStackNavigator}
-          options={{
-            animationTypeForReplace: 'push',
-          }}
-        />
-      ) : (
-        // Main app flow
-        <>
+    <NavigationControlContext.Provider value={navigationControl}>
+      <Stack.Navigator
+        key={navigationKey}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {isOnboarding ? (
+          // Onboarding flow
+          <Stack.Screen 
+            name="Onboarding" 
+            component={OnboardingStackNavigator}
+            options={{
+              animationTypeForReplace: 'push',
+            }}
+          />
+        ) : (
+          // Main app flow
+          <>
           <Stack.Screen 
             name="MainTabs" 
             component={MainTabNavigator}
@@ -251,12 +352,14 @@ const AppStackNavigator = () => {
         </>
       )}
     </Stack.Navigator>
+    </NavigationControlContext.Provider>
   );
 };
 
 // Survey Screen Wrapper Component
 const OnboardingSurveyScreen = ({ navigation, route }) => {
   const appContext = useApp();
+  const navigationControl = React.useContext(NavigationControlContext);
 
   const handleSurveyComplete = async (result) => {
     try {
@@ -272,7 +375,10 @@ const OnboardingSurveyScreen = ({ navigation, route }) => {
           segmentResult: result,
         });
         console.log('OnboardingSurveyScreen: User stats updated successfully');
-        console.log('OnboardingSurveyScreen: Navigation should automatically update via AppStackNavigator useEffect');
+        
+        // Navigate to Results screen first, then let the AppStackNavigator handle the main transition
+        console.log('OnboardingSurveyScreen: Navigating to Results screen');
+        navigation.navigate('Results', { result });
       } else {
         console.log('OnboardingSurveyScreen: updateUserStats function not available');
         console.log('Available context methods:', Object.keys(appContext));
@@ -284,11 +390,11 @@ const OnboardingSurveyScreen = ({ navigation, route }) => {
   };
 
   const handleSkip = async () => {
-    console.log('OnboardingSurveyScreen: Survey skipped');
+    console.log('OnboardingSurveyScreen: Survey skipped - directly forcing navigation to main app');
     
-    // Mark survey as completed even when skipped
-    if (appContext.updateUserStats) {
-      try {
+    try {
+      // Mark survey as completed even when skipped
+      if (appContext.updateUserStats) {
         console.log('OnboardingSurveyScreen: Updating user stats for skipped survey');
         await appContext.updateUserStats({
           ...appContext.userStats,
@@ -297,13 +403,21 @@ const OnboardingSurveyScreen = ({ navigation, route }) => {
           surveySkipped: true,
         });
         console.log('OnboardingSurveyScreen: User stats updated for skipped survey');
-        console.log('OnboardingSurveyScreen: Navigation should automatically update via AppStackNavigator useEffect');
-      } catch (error) {
-        console.error('OnboardingSurveyScreen: Error updating user stats for skip:', error);
       }
-    } else {
-      console.log('OnboardingSurveyScreen: updateUserStats not available');
-      console.log('Available context methods:', Object.keys(appContext));
+      
+      // Use the direct navigation control context to force main app
+      if (navigationControl?.forceMainApp) {
+        console.log('OnboardingSurveyScreen: Calling forceMainApp via context');
+        navigationControl.forceMainApp();
+      } else {
+        console.log('OnboardingSurveyScreen: navigationControl not available, falling back');
+        navigation.goBack();
+      }
+      
+    } catch (error) {
+      console.error('OnboardingSurveyScreen: Error in skip handler:', error);
+      // Fallback - just go back
+      navigation.goBack();
     }
   };
 
@@ -311,6 +425,25 @@ const OnboardingSurveyScreen = ({ navigation, route }) => {
     <OnboardingSurvey
       onComplete={handleSurveyComplete}
       onSkip={handleSkip}
+    />
+  );
+};
+
+// Segment Results Screen Wrapper Component  
+const SegmentResultsScreenWrapper = ({ navigation, route }) => {
+  const navigationControl = React.useContext(NavigationControlContext);
+
+  // Pass the navigationControl to the SegmentResultsScreen via props
+  // and handle the navigation properly from this wrapper
+  return (
+    <SegmentResultsScreen
+      navigation={navigation}
+      route={route}
+      navigationControl={navigationControl}
+      segment={route.params?.result?.segment || route.params?.segment}
+      confidence={route.params?.result?.confidence || route.params?.confidence || 85}
+      secondarySegment={route.params?.result?.secondarySegment || route.params?.secondarySegment}
+      goals={route.params?.result?.goals || route.params?.goals || []}
     />
   );
 };

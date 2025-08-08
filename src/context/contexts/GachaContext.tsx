@@ -314,10 +314,8 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
 
         const results: Character[] = [];
         for (let i = 0; i < pullCount; i++) {
-          const character = performGachaPull(
-            state.characterCollection,
-            state.currentBanner,
-          );
+          const singlePullResults = performGachaPull('single');
+          const character = singlePullResults[0]; // performGachaPull returns an array
           results.push(character);
           dispatch({ type: 'ADD_CHARACTER', payload: character });
         }
@@ -328,10 +326,13 @@ export const GachaProvider: React.FC<GachaProviderProps> = ({ children }) => {
           payload: { gems: state.userCurrencies.gems - cost },
         });
 
-        // Save updated data
+        // Save updated data (collections and currencies will be saved after dispatch updates)
+        const updatedCollection = [...state.characterCollection, ...results];
+        const updatedCurrencies = { ...state.userCurrencies, gems: state.userCurrencies.gems - cost };
+        
         await Promise.all([
-          StorageManager.saveCharacterCollection(state.characterCollection),
-          StorageManager.saveUserCurrencies(state.userCurrencies),
+          StorageManager.saveCharacterCollection(updatedCollection),
+          StorageManager.saveUserCurrencies(updatedCurrencies),
         ]);
 
         return results;

@@ -2,6 +2,7 @@
 // Unified context architecture with performance optimization and proper state management
 
 import React, { createContext, useContext, useReducer, useCallback, useMemo, ReactNode, useEffect } from 'react';
+import StorageManager from '../utils/StorageManager';
 import { 
   WorkoutProvider, 
   useWorkout,
@@ -29,6 +30,9 @@ interface UnifiedAppState {
   initialized: boolean;
   loading: boolean;
   error: string | null;
+  // App settings
+  settings?: any;
+  isDemo: boolean;
   
   // Multi-Gymmy integration state
   characterSystemEnabled: boolean;
@@ -61,6 +65,8 @@ interface UnifiedAppContextValue {
   syncCharacterProgression: (workoutData: any) => Promise<void>;
   handleWorkoutComplete: (workout: any) => Promise<void>;
   handleCharacterAction: (action: string, data: any) => Promise<void>;
+  updateSettings: (newSettings: any) => Promise<void>;
+  setDemoMode: (enabled: boolean) => Promise<void>;
   
   // Performance utilities
   refreshContext: (contextName: string) => void;
@@ -79,6 +85,8 @@ type UnifiedAppAction =
   | { type: 'INITIALIZE_APP' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_SETTINGS'; payload: any }
+  | { type: 'SET_DEMO_MODE'; payload: boolean }
   | { type: 'ENABLE_CHARACTER_SYSTEM'; payload: boolean }
   | { type: 'SET_ACTIVE_CHARACTERS'; payload: string[] }
   | { type: 'SET_CURRENT_TEAM'; payload: string | null }
@@ -97,6 +105,8 @@ const initialUnifiedState: UnifiedAppState = {
   initialized: false,
   loading: false,
   error: null,
+  settings: undefined,
+  isDemo: false,
   characterSystemEnabled: false,
   activeCharacters: [],
   currentTeam: null,
@@ -118,6 +128,12 @@ function unifiedAppReducer(state: UnifiedAppState, action: UnifiedAppAction): Un
       
   case 'SET_ERROR':
     return { ...state, error: action.payload, loading: false };
+  
+  case 'SET_SETTINGS':
+    return { ...state, settings: action.payload, isDemo: !!action.payload?.demoMode };
+  
+  case 'SET_DEMO_MODE':
+    return { ...state, isDemo: action.payload, settings: { ...(state.settings || {}), demoMode: action.payload } };
       
   case 'ENABLE_CHARACTER_SYSTEM':
     return { ...state, characterSystemEnabled: action.payload };
@@ -211,6 +227,16 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       
+      // Load settings (including demoMode) from storage
+      try {
+        const loadedSettings = await StorageManager.loadSettings();
+        if (loadedSettings) {
+          dispatch({ type: 'SET_SETTINGS', payload: loadedSettings });
+        }
+      } catch (settingsError: any) {
+        console.warn('Failed to load settings:', settingsError?.message || settingsError);
+      }
+
       // Initialize Multi-Gymmy systems if enabled
       if (enableMultiGymmy) {
         // Systems are already initialized as singletons via the barrel export
@@ -361,6 +387,47 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
   // UTILITY FUNCTIONS
   // ==============================================================================
 
+  const updateSettings = useCallback(async (newSettings: any): Promise<void> => {
+    try {
+      await StorageManager.saveSettings(newSettings);
+      dispatch({ type: 'SET_SETTINGS', payload: newSettings });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: `Settings update failed: ${error.message}` });
+    }
+  }, []);
+
+  const setDemoMode = useCallback(async (enabled: boolean): Promise<void> => {
+    try {
+      const currentSettings = (await StorageManager.loadSettings()) || {};
+      const updated = { ...currentSettings, demoMode: enabled };
+      await StorageManager.saveSettings(updated);
+      dispatch({ type: 'SET_DEMO_MODE', payload: enabled });
+
+      // Seed or restore data when toggling demo mode
+      if (enabled) {
+        // Backup user data then reset to rich dummy data
+        try {
+          await StorageManager.backupUserData();
+        } catch {}
+        await StorageManager.resetToDummyData();
+        // Ensure plenty of gems for gacha testing
+        try {
+          await StorageManager.saveUserCurrencies({ gems: 1000000, coins: 1000000, crystals: 1000 });
+        } catch {}
+      } else {
+        // Restore backed up user data when leaving demo
+        try {
+          await StorageManager.restoreUserData();
+          await StorageManager.clearBackupData();
+        } catch (e) {
+          console.warn('Failed to restore user data after demo mode off', e);
+        }
+      }
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: `Demo mode toggle failed: ${error.message}` });
+    }
+  }, []);
+
   const refreshContext = useCallback((contextName: string): void => {
     // This would trigger a refresh of specific contexts
     console.log(`Refreshing context: ${contextName}`);
@@ -406,6 +473,8 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
     syncCharacterProgression,
     handleWorkoutComplete,
     handleCharacterAction,
+    updateSettings,
+    setDemoMode,
     refreshContext,
     resetAppState,
     handleError,
@@ -416,6 +485,8 @@ export const UnifiedAppProvider: React.FC<UnifiedAppProviderProps> = ({
     syncCharacterProgression,
     handleWorkoutComplete,
     handleCharacterAction,
+    updateSettings,
+    setDemoMode,
     refreshContext,
     resetAppState,
     handleError,
@@ -459,11 +530,11 @@ const ContextBridge: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [, forceUpdate] = React.useReducer(x => x + 1, 0);
   
   useEffect(() => {
-    if (userStats?.userStats?.surveyCompleted) {
+    if ((userStats as any)?.userStats?.surveyCompleted) {
       console.log('ContextBridge: Survey completion detected, forcing re-render');
       forceUpdate();
     }
-  }, [userStats?.userStats?.surveyCompleted]);
+  }, [(userStats as any)?.userStats?.surveyCompleted]);
 
   // Update the unified context with individual context values using proper state management
   const bridgedContext = useMemo(() => {
@@ -542,6 +613,15 @@ export const useWorkoutIntegration = () => {
 // LEGACY COMPATIBILITY HOOK
 // ==============================================================================
 
+import { 
+  calculateClassXPRequired, 
+  calculateExperience, 
+  calculateClassXP, 
+  calculateLevel,
+  calculateLevelRequirement,
+  calculateTotalXPForLevel 
+} from './GameLogic';
+
 // This hook provides backward compatibility with the old context interface
 export const useLegacyApp = () => {
   const unifiedContext = useUnifiedApp();
@@ -566,6 +646,9 @@ export const useLegacyApp = () => {
       addWorkout: unifiedContext.workout?.addWorkout,
       removeWorkout: unifiedContext.workout?.removeWorkout,
       updateExerciseHistory: unifiedContext.workout?.updateExerciseHistory,
+      updateWorkout: unifiedContext.workout?.updateWorkout,
+      // Added setter for complete workout history (used by demo seeding)
+      updateWorkoutHistory: unifiedContext.workout?.setWorkoutHistory,
       
       // Character/Gacha data (legacy)
       characterCollection: unifiedContext.gacha?.characterCollection || [],
@@ -573,10 +656,22 @@ export const useLegacyApp = () => {
       userCurrencies: unifiedContext.gacha?.userCurrencies || { gems: 0, coins: 0 },
       performPull: unifiedContext.gacha?.performPull,
       
+      // Characters object with proper structure for CharacterCollectionScreen
+      characters: {
+        collection: unifiedContext.gacha?.characterCollection || [],
+        active_character: null, // TODO: This needs to be properly connected to the gacha state
+      },
+      
+      // Add setActiveCharacter method - create a stub for now
+      setActiveCharacter: (characterId: string) => {
+        console.warn('setActiveCharacter not implemented in unified context yet');
+      },
+      
       // App state  
       loading: unifiedContext.appState?.loading || false,
       error: unifiedContext.appState?.error || null,
-      isDemo: false,
+      isDemo: unifiedContext.appState?.isDemo || false,
+      settings: unifiedContext.appState?.settings || undefined,
       
       // Segmentation
       getCurrentSegment: unifiedContext.segmentation?.getCurrentSegment,
@@ -588,16 +683,27 @@ export const useLegacyApp = () => {
       characterSystemEnabled: unifiedContext.appState?.characterSystemEnabled || false,
       activeCharacters: unifiedContext.appState?.activeCharacters || [],
       
+      // Game Logic functions
+      calculateClassXPRequired,
+      calculateExperience,
+      calculateClassXP,
+      calculateLevel,
+      calculateLevelRequirement,
+      calculateTotalXPForLevel,
+      
       // Utility methods
       resetToDummyData: async () => {
-        console.log('resetToDummyData called - implement if needed');
+        await StorageManager.resetToDummyData();
       },
       clearAllData: async () => {
-        console.log('clearAllData called - implement if needed');  
+        await StorageManager.clearAllData();  
       },
       loadDemoData: async () => {
-        console.log('loadDemoData called - implement if needed');
+        await StorageManager.resetToDummyData();
       },
+      // Settings methods
+      updateSettings: unifiedContext.updateSettings,
+      setDemoMode: unifiedContext.setDemoMode,
     };
     
     return legacyContext;

@@ -62,33 +62,45 @@ const WelcomeScreen = ({ navigation }) => {
         lastSurveyCompletion: new Date().toISOString(),
         surveySkipped: true, // Add a flag to indicate it was skipped
       }).then(() => {
-        // Navigate back to root to trigger re-evaluation
+        // Prefer hard navigation to main tabs so the dashboard is visible immediately
         setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Onboarding' }],
-          });
-        }, 200);
+          try {
+            navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+          } catch (e) {
+            // Fallback to navigate if reset fails
+            navigation.navigate('MainTabs');
+          }
+        }, 150);
       }).catch((error) => {
         console.error('Error updating user stats for skip:', error);
-        // Still try to navigate even if update fails
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Onboarding' }],
-        });
+        // Still try to navigate to main app even if update fails
+        navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
       });
     } else {
-      // Fallback navigation
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Onboarding' }],
-      });
+      // Fallback navigation to main tabs
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#007AFF" />
+      {/* Top-right actions (settings/demo toggle) */}
+      <View style={styles.topRightActions}>
+        <TouchableOpacity
+          onPress={async () => {
+            try {
+              await appContext?.setDemoMode && appContext.setDemoMode(!appContext?.isDemo);
+            } catch (e) {
+              console.warn('Failed to toggle demo mode', e);
+            }
+          }}
+          activeOpacity={0.8}
+          style={[styles.gearButton, appContext?.isDemo ? styles.gearOn : styles.gearOff]}
+        >
+          <Ionicons name="settings-outline" size={16} color={appContext?.isDemo ? '#fff' : '#0f172a'} />
+        </TouchableOpacity>
+      </View>
       
       {/* Hero Section */}
       <View style={styles.heroSection}>
@@ -235,6 +247,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  topRightActions: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    zIndex: 20,
+  },
+  gearButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  gearOn: {
+    backgroundColor: '#ff6b35',
+    borderColor: '#ff6b35',
+  },
+  gearOff: {
+    backgroundColor: '#ffffff',
+    borderColor: '#e5e7eb',
   },
   heroSection: {
     backgroundColor: '#007AFF',

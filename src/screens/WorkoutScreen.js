@@ -56,8 +56,8 @@ const WorkoutScreen = ({ navigation, route }) => {
     removeTemplate,
   } = useApp();
 
-  // Check if we should show templates or start with a template
-  const { showTemplates, templateId } = route.params || {};
+  // Handle entry via calendar/day pane for editing an existing workout
+  const { showTemplates, templateId, workoutId, mode } = route.params || {};
 
   // Local state for current workout session
   const [currentWorkout, setCurrentWorkout] = useState(null);
@@ -79,6 +79,19 @@ const WorkoutScreen = ({ navigation, route }) => {
   const [templateDescription, setTemplateDescription] = useState('');
   const [showVerification, setShowVerification] = useState(false);
   const [completedWorkout, setCompletedWorkout] = useState(null);
+
+  // Initialize edit mode if navigated with a workoutId
+  useEffect(() => {
+    if (mode === 'edit' && workoutId && !currentWorkout) {
+      const existing = (workoutHistory || []).find(w => w.id === workoutId);
+      if (existing) {
+        setCurrentWorkout({ ...existing });
+        setExercises(existing.exercises || []);
+        setSelectedCategory(null);
+        setRatingType('post');
+      }
+    }
+  }, [mode, workoutId, workoutHistory, currentWorkout]);
 
   // Memoized exercise categories
   const exerciseCategories = useMemo(

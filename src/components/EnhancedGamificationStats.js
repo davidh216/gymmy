@@ -4,7 +4,12 @@ import { useApp } from '../context';
 import { FITNESS_CLASSES } from '../screens/ClassSelectionScreen';
 
 const EnhancedGamificationStats = ({ navigation }) => {
-  const { userStats, calculateClassXPRequired } = useApp();
+  const { userStats, calculateClassXPRequired, calculateTotalXPForLevel } = useApp();
+  // Safe fallbacks for demo data
+  const safeLevel = Number(userStats.level) || 1;
+  const safeExperience = (typeof userStats.experience === 'number' ? userStats.experience : (typeof userStats.totalExperience === 'number' ? userStats.totalExperience : 0));
+  const safeClassXP = Number(userStats.classXP) || 0;
+  const safeClassLevel = Number(userStats.classLevel) || 1;
   const [levelProgress] = useState(new Animated.Value(0));
   const [classProgress] = useState(new Animated.Value(0));
   
@@ -12,9 +17,10 @@ const EnhancedGamificationStats = ({ navigation }) => {
   
   useEffect(() => {
     // Animate overall level progress
-    const currentLevelXP = calculateLevelXP(userStats.level);
-    const nextLevelXP = calculateLevelXP(userStats.level + 1);
-    const progress = (userStats.experience - currentLevelXP) / (nextLevelXP - currentLevelXP);
+    const currentLevelXP = calculateTotalXPForLevel(safeLevel);
+    const nextLevelXP = calculateTotalXPForLevel(safeLevel + 1);
+    const denom = Math.max(1, nextLevelXP - currentLevelXP);
+    const progress = Math.max(0, Math.min(1, (safeExperience - currentLevelXP) / denom));
     
     Animated.timing(levelProgress, {
       toValue: progress,
@@ -24,14 +30,15 @@ const EnhancedGamificationStats = ({ navigation }) => {
     
     // Animate class progress if class selected
     if (classData) {
-      const classProgressValue = userStats.classXP / calculateClassXPRequired(userStats.classLevel + 1);
+      const required = Math.max(1, calculateClassXPRequired(safeClassLevel + 1));
+      const classProgressValue = Math.max(0, Math.min(1, safeClassXP / required));
       Animated.timing(classProgress, {
         toValue: classProgressValue,
         duration: 1500,
         useNativeDriver: false,
       }).start();
     }
-  }, [userStats.experience, userStats.level, userStats.classXP, userStats.classLevel]);
+  }, [safeExperience, safeLevel, safeClassXP, safeClassLevel]);
   
   const levelProgressWidth = levelProgress.interpolate({
     inputRange: [0, 1],
@@ -49,7 +56,7 @@ const EnhancedGamificationStats = ({ navigation }) => {
       <View style={styles.levelSection}>
         <View style={styles.levelHeader}>
           <Text style={styles.levelTitle}>WARRIOR LEVEL</Text>
-          <Text style={styles.levelNumber}>{userStats.level}</Text>
+          <Text style={styles.levelNumber}>{safeLevel}</Text>
         </View>
         
         <View style={styles.progressBar}>
@@ -59,7 +66,7 @@ const EnhancedGamificationStats = ({ navigation }) => {
         </View>
         
         <Text style={styles.experienceText}>
-          {userStats.experience} XP
+          {safeExperience} XP
         </Text>
       </View>
       
@@ -70,7 +77,7 @@ const EnhancedGamificationStats = ({ navigation }) => {
             <Text style={styles.classEmoji}>{classData.emoji}</Text>
             <View>
               <Text style={styles.classLevelTitle}>{classData.name}</Text>
-              <Text style={styles.classLevelNumber}>Level {userStats.classLevel}</Text>
+              <Text style={styles.classLevelNumber}>Level {safeClassLevel}</Text>
             </View>
           </View>
           
@@ -84,7 +91,7 @@ const EnhancedGamificationStats = ({ navigation }) => {
           </View>
           
           <Text style={styles.classXPText}>
-            {userStats.classXP} / {calculateClassXPRequired(userStats.classLevel + 1)} Class XP
+            {safeClassXP} / {calculateClassXPRequired(safeClassLevel + 1)} Class XP
           </Text>
         </View>
       )}

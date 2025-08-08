@@ -1,12 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Animated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
+// Safe LinearGradient fallback for web or when expo-linear-gradient is unavailable
+let LinearGradient = ({ colors = ['#4CAF50'], style, children }) => (
+  <View style={[style, { backgroundColor: colors[0] }]}>{children}</View>
+);
+if (Platform.OS !== 'web') {
+  try {
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    LinearGradient = require('expo-linear-gradient').LinearGradient;
+  } catch (e) {
+    // Keep fallback
+  }
+}
+
 const GachaComponents = ({ navigation }) => {
-  const { state, pullGacha } = useUnifiedApp();
-  const { userStats, gachaStats } = state;
+  const unified = useUnifiedApp();
+  const userStats = unified?.userStats?.userStats || unified?.userStats || {};
+  const gacha = unified?.gacha || {};
+  const pullGacha = gacha?.performPull || (() => []);
+  const gachaStats = gacha?.enhancedGacha?.lifetime_stats || { total_pulls: 0, gems_spent: 0 };
   
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState([]);
@@ -49,12 +64,12 @@ const GachaComponents = ({ navigation }) => {
 
         <View style={styles.gachaInfo}>
           <Text style={styles.gachaTitle}>Your Gacha Currency:</Text>
-          <Text style={styles.gachaAmount}>{userStats.gachaCurrency} Gacha Points</Text>
+          <Text style={styles.gachaAmount}>{userStats.gems ?? 0} Gems</Text>
         </View>
 
         <View style={styles.gachaInfo}>
           <Text style={styles.gachaTitle}>Total Pulls:</Text>
-          <Text style={styles.gachaAmount}>{gachaStats.totalPulls}</Text>
+          <Text style={styles.gachaAmount}>{gachaStats.total_pulls ?? 0}</Text>
         </View>
 
         <View style={styles.gachaInfo}>

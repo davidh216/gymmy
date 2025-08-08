@@ -1,4 +1,4 @@
-import React, { useMemo, useState, Suspense } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,49 +6,26 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  Alert,
-  Modal,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import { 
-  AnalyticsPreview,
-  GamificationStats,
   EnhancedGamificationStats,
 } from '../components/common';
 import MiniWeeklyChart from '../components/MiniWeeklyChart';
-import ClassDashboardWidget from '../components/ClassDashboardWidget';
-import { DESIGN_TOKENS } from '../constants/designTokens';
 
-// Lazy load the heavy AnalyticsCharts component
-const AnalyticsCharts = React.lazy(() => import('../components/AnalyticsCharts'));
-
-// Loading component for lazy-loaded charts
-const ChartsLoadingFallback = () => (
-  <View style={styles.chartsLoadingContainer}>
-    <ActivityIndicator size="large" color="#007AFF" />
-    <Text style={styles.chartsLoadingText}>Loading analytics...</Text>
-  </View>
-);
 
 const DashboardScreen = ({ navigation }) => {
   const { 
-    workoutStats, 
-    monthlyStats, 
-    recentWorkouts = [], // Add default empty array
-    userStats, 
     loading, 
-    updateWorkout, 
-    workoutTemplates = [], // Add default empty array
-    bodyWeights = [], // Add default empty array
     workoutHistory = [], // Add default empty array
     isDemo, 
+    setDemoMode,
   } = useApp();
   
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [showTemplateMenu, setShowTemplateMenu] = useState(false);
 
   // Handle month change from calendar
   const handleMonthChange = (newMonth) => {
@@ -57,8 +34,8 @@ const DashboardScreen = ({ navigation }) => {
 
   // Use memoized stats from context instead of calculating locally
   const dashboardStats = useMemo(() => {
-    // Add safety checks for all data
-    if (!recentWorkouts || !Array.isArray(recentWorkouts)) {
+    const history = Array.isArray(workoutHistory) ? workoutHistory : [];
+    if (history.length === 0) {
       return {
         totalWorkouts: 0,
         thisWeekCount: 0,
@@ -68,110 +45,55 @@ const DashboardScreen = ({ navigation }) => {
         totalDuration: 0,
         selectedMonthDuration: 0,
         favoriteExercise: 'None yet',
-        templatesCount: 0,
       };
     }
 
     const now = new Date();
-    const thisWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-    
-    // Use selected month instead of current month
-    const selectedMonthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-    const selectedMonthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    
-    // This week's workouts (still need to calculate this locally since it's time-dependent)
-    const thisWeekWorkouts = recentWorkouts.filter(workout => {
-      const workoutDate = new Date(workout.startTime);
-      return workoutDate >= thisWeek;
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+
+    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+
+    const thisWeekWorkouts = history.filter(w => new Date(w.startTime || w.workoutDate) >= startOfWeek);
+    const selectedMonthWorkouts = history.filter(w => {
+      const d = new Date(w.startTime || w.workoutDate);
+      return d >= monthStart && d <= monthEnd;
     });
 
-    // Selected month's workouts (still need to calculate this locally since it's month-dependent)
-    const selectedMonthWorkouts = recentWorkouts.filter(workout => {
-      const workoutDate = new Date(workout.startTime);
-      return workoutDate >= selectedMonthStart && workoutDate <= selectedMonthEnd;
-    });
-
-    // Most frequent exercise in selected month
-    const exerciseCount = {};
-    selectedMonthWorkouts.forEach(workout => {
-      if (workout.exercises && Array.isArray(workout.exercises)) {
-        workout.exercises.forEach(exercise => {
-          if (exercise.name) {
-            exerciseCount[exercise.name] = (exerciseCount[exercise.name] || 0) + 1;
-          }
-        });
-      }
-    });
-    
-    const favoriteExercise = Object.keys(exerciseCount).length > 0 
-      ? Object.keys(exerciseCount).reduce((a, b) => exerciseCount[a] > exerciseCount[b] ? a : b)
-      : 'None yet';
-
-    // Calculate total duration for selected month
+    const totalDuration = history.reduce((sum, w) => sum + (w.duration || 0), 0);
     const selectedMonthDuration = selectedMonthWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
 
-    // Calculate average rating for selected month
     const selectedMonthRatings = selectedMonthWorkouts
-      .filter(w => w.ratings?.workoutRating)
-      .map(w => w.ratings.workoutRating);
-    
-    const selectedMonthAvgRating = selectedMonthRatings.length > 0 
-      ? selectedMonthRatings.reduce((sum, rating) => sum + rating, 0) / selectedMonthRatings.length
+      .map(w => w?.ratings?.workoutRating)
+      .filter(r => typeof r === 'number');
+    const avgRating = selectedMonthRatings.length > 0
+      ? selectedMonthRatings.reduce((a, b) => a + b, 0) / selectedMonthRatings.length
       : 0;
 
-    // Calculate average workouts per week for the selected month
-    const weeksInSelectedMonth = Math.ceil((selectedMonthEnd - selectedMonthStart) / (1000 * 60 * 60 * 24 * 7));
-    const avgWorkoutsPerWeek = weeksInSelectedMonth > 0 ? selectedMonthWorkouts.length / weeksInSelectedMonth : 0;
+    const exerciseCount = {};
+    selectedMonthWorkouts.forEach(w => (w.exercises || []).forEach(ex => {
+      if (ex?.name) exerciseCount[ex.name] = (exerciseCount[ex.name] || 0) + 1;
+    }));
+    const favoriteExercise = Object.keys(exerciseCount).length
+      ? Object.entries(exerciseCount).sort((a,b) => b[1]-a[1])[0][0]
+      : 'None yet';
+
+    const weeksInMonth = Math.ceil((monthEnd.getTime() - monthStart.getTime() + 1) / (1000 * 60 * 60 * 24 * 7));
+    const avgWorkoutsPerWeek = weeksInMonth > 0 ? selectedMonthWorkouts.length / weeksInMonth : 0;
 
     return {
-      totalWorkouts: workoutStats?.totalWorkouts || 0,
+      totalWorkouts: history.length,
       thisWeekCount: thisWeekWorkouts.length,
       selectedMonthCount: selectedMonthWorkouts.length,
-      avgWorkoutsPerWeek: avgWorkoutsPerWeek,
-      avgRating: selectedMonthAvgRating,
-      totalDuration: workoutStats?.totalDuration || 0,
-      selectedMonthDuration: selectedMonthDuration,
+      avgWorkoutsPerWeek,
+      avgRating,
+      totalDuration,
+      selectedMonthDuration,
       favoriteExercise,
-      templatesCount: Array.isArray(workoutTemplates) ? workoutTemplates.length : 0,
     };
-  }, [workoutStats, monthlyStats, recentWorkouts, workoutTemplates, selectedMonth]);
+  }, [workoutHistory, selectedMonth]);
 
-  const getRatingColor = (rating) => {
-    if (rating >= 8) return '#22c55e';
-    if (rating >= 6) return '#84cc16';
-    if (rating >= 4) return '#eab308';
-    if (rating >= 2) return '#f97316';
-    return '#ef4444';
-  };
-
-  const handleWorkoutPress = async (workout, action = 'view') => {
-    if (action === 'edit') {
-      // Navigate to workout screen with edit mode
-      navigation.navigate('Workout', { 
-        workoutId: workout.id,
-        mode: 'edit',
-      });
-    } else if (action === 'delete') {
-      Alert.alert(
-        'Delete Workout',
-        'Are you sure you want to delete this workout?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Delete', 
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await updateWorkout({ ...workout, _delete: true });
-              } catch (error) {
-                Alert.alert('Error', 'Failed to delete workout');
-              }
-            },
-          },
-        ],
-      );
-    }
-  };
 
   const handleAnalyticsPress = () => {
     // Analytics charts are already shown inline in the dashboard
@@ -183,12 +105,8 @@ const DashboardScreen = ({ navigation }) => {
     navigation.navigate('Achievements');
   };
 
-  const handleClassSelectionPress = () => {
-    navigation.navigate('ClassSelection');
-  };
-
   const handleGachaPress = () => {
-    navigation.navigate('GachaScreen');
+    navigation.navigate('Gacha');
   };
 
   const handleCharacterCollectionPress = () => {
@@ -212,19 +130,41 @@ const DashboardScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
-          <TouchableOpacity 
-            style={styles.analyticsButton}
-            onPress={handleAnalyticsPress}
-          >
-            <Ionicons name="analytics-outline" size={24} color="#007AFF" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {/* Demo toggle pill */}
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await setDemoMode && setDemoMode(!isDemo);
+                } catch (e) {
+                  console.warn('Failed to toggle demo mode', e);
+                }
+              }}
+              style={[styles.demoToggle, isDemo ? styles.demoToggleOn : styles.demoToggleOff]}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name={isDemo ? 'eye' : 'eye-off'}
+                size={14}
+                color={isDemo ? '#fff' : '#6b7280'}
+              />
+              <Text style={[styles.demoToggleText, isDemo ? styles.demoToggleTextOn : styles.demoToggleTextOff]}>
+                {isDemo ? 'Demo On' : 'Demo Off'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Analytics shortcut */}
+            <TouchableOpacity 
+              style={styles.analyticsButton}
+              onPress={handleAnalyticsPress}
+            >
+              <Ionicons name="analytics-outline" size={24} color="#007AFF" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Class Dashboard Widget */}
-        <ClassDashboardWidget />
-
         {/* Gamification Stats */}
-        <EnhancedGamificationStats />
+        <EnhancedGamificationStats navigation={navigation} />
 
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
@@ -257,91 +197,6 @@ const DashboardScreen = ({ navigation }) => {
           navigation={navigation}
         />
 
-        {/* Recent Workouts */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Workouts</Text>
-            <TouchableOpacity 
-              style={styles.seeAllButton}
-              onPress={() => navigation.navigate('Workout')}
-            >
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.recentWorkoutsContainer}
-          >
-            {recentWorkouts && recentWorkouts.length > 0 ? (
-              recentWorkouts.map((workout, index) => (
-                <TouchableOpacity
-                  key={workout.id}
-                  style={styles.workoutCard}
-                  onPress={() => handleWorkoutPress(workout)}
-                  onLongPress={() => {
-                    Alert.alert(
-                      'Workout Options',
-                      'What would you like to do?',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'View', onPress: () => handleWorkoutPress(workout) },
-                        { text: 'Edit', onPress: () => handleWorkoutPress(workout, 'edit') },
-                        { text: 'Delete', style: 'destructive', onPress: () => handleWorkoutPress(workout, 'delete') },
-                      ],
-                    );
-                  }}
-                >
-                  <View style={styles.workoutCardHeader}>
-                    <Text style={styles.workoutDate}>
-                      {new Date(workout.startTime).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                      })}
-                    </Text>
-                    <Text style={styles.workoutTime}>
-                      {new Date(workout.startTime).toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                      })}
-                    </Text>
-                  </View>
-                  
-                  <Text style={styles.workoutDuration}>
-                    {Math.round(workout.duration || 0)} min
-                  </Text>
-                  
-                  <Text style={styles.workoutExercises}>
-                    {workout.exercises?.length || 0} exercises
-                  </Text>
-                  
-                  {workout.ratings?.workoutRating && (
-                    <View style={styles.ratingContainer}>
-                      <Ionicons 
-                        name="star" 
-                        size={12} 
-                        color={getRatingColor(workout.ratings.workoutRating)} 
-                      />
-                      <Text style={[
-                        styles.ratingText,
-                        { color: getRatingColor(workout.ratings.workoutRating) },
-                      ]}>
-                        {workout.ratings.workoutRating}/10
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))
-            ) : (
-              <View style={styles.emptyWorkoutsContainer}>
-                <Ionicons name="fitness-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyWorkoutsText}>No workouts yet</Text>
-                <Text style={styles.emptyWorkoutsSubtext}>Start your fitness journey today!</Text>
-              </View>
-            )}
-          </ScrollView>
-        </View>
 
         {/* Quick Actions */}
         <View style={styles.section}>
@@ -370,29 +225,9 @@ const DashboardScreen = ({ navigation }) => {
               <Ionicons name="people" size={24} color="#10b981" />
               <Text style={styles.actionText}>Characters</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.actionCard}
-              onPress={handleClassSelectionPress}
-            >
-              <Ionicons name="shield" size={24} color="#ef4444" />
-              <Text style={styles.actionText}>Classes</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Lazy-loaded Analytics Charts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Analytics Preview</Text>
-          <Suspense fallback={<ChartsLoadingFallback />}>
-            <AnalyticsCharts 
-              workoutHistory={workoutHistory}
-              exerciseHistory={{}}
-              userStats={userStats}
-              bodyWeights={bodyWeights}
-            />
-          </Suspense>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -431,8 +266,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1f2937',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   analyticsButton: {
     padding: 8,
+  },
+  demoToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  demoToggleOn: {
+    backgroundColor: '#ff6b35',
+    borderColor: '#ff6b35',
+  },
+  demoToggleOff: {
+    backgroundColor: '#fff',
+    borderColor: '#e5e7eb',
+  },
+  demoToggleText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  demoToggleTextOn: {
+    color: '#fff',
+  },
+  demoToggleTextOff: {
+    color: '#6b7280',
   },
   statsContainer: {
     flexDirection: 'row',

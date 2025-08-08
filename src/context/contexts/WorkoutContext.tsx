@@ -57,11 +57,14 @@ interface WorkoutContextValue {
   // Actions
   addWorkout: (workout: Workout) => Promise<void>;
   removeWorkout: (workoutId: string) => Promise<void>;
+  updateWorkout: (workout: Workout) => Promise<void>;
   updateExerciseHistory: (exercises: Exercise[]) => Promise<void>;
   addTemplate: (template: WorkoutTemplate) => Promise<void>;
   removeTemplate: (templateId: string) => Promise<void>;
   addRestDay: (restDay: RestDay) => Promise<void>;
   removeRestDay: (date: string) => Promise<void>;
+  /** Replace entire workout history; useful for demo mode seeding */
+  setWorkoutHistory: (workouts: Workout[]) => Promise<void>;
   clearAllWorkoutData: () => Promise<void>;
 }
 
@@ -240,6 +243,26 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
     }
   }, []);
 
+  const updateWorkout = useCallback(async (workout: Workout) => {
+    try {
+      const existing = state.workoutHistory || [];
+      let found = false;
+      const updated = existing.map(w => {
+        if (w.id === workout.id) {
+          found = true;
+          return { ...w, ...workout };
+        }
+        return w;
+      });
+      const finalList = found ? updated : [...updated, workout];
+      dispatch({ type: 'SET_WORKOUTS', payload: finalList });
+      await StorageManager.saveWorkoutHistory(finalList);
+    } catch (error) {
+      console.error('Error updating workout:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to update workout' });
+    }
+  }, [state.workoutHistory]);
+
   const updateExerciseHistory = useCallback(
     async (exercises: Exercise[]) => {
       try {
@@ -296,6 +319,16 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
     }
   }, []);
 
+  const setWorkoutHistory = useCallback(async (workouts: Workout[]) => {
+    try {
+      dispatch({ type: 'SET_WORKOUTS', payload: workouts || [] });
+      await StorageManager.saveWorkoutHistory(workouts || []);
+    } catch (error) {
+      console.error('Error setting workout history:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to set workout history' });
+    }
+  }, []);
+
   const clearAllWorkoutData = useCallback(async () => {
     try {
       dispatch({ type: 'SET_WORKOUTS', payload: [] });
@@ -327,11 +360,13 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
     // Actions
     addWorkout,
     removeWorkout,
+    updateWorkout,
     updateExerciseHistory,
     addTemplate,
     removeTemplate,
     addRestDay,
     removeRestDay,
+    setWorkoutHistory,
     clearAllWorkoutData,
   };
 

@@ -27,7 +27,9 @@
       "Bash(sed:*)",
       "Bash(timeout 10s npx expo start --no-dev --minify)",
       "Bash(timeout 10s npx expo start --no-dev --minify --port 8083)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(timeout:*)",
+      "Bash(npx expo:*)"
     ],
     "deny": []
   }

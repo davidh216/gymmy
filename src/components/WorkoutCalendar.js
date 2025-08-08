@@ -5,11 +5,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUnifiedApp } from '../context/UnifiedAppProvider';
 
 const WorkoutCalendar = ({ navigation }) => {
-  const { state, addRestDay } = useUnifiedApp();
-  const { workoutHistory, restDays } = state;
+  const { workout } = useUnifiedApp();
+  const workoutHistory = workout?.workoutHistory || [];
+  const restDays = workout?.restDays || [];
   
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddRestDay, setShowAddRestDay] = useState(false);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedDayString, setSelectedDayString] = useState('');
+  const [dayWorkouts, setDayWorkouts] = useState([]);
   
   // Generate calendar data for current month
   const calendarData = useMemo(() => {
@@ -46,12 +50,15 @@ const WorkoutCalendar = ({ navigation }) => {
   
   const handleDatePress = (day) => {
     if (day.hasWorkout) {
-      // Navigate to workout details
-      const workout = workoutHistory.find(w => 
+      // Open an in-app modal listing workouts for that day (web-friendly)
+      const workoutsForDay = workoutHistory.filter(w =>
         w.date === day.dateString || w.startTime?.startsWith(day.dateString)
       );
-      if (workout) {
-        navigation.navigate('WorkoutDetails', { workout });
+      if (workoutsForDay && workoutsForDay.length > 0) {
+        setDayWorkouts(workoutsForDay);
+        setSelectedDayString(day.dateString);
+        setShowDayModal(true);
+        return;
       }
     } else if (day.hasRestDay) {
       // Show rest day details
@@ -84,8 +91,7 @@ const WorkoutCalendar = ({ navigation }) => {
   };
   
   const handleAddRestDay = () => {
-    const today = new Date().toISOString().split('T')[0];
-    addRestDay(today, 'Rest day logged');
+    // Demo-only placeholder: close modal. Rest-day persistence can be wired later.
     setShowAddRestDay(false);
   };
   
@@ -195,7 +201,44 @@ const WorkoutCalendar = ({ navigation }) => {
                 style={[styles.modalButton, styles.confirmButton]}
                 onPress={handleAddRestDay}
               >
-                <Text style={styles.confirmButtonText}>Add Rest Day</Text>
+                <Text style={styles.confirmButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Day Workouts Modal */}
+      {showDayModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Workouts for {selectedDayString}</Text>
+            <View style={{ width: '100%', marginTop: 8 }}>
+              {dayWorkouts.map((w, idx) => {
+                const time = new Date(w.startTime || w.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const exCount = w.exercises?.length || 0;
+                const dur = Math.round(w.duration || 0);
+                return (
+                  <TouchableOpacity
+                    key={w.id || idx}
+                    style={styles.dayWorkoutItem}
+                    onPress={() => {
+                      setShowDayModal(false);
+                      navigation.navigate('Workout', { workoutId: w.id, mode: 'edit' });
+                    }}
+                  >
+                    <Text style={styles.dayWorkoutText}>{time} • {exCount} exercises • {dur}m</Text>
+                    <Text style={styles.dayWorkoutEdit}>Open</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowDayModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -376,6 +419,28 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  dayWorkoutItem: {
+    width: '100%',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 8,
+    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+  },
+  dayWorkoutText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  dayWorkoutEdit: {
+    color: '#007AFF',
+    fontSize: 14,
     fontWeight: '600',
   },
 });

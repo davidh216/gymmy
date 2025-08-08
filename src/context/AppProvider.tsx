@@ -67,32 +67,66 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
 const DevTools: React.FC = () => {
   const [showDebugger, setShowDebugger] = React.useState(false);
-  
+  const [devtoolsOpen, setDevtoolsOpen] = React.useState(false);
+
+  // Only attempt DOM checks on web
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const detect = () => {
+      const threshold = 160;
+      const width = Math.abs((window.outerWidth || 0) - (window.innerWidth || 0)) > threshold;
+      const height = Math.abs((window.outerHeight || 0) - (window.innerHeight || 0)) > threshold;
+      return width || height;
+    };
+
+    const update = () => setDevtoolsOpen(detect());
+    update();
+    const id = window.setInterval(update, 600);
+
+    // F12 shortcut forces visibility while devtools likely opens
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F12' || (e as any).keyCode === 123) {
+        setTimeout(update, 300);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
-  
+
+  // Hide entirely unless devtools (F12) is open
+  if (!devtoolsOpen) return null;
+
   return (
     <>
-      {/* Debug Toggle */}
+      {/* Debug Toggle - bottom-right */}
       <div
         style={{
           position: 'fixed',
-          top: 10,
-          right: 10,
+          bottom: 12,
+          right: 12,
           zIndex: 10000,
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           color: 'white',
-          padding: '5px 10px',
-          borderRadius: '5px',
+          padding: '6px 10px',
+          borderRadius: '9999px',
           fontSize: '12px',
           cursor: 'pointer',
+          userSelect: 'none',
         }}
         onClick={() => setShowDebugger(!showDebugger)}
       >
         🐛 Debug
       </div>
-      
+
       {/* Debug Panel */}
       {showDebugger && <DebugPanel />}
     </>

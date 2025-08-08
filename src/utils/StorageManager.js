@@ -10,6 +10,23 @@ const STORAGE_KEYS = {
   WORKOUT_TEMPLATES: '@workout_templates',
   REST_DAYS: '@rest_days',
   BODY_WEIGHTS: '@body_weights',
+  // Gacha and character system keys
+  CHARACTER_COLLECTION: '@character_collection',
+  SOCIAL_POSTS: '@social_posts',
+  USER_CURRENCIES: '@user_currencies',
+  DAILY_BONUSES: '@daily_bonuses',
+  ENHANCED_GACHA_STATE: '@enhanced_gacha_state',
+  // Segmentation system keys
+  SEGMENT_PROFILE: '@segment_profile',
+  SURVEY_HISTORY: '@survey_history',
+  PERSONALIZED_GOALS: '@personalized_goals',
+  SEGMENT_PREFERENCES: '@segment_preferences',
+  SEGMENT_METRICS: '@segment_metrics',
+  ADAPTIVE_SETTINGS: '@adaptive_settings',
+  ONBOARDING_STATUS: '@onboarding_status',
+  // Achievement and quest system keys
+  ACHIEVEMENTS: '@achievements',
+  QUESTS: '@quests',
   // Backup keys for demo mode
   BACKUP_WORKOUT_HISTORY: '@backup_workout_history',
   BACKUP_EXERCISE_HISTORY: '@backup_exercise_history',
@@ -891,6 +908,277 @@ class StorageManager {
       console.error('Error clearing backup data:', error);
       return false;
     }
+  }
+
+  // Achievement system methods
+  static async saveAchievements(achievements) {
+    return await this.saveData(STORAGE_KEYS.ACHIEVEMENTS, achievements);
+  }
+
+  static async loadAchievements() {
+    return await this.loadData(STORAGE_KEYS.ACHIEVEMENTS, []);
+  }
+
+  static async getAchievements() {
+    return await this.loadAchievements();
+  }
+
+  // Quest system methods
+  static async saveQuests(quests) {
+    return await this.saveData(STORAGE_KEYS.QUESTS, quests);
+  }
+
+  static async loadQuests() {
+    return await this.loadData(STORAGE_KEYS.QUESTS, []);
+  }
+
+  static async getQuests() {
+    return await this.loadQuests();
+  }
+
+  // Character collection methods
+  static async saveCharacterCollection(characters) {
+    return await this.saveData(STORAGE_KEYS.CHARACTER_COLLECTION, characters);
+  }
+
+  static async loadCharacterCollection() {
+    return await this.loadData(STORAGE_KEYS.CHARACTER_COLLECTION, []);
+  }
+
+  static async getCharacterCollection() {
+    return await this.loadCharacterCollection();
+  }
+
+  // Social posts methods
+  static async saveSocialPosts(posts) {
+    return await this.saveData(STORAGE_KEYS.SOCIAL_POSTS, posts);
+  }
+
+  static async loadSocialPosts() {
+    return await this.loadData(STORAGE_KEYS.SOCIAL_POSTS, []);
+  }
+
+  static async getSocialPosts() {
+    return await this.loadSocialPosts();
+  }
+
+  static async saveSocialPost(post) {
+    const posts = await this.loadSocialPosts();
+    posts.push(post);
+    return await this.saveSocialPosts(posts);
+  }
+
+  // User currencies methods
+  static async saveUserCurrencies(currencies) {
+    return await this.saveData(STORAGE_KEYS.USER_CURRENCIES, currencies);
+  }
+
+  static async loadUserCurrencies() {
+    const defaultCurrencies = {
+      gems: 0,
+      coins: 0,
+      tickets: 0,
+    };
+    return await this.loadData(STORAGE_KEYS.USER_CURRENCIES, defaultCurrencies);
+  }
+
+  static async getUserCurrencies() {
+    return await this.loadUserCurrencies();
+  }
+
+  // Daily bonuses methods
+  static async saveDailyBonuses(bonuses) {
+    return await this.saveData(STORAGE_KEYS.DAILY_BONUSES, bonuses);
+  }
+
+  static async loadDailyBonuses() {
+    const defaultBonuses = {
+      lastClaimed: null,
+      streak: 0,
+      available: true,
+    };
+    return await this.loadData(STORAGE_KEYS.DAILY_BONUSES, defaultBonuses);
+  }
+
+  static async getDailyBonuses() {
+    return await this.loadDailyBonuses();
+  }
+
+  // Enhanced gacha state methods
+  static async saveEnhancedGachaState(state) {
+    return await this.saveData(STORAGE_KEYS.ENHANCED_GACHA_STATE, state);
+  }
+
+  static async loadEnhancedGachaState() {
+    return await this.loadData(STORAGE_KEYS.ENHANCED_GACHA_STATE, null);
+  }
+
+  static async getEnhancedGachaState() {
+    return await this.loadEnhancedGachaState();
+  }
+
+  // Segmentation system methods
+  static async saveSegmentProfile(profile) {
+    return await this.saveData(STORAGE_KEYS.SEGMENT_PROFILE, profile);
+  }
+
+  static async loadSegmentProfile() {
+    return await this.loadData(STORAGE_KEYS.SEGMENT_PROFILE, null);
+  }
+
+  static async getSegmentProfile() {
+    return await this.loadSegmentProfile();
+  }
+
+  static async saveSurveyHistory(history) {
+    return await this.saveData(STORAGE_KEYS.SURVEY_HISTORY, history);
+  }
+
+  static async loadSurveyHistory() {
+    return await this.loadData(STORAGE_KEYS.SURVEY_HISTORY, []);
+  }
+
+  static async getSurveyHistory() {
+    return await this.loadSurveyHistory();
+  }
+
+  static async savePersonalizedGoals(goals) {
+    return await this.saveData(STORAGE_KEYS.PERSONALIZED_GOALS, goals);
+  }
+
+  static async loadPersonalizedGoals() {
+    return await this.loadData(STORAGE_KEYS.PERSONALIZED_GOALS, []);
+  }
+
+  static async getPersonalizedGoals() {
+    return await this.loadPersonalizedGoals();
+  }
+
+  static async saveSegmentPreferences(preferences) {
+    return await this.saveData(STORAGE_KEYS.SEGMENT_PREFERENCES, preferences);
+  }
+
+  static async loadSegmentPreferences() {
+    return await this.loadData(STORAGE_KEYS.SEGMENT_PREFERENCES, null);
+  }
+
+  static async getSegmentPreferences() {
+    return await this.loadSegmentPreferences();
+  }
+
+  static async saveSegmentMetrics(metrics) {
+    return await this.saveData(STORAGE_KEYS.SEGMENT_METRICS, metrics);
+  }
+
+  static async loadSegmentMetrics() {
+    return await this.loadData(STORAGE_KEYS.SEGMENT_METRICS, null);
+  }
+
+  static async getSegmentMetrics() {
+    return await this.loadSegmentMetrics();
+  }
+
+  static async saveAdaptiveSettings(settings) {
+    return await this.saveData(STORAGE_KEYS.ADAPTIVE_SETTINGS, settings);
+  }
+
+  static async loadAdaptiveSettings() {
+    return await this.loadData(STORAGE_KEYS.ADAPTIVE_SETTINGS, null);
+  }
+
+  static async getAdaptiveSettings() {
+    return await this.loadAdaptiveSettings();
+  }
+
+  static async saveOnboardingStatus(completed) {
+    return await this.saveData(STORAGE_KEYS.ONBOARDING_STATUS, completed);
+  }
+
+  static async loadOnboardingStatus() {
+    return await this.loadData(STORAGE_KEYS.ONBOARDING_STATUS, false);
+  }
+
+  static async getOnboardingStatus() {
+    return await this.loadOnboardingStatus();
+  }
+
+  // Add missing workout-related methods
+  static async getWorkoutHistory() {
+    return await this.loadWorkoutHistory();
+  }
+
+  static async getExerciseHistory() {
+    return await this.loadExerciseHistory();
+  }
+
+  static async getWorkoutTemplates() {
+    return await this.loadWorkoutTemplates();
+  }
+
+  static async getRestDays() {
+    return await this.loadRestDays();
+  }
+
+  static async getUserStats() {
+    return await this.loadUserStats();
+  }
+
+  static async saveWorkout(workout) {
+    const workoutHistory = await this.loadWorkoutHistory();
+    workoutHistory.push(workout);
+    return await this.saveWorkoutHistory(workoutHistory);
+  }
+
+  static async saveWorkoutTemplate(template) {
+    const templates = await this.loadWorkoutTemplates();
+    const existingIndex = templates.findIndex(t => t.id === template.id);
+    if (existingIndex >= 0) {
+      templates[existingIndex] = template;
+    } else {
+      templates.push(template);
+    }
+    return await this.saveWorkoutTemplates(templates);
+  }
+
+  static async saveRestDay(restDay) {
+    const restDays = await this.loadRestDays();
+    restDays.push(restDay);
+    return await this.saveRestDays(restDays);
+  }
+
+  // Convenience mutation helpers (used by contexts)
+  static async removeWorkout(workoutId) {
+    const workouts = await this.loadWorkoutHistory();
+    const updated = (workouts || []).filter(w => w.id !== workoutId);
+    return await this.saveWorkoutHistory(updated);
+  }
+
+  static async removeWorkoutTemplate(templateId) {
+    const templates = await this.loadWorkoutTemplates();
+    const updated = (templates || []).filter(t => t.id !== templateId);
+    return await this.saveWorkoutTemplates(updated);
+  }
+
+  static async removeRestDay(date) {
+    const restDays = await this.loadRestDays();
+    const updated = (restDays || []).filter(r => r.date !== date);
+    return await this.saveRestDays(updated);
+  }
+
+  static async clearWorkoutHistory() {
+    return await this.removeData(STORAGE_KEYS.WORKOUT_HISTORY);
+  }
+
+  static async clearExerciseHistory() {
+    return await this.removeData(STORAGE_KEYS.EXERCISE_HISTORY);
+  }
+
+  static async clearWorkoutTemplates() {
+    return await this.removeData(STORAGE_KEYS.WORKOUT_TEMPLATES);
+  }
+
+  static async clearRestDays() {
+    return await this.removeData(STORAGE_KEYS.REST_DAYS);
   }
 }
 
