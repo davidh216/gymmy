@@ -13,6 +13,9 @@ import { useApp } from '../context';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import { 
   EnhancedGamificationStats,
+  ScreenErrorBoundary,
+  MemoryOptimizedComponent,
+  PerformanceMonitor,
 } from '../components/common';
 import MiniWeeklyChart from '../components/MiniWeeklyChart';
 
@@ -125,8 +128,11 @@ const DashboardScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+    <ScreenErrorBoundary>
+      <MemoryOptimizedComponent>
+        <PerformanceMonitor componentName="DashboardScreen">
+          <SafeAreaView style={styles.container}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>
@@ -228,8 +234,11 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         </View>
 
-      </ScrollView>
-    </SafeAreaView>
+            </ScrollView>
+          </SafeAreaView>
+        </PerformanceMonitor>
+      </MemoryOptimizedComponent>
+    </ScreenErrorBoundary>
   );
 };
 

@@ -14,6 +14,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUnifiedApp } from '../context/UnifiedAppProvider';
+import { 
+  WidgetErrorBoundary,
+  MemoryOptimizedComponent,
+  PerformanceMonitor,
+} from './common';
 
 // ==============================================================================
 // ENHANCED GACHA SCREEN WITH PITY DISPLAY
@@ -77,7 +82,10 @@ export const EnhancedGachaScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <WidgetErrorBoundary>
+      <MemoryOptimizedComponent>
+        <PerformanceMonitor componentName="EnhancedGachaScreen">
+          <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       {/* Enhanced Header with Pity Display */}
       <View style={styles.enhancedHeader}>
         <Text style={styles.title}>ENHANCED SUMMONS</Text>
@@ -207,8 +215,11 @@ export const EnhancedGachaScreen = ({ navigation }) => {
         visible={showResults}
         results={pullResults}
         onClose={() => setShowResults(false)}
-      />
-    </ScrollView>
+          />
+        </ScrollView>
+      </PerformanceMonitor>
+    </MemoryOptimizedComponent>
+  </WidgetErrorBoundary>
   );
 };
 

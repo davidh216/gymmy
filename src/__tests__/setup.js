@@ -1,5 +1,10 @@
 /* global jest */
 
+// Global polyfills to prevent TypeError
+global.Object.defineProperty = Object.defineProperty;
+global.Object.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+global.Object.getOwnPropertyNames = Object.getOwnPropertyNames;
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
@@ -62,24 +67,6 @@ jest.mock('expo', () => ({
   StatusBar: 'StatusBar',
 }));
 
-// Mock react-native-chart-kit
-jest.mock('react-native-chart-kit', () => ({
-  LineChart: 'LineChart',
-  BarChart: 'BarChart',
-  PieChart: 'PieChart',
-}));
-
-// Mock @react-native-community/datetimepicker
-jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker');
-
-// Mock react-native-svg
-jest.mock('react-native-svg', () => ({
-  Svg: 'Svg',
-  Path: 'Path',
-  Circle: 'Circle',
-  Rect: 'Rect',
-}));
-
 // Mock @expo/vector-icons
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
@@ -93,4 +80,15 @@ global.console = {
   log: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+};
+
+// Mock fetch for API calls
+global.fetch = jest.fn();
+
+// Mock AsyncStorage for testing
+global.AsyncStorage = {
+  setItem: jest.fn(),
+  getItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
 }; 

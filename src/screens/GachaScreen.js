@@ -16,6 +16,11 @@ import {
   Alert,
 } from 'react-native';
 import { useApp, getPullCosts, GACHA_RATES } from '../context';
+import { 
+  ScreenErrorBoundary,
+  MemoryOptimizedComponent,
+  PerformanceMonitor,
+} from '../components/common';
 
 const { width, height } = Dimensions.get('window');
 
@@ -94,8 +99,11 @@ const GachaScreen = ({ navigation }) => {
   };
   
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <ScreenErrorBoundary>
+      <MemoryOptimizedComponent>
+        <PerformanceMonitor componentName="GachaScreen">
+          <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header with Currency Display */}
         <View style={styles.header}>
           <Text style={styles.title}>GACHA SUMMONS</Text>
@@ -203,16 +211,19 @@ const GachaScreen = ({ navigation }) => {
             <Text style={styles.actionButtonText}>🏋️ EARN GEMS</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-      
-      {/* Pull Results Modal */}
-      <PullResultsModal
-        visible={showResults}
-        results={pullResults}
-        onClose={() => setShowResults(false)}
-        rarityGradients={rarityGradients}
-      />
-    </View>
+            </ScrollView>
+          </View>
+          
+          {/* Pull Results Modal */}
+          <PullResultsModal
+            visible={showResults}
+            results={pullResults}
+            onClose={() => setShowResults(false)}
+            rarityGradients={rarityGradients}
+          />
+        </PerformanceMonitor>
+      </MemoryOptimizedComponent>
+    </ScreenErrorBoundary>
   );
 };
 

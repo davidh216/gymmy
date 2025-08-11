@@ -15,6 +15,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useApp } from '../context';
+import { 
+  ScreenErrorBoundary,
+  MemoryOptimizedComponent,
+  PerformanceMonitor,
+} from '../components/common';
 
 // Import new workout components
 import { 
@@ -517,8 +522,11 @@ const WorkoutScreen = ({ navigation, route }) => {
   }, [ratingType, completeWorkout]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+    <ScreenErrorBoundary>
+      <MemoryOptimizedComponent>
+        <PerformanceMonitor componentName="WorkoutScreen">
+          <SafeAreaView style={styles.container}>
+            <ScrollView style={styles.scrollView}>
         {!currentWorkout ? (
           // Workout not started - Show header and history
           <View>
@@ -612,8 +620,11 @@ const WorkoutScreen = ({ navigation, route }) => {
             onVerificationComplete={handleVerificationComplete}
           />
         </Suspense>
-      )}
-    </SafeAreaView>
+            )}
+          </SafeAreaView>
+        </PerformanceMonitor>
+      </MemoryOptimizedComponent>
+    </ScreenErrorBoundary>
   );
 };
 
