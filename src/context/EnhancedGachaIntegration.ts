@@ -133,6 +133,15 @@ export class EnhancedGachaManager {
     switch (rarity) {
       case 'common':
         return { 'strength_essence': 1 };
+      case 'rare':
+        return { 'strength_essence': 2, 'rare_crystal': 1 };
+      case 'epic':
+        return { 'strength_essence': 5, 'rare_crystal': 3, 'epic_shard': 1 };
+      case 'legendary':
+        return { 'strength_essence': 10, 'rare_crystal': 5, 'epic_shard': 3, 'legendary_core': 1 };
+      default:
+        return { 'strength_essence': 1 };
+    }
   }
   
   // Banner management

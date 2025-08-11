@@ -8,8 +8,8 @@ export * from './character-visual';
 // Sprint 2: Team Management UI
 export * from './team-management';
 
-// Sprint 3: Gacha Experience (coming soon)
-// export * from './gacha-experience';
+// Sprint 3: Enhanced Gacha Experience
+export * from './gacha-experience';
 
 // Sprint 4: Collection Hub (coming soon)
 // export * from './collection-hub';
