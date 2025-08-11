@@ -1,5 +1,16 @@
 /* global jest */
 
+// Polyfill for jest-expo TypeError fix
+if (typeof global.window === 'undefined') {
+  global.window = {};
+}
+if (typeof global.document === 'undefined') {
+  global.document = {};
+}
+if (typeof global.navigator === 'undefined') {
+  global.navigator = {};
+}
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
@@ -56,29 +67,8 @@ jest.mock('@react-navigation/native', () => ({
   })),
 }));
 
-// Mock Expo
-jest.mock('expo', () => ({
-  LinearGradient: 'LinearGradient',
-  StatusBar: 'StatusBar',
-}));
-
-// Mock react-native-chart-kit
-jest.mock('react-native-chart-kit', () => ({
-  LineChart: 'LineChart',
-  BarChart: 'BarChart',
-  PieChart: 'PieChart',
-}));
-
 // Mock @react-native-community/datetimepicker
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker');
-
-// Mock react-native-svg
-jest.mock('react-native-svg', () => ({
-  Svg: 'Svg',
-  Path: 'Path',
-  Circle: 'Circle',
-  Rect: 'Rect',
-}));
 
 // Mock @expo/vector-icons
 jest.mock('@expo/vector-icons', () => ({

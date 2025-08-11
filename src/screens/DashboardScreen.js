@@ -1,459 +1,209 @@
-import React, { useMemo, useState } from 'react';
+// src/screens/DashboardScreen.js
+
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  RefreshControl,
   SafeAreaView,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context';
-import WorkoutCalendar from '../components/WorkoutCalendar';
 import { 
-  EnhancedGamificationStats,
+  ScreenErrorBoundary, 
+  WidgetErrorBoundary,
+  MemoryOptimizedComponent,
+  useMemoryMonitor,
+  useDebouncedValue
 } from '../components/common';
-import MiniWeeklyChart from '../components/MiniWeeklyChart';
+import { useSystemIntegration } from '../context/SystemIntegrationFix';
 
+// Lazy load heavy components
+const AdaptiveDashboard = React.lazy(() => import('../components/AdaptiveDashboard'));
+const AnalyticsPreview = React.lazy(() => import('../components/AnalyticsPreview'));
+const MotivationalQuote = React.lazy(() => import('../components/MotivationalQuote'));
 
 const DashboardScreen = ({ navigation }) => {
-  const { 
-    loading, 
-    workoutHistory = [], // Add default empty array
-    isDemo, 
-    setDemoMode,
-  } = useApp();
+  // Memory monitoring in development
+  useMemoryMonitor('DashboardScreen');
   
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  // System integration
+  const systemIntegration = useSystemIntegration('Dashboard');
 
-  // Handle month change from calendar
-  const handleMonthChange = (newMonth) => {
-    setSelectedMonth(newMonth);
-  };
+  const { 
+    userStats, 
+    workoutHistory, 
+    characterSystem,
+    updateUserStats,
+    refreshData 
+  } = useApp();
 
-  // Use memoized stats from context instead of calculating locally
-  const dashboardStats = useMemo(() => {
-    const history = Array.isArray(workoutHistory) ? workoutHistory : [];
-    if (history.length === 0) {
-      return {
-        totalWorkouts: 0,
-        thisWeekCount: 0,
-        selectedMonthCount: 0,
-        avgWorkoutsPerWeek: 0,
-        avgRating: 0,
-        totalDuration: 0,
-        selectedMonthDuration: 0,
-        favoriteExercise: 'None yet',
-      };
-    }
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
+  // Debounce search for performance
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
 
-    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-
-    const thisWeekWorkouts = history.filter(w => new Date(w.startTime || w.workoutDate) >= startOfWeek);
-    const selectedMonthWorkouts = history.filter(w => {
-      const d = new Date(w.startTime || w.workoutDate);
-      return d >= monthStart && d <= monthEnd;
-    });
-
-    const totalDuration = history.reduce((sum, w) => sum + (w.duration || 0), 0);
-    const selectedMonthDuration = selectedMonthWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
-
-    const selectedMonthRatings = selectedMonthWorkouts
-      .map(w => w?.ratings?.workoutRating)
-      .filter(r => typeof r === 'number');
-    const avgRating = selectedMonthRatings.length > 0
-      ? selectedMonthRatings.reduce((a, b) => a + b, 0) / selectedMonthRatings.length
-      : 0;
-
-    const exerciseCount = {};
-    selectedMonthWorkouts.forEach(w => (w.exercises || []).forEach(ex => {
-      if (ex?.name) exerciseCount[ex.name] = (exerciseCount[ex.name] || 0) + 1;
-    }));
-    const favoriteExercise = Object.keys(exerciseCount).length
-      ? Object.entries(exerciseCount).sort((a,b) => b[1]-a[1])[0][0]
-      : 'None yet';
-
-    const weeksInMonth = Math.ceil((monthEnd.getTime() - monthStart.getTime() + 1) / (1000 * 60 * 60 * 24 * 7));
-    const avgWorkoutsPerWeek = weeksInMonth > 0 ? selectedMonthWorkouts.length / weeksInMonth : 0;
-
-    return {
-      totalWorkouts: history.length,
-      thisWeekCount: thisWeekWorkouts.length,
-      selectedMonthCount: selectedMonthWorkouts.length,
-      avgWorkoutsPerWeek,
-      avgRating,
-      totalDuration,
-      selectedMonthDuration,
-      favoriteExercise,
-    };
-  }, [workoutHistory, selectedMonth]);
-
-
-  const handleAnalyticsPress = () => {
-    // Analytics charts are already shown inline in the dashboard
-    // No separate analytics screen needed
-    console.log('Analytics charts are displayed inline in the dashboard');
-  };
-
-  const handleAchievementsPress = () => {
-    navigation.navigate('Achievements');
-  };
-
-  const handleGachaPress = () => {
-    navigation.navigate('Gacha');
-  };
-
-  const handleCharacterCollectionPress = () => {
-    navigation.navigate('CharacterCollection');
-  };
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </SafeAreaView>
+  // Memoized filtered data
+  const filteredWorkoutHistory = useMemo(() => {
+    if (!debouncedSearchQuery) return workoutHistory;
+    return workoutHistory.filter(workout => 
+      workout.category?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      workout.exercises?.some(exercise => 
+        exercise.name?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
+      )
     );
-  }
+  }, [workoutHistory, debouncedSearchQuery]);
+
+  // Optimized refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      await refreshData();
+      systemIntegration.emit('dashboard:refreshed', { timestamp: Date.now() });
+    } catch (error) {
+      systemIntegration.logError(error as Error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshData, systemIntegration]);
+
+  // Error boundary fallback
+  const DashboardErrorFallback = ({ error, resetError }) => (
+    <SafeAreaView style={styles.errorContainer}>
+      <Text style={styles.errorTitle}>Dashboard Error</Text>
+      <Text style={styles.errorMessage}>
+        Unable to load dashboard. Please try again.
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={resetError}>
+        <Text style={styles.retryText}>Retry</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Dashboard</Text>
-          <View style={styles.headerActions}>
-            {/* Demo toggle pill */}
-            <TouchableOpacity
-              onPress={async () => {
-                try {
-                  await setDemoMode && setDemoMode(!isDemo);
-                } catch (e) {
-                  console.warn('Failed to toggle demo mode', e);
-                }
-              }}
-              style={[styles.demoToggle, isDemo ? styles.demoToggleOn : styles.demoToggleOff]}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name={isDemo ? 'eye' : 'eye-off'}
-                size={14}
-                color={isDemo ? '#fff' : '#6b7280'}
-              />
-              <Text style={[styles.demoToggleText, isDemo ? styles.demoToggleTextOn : styles.demoToggleTextOff]}>
-                {isDemo ? 'Demo On' : 'Demo Off'}
-              </Text>
-            </TouchableOpacity>
+    <ScreenErrorBoundary screenName="Dashboard">
+      <MemoryOptimizedComponent debugName="DashboardScreen" cleanupOnUnmount={true}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Welcome Section */}
+            <WidgetErrorBoundary widgetName="Welcome">
+              <View style={styles.welcomeSection}>
+                <Text style={styles.welcomeText}>
+                  Welcome back! 💪
+                </Text>
+                <Text style={styles.subText}>
+                  Ready for today's workout?
+                </Text>
+              </View>
+            </WidgetErrorBoundary>
 
-            {/* Analytics shortcut */}
-            <TouchableOpacity 
-              style={styles.analyticsButton}
-              onPress={handleAnalyticsPress}
-            >
-              <Ionicons name="analytics-outline" size={24} color="#007AFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
+            {/* Motivational Quote */}
+            <WidgetErrorBoundary widgetName="MotivationalQuote">
+              <React.Suspense fallback={<View style={styles.loadingWidget} />}>
+                <MotivationalQuote />
+              </React.Suspense>
+            </WidgetErrorBoundary>
 
-        {/* Gamification Stats */}
-        <EnhancedGamificationStats navigation={navigation} />
+            {/* Adaptive Dashboard */}
+            <WidgetErrorBoundary widgetName="AdaptiveDashboard">
+              <React.Suspense fallback={<View style={styles.loadingWidget} />}>
+                <AdaptiveDashboard 
+                  userStats={userStats}
+                  workoutHistory={filteredWorkoutHistory}
+                  characterSystem={characterSystem}
+                />
+              </React.Suspense>
+            </WidgetErrorBoundary>
 
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{dashboardStats.totalWorkouts}</Text>
-            <Text style={styles.statLabel}>Total Workouts</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{dashboardStats.thisWeekCount}</Text>
-            <Text style={styles.statLabel}>This Week</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{Math.round(dashboardStats.avgRating * 10) / 10}</Text>
-            <Text style={styles.statLabel}>Avg Rating</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{Math.round(dashboardStats.totalDuration / 60)}</Text>
-            <Text style={styles.statLabel}>Hours</Text>
-          </View>
-        </View>
+            {/* Analytics Preview */}
+            <WidgetErrorBoundary widgetName="AnalyticsPreview">
+              <React.Suspense fallback={<View style={styles.loadingWidget} />}>
+                <AnalyticsPreview 
+                  data={filteredWorkoutHistory}
+                  userStats={userStats}
+                />
+              </React.Suspense>
+            </WidgetErrorBoundary>
 
-        {/* Mini Weekly Chart - Pass workoutHistory as prop */}
-        <MiniWeeklyChart workoutHistory={workoutHistory} />
-
-        {/* Workout Calendar - Pass workoutHistory as prop */}
-        <WorkoutCalendar 
-          workoutHistory={workoutHistory}
-          selectedMonth={selectedMonth}
-          onMonthChange={handleMonthChange}
-          navigation={navigation}
-        />
-
-
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity 
-              style={styles.actionCard}
-              onPress={handleAchievementsPress}
-            >
-              <Ionicons name="trophy" size={24} color="#f59e0b" />
-              <Text style={styles.actionText}>Achievements</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.actionCard}
-              onPress={handleGachaPress}
-            >
-              <Ionicons name="gift" size={24} color="#8b5cf6" />
-              <Text style={styles.actionText}>Gacha</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.actionCard}
-              onPress={handleCharacterCollectionPress}
-            >
-              <Ionicons name="people" size={24} color="#10b981" />
-              <Text style={styles.actionText}>Characters</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-      </ScrollView>
-    </SafeAreaView>
+          </ScrollView>
+        </SafeAreaView>
+      </MemoryOptimizedComponent>
+    </ScreenErrorBoundary>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f5f5',
   },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  analyticsButton: {
-    padding: 8,
-  },
-  demoToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
-  demoToggleOn: {
-    backgroundColor: '#ff6b35',
-    borderColor: '#ff6b35',
-  },
-  demoToggleOff: {
-    backgroundColor: '#fff',
-    borderColor: '#e5e7eb',
-  },
-  demoToggleText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  demoToggleTextOn: {
-    color: '#fff',
-  },
-  demoToggleTextOff: {
-    color: '#6b7280',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#fff',
+  scrollContent: {
     padding: 16,
+  },
+  welcomeSection: {
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: 'white',
     borderRadius: 12,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  statNumber: {
+  welcomeText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginTop: 4,
-  },
-  section: {
-    marginTop: 24,
-    paddingHorizontal: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  seeAllButton: {
-    padding: 4,
-  },
-  seeAllText: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  recentWorkoutsContainer: {
-    marginBottom: 8,
-  },
-  workoutCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginRight: 12,
-    width: 140,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  workoutCardHeader: {
-    marginBottom: 8,
-  },
-  workoutDate: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  workoutTime: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  workoutDuration: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#333',
     marginBottom: 4,
   },
-  workoutExercises: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  emptyWorkoutsContainer: {
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginRight: 12,
-    width: 200,
-  },
-  emptyWorkoutsText: {
+  subText: {
     fontSize: 16,
-    fontWeight: '600',
     color: '#666',
-    marginTop: 12,
   },
-  emptyWorkoutsSubtext: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-    textAlign: 'center',
+  loadingWidget: {
+    height: 100,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginVertical: 8,
   },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  actionCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    width: '48%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  actionText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1f2937',
-    marginTop: 8,
-  },
-  chartsLoadingContainer: {
-    height: 200,
+  errorContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 16,
+    padding: 20,
   },
-  chartsLoadingText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#6b7280',
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#d32f2f',
+    marginBottom: 8,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
