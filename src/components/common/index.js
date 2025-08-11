@@ -4,6 +4,21 @@
 export { default as LoadingFallback } from '../LoadingFallback';
 export { default as ErrorFallback } from '../ErrorFallback';
 export { default as ErrorBoundary } from '../ErrorBoundary';
+export { 
+  default as ErrorBoundaryWrapper,
+  ScreenErrorBoundary,
+  WidgetErrorBoundary,
+  ListItemErrorBoundary
+} from '../ErrorBoundaryWrapper';
+export { 
+  default as PerformanceOptimizer,
+  MemoryOptimizedComponent,
+  LazyComponent,
+  VirtualizedList,
+  OptimizedImage,
+  useDebouncedValue,
+  useMemoryMonitor
+} from '../PerformanceOptimizer';
 export { default as MotivationalQuote } from '../MotivationalQuote';
 export { default as SimpleCharts } from '../SimpleCharts';
 export { default as GamificationStats } from '../GamificationStats';
