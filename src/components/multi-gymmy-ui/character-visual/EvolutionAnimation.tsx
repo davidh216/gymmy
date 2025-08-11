@@ -312,11 +312,11 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
         style={[
           styles.background,
           {
-            opacity: backgroundOpacity,
-          },
-        ]}
-        pointerEvents=\"none\"
-      >
+                      opacity: backgroundOpacity,
+        },
+      ]}
+      pointerEvents="none"
+    >
         <LinearGradient
           colors={['rgba(0, 0, 0, 0.8)', 'rgba(0, 0, 0, 0.9)', 'rgba(0, 0, 0, 0.8)']}
           style={styles.backgroundGradient}
@@ -333,7 +333,7 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
           opacity: glowOpacity,
         },
       ]}
-      pointerEvents=\"none\"
+      pointerEvents="none"
     >
       <LinearGradient
         colors={config.colors}
@@ -352,7 +352,7 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
           opacity: particleOpacity,
         },
       ]}
-      pointerEvents=\"none\"
+      pointerEvents="none"
     >
       {Array.from({ length: config.particleCount }).map((_, index) => {
         const angle = (index / config.particleCount) * 2 * Math.PI;
@@ -398,7 +398,7 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
           }),
         },
       ]}
-      pointerEvents=\"none\"
+      pointerEvents="none"
     >
       <LinearGradient
         colors={['transparent', ...config.colors, 'transparent']}
@@ -418,7 +418,7 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
           transform: [{ scale: celebrationScale }],
         },
       ]}
-      pointerEvents=\"none\"
+      pointerEvents="none"
     >
       <Text style={styles.evolutionText}>
         {evolutionText}
@@ -444,7 +444,7 @@ export const EvolutionAnimation: React.FC<EvolutionAnimationProps> = ({
   }
   
   return (
-    <View style={[styles.container, style]} pointerEvents=\"none\">
+    <View style={[styles.container, style]} pointerEvents="none">
       {renderBackground}
       {renderGlowEffect}
       {renderParticles}

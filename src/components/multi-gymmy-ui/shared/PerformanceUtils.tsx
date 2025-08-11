@@ -131,7 +131,7 @@ export const useDebounce = <T extends any[]>(
 // LAZY LOADING AND VIRTUALIZATION
 // ==============================================================================
 
-export const useLazyLoad = <T>(
+export const useLazyLoad = <T extends any>(
   items: T[],
   pageSize: number = 20,
   threshold: number = 5
@@ -212,7 +212,7 @@ export const useMemoryOptimization = (config: PerformanceConfig = {}) => {
     console.log('[Performance] Cache cleared due to memory pressure');
   }, []);
   
-  const memoizeValue = useCallback(<T>(key: string, factory: () => T): T => {
+  const memoizeValue = useCallback(<T extends any>(key: string, factory: () => T): T => {
     if (cacheRef.current.has(key)) {
       return cacheRef.current.get(key);
     }
