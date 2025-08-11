@@ -366,7 +366,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
             opacity: flashAnim,
           },
         ]}
-        pointerEvents=\"none\"
+        pointerEvents="none"
       />
     );
   }, [transitionEffects, flashAnim]);
@@ -390,7 +390,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
             }),
           },
         ]}
-        pointerEvents=\"none\"
+        pointerEvents="none"
       />
     );
   }, [transitionEffects, glowAnim, effectConfig.glowRadius]);
@@ -423,7 +423,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
             opacity,
           },
         ]}
-        pointerEvents=\"none\"
+        pointerEvents="none"
       />
     );
   }, [transitionEffects, rippleAnim, effectConfig.rippleSize]);
@@ -433,7 +433,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
     if (!effect) return null;
     
     return (
-      <View style={styles.particleContainer} pointerEvents=\"none\">
+      <View style={styles.particleContainer} pointerEvents="none">
         {Array.from({ length: 6 }).map((_, index) => {
           const angle = (index * 60) * (Math.PI / 180);
           const distance = 30 * effectConfig.effectScale;
@@ -477,7 +477,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
     if (!effect) return null;
     
     return (
-      <View style={styles.sparkleContainer} pointerEvents=\"none\">
+      <View style={styles.sparkleContainer} pointerEvents="none">
         {Array.from({ length: 4 }).map((_, index) => (
           <Animated.View
             key={index}
@@ -511,7 +511,7 @@ export const StateTransition: React.FC<StateTransitionProps> = ({
   }
   
   return (
-    <View style={styles.container} pointerEvents=\"none\">
+    <View style={styles.container} pointerEvents="none">
       {renderFlashEffect}
       {renderGlowEffect}
       {renderRippleEffect}

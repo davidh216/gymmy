@@ -1,0 +1,356 @@
+{
+  "totalComponents": 53,
+  "categories": {
+    "character-visual": 13,
+    "team-management": 22,
+    "gacha-experience": 7,
+    "collection-management": 2,
+    "core-systems": 3,
+    "shared-utilities": 4,
+    "examples": 2,
+    "other": 1
+  },
+  "detailedBreakdown": {
+    "character-visual": [
+      {
+        "name": "AnimationController.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/AnimationController.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/AnimationController.tsx",
+        "size": 14380
+      },
+      {
+        "name": "CharacterMoodDisplay.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterMoodDisplay.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterMoodDisplay.tsx",
+        "size": 13441
+      },
+      {
+        "name": "CharacterRenderer.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterRenderer.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterRenderer.tsx",
+        "size": 14413
+      },
+      {
+        "name": "CharacterSprite.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterSprite.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterSprite.tsx",
+        "size": 11340
+      },
+      {
+        "name": "EvolutionAnimation.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/EvolutionAnimation.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/EvolutionAnimation.tsx",
+        "size": 17075
+      },
+      {
+        "name": "ExperienceVisualizer.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/ExperienceVisualizer.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/ExperienceVisualizer.tsx",
+        "size": 14207
+      },
+      {
+        "name": "StateTransition.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/StateTransition.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/StateTransition.tsx",
+        "size": 17494
+      },
+      {
+        "name": "index.ts",
+        "path": "src/components/multi-gymmy-ui/character-visual/index.ts",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/index.ts",
+        "size": 401
+      },
+      {
+        "name": "AnimationUtils.tsx",
+        "path": "src/components/multi-gymmy-ui/shared/AnimationUtils.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/shared/AnimationUtils.tsx",
+        "size": 12906
+      },
+      {
+        "name": "CharacterMoodDisplay.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterMoodDisplay.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterMoodDisplay.tsx",
+        "size": 13441
+      },
+      {
+        "name": "CharacterRenderer.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterRenderer.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterRenderer.tsx",
+        "size": 14413
+      },
+      {
+        "name": "CharacterSprite.tsx",
+        "path": "src/components/multi-gymmy-ui/character-visual/CharacterSprite.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/character-visual/CharacterSprite.tsx",
+        "size": 11340
+      },
+      {
+        "name": "EvolutionManager.ts",
+        "path": "src/context/managers/EvolutionManager.ts",
+        "relativePath": "src/context/managers/EvolutionManager.ts",
+        "size": 2491
+      }
+    ],
+    "team-management": [
+      {
+        "name": "DragDropUtils.tsx",
+        "path": "src/components/multi-gymmy-ui/shared/DragDropUtils.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/shared/DragDropUtils.tsx",
+        "size": 10981
+      },
+      {
+        "name": "CharacterSlot.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/CharacterSlot.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/CharacterSlot.tsx",
+        "size": 7428
+      },
+      {
+        "name": "ConnectionLines.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/ConnectionLines.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/ConnectionLines.tsx",
+        "size": 1686
+      },
+      {
+        "name": "DragDropArea.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/DragDropArea.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/DragDropArea.tsx",
+        "size": 4907
+      },
+      {
+        "name": "EffectivenessMetrics.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/EffectivenessMetrics.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/EffectivenessMetrics.tsx",
+        "size": 10833
+      },
+      {
+        "name": "SynergyVisualizer.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/SynergyVisualizer.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/SynergyVisualizer.tsx",
+        "size": 9568
+      },
+      {
+        "name": "TeamAnalyticsDashboard.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/TeamAnalyticsDashboard.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/TeamAnalyticsDashboard.tsx",
+        "size": 11175
+      },
+      {
+        "name": "TeamBuilder.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/TeamBuilder.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/TeamBuilder.tsx",
+        "size": 7524
+      },
+      {
+        "name": "TeamPresetManager.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/TeamPresetManager.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/TeamPresetManager.tsx",
+        "size": 5326
+      },
+      {
+        "name": "TeamSaveLoad.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/TeamSaveLoad.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/TeamSaveLoad.tsx",
+        "size": 10382
+      },
+      {
+        "name": "PresetManagerComponents.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/components/PresetManagerComponents.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/components/PresetManagerComponents.tsx",
+        "size": 7780
+      },
+      {
+        "name": "TeamBuilderModals.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/components/TeamBuilderModals.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/components/TeamBuilderModals.tsx",
+        "size": 7612
+      },
+      {
+        "name": "TeamBuilderRenders.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/components/TeamBuilderRenders.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/components/TeamBuilderRenders.tsx",
+        "size": 7585
+      },
+      {
+        "name": "TeamManagementExample.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/examples/TeamManagementExample.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/examples/TeamManagementExample.tsx",
+        "size": 13850
+      },
+      {
+        "name": "index.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/index.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/index.ts",
+        "size": 1097
+      },
+      {
+        "name": "AnalyticsUtils.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/utils/AnalyticsUtils.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/utils/AnalyticsUtils.ts",
+        "size": 11684
+      },
+      {
+        "name": "ComponentUtils.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/utils/ComponentUtils.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/utils/ComponentUtils.ts",
+        "size": 4369
+      },
+      {
+        "name": "SynergyUtils.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/utils/SynergyUtils.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/utils/SynergyUtils.ts",
+        "size": 8863
+      },
+      {
+        "name": "TeamUtils.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/utils/TeamUtils.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/utils/TeamUtils.ts",
+        "size": 5835
+      },
+      {
+        "name": "index.ts",
+        "path": "src/components/multi-gymmy-ui/team-management/utils/index.ts",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/utils/index.ts",
+        "size": 246
+      },
+      {
+        "name": "CharacterSlot.tsx",
+        "path": "src/components/multi-gymmy-ui/team-management/CharacterSlot.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/team-management/CharacterSlot.tsx",
+        "size": 7428
+      },
+      {
+        "name": "AnalyticsManager.ts",
+        "path": "src/context/managers/AnalyticsManager.ts",
+        "relativePath": "src/context/managers/AnalyticsManager.ts",
+        "size": 6112
+      }
+    ],
+    "gacha-experience": [
+      {
+        "name": "EnhancedGachaComponents.js",
+        "path": "src/components/EnhancedGachaComponents.js",
+        "relativePath": "src/components/EnhancedGachaComponents.js",
+        "size": 49234
+      },
+      {
+        "name": "GachaComponents.js",
+        "path": "src/components/GachaComponents.js",
+        "relativePath": "src/components/GachaComponents.js",
+        "size": 6681
+      },
+      {
+        "name": "EnhancedGachaManager.ts",
+        "path": "src/context/EnhancedGachaManager.ts",
+        "relativePath": "src/context/EnhancedGachaManager.ts",
+        "size": 4582
+      },
+      {
+        "name": "EnhancedGachaSystem.ts",
+        "path": "src/context/EnhancedGachaSystem.ts",
+        "relativePath": "src/context/EnhancedGachaSystem.ts",
+        "size": 20191
+      },
+      {
+        "name": "BannerManager.ts",
+        "path": "src/context/managers/BannerManager.ts",
+        "relativePath": "src/context/managers/BannerManager.ts",
+        "size": 4310
+      },
+      {
+        "name": "PullManager.ts",
+        "path": "src/context/managers/PullManager.ts",
+        "relativePath": "src/context/managers/PullManager.ts",
+        "size": 2062
+      },
+      {
+        "name": "AdvancedGachaSystem.ts",
+        "path": "src/context/systems/AdvancedGachaSystem.ts",
+        "relativePath": "src/context/systems/AdvancedGachaSystem.ts",
+        "size": 26362
+      }
+    ],
+    "collection-management": [
+      {
+        "name": "CharacterDetailModal.js",
+        "path": "src/components/CharacterDetailModal.js",
+        "relativePath": "src/components/CharacterDetailModal.js",
+        "size": 9789
+      },
+      {
+        "name": "CharacterGallery.js",
+        "path": "src/components/multi-gymmy/CharacterGallery.js",
+        "relativePath": "src/components/multi-gymmy/CharacterGallery.js",
+        "size": 26613
+      }
+    ],
+    "core-systems": [
+      {
+        "name": "MultiGymmyManager.ts",
+        "path": "src/context/managers/MultiGymmyManager.ts",
+        "relativePath": "src/context/managers/MultiGymmyManager.ts",
+        "size": 25692
+      },
+      {
+        "name": "CharacterGrowthSystem.ts",
+        "path": "src/context/systems/CharacterGrowthSystem.ts",
+        "relativePath": "src/context/systems/CharacterGrowthSystem.ts",
+        "size": 26757
+      },
+      {
+        "name": "TeamManagementSystem.ts",
+        "path": "src/context/systems/TeamManagementSystem.ts",
+        "relativePath": "src/context/systems/TeamManagementSystem.ts",
+        "size": 42359
+      }
+    ],
+    "shared-utilities": [
+      {
+        "name": "CharacterUtils.tsx",
+        "path": "src/components/multi-gymmy-ui/shared/CharacterUtils.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/shared/CharacterUtils.tsx",
+        "size": 12940
+      },
+      {
+        "name": "PerformanceUtils.tsx",
+        "path": "src/components/multi-gymmy-ui/shared/PerformanceUtils.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/shared/PerformanceUtils.tsx",
+        "size": 12610
+      },
+      {
+        "name": "index.ts",
+        "path": "src/components/multi-gymmy-ui/shared/index.ts",
+        "relativePath": "src/components/multi-gymmy-ui/shared/index.ts",
+        "size": 246
+      },
+      {
+        "name": "CharacterUtils.tsx",
+        "path": "src/components/multi-gymmy-ui/shared/CharacterUtils.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/shared/CharacterUtils.tsx",
+        "size": 12940
+      }
+    ],
+    "examples": [
+      {
+        "name": "CharacterDisplayExample.tsx",
+        "path": "src/components/multi-gymmy-ui/examples/CharacterDisplayExample.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/examples/CharacterDisplayExample.tsx",
+        "size": 17249
+      },
+      {
+        "name": "CharacterDisplayExample.tsx",
+        "path": "src/components/multi-gymmy-ui/examples/CharacterDisplayExample.tsx",
+        "relativePath": "src/components/multi-gymmy-ui/examples/CharacterDisplayExample.tsx",
+        "size": 17249
+      }
+    ],
+    "other": [
+      {
+        "name": "index.ts",
+        "path": "src/components/multi-gymmy-ui/index.ts",
+        "relativePath": "src/components/multi-gymmy-ui/index.ts",
+        "size": 500
+      }
+    ]
+  },
+  "timestamp": "2025-08-11T13:36:04.280Z"
+}
