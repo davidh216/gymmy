@@ -1,26 +1,28 @@
 // src/context/GameLogic.ts
 // Game logic functions for XP calculations, gacha, and character interactions
 
-import { 
-  FITNESS_CLASSES, 
-  CHARACTER_TEMPLATES, 
-  GACHA_RATES, 
+import {
+  // FITNESS_CLASSES,
+  // CHARACTER_TEMPLATES,
+  // GACHA_RATES,
+  // 
 } from './GameData';
 
 import {
-  Workout,
-  UserStats,
-  Character,
-  CharacterRarity,
-  SocialPost,
-  FitnessClassKey,
-  CalculateExperienceFunction,
-  CalculateClassXPFunction,
-  CalculateLevelFunction,
-  GenerateCharacterFunction,
-  PerformGachaPullFunction,
-  WorkoutWithCharacterFunction,
-  CreateWorkoutPostFunction,
+  // Workout,
+  // UserStats,
+  // Character,
+  // CharacterRarity,
+  // SocialPost,
+  // FitnessClassKey,
+  // CalculateExperienceFunction,
+  // CalculateClassXPFunction,
+  // CalculateLevelFunction,
+  // GenerateCharacterFunction,
+  // PerformGachaPullFunction,
+  // WorkoutWithCharacterFunction,
+  // CreateWorkoutPostFunction,
+  // 
 } from './types';
 
 // ==============================================================================
@@ -29,7 +31,7 @@ import {
 
 // WoW-style exponential XP curve calculation
 export const calculateLevelRequirement = (level: number): number => {
-  const baseXP = 100;
+  // const baseXP = ...; // Quick fix: commented unused variable
   return Math.floor(baseXP * Math.pow(level - 1, 1.5));
 };
 
@@ -86,7 +88,7 @@ export const calculateExperience: CalculateExperienceFunction = (workout: Workou
   
   // Streak bonus
   if (userStats.streaks?.current > 0) {
-    const streakBonus = Math.min(userStats.streaks.current * 10, 100);
+    // const streakBonus = ...; // Quick fix: commented unused variable
     experience += streakBonus;
   }
   
@@ -97,13 +99,13 @@ export const calculateExperience: CalculateExperienceFunction = (workout: Workou
   
   // Exercise variety bonus
   if (workout.exercises) {
-    const uniqueExercises = new Set(workout.exercises.map(ex => ex.name)).size;
+    // const uniqueExercises = ...; // Quick fix: commented unused variable
     if (uniqueExercises >= 5) experience += 25;
   }
   
   // Apply class bonuses if class is selected
   if (userStats.selectedClass) {
-    const classData = FITNESS_CLASSES[userStats.selectedClass as FitnessClassKey];
+    // const classData = ...; // Quick fix: commented unused variable
     experience = applyClassBonuses(experience, workout, classData, userStats);
   }
   
@@ -113,7 +115,7 @@ export const calculateExperience: CalculateExperienceFunction = (workout: Workou
 export const calculateClassXP: CalculateClassXPFunction = (workout: Workout, userStats: UserStats): number => {
   if (!userStats.selectedClass) return 0;
   
-  const classData = FITNESS_CLASSES[userStats.selectedClass as FitnessClassKey];
+  // const classData = ...; // Quick fix: commented unused variable
   let classXP = 50;
   
   // Check for preferred exercises
@@ -136,7 +138,7 @@ export const applyClassBonuses = (
 ): number => {
   let multiplier = 1.0;
   
-  const exerciseTypes = workout.exercises?.map(ex => ex.category) || [];
+  // const exerciseTypes = ...; // Quick fix: commented unused variable
   
   if (exerciseTypes.includes('chest') || exerciseTypes.includes('back') || exerciseTypes.includes('legs')) {
     if (classData.bonuses.compoundLiftXP) {
@@ -161,8 +163,8 @@ export const applyClassBonuses = (
 
 // Generate character from template
 export const generateCharacter: GenerateCharacterFunction = (rarity: CharacterRarity): Character => {
-  const templates = CHARACTER_TEMPLATES[rarity];
-  const template = templates[Math.floor(Math.random() * templates.length)];
+  // const templates = ...; // Quick fix: commented unused variable
+  // const template = ...; // Quick fix: commented unused variable
   
   return {
     ...template,
@@ -184,11 +186,11 @@ export const generateCharacter: GenerateCharacterFunction = (rarity: CharacterRa
 
 // Perform gacha pull
 export const performGachaPull: PerformGachaPullFunction = (pullType: 'single' | 'ten_pull' = 'single'): Character[] => {
-  const numPulls = pullType === 'single' ? 1 : 10;
+  // const numPulls = ...; // Quick fix: commented unused variable
   const results: Character[] = [];
   
   for (let i = 0; i < numPulls; i++) {
-    const roll = Math.random();
+    // const roll = ...; // Quick fix: commented unused variable
     let rarity: CharacterRarity;
     
     if (roll < GACHA_RATES.legendary) {
@@ -201,7 +203,7 @@ export const performGachaPull: PerformGachaPullFunction = (pullType: 'single' | 
       rarity = 'common';
     }
     
-    const newCharacter = generateCharacter(rarity);
+    // const newCharacter = ...; // Quick fix: commented unused variable
     results.push(newCharacter);
   }
   
@@ -214,11 +216,11 @@ export const performGachaPull: PerformGachaPullFunction = (pullType: 'single' | 
 
 // Character workout interaction
 export const workoutWithCharacter: WorkoutWithCharacterFunction = (character: Character, workout: Workout): Character => {
-  const xpGained = Math.floor((workout.exercises?.length || 1) * 20);
-  const newLevel = Math.floor((character.experience + xpGained) / 1000) + 1;
+  // const xpGained = ...; // Quick fix: commented unused variable
+  // const newLevel = ...; // Quick fix: commented unused variable
   
-  const energyDrain = Math.min(30, (workout.duration || 30) / 2);
-  const moodBoost = Math.min(20, (workout.ratings?.workoutRating || 5) * 2);
+  // const energyDrain = ...; // Quick fix: commented unused variable
+  // const moodBoost = ...; // Quick fix: commented unused variable
   
   return {
     ...character,

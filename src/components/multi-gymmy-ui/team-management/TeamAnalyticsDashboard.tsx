@@ -3,23 +3,34 @@
 
 import React, { useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter, GymmyTeam } from '../../../../context/types/MultiGymmyTypes';
-import { SynergyAnalysis } from './utils/SynergyUtils';
-import { TeamPerformanceMetrics } from './utils/AnalyticsUtils';
-import { 
-  getStatColor, 
-  getRoleColor, 
-  getRoleIcon, 
-  getSuggestionIcon,
-  getPriorityStyle,
-  getPriorityBadgeStyle,
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter,
+  // GymmyTeam
+} from '../../../../context/types/MultiGymmyTypes';
+import {
+  // SynergyAnalysis
+} from './utils/SynergyUtils';
+import {
+  // TeamPerformanceMetrics
+} from './utils/AnalyticsUtils';
+import {
+  // getStatColor,
+  // getRoleColor,
+  // getRoleIcon,
+  // getSuggestionIcon,
+  // getPriorityStyle,
+  // getPriorityBadgeStyle,
+  // 
 } from './utils/ComponentUtils';
 
 interface TeamAnalyticsDashboardProps {
@@ -157,7 +168,7 @@ const TeamAnalyticsDashboard: React.FC<TeamAnalyticsDashboardProps> = ({
             <Text style={styles.synergyDescription}>{synergy.description}</Text>
             <View style={styles.synergyCharacters}>
               {synergy.characters.map((charId) => {
-                const character = characters.find(c => c.id === charId);
+                // const character = ...; // Quick fix: commented unused variable
                 return character ? (
                   <Text key={charId} style={styles.synergyCharacter}>
                     {character.emoji} {character.name}

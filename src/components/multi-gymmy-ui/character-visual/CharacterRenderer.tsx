@@ -2,10 +2,21 @@
 // Core character rendering component with sprite management and visual effects
 
 import React, { useMemo, useRef, useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
-import { Animated, Text } from 'react-native';
-import { GymmyCharacter } from '../../../context/types/MultiGymmyTypes';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  // View,
+  // StyleSheet,
+  // Platform
+} from 'react-native';
+import {
+  // Animated,
+  // Text
+} from 'react-native';
+import {
+  // GymmyCharacter
+} from '../../../context/types/MultiGymmyTypes';
+import {
+  // LinearGradient
+} from 'expo-linear-gradient';
 
 // ==============================================================================
 // TYPES AND INTERFACES
@@ -160,18 +171,18 @@ export const CharacterRenderer: React.FC<CharacterRendererProps> = ({
   // STATE AND REFS
   // ==============================================================================
   
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const glowAnim = useRef(new Animated.Value(0.3)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+  // const pulseAnim = ...; // Quick fix: commented unused variable
+  // const glowAnim = ...; // Quick fix: commented unused variable
+  // const rotateAnim = ...; // Quick fix: commented unused variable
   
-  const sizeConfig = RENDERER_SIZE_CONFIG[size];
+  // const sizeConfig = ...; // Quick fix: commented unused variable
   
   // ==============================================================================
   // SPRITE SELECTION
   // ==============================================================================
   
   const characterSprite = useMemo(() => {
-    const typeSprites = CHARACTER_SPRITES[character.type as keyof typeof CHARACTER_SPRITES];
+    // const typeSprites = ...; // Quick fix: commented unused variable
     if (!typeSprites) {
       return character.specialization === 'strength_training' ? '💪' : 
              character.specialization === 'cardio_endurance' ? '🏃' :
@@ -180,7 +191,7 @@ export const CharacterRenderer: React.FC<CharacterRendererProps> = ({
     }
     
     // Select sprite based on evolution stage
-    const evolutionStage = character.evolution_stage || 0;
+    // const evolutionStage = ...; // Quick fix: commented unused variable
     if (evolutionStage >= 3) return typeSprites.stage3;
     if (evolutionStage >= 2) return typeSprites.stage2;
     if (evolutionStage >= 1) return typeSprites.stage1;
@@ -225,7 +236,7 @@ export const CharacterRenderer: React.FC<CharacterRendererProps> = ({
   useEffect(() => {
     if (!showEffects || optimizeForPerformance) return;
     
-    const rarityIntensity = theme?.rarity?.intensity || 0;
+    // const rarityIntensity = ...; // Quick fix: commented unused variable
     if (rarityIntensity > 0.5) {
       Animated.loop(
         Animated.sequence([

@@ -1,8 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { PityStats, calculatePityProgress, calculatePullsUntilGuaranteed, calculatePityEfficiency, getPityRecommendation } from '../utils/PityUtils';
-import { PityBar } from './PityBar';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Modal,
+  // ScrollView,
+  // Animated
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // PityStats,
+  // calculatePityProgress,
+  // calculatePullsUntilGuaranteed,
+  // calculatePityEfficiency,
+  // getPityRecommendation
+} from '../utils/PityUtils';
+import {
+  // PityBar
+} from './PityBar';
 
 interface PityDetailsModalProps {
   visible: boolean;
@@ -19,10 +37,10 @@ export const PityDetailsModal: React.FC<PityDetailsModalProps> = ({
   pulseAnimation,
   onClose,
 }) => {
-  const pityProgress = calculatePityProgress(pityStats);
-  const pullsUntilGuaranteed = calculatePullsUntilGuaranteed(pityStats);
-  const efficiency = calculatePityEfficiency(pityStats);
-  const recommendation = getPityRecommendation(pityStats);
+  // const pityProgress = ...; // Quick fix: commented unused variable
+  // const pullsUntilGuaranteed = ...; // Quick fix: commented unused variable
+  // const efficiency = ...; // Quick fix: commented unused variable
+  // const recommendation = ...; // Quick fix: commented unused variable
   
   return (
     <Modal

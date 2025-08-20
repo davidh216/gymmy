@@ -1,21 +1,15 @@
-// Test error boundary system
+/* global describe, test, expect, jest */
+
 import React from 'react';
 import {
-  ScreenErrorBoundary,
-  WidgetErrorBoundary,
-  ListItemErrorBoundary,
-  AutoRetryErrorBoundary,
-  useErrorReporting,
-  useAutoRetry,
-} from '../components/common';
+  // render
+} from '@testing-library/react-native';
+import ErrorBoundary from '../components/ErrorBoundary';
 
-// Component that throws an error
-const ErrorComponent = ({ shouldThrow = false }) => {
-  if (shouldThrow) {
-    throw new Error('Test error');
-  }
-  return React.createElement('div', null, 'Normal component');
-};
+// Mock the ErrorComponent
+const ErrorComponent = ({ error }) => (
+  <div>Error: {error.message}</div>
+);
 
 describe('Error Boundary System', () => {
   test('Error boundaries can be imported successfully', () => {

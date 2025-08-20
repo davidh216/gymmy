@@ -1,30 +1,41 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  RefreshControl,
+  // View,
+  // Text,
+  // StyleSheet,
+  // FlatList,
+  // TouchableOpacity,
+  // Dimensions,
+  // RefreshControl,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Character } from '../../context/types/MultiGymmyTypes';
 import {
-  CollectionFilters,
-  CollectionViewMode,
-  SortOption,
-  filterCharacters,
-  sortCharacters,
-  enhanceCharacterForDisplay,
-  calculateCollectionStats,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // Character
+} from '../../context/types/MultiGymmyTypes';
+import {
+  // CollectionFilters,
+  // CollectionViewMode,
+  // SortOption,
+  // filterCharacters,
+  // sortCharacters,
+  // enhanceCharacterForDisplay,
+  // calculateCollectionStats,
+  // 
 } from './utils/CollectionUtils';
 import {
-  useOptimizedList,
-  DEFAULT_PERFORMANCE_CONFIG,
+  // useOptimizedList,
+  // DEFAULT_PERFORMANCE_CONFIG,
+  // 
 } from './utils/PerformanceUtils';
-import { CharacterCard } from './CharacterCard';
-import { CollectionStats } from './CollectionStats';
+import {
+  // CharacterCard
+} from './CharacterCard';
+import {
+  // CollectionStats
+} from './CollectionStats';
 
 interface CollectionGridProps {
   characters: Character[];
@@ -55,8 +66,8 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
 
   // Process and filter characters
   const processedCharacters = useMemo(() => {
-    const filtered = filterCharacters(characters, filters);
-    const sorted = sortCharacters(filtered, sortOption);
+    // const filtered = ...; // Quick fix: commented unused variable
+    // const sorted = ...; // Quick fix: commented unused variable
     return sorted.map(enhanceCharacterForDisplay);
   }, [characters, filters, sortOption]);
 
@@ -81,8 +92,8 @@ export const CollectionGrid: React.FC<CollectionGridProps> = ({
 
   // Render character item
   const renderCharacterItem = useCallback(({ item }: { item: any }) => {
-    const character = item.data;
-    const isSelected = selectedCharacterId === character.id;
+    // const character = ...; // Quick fix: commented unused variable
+    // const isSelected = ...; // Quick fix: commented unused variable
 
     return (
       <CharacterCard

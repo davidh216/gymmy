@@ -2,22 +2,27 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  ImageBackground,
-  StatusBar,
+  // View,
+  // Text,
+  // TouchableOpacity,
+  // StyleSheet,
+  // Animated,
+  // Dimensions,
+  // ImageBackground,
+  // StatusBar,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useApp } from '../context';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // useApp
+} from '../context';
 
 const { width, height } = Dimensions.get('window');
 
 const WelcomeScreen = ({ navigation }) => {
-  const appContext = useApp();
+  // const appContext = ...; // Quick fix: commented unused variable
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
   const [scaleAnim] = useState(new Animated.Value(0.8));

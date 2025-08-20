@@ -1,7 +1,10 @@
 // src/context/types/EnhancedGachaTypes.ts
 // State interface extensions for enhanced gacha system
 
-import { Character, UserCurrencies } from '../types';
+import {
+  // Character,
+  // UserCurrencies
+} from '../types';
 
 // ==============================================================================
 // ENHANCED GACHA STATE ADDITIONS FOR APPCONTEXT

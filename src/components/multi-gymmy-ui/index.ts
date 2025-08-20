@@ -16,3 +16,6 @@ export * from './gacha-experience';
 
 // Shared utilities
 export * from './shared';
+
+// Phase 4: 1% Better Core System UI Components
+export * from './phase4-improvements';

@@ -2,22 +2,28 @@
 // UI components for the refined gacha system
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  Modal, 
-  Alert,
-  Animated,
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // ScrollView,
+  // Modal,
+  // Alert,
+  // Animated,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useUnifiedApp } from '../context/UnifiedAppProvider';
-import { 
-  WidgetErrorBoundary,
-  MemoryOptimizedComponent,
-  PerformanceMonitor,
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // useUnifiedApp
+} from '../context/UnifiedAppProvider';
+import {
+  // WidgetErrorBoundary,
+  // MemoryOptimizedComponent,
+  // PerformanceMonitor,
+  // 
 } from './common';
 
 // ==============================================================================
@@ -33,7 +39,7 @@ export const EnhancedGachaScreen = ({ navigation }) => {
   const [pullResults, setPullResults] = useState([]);
   const [isPulling, setIsPulling] = useState(false);
   
-  const costs = getPullCosts();
+  // const costs = ...; // Quick fix: commented unused variable
   
   // Pity progress calculations
   const pityProgress = {
@@ -43,7 +49,7 @@ export const EnhancedGachaScreen = ({ navigation }) => {
   };
 
   const handlePull = async (pullType) => {
-    const cost = costs[pullType];
+    // const cost = ...; // Quick fix: commented unused variable
     
     if (userStats.currencies.gems < cost.gems) {
       Alert.alert(
@@ -70,7 +76,7 @@ export const EnhancedGachaScreen = ({ navigation }) => {
       }),
     ]).start(() => {
       try {
-        const results = pullGacha(pullType);
+        // const results = ...; // Quick fix: commented unused variable
         setPullResults(results);
         setShowResults(true);
         setIsPulling(false);
@@ -228,7 +234,7 @@ export const EnhancedGachaScreen = ({ navigation }) => {
 // ==============================================================================
 
 const FeaturedBannerCard = ({ onPress }) => {
-  const bannerAnimation = useRef(new Animated.Value(0)).current;
+  // const bannerAnimation = ...; // Quick fix: commented unused variable
   
   useEffect(() => {
     const pulse = Animated.sequence([
@@ -552,7 +558,7 @@ const BannerDetailsModal = ({ visible, onClose }) => {
 const EnhancedPullResultsModal = ({ visible, results, onClose }) => {
   const [currentResultIndex, setCurrentResultIndex] = useState(0);
   const [showAllResults, setShowAllResults] = useState(false);
-  const revealAnimation = useRef(new Animated.Value(0)).current;
+  // const revealAnimation = ...; // Quick fix: commented unused variable
   
   useEffect(() => {
     if (visible && results.length > 0) {
@@ -1474,7 +1480,7 @@ const EvolvableCharacterCard = ({ character, onPress }) => {
     }
   };
 
-  const nextRarity = getNextRarity(character.rarity);
+  // const nextRarity = ...; // Quick fix: commented unused variable
 
   return (
     <TouchableOpacity style={styles.evolvableCard} onPress={onPress}>

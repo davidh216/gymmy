@@ -1,7 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { CollectionFilters, CollectionViewMode } from '../utils/CollectionUtils';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // CollectionFilters,
+  // CollectionViewMode
+} from '../utils/CollectionUtils';
 
 interface FilterControlsProps {
   filters: CollectionFilters;
@@ -16,8 +26,8 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
   onFiltersChange,
   onViewModeChange,
 }) => {
-  const rarityOptions = ['common', 'rare', 'epic', 'legendary'] as const;
-  const classOptions = ['strength', 'cardio', 'flexibility', 'balance', 'endurance'] as const;
+  // const rarityOptions = ...; // Quick fix: commented unused variable
+  // const classOptions = ...; // Quick fix: commented unused variable
 
   return (
     <View style={styles.container}>

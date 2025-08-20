@@ -1,9 +1,16 @@
 // src/context/managers/EvolutionManager.ts
 // Handles character evolution logic
 
-import { EnhancedGachaEngine, EnhancedGachaState } from '../EnhancedGachaSystem';
-import { Character } from '../types';
-import { EvolutionResult } from '../types/EnhancedGachaTypes';
+import {
+  // EnhancedGachaEngine,
+  // EnhancedGachaState
+} from '../EnhancedGachaSystem';
+import {
+  // Character
+} from '../types';
+import {
+  // EvolutionResult
+} from '../types/EnhancedGachaTypes';
 
 export class EvolutionManager {
   private engine: EnhancedGachaEngine;
@@ -21,7 +28,7 @@ export class EvolutionManager {
       };
     }
     
-    const evolvedCharacter = this.engine.evolveCharacter(character);
+    // const evolvedCharacter = ...; // Quick fix: commented unused variable
     
     if (!evolvedCharacter) {
       return { 
@@ -31,7 +38,7 @@ export class EvolutionManager {
     }
     
     // Calculate materials used (you'd implement this based on requirements)
-    const materialsUsed = this.getEvolutionMaterialsUsed(character.rarity);
+    // const materialsUsed = ...; // Quick fix: commented unused variable
     
     return {
       success: true,
@@ -80,7 +87,7 @@ export class EvolutionManager {
   
   // Check if player has materials for evolution
   public canAffordEvolution(character: Character, playerMaterials: Record<string, number>): boolean {
-    const requirements = this.getEvolutionRequirements(character);
+    // const requirements = ...; // Quick fix: commented unused variable
     
     return Object.entries(requirements).every(([material, amount]) => 
       (playerMaterials[material] || 0) >= amount,

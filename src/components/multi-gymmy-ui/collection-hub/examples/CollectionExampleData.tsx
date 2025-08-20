@@ -1,4 +1,6 @@
-import { Character } from '../../../context/types/MultiGymmyTypes';
+import {
+  // Character
+} from '../../../context/types/MultiGymmyTypes';
 
 // Mock character data for demonstration
 export const mockCharacters: Character[] = [
@@ -83,9 +85,9 @@ export const mockCharacters: Character[] = [
 ];
 
 // Filter options
-export const rarityOptions = ['common', 'rare', 'epic', 'legendary'] as const;
-export const classOptions = ['strength', 'cardio', 'flexibility', 'balance', 'endurance'] as const;
-export const statusOptions = ['idle', 'training', 'evolved', 'maxed'] as const;
+export // const rarityOptions = ...; // Quick fix: commented unused variable
+export // const classOptions = ...; // Quick fix: commented unused variable
+export // const statusOptions = ...; // Quick fix: commented unused variable
 
 // Default filter states
 export const defaultFilters = {

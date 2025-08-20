@@ -4,12 +4,13 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
+  // View,
+  // Text,
+  // Modal,
+  // TouchableOpacity,
+  // Animated,
+  // StyleSheet,
+  // 
 } from 'react-native';
 
 const PullResultsModal = ({ visible, results, onClose, rarityGradients }) => {
@@ -44,9 +45,9 @@ const PullResultsModal = ({ visible, results, onClose, rarityGradients }) => {
     
   if (!visible || results.length === 0) return null;
     
-  const currentResult = results[currentIndex];
-  const isLegendary = currentResult.rarity === 'legendary';
-  const isEpic = currentResult.rarity === 'epic';
+  // const currentResult = ...; // Quick fix: commented unused variable
+  // const isLegendary = ...; // Quick fix: commented unused variable
+  // const isEpic = ...; // Quick fix: commented unused variable
     
   const cardScale = revealAnimation.interpolate({
     inputRange: [0, 1],

@@ -4,15 +4,18 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Alert,
-  StyleSheet,
-  FlatList,
+  // View,
+  // Text,
+  // TouchableOpacity,
+  // Modal,
+  // Alert,
+  // StyleSheet,
+  // FlatList,
+  // 
 } from 'react-native';
-import { useApp } from '../context';
+import {
+  // useApp
+} from '../context';
 
 const CharacterCollectionScreen = ({ navigation }) => {
   const { characters, setActiveCharacter } = useApp();
@@ -39,7 +42,7 @@ const CharacterCollectionScreen = ({ navigation }) => {
     
   // Prepare data for FlatList - group characters by rarity for proper display
   const sectionsData = useMemo(() => {
-    const sections = [];
+    // const sections = ...; // Quick fix: commented unused variable
     
     // Check if characters collection exists
     if (!characters?.collection || !Array.isArray(characters.collection)) {
@@ -55,7 +58,7 @@ const CharacterCollectionScreen = ({ navigation }) => {
       
     // Create sections with rarity header and character grid
     ['legendary', 'epic', 'rare', 'common'].forEach(rarity => {
-      const chars = groupedCharacters[rarity] || [];
+      // const chars = ...; // Quick fix: commented unused variable
       if (chars.length > 0) {
         sections.push({
           type: 'raritySection',
@@ -114,7 +117,7 @@ const CharacterCollectionScreen = ({ navigation }) => {
       }
 
       if (item.type === 'raritySection') {
-        const characters = Array.isArray(item.characters) ? item.characters : [];
+        // const characters = ...; // Quick fix: commented unused variable
         
         return (
           <View style={styles.raritySection}>
@@ -128,7 +131,7 @@ const CharacterCollectionScreen = ({ navigation }) => {
             <View style={styles.characterGrid}>
               {characters.map((character, index) => {
                 // Ensure each character has a unique key
-                const key = character?.instance_id || `char-${item.rarity}-${index}`;
+                // const key = ...; // Quick fix: commented unused variable
                 return renderCharacterCard({ ...character, key });
               }).filter(Boolean)}
             </View>

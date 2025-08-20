@@ -1,25 +1,36 @@
 import React, { useState, useRef } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // ScrollView,
+  // Alert,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import {
-  BannerDisplay,
-  PityProgressDisplay,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // BannerDisplay,
+  // PityProgressDisplay,
+  // 
 } from '../index';
-import { Banner, DEFAULT_BANNERS } from '../utils/BannerUtils';
-import { FeatureButton } from '../components/FeatureButton';
-import { GachaModals } from '../components/GachaModals';
-import { 
-  PullResult, 
-  mockPityStats, 
-  mockPullResults, 
-  featureButtons 
+import {
+  // Banner,
+  // DEFAULT_BANNERS
+} from '../utils/BannerUtils';
+import {
+  // FeatureButton
+} from '../components/FeatureButton';
+import {
+  // GachaModals
+} from '../components/GachaModals';
+import {
+  // PullResult,
+  // mockPityStats,
+  // mockPullResults,
+  // featureButtons
 } from './GachaExampleData';
 
 const GachaExperienceExample: React.FC = () => {
@@ -43,7 +54,7 @@ const GachaExperienceExample: React.FC = () => {
   const handlePull = (pullType: 'single' | 'multi') => {
     if (!selectedBanner) return;
     
-    const cost = pullType === 'single' ? selectedBanner.pullCost : selectedBanner.pullCost * 10;
+    // const cost = ...; // Quick fix: commented unused variable
     
     if (userGems < cost) {
       Alert.alert(

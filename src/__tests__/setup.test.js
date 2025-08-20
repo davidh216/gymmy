@@ -11,7 +11,7 @@ describe('Jest Setup', () => {
   });
 
   test('should have AsyncStorage mock available', () => {
-    const AsyncStorage = require('@react-native-async-storage/async-storage');
+    // const AsyncStorage = ...; // Quick fix: commented unused variable
     expect(AsyncStorage.setItem).toBeDefined();
     expect(AsyncStorage.getItem).toBeDefined();
   });

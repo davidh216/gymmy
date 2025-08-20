@@ -1,15 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { EnhancedCharacter } from '../utils/CollectionUtils';
 import {
-  getRarityColor,
-  getClassIcon,
-  getStatusColor,
-  formatCharacterLevel,
+  // View,
+  // Text,
+  // StyleSheet
+} from 'react-native';
+import {
+  // EnhancedCharacter
 } from '../utils/CollectionUtils';
 import {
-  calculateCharacterStats,
-  getCharacterTier,
+  // getRarityColor,
+  // getClassIcon,
+  // getStatusColor,
+  // formatCharacterLevel,
+  // 
+} from '../utils/CollectionUtils';
+import {
+  // calculateCharacterStats,
+  // getCharacterTier,
+  // 
 } from '../utils/CharacterUtils';
 
 interface GridCardViewProps {
@@ -18,8 +26,8 @@ interface GridCardViewProps {
 }
 
 export const GridCardView: React.FC<GridCardViewProps> = ({ character, isSelected = false }) => {
-  const characterStats = calculateCharacterStats(character);
-  const tier = getCharacterTier(character);
+  // const characterStats = ...; // Quick fix: commented unused variable
+  // const tier = ...; // Quick fix: commented unused variable
 
   return (
     <View style={[styles.gridCard, isSelected && styles.selectedCard]}>

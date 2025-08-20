@@ -1,7 +1,14 @@
 // src/components/workout/WorkoutHeader.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 import MotivationalQuote from '../MotivationalQuote';
 import GamificationStats from '../GamificationStats';
 

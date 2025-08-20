@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // Animated
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 const MotivationalQuote = () => {
   const [currentQuote, setCurrentQuote] = useState(0);

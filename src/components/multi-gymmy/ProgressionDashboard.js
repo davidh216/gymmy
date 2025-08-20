@@ -3,19 +3,26 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Modal,
-  Alert,
-  Animated,
-  Platform,
+  // View,
+  // Text,
+  // ScrollView,
+  // TouchableOpacity,
+  // StyleSheet,
+  // Dimensions,
+  // Modal,
+  // Alert,
+  // Animated,
+  // Platform,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // LineChart,
+  // BarChart,
+  // PieChart
+} from 'react-native-chart-kit';
 
 const { width, height } = Dimensions.get('window');
 
@@ -137,8 +144,8 @@ const ProgressionDashboard = ({
   };
 
   const formatDuration = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    // const hours = ...; // Quick fix: commented unused variable
+    // const mins = ...; // Quick fix: commented unused variable
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 

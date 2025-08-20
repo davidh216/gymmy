@@ -2,8 +2,15 @@
 // Error boundary fallback component for React Native with Expo
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 const ErrorFallback = ({ error, resetError }) => {
   return (

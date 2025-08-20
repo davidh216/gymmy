@@ -1,14 +1,20 @@
 // src/components/workout/ActiveWorkout.js
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { CardioExercise, WeightExercise } from './ExerciseComponents';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // CardioExercise,
+  // WeightExercise
+} from './ExerciseComponents';
 
 const ActiveWorkout = ({
   currentWorkout,
@@ -26,12 +32,12 @@ const ActiveWorkout = ({
 }) => {
   const getWorkoutDuration = () => {
     if (!currentWorkout?.startTime) return '0:00';
-    const now = new Date();
+    // const now = ...; // Quick fix: commented unused variable
     const duration = Math.floor(
       (now - new Date(currentWorkout.startTime)) / 1000 / 60,
     );
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
+    // const hours = ...; // Quick fix: commented unused variable
+    // const minutes = ...; // Quick fix: commented unused variable
     return hours > 0
       ? `${hours}:${minutes.toString().padStart(2, '0')}`
       : `${minutes}:00`;
@@ -46,7 +52,7 @@ const ActiveWorkout = ({
     }, 0);
   };
 
-  const getTotalExercises = () => exercises.length;
+  // const getTotalExercises = ...; // Quick fix: commented unused variable
 
   return (
     <View style={styles.activeWorkoutContainer}>

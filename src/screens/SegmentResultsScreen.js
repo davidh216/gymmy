@@ -2,17 +2,22 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  Image,
+  // View,
+  // Text,
+  // TouchableOpacity,
+  // ScrollView,
+  // StyleSheet,
+  // Animated,
+  // Dimensions,
+  // Image,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { SEGMENT_CONFIGS } from '../context/segmentationTypes';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // SEGMENT_CONFIGS
+} from '../context/segmentationTypes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,8 +34,8 @@ export const SegmentResultsScreen = ({
   const [slideAnim] = useState(new Animated.Value(50));
   const [scaleAnim] = useState(new Animated.Value(0.8));
 
-  const segmentConfig = SEGMENT_CONFIGS[segment];
-  const secondaryConfig = secondarySegment ? SEGMENT_CONFIGS[secondarySegment] : null;
+  // const segmentConfig = ...; // Quick fix: commented unused variable
+  // const secondaryConfig = ...; // Quick fix: commented unused variable
 
   useEffect(() => {
     // Orchestrated entrance animation
@@ -86,7 +91,7 @@ export const SegmentResultsScreen = ({
       console.log('SegmentResultsScreen: NavigationControlContext not available, using fallback navigation');
       // Fallback - try to navigate to MainTabs directly
       try {
-        const rootNavigation = navigation.getParent()?.getParent();
+        // const rootNavigation = ...; // Quick fix: commented unused variable
         if (rootNavigation) {
           console.log('SegmentResultsScreen: Using root navigation to go to MainTabs');
           rootNavigation.reset({

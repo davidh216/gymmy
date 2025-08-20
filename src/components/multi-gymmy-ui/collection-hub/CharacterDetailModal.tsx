@@ -1,34 +1,46 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
+  // View,
+  // Text,
+  // Modal,
+  // TouchableOpacity,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Character } from '../../context/types/MultiGymmyTypes';
-import { EnhancedCharacter } from './utils/CollectionUtils';
 import {
-  getRarityColor,
-  getClassIcon,
-  getStatusColor,
-  formatCharacterLevel,
-  formatExperience,
-  getCharacterDescription,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // Character
+} from '../../context/types/MultiGymmyTypes';
+import {
+  // EnhancedCharacter
 } from './utils/CollectionUtils';
 import {
-  calculateCharacterStats,
-  getCharacterTier,
-  getCharacterSpecialties,
-  getCharacterPotential,
-  getCharacterRecommendations,
+  // getRarityColor,
+  // getClassIcon,
+  // getStatusColor,
+  // formatCharacterLevel,
+  // formatExperience,
+  // getCharacterDescription,
+  // 
+} from './utils/CollectionUtils';
+import {
+  // calculateCharacterStats,
+  // getCharacterTier,
+  // getCharacterSpecialties,
+  // getCharacterPotential,
+  // getCharacterRecommendations,
+  // 
 } from './utils/CharacterUtils';
 import {
-  getAvailableEvolutionPaths,
-  calculateEvolutionPathProgress,
+  // getAvailableEvolutionPaths,
+  // calculateEvolutionPathProgress,
+  // 
 } from './utils/EvolutionUtils';
-import { characterDetailStyles } from './components/CharacterDetailStyles';
+import {
+  // characterDetailStyles
+} from './components/CharacterDetailStyles';
 
 interface CharacterDetailModalProps {
   character: EnhancedCharacter | null;
@@ -47,13 +59,13 @@ export const CharacterDetailModal: React.FC<CharacterDetailModalProps> = ({
 }) => {
   if (!character) return null;
 
-  const characterStats = calculateCharacterStats(character);
-  const tier = getCharacterTier(character);
-  const specialties = getCharacterSpecialties(character);
-  const potential = getCharacterPotential(character);
-  const recommendations = getCharacterRecommendations(character);
-  const evolutionPaths = getAvailableEvolutionPaths(character);
-  const evolutionProgress = calculateEvolutionPathProgress(character, evolutionPaths[0]);
+  // const characterStats = ...; // Quick fix: commented unused variable
+  // const tier = ...; // Quick fix: commented unused variable
+  // const specialties = ...; // Quick fix: commented unused variable
+  // const potential = ...; // Quick fix: commented unused variable
+  // const recommendations = ...; // Quick fix: commented unused variable
+  // const evolutionPaths = ...; // Quick fix: commented unused variable
+  // const evolutionProgress = ...; // Quick fix: commented unused variable
 
   return (
     <Modal

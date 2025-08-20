@@ -3,23 +3,31 @@
 
 import React, { useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter } from '../../../../context/types/MultiGymmyTypes';
-import { TeamPerformanceMetrics } from './utils/AnalyticsUtils';
-import { 
-  getStatColor, 
-  getRoleColor, 
-  getRoleIcon, 
-  getSuggestionIcon,
-  getStatEffectiveness,
-  getRoleEffectiveness,
-  getPriorityStyle,
-  getPriorityBadgeStyle,
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter
+} from '../../../../context/types/MultiGymmyTypes';
+import {
+  // TeamPerformanceMetrics
+} from './utils/AnalyticsUtils';
+import {
+  // getStatColor,
+  // getRoleColor,
+  // getRoleIcon,
+  // getSuggestionIcon,
+  // getStatEffectiveness,
+  // getRoleEffectiveness,
+  // getPriorityStyle,
+  // getPriorityBadgeStyle,
+  // 
 } from './utils/ComponentUtils';
 
 interface EffectivenessMetricsProps {
@@ -140,7 +148,7 @@ const EffectivenessMetrics: React.FC<EffectivenessMetricsProps> = ({
       <Text style={styles.sectionTitle}>Character Contributions</Text>
       <View style={styles.contributionsList}>
         {characters.map((character) => {
-          const contribution = calculateCharacterContribution(character);
+          // const contribution = ...; // Quick fix: commented unused variable
           return (
             <View key={character.id} style={styles.contributionItem}>
               <View style={styles.characterInfo}>
@@ -174,8 +182,8 @@ const EffectivenessMetrics: React.FC<EffectivenessMetricsProps> = ({
 
 // Helper functions
 const calculateCharacterContribution = (character: GymmyCharacter): number => {
-  const baseStats = character.stats || {};
-  const totalStats = Object.values(baseStats).reduce((sum, stat) => sum + (stat || 0), 0);
+  // const baseStats = ...; // Quick fix: commented unused variable
+  // const totalStats = ...; // Quick fix: commented unused variable
   return Math.round((totalStats / 500) * 100); // Normalize to 0-100 scale
 };
 

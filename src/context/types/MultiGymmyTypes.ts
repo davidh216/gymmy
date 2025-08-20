@@ -1,7 +1,9 @@
 // src/context/types/MultiGymmyTypes.ts
 // Comprehensive type definitions for the Multi-Gymmy character collection system
 
-import { FitnessClassKey } from '../types';
+import {
+  // FitnessClassKey
+} from '../types';
 
 // ==============================================================================
 // CORE MULTI-GYMMY TYPES

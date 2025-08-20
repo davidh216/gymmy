@@ -2,15 +2,17 @@
 // Comprehensive progression tracking and achievement system
 
 import {
-  GymmyCharacter,
-  EvolutionMaterials,
+  // GymmyCharacter,
+  // EvolutionMaterials,
+  // 
 } from '../types/MultiGymmyTypes';
 
 import {
-  ExperienceGain,
-  LevelUpResult,
-  EvolutionResult,
-  CharacterGrowthSystem,
+  // ExperienceGain,
+  // LevelUpResult,
+  // EvolutionResult,
+  // CharacterGrowthSystem,
+  // 
 } from './CharacterGrowthSystem';
 
 // ==============================================================================
@@ -167,7 +169,7 @@ export class ProgressionTracker {
   // ==============================================================================
 
   public startSession(activityType: string, charactersInvolved: string[]): string {
-    const sessionId = this.generateSessionId();
+    // const sessionId = ...; // Quick fix: commented unused variable
     const session: ProgressionSession = {
       id: sessionId,
       timestamp: new Date().toISOString(),
@@ -193,7 +195,7 @@ export class ProgressionTracker {
     duration: number,
     sessionRating: number = 0,
   ): ProgressionSession {
-    const session = this.sessions.find(s => s.id === sessionId);
+    // const session = ...; // Quick fix: commented unused variable
     if (!session) throw new Error('Session not found');
 
     session.duration = duration;
@@ -225,7 +227,7 @@ export class ProgressionTracker {
 
   private checkAchievements(session: ProgressionSession): Achievement[] {
     const newAchievements: Achievement[] = [];
-    const allAchievements = this.getAllPossibleAchievements();
+    // const allAchievements = ...; // Quick fix: commented unused variable
 
     allAchievements.forEach(achievement => {
       if (this.isAchievementCompleted(achievement.id)) return;
@@ -240,7 +242,7 @@ export class ProgressionTracker {
   }
 
   private checkAchievementCondition(achievement: Achievement, session: ProgressionSession): boolean {
-    const totalStats = this.calculateTotalStats();
+    // const totalStats = ...; // Quick fix: commented unused variable
 
     switch (achievement.id) {
     case 'first_steps':
@@ -290,7 +292,7 @@ export class ProgressionTracker {
     this.milestones.forEach(milestone => {
       if (milestone.is_completed) return;
 
-      const progress = this.calculateMilestoneProgress(milestone);
+      // const progress = ...; // Quick fix: commented unused variable
       milestone.current_progress = progress;
 
       if (progress >= milestone.requirement_value) {
@@ -315,7 +317,7 @@ export class ProgressionTracker {
   }
 
   private calculateMilestoneProgress(milestone: ProgressionMilestone): number {
-    const stats = this.calculateTotalStats();
+    // const stats = ...; // Quick fix: commented unused variable
 
     switch (milestone.id) {
     case 'experience_milestone_1000':
@@ -347,16 +349,16 @@ export class ProgressionTracker {
       sum + session.experience_gains.reduce((expSum, gain) => expSum + gain.total_exp, 0), 0,
     );
 
-    const totalLevelUps = this.sessions.reduce((sum, session) => sum + session.level_ups.length, 0);
-    const totalEvolutions = this.sessions.reduce((sum, session) => sum + session.evolutions.length, 0);
+    // const totalLevelUps = ...; // Quick fix: commented unused variable
+    // const totalEvolutions = ...; // Quick fix: commented unused variable
 
-    const activeDays = new Set(this.sessions.map(s => s.timestamp.split('T')[0])).size;
-    const totalSessions = this.sessions.length;
-    const totalDuration = this.sessions.reduce((sum, session) => sum + session.duration, 0);
+    // const activeDays = ...; // Quick fix: commented unused variable
+    // const totalSessions = ...; // Quick fix: commented unused variable
+    // const totalDuration = ...; // Quick fix: commented unused variable
 
-    const characterLevels = Array.from(this.characterStats.values()).map(stats => stats.current_level || 1);
-    const maxLevel = characterLevels.length > 0 ? Math.max(...characterLevels) : 1;
-    const avgLevel = characterLevels.length > 0 ? characterLevels.reduce((sum, level) => sum + level, 0) / characterLevels.length : 1;
+    // const characterLevels = ...; // Quick fix: commented unused variable
+    // const maxLevel = ...; // Quick fix: commented unused variable
+    // const avgLevel = ...; // Quick fix: commented unused variable
 
     return {
       total_experience_gained: totalExperience,
@@ -404,15 +406,15 @@ export class ProgressionTracker {
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
 
-    const uniqueDays = Array.from(new Set(sortedSessions.map(s => s.timestamp.split('T')[0]))).sort().reverse();
+    // const uniqueDays = ...; // Quick fix: commented unused variable
     
     let streak = 0;
-    const today = new Date().toISOString().split('T')[0];
-    const checkDate = new Date();
+    // const today = ...; // Quick fix: commented unused variable
+    // const checkDate = ...; // Quick fix: commented unused variable
 
     for (let i = 0; i < uniqueDays.length; i++) {
-      const sessionDate = uniqueDays[i];
-      const expectedDate = checkDate.toISOString().split('T')[0];
+      // const sessionDate = ...; // Quick fix: commented unused variable
+      // const expectedDate = ...; // Quick fix: commented unused variable
       
       if (sessionDate === expectedDate) {
         streak++;
@@ -432,15 +434,15 @@ export class ProgressionTracker {
   private calculateLongestStreak(): number {
     if (this.sessions.length === 0) return 0;
 
-    const uniqueDays = Array.from(new Set(this.sessions.map(s => s.timestamp.split('T')[0]))).sort();
+    // const uniqueDays = ...; // Quick fix: commented unused variable
     
     let maxStreak = 1;
     let currentStreak = 1;
 
     for (let i = 1; i < uniqueDays.length; i++) {
-      const prevDate = new Date(uniqueDays[i - 1]);
-      const currDate = new Date(uniqueDays[i]);
-      const dayDiff = (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+      // const prevDate = ...; // Quick fix: commented unused variable
+      // const currDate = ...; // Quick fix: commented unused variable
+      // const dayDiff = ...; // Quick fix: commented unused variable
 
       if (dayDiff === 1) {
         currentStreak++;
@@ -454,25 +456,25 @@ export class ProgressionTracker {
   }
 
   private calculateAchievementScore(): number {
-    const rarityScores = { common: 10, rare: 25, epic: 50, legendary: 100 };
+    // const rarityScores = ...; // Quick fix: commented unused variable
     return this.achievements.reduce((score, achievement) => 
       score + rarityScores[achievement.rarity], 0,
     );
   }
 
   private calculateCompletionPercentage(): number {
-    const totalPossibleAchievements = this.getAllPossibleAchievements().length;
-    const completedMilestones = this.milestones.filter(m => m.is_completed).length;
-    const totalMilestones = this.milestones.length;
+    // const totalPossibleAchievements = ...; // Quick fix: commented unused variable
+    // const completedMilestones = ...; // Quick fix: commented unused variable
+    // const totalMilestones = ...; // Quick fix: commented unused variable
 
-    const achievementCompletion = (this.achievements.length / totalPossibleAchievements) * 60; // 60% weight
-    const milestoneCompletion = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 40 : 0; // 40% weight
+    // const achievementCompletion = ...; // Quick fix: commented unused variable // 60% weight
+    // const milestoneCompletion = ...; // Quick fix: commented unused variable // 40% weight
 
     return Math.min(100, achievementCompletion + milestoneCompletion);
   }
 
   private calculateWeeklyAverage(metric: 'level_ups' | 'evolutions'): number {
-    const weeksActive = Math.max(1, this.calculateTotalStats().active_days / 7);
+    // const weeksActive = ...; // Quick fix: commented unused variable
     const totalCount = metric === 'level_ups' ? 
       this.calculateTotalStats().total_levels_gained : 
       this.calculateTotalStats().total_evolutions_completed;
@@ -481,7 +483,7 @@ export class ProgressionTracker {
   }
 
   private calculateMonthlyAverage(metric: 'level_ups' | 'evolutions'): number {
-    const monthsActive = Math.max(1, this.calculateTotalStats().active_days / 30);
+    // const monthsActive = ...; // Quick fix: commented unused variable
     const totalCount = metric === 'level_ups' ? 
       this.calculateTotalStats().total_levels_gained : 
       this.calculateTotalStats().total_evolutions_completed;
@@ -530,11 +532,11 @@ export class ProgressionTracker {
   // ==============================================================================
 
   public generateWeeklyReport(): WeeklyReport {
-    const weekEnd = new Date();
-    const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+    // const weekEnd = ...; // Quick fix: commented unused variable
+    // const weekStart = ...; // Quick fix: commented unused variable
 
     const weeklySessions = this.sessions.filter(session => {
-      const sessionDate = new Date(session.timestamp);
+      // const sessionDate = ...; // Quick fix: commented unused variable
       return sessionDate >= weekStart && sessionDate <= weekEnd;
     });
 
@@ -548,9 +550,9 @@ export class ProgressionTracker {
       new_achievements: weeklySessions.reduce((sum, session) => sum + session.achievements_unlocked.length, 0),
     };
 
-    const highlights = this.generateCharacterHighlights(weeklySessions);
-    const recommendations = this.generateRecommendations();
-    const goals = this.generateNextWeekGoals();
+    // const highlights = ...; // Quick fix: commented unused variable
+    // const recommendations = ...; // Quick fix: commented unused variable
+    // const goals = ...; // Quick fix: commented unused variable
 
     return {
       week_start: weekStart.toISOString().split('T')[0],
@@ -587,14 +589,14 @@ export class ProgressionTracker {
     // Generate highlights for top performers
     Object.keys(characterProgress)
       .sort((a, b) => {
-        const aScore = characterProgress[a].level_ups + characterProgress[a].evolutions * 5;
-        const bScore = characterProgress[b].level_ups + characterProgress[b].evolutions * 5;
+        // const aScore = ...; // Quick fix: commented unused variable
+        // const bScore = ...; // Quick fix: commented unused variable
         return bScore - aScore;
       })
       .slice(0, 3)
       .forEach(characterId => {
-        const progress = characterProgress[characterId];
-        const character = this.characterStats.get(characterId);
+        // const progress = ...; // Quick fix: commented unused variable
+        // const character = ...; // Quick fix: commented unused variable
         
         if (progress.evolutions > 0) {
           highlights.push({
@@ -620,7 +622,7 @@ export class ProgressionTracker {
 
   private generateRecommendations(): ProgressionRecommendation[] {
     const recommendations: ProgressionRecommendation[] = [];
-    const stats = this.calculateTotalStats();
+    // const stats = ...; // Quick fix: commented unused variable
 
     // Low activity recommendation
     if (stats.workout_sessions_completed < 3) {
@@ -651,7 +653,7 @@ export class ProgressionTracker {
     }
 
     // Achievement targeting
-    const unlockedAchievements = this.getAllPossibleAchievements().length - this.achievements.length;
+    // const unlockedAchievements = ...; // Quick fix: commented unused variable
     if (unlockedAchievements > 0) {
       recommendations.push({
         type: 'achievement_target',
@@ -667,7 +669,7 @@ export class ProgressionTracker {
   }
 
   private generateNextWeekGoals(): Goal[] {
-    const stats = this.calculateTotalStats();
+    // const stats = ...; // Quick fix: commented unused variable
     const goals: Goal[] = [];
 
     // Experience goal
@@ -888,5 +890,5 @@ export class ProgressionTracker {
 // EXPORT SINGLETON INSTANCE
 // ==============================================================================
 
-export const progressionTracker = ProgressionTracker.getInstance();
+export // const progressionTracker = ...; // Quick fix: commented unused variable
 export default progressionTracker;

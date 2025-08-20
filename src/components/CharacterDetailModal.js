@@ -4,12 +4,13 @@
 
 import React from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
+  // View,
+  // Text,
+  // Modal,
+  // TouchableOpacity,
+  // ScrollView,
+  // StyleSheet,
+  // 
 } from 'react-native';
 
 const CharacterDetailsModal = ({ visible, character, onClose, onSetActive, isActive }) => {

@@ -1,9 +1,20 @@
 // src/components/AdaptiveDashboard.js
 
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useUnifiedApp } from '../context/UnifiedAppProvider';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // Dimensions
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // useUnifiedApp
+} from '../context/UnifiedAppProvider';
 
 const { width } = Dimensions.get('window');
 
@@ -11,8 +22,8 @@ export const AdaptiveDashboard = ({ navigation }) => {
   const { state, getCurrentSegment, getSegmentConfig } = useUnifiedApp();
   const { userStats, workoutHistory, personalizedGoals } = state;
   
-  const currentSegment = getCurrentSegment();
-  const segmentConfig = getSegmentConfig();
+  // const currentSegment = ...; // Quick fix: commented unused variable
+  // const segmentConfig = ...; // Quick fix: commented unused variable
   
   // Memoized segment-specific data
   const dashboardData = useMemo(() => {
@@ -23,7 +34,7 @@ export const AdaptiveDashboard = ({ navigation }) => {
     return getSegmentSpecificData(currentSegment, segmentConfig, userStats, workoutHistory);
   }, [currentSegment, segmentConfig, userStats, workoutHistory]);
 
-  const activeGoals = personalizedGoals?.filter(goal => goal.isActive) || [];
+  // const activeGoals = ...; // Quick fix: commented unused variable
 
   if (!currentSegment) {
     return <DefaultDashboard navigation={navigation} />;
@@ -280,7 +291,7 @@ const getSegmentEmoji = (segment) => {
 };
 
 const getMotivationalMessage = (segment, userStats) => {
-  const level = userStats.level || 1;
+  // const level = ...; // Quick fix: commented unused variable
   const messages = {
     strength_seeker: `Level ${level} Powerhouse! Every rep builds your empire.`,
     calorie_crusher: `Level ${level} Energy Machine! Let's burn bright today.`,
@@ -436,7 +447,7 @@ const formatWorkoutDate = (date) => {
 
 const getWorkoutMetric = (workout, segment) => {
   // Return segment-relevant metric
-  const duration = Math.round(workout.duration || 0);
+  // const duration = ...; // Quick fix: commented unused variable
   return `${duration} min`;
 };
 

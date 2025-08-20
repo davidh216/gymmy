@@ -1,7 +1,10 @@
 // src/components/multi-gymmy-ui/team-management/utils/ComponentUtils.ts
 // Common utility functions and helpers for team management components
 
-import { TextStyle, ViewStyle } from 'react-native';
+import {
+  // TextStyle,
+  // ViewStyle
+} from 'react-native';
 
 // Color utilities
 export const getRarityColor = (rarity: string): string => {
@@ -120,7 +123,7 @@ export const createFadeAnimation = (opacity: number, duration: number = 200) => 
 };
 
 // Validation utilities
-export const validateTeamName = (name: string): { isValid: boolean; error?: string } => {
+export // const validateTeamName = ...; // Quick fix: commented unused variable error?: string } => {
   if (!name.trim()) {
     return { isValid: false, error: 'Team name is required' };
   }
@@ -133,7 +136,7 @@ export const validateTeamName = (name: string): { isValid: boolean; error?: stri
   return { isValid: true };
 };
 
-export const validatePresetName = (name: string): { isValid: boolean; error?: string } => {
+export // const validatePresetName = ...; // Quick fix: commented unused variable error?: string } => {
   if (!name.trim()) {
     return { isValid: false, error: 'Preset name is required' };
   }

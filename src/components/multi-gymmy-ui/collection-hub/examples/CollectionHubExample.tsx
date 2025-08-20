@@ -1,30 +1,40 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // Alert,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Character } from '../../../context/types/MultiGymmyTypes';
 import {
-  CollectionGrid,
-  CollectionFilters,
-  CollectionViewMode,
-  SortOption,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // Character
+} from '../../../context/types/MultiGymmyTypes';
+import {
+  // CollectionGrid,
+  // CollectionFilters,
+  // CollectionViewMode,
+  // SortOption,
+  // 
 } from '../index';
 import {
-  calculateCollectionStats,
+  // calculateCollectionStats,
+  // 
 } from '../utils/CollectionUtils';
 import {
-  mockCharacters,
-  defaultFilters,
-  defaultSortOption,
-  defaultViewMode,
+  // mockCharacters,
+  // defaultFilters,
+  // defaultSortOption,
+  // defaultViewMode,
+  // 
 } from './CollectionExampleData';
-import { FilterControls } from '../components/FilterControls';
+import {
+  // FilterControls
+} from '../components/FilterControls';
 
 export const CollectionHubExample: React.FC = () => {
   const [filters, setFilters] = useState<CollectionFilters>(defaultFilters);

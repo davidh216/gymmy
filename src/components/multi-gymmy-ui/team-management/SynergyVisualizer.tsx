@@ -3,16 +3,25 @@
 
 import React, { useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter } from '../../../../context/types/MultiGymmyTypes';
-import { SynergyAnalysis } from './utils/SynergyUtils';
-import { TeamPerformanceMetrics } from './utils/AnalyticsUtils';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter
+} from '../../../../context/types/MultiGymmyTypes';
+import {
+  // SynergyAnalysis
+} from './utils/SynergyUtils';
+import {
+  // TeamPerformanceMetrics
+} from './utils/AnalyticsUtils';
 import ConnectionLines from './ConnectionLines';
 
 interface SynergyVisualizerProps {
@@ -26,8 +35,8 @@ const SynergyVisualizer: React.FC<SynergyVisualizerProps> = ({
   synergyAnalysis,
   performanceMetrics,
 }) => {
-  const hasActiveSynergies = synergyAnalysis.activeSynergies.length > 0;
-  const hasRecommendations = synergyAnalysis.recommendations.length > 0;
+  // const hasActiveSynergies = ...; // Quick fix: commented unused variable
+  // const hasRecommendations = ...; // Quick fix: commented unused variable
 
   const renderPerformanceOverview = () => (
     <View style={styles.performanceSection}>

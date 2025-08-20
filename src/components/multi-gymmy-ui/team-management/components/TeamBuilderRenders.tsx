@@ -3,16 +3,27 @@
 
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter, GymmyTeam } from '../../../../../context/types/MultiGymmyTypes';
-import { TeamFormation, TeamPosition } from '../utils/TeamUtils';
-import { getRarityColor } from '../utils/ComponentUtils';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter,
+  // GymmyTeam
+} from '../../../../../context/types/MultiGymmyTypes';
+import {
+  // TeamFormation,
+  // TeamPosition
+} from '../utils/TeamUtils';
+import {
+  // getRarityColor
+} from '../utils/ComponentUtils';
 import CharacterSlot from '../CharacterSlot';
 
 interface TeamPositionsProps {
@@ -32,7 +43,7 @@ export const TeamPositions: React.FC<TeamPositionsProps> = ({
     <Text style={styles.sectionTitle}>Team Formation</Text>
     <View style={styles.positionsGrid}>
       {formation.positions.map((position) => {
-        const character = currentTeam.characters.find(c => c.position === position.id);
+        // const character = ...; // Quick fix: commented unused variable
         return (
           <CharacterSlot
             key={position.id}
@@ -97,7 +108,7 @@ export const FormationSelector: React.FC<FormationSelectorProps> = ({
   onFormationSelect,
   onShowFormationModal,
 }) => {
-  const currentFormation = formations.find(f => f.id === selectedFormation);
+  // const currentFormation = ...; // Quick fix: commented unused variable
   
   return (
     <View style={styles.formationSelector}>

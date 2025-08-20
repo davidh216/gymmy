@@ -1,7 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { CollectionStats as CollectionStatsType } from './utils/CollectionUtils';
+import {
+  // View,
+  // Text,
+  // StyleSheet
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // CollectionStats as CollectionStatsType
+} from './utils/CollectionUtils';
 
 interface CollectionStatsProps {
   stats: CollectionStatsType;

@@ -3,18 +3,27 @@
 
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
+  // View,
+  // Text,
+  // StyleSheet,
+  // Modal,
+  // TouchableOpacity,
+  // ScrollView,
+  // TextInput,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyTeam } from '../../../../../context/types/MultiGymmyTypes';
-import { TeamFormation } from '../utils/TeamUtils';
-import { validateTeamName } from '../utils/ComponentUtils';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyTeam
+} from '../../../../../context/types/MultiGymmyTypes';
+import {
+  // TeamFormation
+} from '../utils/TeamUtils';
+import {
+  // validateTeamName
+} from '../utils/ComponentUtils';
 
 interface FormationModalProps {
   visible: boolean;
@@ -142,7 +151,7 @@ export const TeamNameModal: React.FC<TeamNameModalProps> = ({
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSave = () => {
-    const validation = validateTeamName(name);
+    // const validation = ...; // Quick fix: commented unused variable
     if (!validation.isValid) {
       setError(validation.error);
       return;

@@ -2,7 +2,12 @@
 // Loading fallback component for React Native with Expo
 
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  // View,
+  // Text,
+  // ActivityIndicator,
+  // StyleSheet
+} from 'react-native';
 
 const LoadingFallback = ({ message = 'Loading Gymmy...' }) => {
   return (

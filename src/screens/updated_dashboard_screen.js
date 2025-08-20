@@ -1,15 +1,20 @@
 // src/screens/DashboardScreen.js
 
 import React from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  SafeAreaView, 
-  Text, 
-  TouchableOpacity, 
+import {
+  // View,
+  // StyleSheet,
+  // SafeAreaView,
+  // Text,
+  // TouchableOpacity,
+  // 
 } from 'react-native';
-import { useApp } from '../context';
-import { AdaptiveDashboard } from '../components/AdaptiveDashboard';
+import {
+  // useApp
+} from '../context';
+import {
+  // AdaptiveDashboard
+} from '../components/AdaptiveDashboard';
 
 // Import existing dashboard components for fallback
 import ClassDashboardWidget from '../components/ClassDashboardWidget';

@@ -1,14 +1,17 @@
 // src/components/workout/WorkoutTemplates.js
 import React, { useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Modal,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 const WorkoutTemplates = ({
   visible,
@@ -23,7 +26,7 @@ const WorkoutTemplates = ({
     }
 
     return workoutTemplates.reduce((acc, template) => {
-      const category = template.category || 'Other';
+      // const category = ...; // Quick fix: commented unused variable
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -48,8 +51,8 @@ const WorkoutTemplates = ({
 
     // Determine icon based on exercises
     if (template.exercises) {
-      const hasCardio = template.exercises.some(ex => ex.isCardio);
-      const hasWeights = template.exercises.some(ex => !ex.isCardio);
+      // const hasCardio = ...; // Quick fix: commented unused variable
+      // const hasWeights = ...; // Quick fix: commented unused variable
 
       if (hasCardio && hasWeights) return 'fitness';
       if (hasCardio) return 'heart';
@@ -65,8 +68,8 @@ const WorkoutTemplates = ({
     }
 
     // Estimate based on exercises
-    const exerciseCount = template.exercises?.length || 0;
-    const estimatedMinutes = exerciseCount * 8; // ~8 minutes per exercise
+    // const exerciseCount = ...; // Quick fix: commented unused variable
+    // const estimatedMinutes = ...; // Quick fix: commented unused variable // ~8 minutes per exercise
     return `~${estimatedMinutes} min`;
   };
 

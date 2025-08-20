@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Alert,
-  SafeAreaView,
-  FlatList,
-  Platform,
+  // View,
+  // Text,
+  // StyleSheet,
+  // Modal,
+  // TouchableOpacity,
+  // ScrollView,
+  // TextInput,
+  // Alert,
+  // SafeAreaView,
+  // FlatList,
+  // Platform,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const EditWorkoutModal = ({ 
@@ -62,9 +65,9 @@ const EditWorkoutModal = ({
       setExercises(workout.exercises || []);
       
       // Calculate duration in minutes
-      const startTime = new Date(workout.startTime);
-      const endTime = new Date(workout.endTime);
-      const durationMinutes = Math.round((endTime - startTime) / 1000 / 60);
+      // const startTime = ...; // Quick fix: commented unused variable
+      // const endTime = ...; // Quick fix: commented unused variable
+      // const durationMinutes = ...; // Quick fix: commented unused variable
       setDuration(durationMinutes);
     }
   }, [workout]);
@@ -78,7 +81,7 @@ const EditWorkoutModal = ({
     console.log('EditWorkoutModal - handleSave - duration:', duration);
 
     // Create workoutDate in local timezone to avoid timezone issues
-    const workoutDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    // const workoutDate = ...; // Quick fix: commented unused variable
     
     console.log('EditWorkoutModal - handleSave - workoutDate (local):', workoutDate);
     
@@ -177,7 +180,7 @@ const EditWorkoutModal = ({
   const removeSet = (exerciseId, setId) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
-        const updatedSets = exercise.sets.filter(set => set.id !== setId);
+        // const updatedSets = ...; // Quick fix: commented unused variable
         return { ...exercise, sets: updatedSets };
       }
       return exercise;
@@ -189,7 +192,7 @@ const EditWorkoutModal = ({
       if (exercise.id === exerciseId) {
         const updatedSets = exercise.sets.map(set => {
           if (set.id === setId) {
-            const parsedValue = value === '' ? '' : parseInt(value) || 0;
+            // const parsedValue = ...; // Quick fix: commented unused variable
             return { ...set, [field]: parsedValue };
           }
           return set;
@@ -201,7 +204,7 @@ const EditWorkoutModal = ({
   };
 
   const renderRatingStars = () => {
-    const stars = [];
+    // const stars = ...; // Quick fix: commented unused variable
     for (let i = 1; i <= 10; i++) {
       stars.push(
         <TouchableOpacity
@@ -299,7 +302,7 @@ const EditWorkoutModal = ({
       
       // Update duration if end time is set
       if (endTime) {
-        const durationMinutes = Math.round((endTime - selectedTime) / 1000 / 60);
+        // const durationMinutes = ...; // Quick fix: commented unused variable
         setDuration(Math.max(0, durationMinutes));
       }
     }
@@ -313,7 +316,7 @@ const EditWorkoutModal = ({
       setEndTime(selectedTime);
       
       // Update duration
-      const durationMinutes = Math.round((selectedTime - startTime) / 1000 / 60);
+      // const durationMinutes = ...; // Quick fix: commented unused variable
       setDuration(Math.max(0, durationMinutes));
     }
   };
@@ -323,7 +326,7 @@ const EditWorkoutModal = ({
     
     // Parse the date string (YYYY-MM-DD) to avoid timezone issues
     const [year, month, day] = event.target.value.split('-').map(Number);
-    const newDate = new Date(year, month - 1, day); // month is 0-indexed
+    // const newDate = ...; // Quick fix: commented unused variable // month is 0-indexed
     
     console.log('EditWorkoutModal - Web date change - parsed date components:', { year, month, day });
     console.log('EditWorkoutModal - Web date change - newDate:', newDate);

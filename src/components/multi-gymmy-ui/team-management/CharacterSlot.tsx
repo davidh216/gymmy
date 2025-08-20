@@ -3,16 +3,23 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Animated,
+  // Dimensions,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter } from '../../../../context/types/MultiGymmyTypes';
-import { TeamPosition } from './utils/TeamUtils';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter
+} from '../../../../context/types/MultiGymmyTypes';
+import {
+  // TeamPosition
+} from './utils/TeamUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -32,8 +39,8 @@ const CharacterSlot: React.FC<CharacterSlotProps> = ({
   isHighlighted,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const scaleAnimation = useMemo(() => new Animated.Value(1), []);
-  const borderAnimation = useMemo(() => new Animated.Value(0), []);
+  // const scaleAnimation = ...; // Quick fix: commented unused variable
+  // const borderAnimation = ...; // Quick fix: commented unused variable
 
   // Animate on highlight
   React.useEffect(() => {

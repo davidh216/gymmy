@@ -1,17 +1,30 @@
 // src/context/EnhancedGachaManager.ts
 // Main integration class that brings all managers together
 
-import { EnhancedGachaState } from './EnhancedGachaSystem';
-import { PullManager } from './managers/PullManager';
-import { EvolutionManager } from './managers/EvolutionManager';
-import { BannerManager } from './managers/BannerManager';
-import { AnalyticsManager } from './managers/AnalyticsManager';
-import { Character } from './types';
-import { 
-  EnhancedPullResult, 
-  EvolutionResult, 
-  BannerActivationResult,
-  PityInsights, 
+import {
+  // EnhancedGachaState
+} from './EnhancedGachaSystem';
+import {
+  // PullManager
+} from './managers/PullManager';
+import {
+  // EvolutionManager
+} from './managers/EvolutionManager';
+import {
+  // BannerManager
+} from './managers/BannerManager';
+import {
+  // AnalyticsManager
+} from './managers/AnalyticsManager';
+import {
+  // Character
+} from './types';
+import {
+  // EnhancedPullResult,
+  // EvolutionResult,
+  // BannerActivationResult,
+  // PityInsights,
+  // 
 } from './types/EnhancedGachaTypes';
 
 export class EnhancedGachaManager {
@@ -112,7 +125,7 @@ export class EnhancedGachaManager {
   
   // Check if player can perform a pull
   public canPerformPull(pullType: 'single' | 'ten_pull', playerGems: number): boolean {
-    const cost = pullType === 'single' ? 160 : 1600;
+    // const cost = ...; // Quick fix: commented unused variable
     return playerGems >= cost;
   }
   

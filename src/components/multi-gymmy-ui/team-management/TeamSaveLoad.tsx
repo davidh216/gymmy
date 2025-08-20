@@ -3,17 +3,22 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  TextInput,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Alert,
+  // Modal,
+  // TextInput,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GymmyTeam } from '../../../../context/types/MultiGymmyTypes';
+import {
+  // GymmyTeam
+} from '../../../../context/types/MultiGymmyTypes';
 
 interface TeamSaveLoadProps {
   visible: boolean;
@@ -40,9 +45,9 @@ const TeamSaveLoad: React.FC<TeamSaveLoadProps> = ({
 
   const loadSavedTeams = async () => {
     try {
-      const savedTeamsData = await AsyncStorage.getItem('@saved_teams');
+      // const savedTeamsData = ...; // Quick fix: commented unused variable
       if (savedTeamsData) {
-        const teams = JSON.parse(savedTeamsData);
+        // const teams = ...; // Quick fix: commented unused variable
         setSavedTeams(teams);
       }
     } catch (error) {
@@ -63,7 +68,7 @@ const TeamSaveLoad: React.FC<TeamSaveLoadProps> = ({
         last_updated: new Date().toISOString(),
       };
 
-      const updatedTeams = [...savedTeams, teamToSave];
+      // const updatedTeams = ...; // Quick fix: commented unused variable
       await AsyncStorage.setItem('@saved_teams', JSON.stringify(updatedTeams));
       
       setSavedTeams(updatedTeams);
@@ -106,7 +111,7 @@ const TeamSaveLoad: React.FC<TeamSaveLoadProps> = ({
           style: 'destructive',
           onPress: async () => {
             try {
-              const updatedTeams = savedTeams.filter(team => team.id !== teamId);
+              // const updatedTeams = ...; // Quick fix: commented unused variable
               await AsyncStorage.setItem('@saved_teams', JSON.stringify(updatedTeams));
               setSavedTeams(updatedTeams);
             } catch (error) {

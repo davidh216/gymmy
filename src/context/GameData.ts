@@ -1,12 +1,13 @@
 // src/context/GameData.ts
 // Game data constants and templates
 
-import { 
-  FitnessClass, 
-  FitnessClassKey, 
-  CharacterTemplate, 
-  CharacterRarity,
-  UserCurrencies, 
+import {
+  // FitnessClass,
+  // FitnessClassKey,
+  // CharacterTemplate,
+  // CharacterRarity,
+  // UserCurrencies,
+  // 
 } from './types';
 
 // ==============================================================================

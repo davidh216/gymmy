@@ -1,12 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import {
-  getPityColor,
-  getPityMessage,
-  getPityVisualConfig,
-  formatPityProgress,
-  getPityEmoji,
+  // View,
+  // Text,
+  // StyleSheet,
+  // Animated
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // getPityColor,
+  // getPityMessage,
+  // getPityVisualConfig,
+  // formatPityProgress,
+  // getPityEmoji,
+  // 
 } from '../utils/PityUtils';
 
 interface PityProgress {
@@ -29,10 +37,10 @@ export const PityBar: React.FC<PityBarProps> = ({
   progressAnimation,
   pulseAnimation,
 }) => {
-  const color = getPityColor(rarity, progress.percentage);
-  const emoji = getPityEmoji(rarity, progress.percentage);
-  const message = getPityMessage(rarity, progress.percentage);
-  const visualConfig = getPityVisualConfig(rarity, progress.percentage);
+  // const color = ...; // Quick fix: commented unused variable
+  // const emoji = ...; // Quick fix: commented unused variable
+  // const message = ...; // Quick fix: commented unused variable
+  // const visualConfig = ...; // Quick fix: commented unused variable
   
   return (
     <View style={styles.pityBarContainer}>

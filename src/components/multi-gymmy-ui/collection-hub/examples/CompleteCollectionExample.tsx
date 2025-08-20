@@ -1,25 +1,34 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // Alert,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Character } from '../../../context/types/MultiGymmyTypes';
 import {
-  CollectionGrid,
-  CharacterDetailModal,
-  CharacterComparison,
-  EvolutionPlanner,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // Character
+} from '../../../context/types/MultiGymmyTypes';
+import {
+  // CollectionGrid,
+  // CharacterDetailModal,
+  // CharacterComparison,
+  // EvolutionPlanner,
+  // 
 } from '../index';
 import {
-  calculateCollectionStats,
-  enhanceCharacterForDisplay,
+  // calculateCollectionStats,
+  // enhanceCharacterForDisplay,
+  // 
 } from '../utils/CollectionUtils';
-import { mockCharacters } from './CollectionExampleData';
+import {
+  // mockCharacters
+} from './CollectionExampleData';
 
 export const CompleteCollectionExample: React.FC = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
@@ -29,8 +38,8 @@ export const CompleteCollectionExample: React.FC = () => {
   const [showComparisonModal, setShowComparisonModal] = useState(false);
   const [showEvolutionPlanner, setShowEvolutionPlanner] = useState(false);
 
-  const enhancedCharacters = mockCharacters.map(enhanceCharacterForDisplay);
-  const collectionStats = calculateCollectionStats(mockCharacters);
+  // const enhancedCharacters = ...; // Quick fix: commented unused variable
+  // const collectionStats = ...; // Quick fix: commented unused variable
 
   const handleCharacterPress = (character: Character) => {
     setSelectedCharacter(character);

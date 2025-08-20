@@ -1,4 +1,7 @@
-import { Animated, Easing } from 'react-native';
+import {
+  // Animated,
+  // Easing
+} from 'react-native';
 
 export interface PullAnimationConfig {
   duration: number;
@@ -40,11 +43,11 @@ export const createPullSequence = (
   rarity: keyof RarityAnimationConfig,
   onComplete?: () => void
 ): Animated.CompositeAnimation => {
-  const config = DEFAULT_RARITY_ANIMATIONS[rarity];
+  // const config = ...; // Quick fix: commented unused variable
   
-  const scaleAnimation = new Animated.Value(0);
-  const opacityAnimation = new Animated.Value(0);
-  const rotationAnimation = new Animated.Value(0);
+  // const scaleAnimation = ...; // Quick fix: commented unused variable
+  // const opacityAnimation = ...; // Quick fix: commented unused variable
+  // const rotationAnimation = ...; // Quick fix: commented unused variable
   
   const sequence = Animated.parallel([
     // Scale up with bounce effect
@@ -83,8 +86,8 @@ export const createAnticipationAnimation = (
   duration: number = 2000,
   onComplete?: () => void
 ): Animated.CompositeAnimation => {
-  const pulseAnimation = new Animated.Value(1);
-  const glowAnimation = new Animated.Value(0);
+  // const pulseAnimation = ...; // Quick fix: commented unused variable
+  // const glowAnimation = ...; // Quick fix: commented unused variable
   
   const sequence = Animated.parallel([
     // Pulsing effect
@@ -125,10 +128,10 @@ export const createRarityRevealSequence = (
   rarity: keyof RarityAnimationConfig,
   onComplete?: () => void
 ): Animated.CompositeAnimation => {
-  const config = DEFAULT_RARITY_ANIMATIONS[rarity];
+  // const config = ...; // Quick fix: commented unused variable
   
-  const revealAnimation = new Animated.Value(0);
-  const sparkleAnimation = new Animated.Value(0);
+  // const revealAnimation = ...; // Quick fix: commented unused variable
+  // const sparkleAnimation = ...; // Quick fix: commented unused variable
   
   const sequence = Animated.sequence([
     // Initial reveal
@@ -189,7 +192,7 @@ export const getRarityVisualConfig = (rarity: string) => {
 export const createSkipAnimation = (
   onComplete?: () => void
 ): Animated.CompositeAnimation => {
-  const skipAnimation = new Animated.Value(0);
+  // const skipAnimation = ...; // Quick fix: commented unused variable
   
   const sequence = Animated.timing(skipAnimation, {
     toValue: 1,

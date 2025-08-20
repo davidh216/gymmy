@@ -3,24 +3,36 @@
 
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-  Alert,
+  // View,
+  // Text,
+  // StyleSheet,
+  // ScrollView,
+  // TouchableOpacity,
+  // Modal,
+  // Alert,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyCharacter, GymmyTeam } from '../../../../../context/types/MultiGymmyTypes';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyCharacter,
+  // GymmyTeam
+} from '../../../../../context/types/MultiGymmyTypes';
 import TeamBuilder from '../TeamBuilder';
 import TeamPresetManager from '../TeamPresetManager';
 import TeamSaveLoad from '../TeamSaveLoad';
 import TeamAnalyticsDashboard from '../TeamAnalyticsDashboard';
 import EffectivenessMetrics from '../EffectivenessMetrics';
-import { createEmptyTeam } from '../utils/TeamUtils';
-import { calculateTeamPerformance } from '../utils/AnalyticsUtils';
-import { calculateTeamSynergies } from '../utils/SynergyUtils';
+import {
+  // createEmptyTeam
+} from '../utils/TeamUtils';
+import {
+  // calculateTeamPerformance
+} from '../utils/AnalyticsUtils';
+import {
+  // calculateTeamSynergies
+} from '../utils/SynergyUtils';
 
 // Mock character data for demonstration
 const mockCharacters: GymmyCharacter[] = [
@@ -95,8 +107,8 @@ const TeamManagementExample: React.FC = () => {
   const [showEffectiveness, setShowEffectiveness] = useState(false);
 
   // Calculate metrics
-  const performanceMetrics = calculateTeamPerformance(currentTeam, currentTeam.characters);
-  const synergyAnalysis = calculateTeamSynergies(currentTeam.characters);
+  // const performanceMetrics = ...; // Quick fix: commented unused variable
+  // const synergyAnalysis = ...; // Quick fix: commented unused variable
 
   const handleSaveTeam = (team: GymmyTeam) => {
     setCurrentTeam(team);

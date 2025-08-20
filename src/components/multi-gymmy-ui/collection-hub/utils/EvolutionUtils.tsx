@@ -1,4 +1,8 @@
-import { Character, CharacterRarity, CharacterClass } from '../../../context/types/MultiGymmyTypes';
+import {
+  // Character,
+  // CharacterRarity,
+  // CharacterClass
+} from '../../../context/types/MultiGymmyTypes';
 
 // Evolution Data Structures
 export interface EvolutionMaterial {
@@ -207,7 +211,7 @@ export const EVOLUTION_MATERIALS: EvolutionMaterial[] = [
 
 // Utility Functions
 export const getAvailableEvolutionPaths = (character: Character): EvolutionPath[] => {
-  const paths = EVOLUTION_PATHS[character.class] || [];
+  // const paths = ...; // Quick fix: commented unused variable
   
   return paths.map(path => ({
     ...path,
@@ -238,7 +242,7 @@ export const getRequirementCurrentValue = (character: Character, requirement: Ev
 };
 
 export const isRequirementCompleted = (character: Character, requirement: EvolutionRequirement): boolean => {
-  const current = getRequirementCurrentValue(character, requirement);
+  // const current = ...; // Quick fix: commented unused variable
   
   switch (requirement.type) {
     case 'level':
@@ -258,7 +262,7 @@ export const isRequirementCompleted = (character: Character, requirement: Evolut
 };
 
 export const calculateEvolutionPathProgress = (character: Character, path: EvolutionPath): number => {
-  const requirements = path.requirements;
+  // const requirements = ...; // Quick fix: commented unused variable
   const completedRequirements = requirements.filter(req => 
     isRequirementCompleted(character, req)
   );
@@ -271,8 +275,8 @@ export const createEvolutionPlan = (
   targetPath: EvolutionPath,
   priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
 ): EvolutionPlan => {
-  const now = new Date();
-  const estimatedCompletion = new Date(now.getTime() + (targetPath.estimatedTime * 24 * 60 * 60 * 1000));
+  // const now = ...; // Quick fix: commented unused variable
+  // const estimatedCompletion = ...; // Quick fix: commented unused variable
   
   return {
     characterId: character.id,
@@ -286,12 +290,12 @@ export const createEvolutionPlan = (
 };
 
 export const getMaterialsNeeded = (path: EvolutionPath): EvolutionMaterial[] => {
-  const materialRequirements = path.requirements.filter(req => req.type === 'material');
+  // const materialRequirements = ...; // Quick fix: commented unused variable
   
   return materialRequirements.flatMap(req => {
     if (Array.isArray(req.value)) {
       return req.value.map(materialName => {
-        const material = EVOLUTION_MATERIALS.find(m => m.name === materialName);
+        // const material = ...; // Quick fix: commented unused variable
         return material || {
           id: materialName.toLowerCase().replace(' ', '_'),
           name: materialName,
@@ -364,13 +368,13 @@ export const formatEvolutionTime = (days: number): string => {
 };
 
 export const calculateEvolutionEfficiency = (plan: EvolutionPlan): number => {
-  const timeRemaining = plan.estimatedCompletion.getTime() - new Date().getTime();
-  const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
+  // const timeRemaining = ...; // Quick fix: commented unused variable
+  // const daysRemaining = ...; // Quick fix: commented unused variable
   
   if (daysRemaining <= 0) return 100;
   
-  const progressRatio = plan.progress / 100;
-  const timeRatio = 1 - (daysRemaining / plan.targetPath.estimatedTime);
+  // const progressRatio = ...; // Quick fix: commented unused variable
+  // const timeRatio = ...; // Quick fix: commented unused variable
   
   return Math.min((progressRatio + timeRatio) * 50, 100);
 }; 

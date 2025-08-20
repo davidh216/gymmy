@@ -78,6 +78,45 @@ export const DESIGN_TOKENS = {
     ratingFair: '#eab308',       // 4-5
     ratingPoor: '#f97316',       // 2-3
     ratingBad: '#ef4444',        // 0-1
+
+    // Phase 4: 1% Better System Colors
+    // Celebration colors
+    celebration: {
+      primary: '#FF6B35',      // Energetic orange
+      secondary: '#4ECDC4',    // Fresh teal
+      accent: '#FFE66D',       // Bright yellow
+      success: '#95E1D3',      // Soft mint
+      highlight: '#FF8A80',    // Coral pink
+    },
+
+    // Improvement categories
+    improvements: {
+      strength: '#FF6B35',     // Power orange
+      endurance: '#4ECDC4',    // Endurance teal
+      flexibility: '#A8E6CF',  // Flexibility mint
+      technique: '#FFE66D',    // Skill yellow
+      consistency: '#FF8A80',  // Consistency coral
+      recovery: '#B8E6B8',     // Recovery green
+    },
+
+    // Scientific validation colors
+    validation: {
+      high: '#4CAF50',         // High confidence green
+      medium: '#FF9800',       // Medium confidence orange
+      low: '#F44336',          // Low confidence red
+      pending: '#9E9E9E',      // Pending gray
+    },
+
+    // Segment-specific themes
+    segments: {
+      strength_seeker: '#FF6B35',    // Power orange
+      calorie_crusher: '#FF4757',    // Energy red
+      body_optimizer: '#8B5CF6',     // Transformation purple
+      wellness_seeker: '#4ECDC4',    // Wellness teal
+      endurance_athlete: '#10B981',  // Endurance green
+      habit_builder: '#FFA726',      // Consistency orange
+      social_enthusiast: '#FF69B4',  // Social pink
+    },
   },
   
   // Component dimensions
@@ -152,6 +191,25 @@ export const DESIGN_TOKENS = {
     fast: 150,
     normal: 300,
     slow: 500,
+    // Phase 4: Celebration animations
+    celebration: {
+      duration: 3000,
+      easing: 'bounce',
+      particleCount: 25,
+      scale: 1.2,
+    },
+    microImprovement: {
+      duration: 1500,
+      easing: 'elastic',
+      particleCount: 15,
+      scale: 1.1,
+    },
+    validation: {
+      duration: 2000,
+      easing: 'ease-in-out',
+      particleCount: 10,
+      scale: 1.05,
+    },
   },
   
   // Screen breakpoints (for responsive design)
@@ -180,6 +238,29 @@ export const getColor = (color, variant = '') => {
   
 export const getShadow = (size) => {
   return DESIGN_TOKENS.shadows[size] || DESIGN_TOKENS.shadows.md;
+};
+
+// Phase 4: Get celebration color
+export const getCelebrationColor = (type = 'primary') => {
+  return DESIGN_TOKENS.colors.celebration[type] || DESIGN_TOKENS.colors.celebration.primary;
+};
+
+// Phase 4: Get improvement color
+export const getImprovementColor = (category) => {
+  return DESIGN_TOKENS.colors.improvements[category] || DESIGN_TOKENS.colors.celebration.primary;
+};
+
+// Phase 4: Get validation color
+export const getValidationColor = (confidence) => {
+  if (confidence >= 0.8) return DESIGN_TOKENS.colors.validation.high;
+  if (confidence >= 0.6) return DESIGN_TOKENS.colors.validation.medium;
+  if (confidence >= 0.4) return DESIGN_TOKENS.colors.validation.low;
+  return DESIGN_TOKENS.colors.validation.pending;
+};
+
+// Phase 4: Get segment color
+export const getSegmentColor = (segment) => {
+  return DESIGN_TOKENS.colors.segments[segment] || DESIGN_TOKENS.colors.primary;
 };
   
 // Common style combinations
@@ -272,6 +353,40 @@ export const COMMON_STYLES = {
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  // Phase 4: Celebration styles
+  celebrationCard: {
+    backgroundColor: DESIGN_TOKENS.colors.card,
+    borderRadius: DESIGN_TOKENS.borderRadius.lg,
+    padding: DESIGN_TOKENS.spacing.lg,
+    ...DESIGN_TOKENS.shadows.lg,
+    borderWidth: 2,
+    borderColor: DESIGN_TOKENS.colors.celebration.primary,
+  },
+
+  celebrationText: {
+    fontSize: DESIGN_TOKENS.fontSize.xxl,
+    fontWeight: 'bold',
+    color: DESIGN_TOKENS.colors.celebration.primary,
+    textAlign: 'center',
+  },
+
+  validationCard: {
+    backgroundColor: DESIGN_TOKENS.colors.card,
+    borderRadius: DESIGN_TOKENS.borderRadius.md,
+    padding: DESIGN_TOKENS.spacing.md,
+    ...DESIGN_TOKENS.shadows.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: DESIGN_TOKENS.colors.validation.high,
+  },
+
+  analyticsCard: {
+    backgroundColor: DESIGN_TOKENS.colors.card,
+    borderRadius: DESIGN_TOKENS.borderRadius.md,
+    padding: DESIGN_TOKENS.spacing.md,
+    ...DESIGN_TOKENS.shadows.md,
+    marginVertical: DESIGN_TOKENS.spacing.sm,
   },
 };
   

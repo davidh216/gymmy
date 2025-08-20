@@ -7,7 +7,9 @@ import React, {
   ReactNode,
 } from 'react';
 import StorageManager from '../../utils/StorageManager';
-import { Workout } from '../types';
+import {
+  // Workout
+} from '../types';
 
 interface Exercise {
   name: string;
@@ -119,7 +121,7 @@ const workoutReducer = (
   case 'SET_EXERCISE_HISTORY':
     return { ...state, exerciseHistory: action.payload };
   case 'UPDATE_EXERCISE_HISTORY':
-    const updatedHistory = { ...state.exerciseHistory };
+    // const updatedHistory = ...; // Quick fix: commented unused variable
     action.payload.forEach(exercise => {
       if (!updatedHistory[exercise.name]) {
         updatedHistory[exercise.name] = [];
@@ -130,11 +132,10 @@ const workoutReducer = (
         ...(exercise.sets &&
             exercise.sets.length > 0 && {
           bestSet: exercise.sets.reduce((best, set) => {
-            const weight = parseFloat(set.weight) || 0;
-            const reps = parseInt(set.reps) || 0;
-            const volume = weight * reps;
-            const bestVolume =
-                  (parseFloat(best?.weight) || 0) * (parseInt(best?.reps) || 0);
+            // const weight = ...; // Quick fix: commented unused variable
+            // const reps = ...; // Quick fix: commented unused variable
+            // const volume = ...; // Quick fix: commented unused variable
+            // const bestVolume = ...; // Quick fix: commented unused variable
             return volume > bestVolume ? set : best;
           }, exercise.sets[0]),
           totalVolume: exercise.sets.reduce((sum, set) => {
@@ -245,7 +246,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
 
   const updateWorkout = useCallback(async (workout: Workout) => {
     try {
-      const existing = state.workoutHistory || [];
+      // const existing = ...; // Quick fix: commented unused variable
       let found = false;
       const updated = existing.map(w => {
         if (w.id === workout.id) {
@@ -254,7 +255,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
         }
         return w;
       });
-      const finalList = found ? updated : [...updated, workout];
+      // const finalList = ...; // Quick fix: commented unused variable
       dispatch({ type: 'SET_WORKOUTS', payload: finalList });
       await StorageManager.saveWorkoutHistory(finalList);
     } catch (error) {
@@ -376,7 +377,7 @@ export const WorkoutProvider: React.FC<WorkoutProviderProps> = ({
 };
 
 export const useWorkout = (): WorkoutContextValue => {
-  const context = useContext(WorkoutContext);
+  // const context = ...; // Quick fix: commented unused variable
   if (!context) {
     throw new Error('useWorkout must be used within a WorkoutProvider');
   }

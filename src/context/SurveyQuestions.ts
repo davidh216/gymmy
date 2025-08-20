@@ -1,6 +1,8 @@
 // src/context/SurveyQuestions.ts
 
-import { FitnessSegment } from './segmentationTypes';
+import {
+  // FitnessSegment
+} from './segmentationTypes';
 
 export interface SurveyQuestion {
   id: string;
@@ -949,7 +951,7 @@ export const getOrderedSurveyQuestions = (): SurveyQuestion[] => {
 };
 
 export const validateSurveyResponse = (questionId: string, optionId: string): boolean => {
-  const question = getSurveyQuestionById(questionId);
+  // const question = ...; // Quick fix: commented unused variable
   if (!question) return false;
   
   return question.options.some(option => option.id === optionId);
@@ -976,10 +978,10 @@ export const validateSurveyCompletion = (responses: any[]): {
   const missingQuestions: string[] = [];
   
   // Check if all required questions are answered
-  const requiredQuestions = ONBOARDING_SURVEY_QUESTIONS.filter(q => q.required);
+  // const requiredQuestions = ...; // Quick fix: commented unused variable
   
   requiredQuestions.forEach(question => {
-    const response = responses.find(r => r.questionId === question.id);
+    // const response = ...; // Quick fix: commented unused variable
     if (!response) {
       missingQuestions.push(question.id);
     } else if (!validateSurveyResponse(question.id, response.selectedOption)) {

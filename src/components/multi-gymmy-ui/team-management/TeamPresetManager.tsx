@@ -3,16 +3,26 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Alert,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GymmyTeam } from '../../../../context/types/MultiGymmyTypes';
-import { TeamPreset } from './utils/TeamUtils';
-import { SavePresetModal, PresetList } from './components/PresetManagerComponents';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // GymmyTeam
+} from '../../../../context/types/MultiGymmyTypes';
+import {
+  // TeamPreset
+} from './utils/TeamUtils';
+import {
+  // SavePresetModal,
+  // PresetList
+} from './components/PresetManagerComponents';
 
 interface TeamPresetManagerProps {
   visible: boolean;

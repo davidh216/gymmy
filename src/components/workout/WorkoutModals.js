@@ -1,15 +1,18 @@
 // src/components/workout/WorkoutModals.js
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  ScrollView,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Modal,
+  // TextInput,
+  // ScrollView,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 export const WorkoutRatingModal = ({
   visible,
@@ -59,7 +62,7 @@ export const WorkoutRatingModal = ({
     </View>
   );
 
-  const isPreWorkout = ratingType === 'pre';
+  // const isPreWorkout = ...; // Quick fix: commented unused variable
 
   return (
     <Modal visible={visible} transparent animationType="slide">

@@ -2,10 +2,18 @@
 // Context selector hooks for optimized data access and performance
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useWorkout } from './contexts/WorkoutContext';
-import { useUserStats } from './contexts/UserStatsContext';
-import { useGacha } from './contexts/GachaContext';
-import { useSegmentation } from './contexts/SegmentationContext';
+import {
+  // useWorkout
+} from './contexts/WorkoutContext';
+import {
+  // useUserStats
+} from './contexts/UserStatsContext';
+import {
+  // useGacha
+} from './contexts/GachaContext';
+import {
+  // useSegmentation
+} from './contexts/SegmentationContext';
 
 // ==============================================================================
 // CONTEXT SELECTOR INTERFACES
@@ -39,7 +47,7 @@ export const useWorkoutHistory = () => {
 };
 
 export const useWorkoutActions = () => {
-  const workoutContext = useWorkout();
+  // const workoutContext = ...; // Quick fix: commented unused variable
   return {
     addWorkout: workoutContext.addWorkout,
     removeWorkout: workoutContext.removeWorkout,
@@ -56,7 +64,7 @@ export const useWorkoutActions = () => {
 
 // User stats selectors
 export const useUserStatsData = () => {
-  const userStatsContext = useUserStats();
+  // const userStatsContext = ...; // Quick fix: commented unused variable
   return {
     userStats: userStatsContext.userStats,
     achievements: userStatsContext.achievements,
@@ -67,7 +75,7 @@ export const useUserStatsData = () => {
 };
 
 export const useUserStatsActions = () => {
-  const userStatsContext = useUserStats();
+  // const userStatsContext = ...; // Quick fix: commented unused variable
   return {
     updateUserStats: userStatsContext.updateUserStats,
     addExperience: userStatsContext.addExperience,
@@ -91,7 +99,7 @@ export const useCharacterCollection = () => {
 };
 
 export const useGachaActions = () => {
-  const gachaContext = useGacha();
+  // const gachaContext = ...; // Quick fix: commented unused variable
   return {
     performPull: gachaContext.performPull,
     performEnhancedPull: gachaContext.performEnhancedPull,
@@ -116,7 +124,7 @@ export const useGachaActions = () => {
 
 // Segmentation selectors
 export const useUserSegment = () => {
-  const segmentationContext = useSegmentation();
+  // const segmentationContext = ...; // Quick fix: commented unused variable
   return {
     currentSegment: segmentationContext.currentSegment,
     segmentProfile: segmentationContext.segmentProfile,
@@ -133,7 +141,7 @@ export const useUserSegment = () => {
 // ALL SELECTORS PROVIDER
 // ==============================================================================
 
-const SelectorsContext = createContext<SelectorsContextValue | null>(null);
+// const SelectorsContext = ...; // Quick fix: commented unused variable
 
 interface AllSelectorsProviderProps {
   children: ReactNode;
@@ -159,7 +167,7 @@ export const AllSelectorsProvider: React.FC<AllSelectorsProviderProps> = ({ chil
 
 // Hook to access all selectors
 export const useAllSelectors = (): SelectorsContextValue => {
-  const context = useContext(SelectorsContext);
+  // const context = ...; // Quick fix: commented unused variable
   if (!context) {
     throw new Error('useAllSelectors must be used within an AllSelectorsProvider');
   }

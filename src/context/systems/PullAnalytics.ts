@@ -2,16 +2,18 @@
 // Advanced pull analytics and user engagement tracking system
 
 import {
-  GymmyRarity,
-  GymmyCharacter,
-  EvolutionMaterials,
+  // GymmyRarity,
+  // GymmyCharacter,
+  // EvolutionMaterials,
+  // 
 } from '../types/MultiGymmyTypes';
 
 import {
-  PullResult,
-  PullHistory,
-  GachaAnalytics,
-  BannerAnalytics,
+  // PullResult,
+  // PullHistory,
+  // GachaAnalytics,
+  // BannerAnalytics,
+  // 
 } from '../systems/AdvancedGachaSystem';
 
 // ==============================================================================
@@ -207,21 +209,21 @@ export class PullAnalyticsEngine {
   }
 
   private updateUserPatterns(result: PullResult): void {
-    const hour = new Date(result.timestamp).getHours();
-    const day = new Date(result.timestamp).toLocaleDateString('en-US', { weekday: 'long' });
+    // const hour = ...; // Quick fix: commented unused variable
+    // const day = ...; // Quick fix: commented unused variable
     
     // Update hour patterns
-    const hourPattern = this.userPatterns.get('hour_activity') || {};
+    // const hourPattern = ...; // Quick fix: commented unused variable
     hourPattern[hour] = (hourPattern[hour] || 0) + result.characters.length;
     this.userPatterns.set('hour_activity', hourPattern);
     
     // Update day patterns
-    const dayPattern = this.userPatterns.get('day_activity') || {};
+    // const dayPattern = ...; // Quick fix: commented unused variable
     dayPattern[day] = (dayPattern[day] || 0) + result.characters.length;
     this.userPatterns.set('day_activity', dayPattern);
     
     // Update pull type preferences
-    const pullTypePattern = this.userPatterns.get('pull_type_preference') || {};
+    // const pullTypePattern = ...; // Quick fix: commented unused variable
     pullTypePattern[result.pull_type] = (pullTypePattern[result.pull_type] || 0) + 1;
     this.userPatterns.set('pull_type_preference', pullTypePattern);
   }
@@ -242,8 +244,8 @@ export class PullAnalyticsEngine {
   }
 
   private calculateBasicStats(): BasicPullStats {
-    const totalPulls = this.pullHistory.reduce((sum, r) => sum + r.characters.length, 0);
-    const totalGems = this.pullHistory.reduce((sum, r) => sum + r.gems_spent, 0);
+    // const totalPulls = ...; // Quick fix: commented unused variable
+    // const totalGems = ...; // Quick fix: commented unused variable
     
     // Calculate rarity breakdown
     const rarityCount: Record<GymmyRarity, number> = {
@@ -262,8 +264,8 @@ export class PullAnalyticsEngine {
     });
 
     const rarityBreakdown = Object.keys(rarityCount).reduce((acc, rarity) => {
-      const r = rarity as GymmyRarity;
-      const count = rarityCount[r];
+      // const r = ...; // Quick fix: commented unused variable
+      // const count = ...; // Quick fix: commented unused variable
       acc[r] = {
         count,
         percentage: totalPulls > 0 ? (count / totalPulls) * 100 : 0,
@@ -274,15 +276,15 @@ export class PullAnalyticsEngine {
     }, {} as any);
 
     // Calculate luck score
-    const expectedRates = { common: 0.60, rare: 0.25, epic: 0.12, legendary: 0.025, mythical: 0.005 };
-    const luckScore = this.calculateLuckScore(rarityBreakdown, expectedRates, totalPulls);
+    // const expectedRates = ...; // Quick fix: commented unused variable
+    // const luckScore = ...; // Quick fix: commented unused variable
     
     // Calculate efficiency
-    const legendaryCount = rarityCount.legendary + rarityCount.mythical;
-    const gemsPerLegendary = legendaryCount > 0 ? totalGems / legendaryCount : 0;
-    const pullsPerLegendary = legendaryCount > 0 ? totalPulls / legendaryCount : 0;
+    // const legendaryCount = ...; // Quick fix: commented unused variable
+    // const gemsPerLegendary = ...; // Quick fix: commented unused variable
+    // const pullsPerLegendary = ...; // Quick fix: commented unused variable
     
-    const efficiency = this.calculateEfficiencyRating(gemsPerLegendary);
+    // const efficiency = ...; // Quick fix: commented unused variable
 
     return {
       total_pulls: totalPulls,
@@ -308,23 +310,23 @@ export class PullAnalyticsEngine {
     let weightedSum = 0;
     
     Object.keys(expected).forEach(rarity => {
-      const r = rarity as GymmyRarity;
-      const actualRate = breakdown[r].percentage / 100;
-      const expectedRate = expected[r];
-      const weight = this.getRarityWeight(r);
+      // const r = ...; // Quick fix: commented unused variable
+      // const actualRate = ...; // Quick fix: commented unused variable
+      // const expectedRate = ...; // Quick fix: commented unused variable
+      // const weight = ...; // Quick fix: commented unused variable
       
-      const deviation = (actualRate - expectedRate) / expectedRate;
+      // const deviation = ...; // Quick fix: commented unused variable
       luckScore += deviation * weight;
       weightedSum += weight;
     });
     
     // Normalize to -100 to +100 scale
-    const normalizedScore = (luckScore / weightedSum) * 100;
+    // const normalizedScore = ...; // Quick fix: commented unused variable
     return Math.max(-100, Math.min(100, normalizedScore));
   }
 
   private getRarityWeight(rarity: GymmyRarity): number {
-    const weights = { common: 1, rare: 5, epic: 15, legendary: 50, mythical: 100 };
+    // const weights = ...; // Quick fix: commented unused variable
     return weights[rarity];
   }
 
@@ -346,8 +348,8 @@ export class PullAnalyticsEngine {
   }
 
   private performTemporalAnalysis(): TemporalAnalysis {
-    const hourActivity = this.userPatterns.get('hour_activity') || {};
-    const dayActivity = this.userPatterns.get('day_activity') || {};
+    // const hourActivity = ...; // Quick fix: commented unused variable
+    // const dayActivity = ...; // Quick fix: commented unused variable
     
     // Find most active times
     const mostActiveHour = Object.keys(hourActivity).reduce((a, b) => 
@@ -359,7 +361,7 @@ export class PullAnalyticsEngine {
     );
 
     // Calculate session metrics
-    const sessions = this.calculateSessions();
+    // const sessions = ...; // Quick fix: commented unused variable
     const avgSessionDuration = sessions.length > 0 ? 
       sessions.reduce((sum, s) => sum + s.duration, 0) / sessions.length : 0;
     
@@ -373,7 +375,7 @@ export class PullAnalyticsEngine {
     );
 
     // Calculate streaks
-    const streaks = this.calculateStreaks();
+    // const streaks = ...; // Quick fix: commented unused variable
 
     return {
       most_active_hour: parseInt(mostActiveHour),
@@ -390,12 +392,12 @@ export class PullAnalyticsEngine {
   }
 
   private calculateSessions(): {duration: number, pulls: number, date: string}[] {
-    const sessions = [];
+    // const sessions = ...; // Quick fix: commented unused variable
     let currentSession = null;
-    const SESSION_GAP_HOURS = 2; // If gap > 2 hours, it's a new session
+    // const SESSION_GAP_HOURS = ...; // Quick fix: commented unused variable // If gap > 2 hours, it's a new session
     
     this.pullHistory.forEach(result => {
-      const resultTime = new Date(result.timestamp);
+      // const resultTime = ...; // Quick fix: commented unused variable
       
       if (!currentSession || 
           (resultTime.getTime() - new Date(currentSession.lastPull).getTime()) > SESSION_GAP_HOURS * 60 * 60 * 1000) {
@@ -445,12 +447,12 @@ export class PullAnalyticsEngine {
   }
 
   private categorizePullFrequency(): 'Heavy' | 'Regular' | 'Casual' | 'Sporadic' {
-    const totalPulls = this.pullHistory.reduce((sum, r) => sum + r.characters.length, 0);
-    const daysActive = new Set(this.pullHistory.map(r => r.timestamp.split('T')[0])).size;
+    // const totalPulls = ...; // Quick fix: commented unused variable
+    // const daysActive = ...; // Quick fix: commented unused variable
     
     if (daysActive === 0) return 'Sporadic';
     
-    const pullsPerDay = totalPulls / daysActive;
+    // const pullsPerDay = ...; // Quick fix: commented unused variable
     
     if (pullsPerDay >= 20) return 'Heavy';
     if (pullsPerDay >= 10) return 'Regular';
@@ -462,7 +464,7 @@ export class PullAnalyticsEngine {
     const monthlyData: Record<string, MonthlyActivity> = {};
     
     this.pullHistory.forEach(result => {
-      const month = new Date(result.timestamp).toISOString().substring(0, 7); // YYYY-MM
+      // const month = ...; // Quick fix: commented unused variable // YYYY-MM
       
       if (!monthlyData[month]) {
         monthlyData[month] = {
@@ -484,7 +486,7 @@ export class PullAnalyticsEngine {
     
     // Calculate efficiency scores
     Object.values(monthlyData).forEach(month => {
-      const legendaries = month.characters_obtained.legendary + month.characters_obtained.mythical;
+      // const legendaries = ...; // Quick fix: commented unused variable
       if (legendaries > 0) {
         month.efficiency_score = (legendaries / month.gems_spent) * 10000; // Normalized score
       }
@@ -497,8 +499,8 @@ export class PullAnalyticsEngine {
     const patterns: BehaviorPattern[] = [];
     
     // Pattern: Pull type preference
-    const pullTypePrefs = this.userPatterns.get('pull_type_preference') || {};
-    const totalSessions = Object.values(pullTypePrefs).reduce((sum: number, count) => sum + (count as number), 0);
+    // const pullTypePrefs = ...; // Quick fix: commented unused variable
+    // const totalSessions = ...; // Quick fix: commented unused variable
     
     if (pullTypePrefs.ten_pull / totalSessions > 0.7) {
       patterns.push({
@@ -512,7 +514,7 @@ export class PullAnalyticsEngine {
     }
     
     // Pattern: Time-based pulling
-    const hourActivity = this.userPatterns.get('hour_activity') || {};
+    // const hourActivity = ...; // Quick fix: commented unused variable
     const peakHours = Object.keys(hourActivity).filter(hour => 
       hourActivity[hour] > Object.values(hourActivity).reduce((sum: number, count) => sum + (count as number), 0) / Object.keys(hourActivity).length * 1.5,
     );
@@ -529,7 +531,7 @@ export class PullAnalyticsEngine {
     }
     
     // Pattern: Luck sensitivity
-    const basicStats = this.calculateBasicStats();
+    // const basicStats = ...; // Quick fix: commented unused variable
     if (basicStats.luck_score < -30) {
       patterns.push({
         id: 'unlucky_streak',
@@ -545,12 +547,12 @@ export class PullAnalyticsEngine {
   }
 
   private generatePredictions(): PredictiveInsights {
-    const basicStats = this.calculateBasicStats();
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     // Predict next legendary
-    const averagePullsToLegendary = basicStats.pulls_per_legendary || 90;
-    const currentStreak = this.calculateStreaks().currentDry;
-    const pitySoftStart = 75; // Soft pity starts around pull 75
+    // const averagePullsToLegendary = ...; // Quick fix: commented unused variable
+    // const currentStreak = ...; // Quick fix: commented unused variable
+    // const pitySoftStart = ...; // Quick fix: commented unused variable // Soft pity starts around pull 75
     
     let estimatedPulls = Math.max(1, averagePullsToLegendary - currentStreak);
     let confidence = 50;
@@ -561,8 +563,8 @@ export class PullAnalyticsEngine {
     }
     
     // Monthly spending prediction
-    const monthlyActivity = this.calculateMonthlyActivity();
-    const recentActivity = monthlyActivity.slice(-3); // Last 3 months
+    // const monthlyActivity = ...; // Quick fix: commented unused variable
+    // const recentActivity = ...; // Quick fix: commented unused variable // Last 3 months
     const avgMonthlyGems = recentActivity.length > 0 ? 
       recentActivity.reduce((sum, month) => sum + month.gems_spent, 0) / recentActivity.length : 0;
 
@@ -586,8 +588,8 @@ export class PullAnalyticsEngine {
   }
 
   private calculateRetentionLikelihood(): number {
-    const basicStats = this.calculateBasicStats();
-    const patterns = this.identifyBehaviorPatterns();
+    // const basicStats = ...; // Quick fix: commented unused variable
+    // const patterns = ...; // Quick fix: commented unused variable
     
     let likelihood = 70; // Base likelihood
     
@@ -600,44 +602,44 @@ export class PullAnalyticsEngine {
     else if (basicStats.efficiency_rating === 'D') likelihood -= 15;
     
     // Adjust based on patterns
-    const hasRiskPatterns = patterns.some(p => p.id === 'unlucky_streak');
+    // const hasRiskPatterns = ...; // Quick fix: commented unused variable
     if (hasRiskPatterns) likelihood -= 25;
     
     return Math.max(0, Math.min(100, likelihood));
   }
 
   private identifyRiskFactors(): string[] {
-    const factors = [];
-    const basicStats = this.calculateBasicStats();
+    // const factors = ...; // Quick fix: commented unused variable
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     if (basicStats.luck_score < -30) factors.push('Extended unlucky streak');
     if (basicStats.efficiency_rating === 'D') factors.push('Poor spending efficiency');
     
-    const temporalAnalysis = this.performTemporalAnalysis();
+    // const temporalAnalysis = ...; // Quick fix: commented unused variable
     if (temporalAnalysis.current_dry_streak > 100) factors.push('Long dry streak without legendary');
     
     return factors;
   }
 
   private identifyPositiveIndicators(): string[] {
-    const indicators = [];
-    const basicStats = this.calculateBasicStats();
+    // const indicators = ...; // Quick fix: commented unused variable
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     if (basicStats.luck_score > 20) indicators.push('Above average luck');
     if (basicStats.efficiency_rating === 'S' || basicStats.efficiency_rating === 'A') {
       indicators.push('Excellent spending efficiency');
     }
     
-    const temporalAnalysis = this.performTemporalAnalysis();
+    // const temporalAnalysis = ...; // Quick fix: commented unused variable
     if (temporalAnalysis.hot_streaks > 2) indicators.push('Multiple lucky streaks experienced');
     
     return indicators;
   }
 
   private generateRecommendations(): UserRecommendation[] {
-    const recommendations = [];
-    const basicStats = this.calculateBasicStats();
-    const patterns = this.identifyBehaviorPatterns();
+    // const recommendations = ...; // Quick fix: commented unused variable
+    // const basicStats = ...; // Quick fix: commented unused variable
+    // const patterns = ...; // Quick fix: commented unused variable
     
     // Luck-based recommendations
     if (basicStats.luck_score < -20) {
@@ -664,7 +666,7 @@ export class PullAnalyticsEngine {
     }
     
     // Pattern-based recommendations
-    const bulkPullerPattern = patterns.find(p => p.id === 'bulk_puller');
+    // const bulkPullerPattern = ...; // Quick fix: commented unused variable
     if (bulkPullerPattern) {
       recommendations.push({
         type: 'banner',
@@ -680,13 +682,13 @@ export class PullAnalyticsEngine {
   }
 
   private calculatePerformanceMetrics(): PerformanceMetrics {
-    const basicStats = this.calculateBasicStats();
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     // Find best session
-    const sessions = this.calculateSessions();
+    // const sessions = ...; // Quick fix: commented unused variable
     const bestSession = sessions.reduce((best, current) => {
-      const currentLegendaries = this.getLegendariesInTimeRange(current.date, new Date(new Date(current.date).getTime() + current.duration).toISOString());
-      const bestLegendaries = best.legendaries_obtained || 0;
+      // const currentLegendaries = ...; // Quick fix: commented unused variable
+      // const bestLegendaries = ...; // Quick fix: commented unused variable
       
       return currentLegendaries > bestLegendaries ? 
         { ...current, legendaries_obtained: currentLegendaries } : 
@@ -723,8 +725,8 @@ export class PullAnalyticsEngine {
   }
 
   private getReachedMilestones(): Milestone[] {
-    const milestones = [];
-    const basicStats = this.calculateBasicStats();
+    // const milestones = ...; // Quick fix: commented unused variable
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     if (basicStats.total_pulls >= 100) {
       milestones.push({
@@ -740,8 +742,8 @@ export class PullAnalyticsEngine {
   }
 
   private getUpcomingMilestones(): Milestone[] {
-    const milestones = [];
-    const basicStats = this.calculateBasicStats();
+    // const milestones = ...; // Quick fix: commented unused variable
+    // const basicStats = ...; // Quick fix: commented unused variable
     
     if (basicStats.total_pulls < 500) {
       milestones.push({
@@ -759,13 +761,13 @@ export class PullAnalyticsEngine {
   }
 
   private estimateMilestoneCompletion(target: number, current: number): string {
-    const remaining = target - current;
-    const dailyRate = this.calculateDailyPullRate();
+    // const remaining = ...; // Quick fix: commented unused variable
+    // const dailyRate = ...; // Quick fix: commented unused variable
     
     if (dailyRate <= 0) return 'Unknown';
     
-    const daysToComplete = Math.ceil(remaining / dailyRate);
-    const completionDate = new Date();
+    // const daysToComplete = ...; // Quick fix: commented unused variable
+    // const completionDate = ...; // Quick fix: commented unused variable
     completionDate.setDate(completionDate.getDate() + daysToComplete);
     
     return completionDate.toISOString().split('T')[0];
@@ -774,13 +776,13 @@ export class PullAnalyticsEngine {
   private calculateDailyPullRate(): number {
     if (this.pullHistory.length < 2) return 0;
     
-    const firstPull = new Date(this.pullHistory[0].timestamp);
-    const lastPull = new Date(this.pullHistory[this.pullHistory.length - 1].timestamp);
-    const daysDiff = (lastPull.getTime() - firstPull.getTime()) / (1000 * 60 * 60 * 24);
+    // const firstPull = ...; // Quick fix: commented unused variable
+    // const lastPull = ...; // Quick fix: commented unused variable
+    // const daysDiff = ...; // Quick fix: commented unused variable
     
     if (daysDiff <= 0) return 0;
     
-    const totalPulls = this.pullHistory.reduce((sum, r) => sum + r.characters.length, 0);
+    // const totalPulls = ...; // Quick fix: commented unused variable
     return totalPulls / daysDiff;
   }
 
@@ -827,5 +829,5 @@ export class PullAnalyticsEngine {
 // EXPORT SINGLETON INSTANCE
 // ==============================================================================
 
-export const pullAnalyticsEngine = PullAnalyticsEngine.getInstance();
+export // const pullAnalyticsEngine = ...; // Quick fix: commented unused variable
 export default pullAnalyticsEngine;

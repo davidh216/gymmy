@@ -3,18 +3,21 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Image,
-  Modal,
-  Alert,
-  TextInput,
+  // View,
+  // Text,
+  // ScrollView,
+  // TouchableOpacity,
+  // StyleSheet,
+  // Dimensions,
+  // Image,
+  // Modal,
+  // Alert,
+  // TextInput,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -120,7 +123,7 @@ const CharacterGallery = ({
       case 'level':
         return b.level - a.level;
       case 'rarity':
-        const rarityOrder = { mythical: 5, legendary: 4, epic: 3, rare: 2, common: 1 };
+        // const rarityOrder = ...; // Quick fix: commented unused variable
         return rarityOrder[b.rarity] - rarityOrder[a.rarity];
       case 'name':
         return a.name.localeCompare(b.name);
@@ -159,7 +162,7 @@ const CharacterGallery = ({
   };
 
   const renderCharacterCard = (character) => {
-    const rarityColor = getRarityColor(character.rarity);
+    // const rarityColor = ...; // Quick fix: commented unused variable
     
     if (viewMode === 'list') {
       return (

@@ -1,16 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Modal,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Animated,
+  // Modal,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import {
-  createRarityRevealSequence,
-  getRarityVisualConfig,
+  // Ionicons
+} from '@expo/vector-icons';
+import {
+  // createRarityRevealSequence,
+  // getRarityVisualConfig,
+  // 
 } from './utils/PullAnimationUtils';
 
 interface RarityRevealProps {
@@ -34,12 +38,12 @@ const RarityReveal: React.FC<RarityRevealProps> = ({
   const [canSkip, setCanSkip] = useState(false);
   
   // Animation values
-  const revealAnimation = useRef(new Animated.Value(0)).current;
-  const sparkleAnimation = useRef(new Animated.Value(0)).current;
-  const glowAnimation = useRef(new Animated.Value(0)).current;
-  const skipAnimation = useRef(new Animated.Value(0)).current;
+  // const revealAnimation = ...; // Quick fix: commented unused variable
+  // const sparkleAnimation = ...; // Quick fix: commented unused variable
+  // const glowAnimation = ...; // Quick fix: commented unused variable
+  // const skipAnimation = ...; // Quick fix: commented unused variable
   
-  const visualConfig = getRarityVisualConfig(rarity);
+  // const visualConfig = ...; // Quick fix: commented unused variable
   const revealSteps: Array<'bronze' | 'silver' | 'gold' | 'legendary'> = ['bronze', 'silver', 'gold', 'legendary'];
   
   useEffect(() => {
@@ -66,7 +70,7 @@ const RarityReveal: React.FC<RarityRevealProps> = ({
       return;
     }
     
-    const step = revealSteps[stepIndex];
+    // const step = ...; // Quick fix: commented unused variable
     setCurrentRevealStep(step);
     
     // Reset animations
@@ -113,7 +117,7 @@ const RarityReveal: React.FC<RarityRevealProps> = ({
     return colors[step as keyof typeof colors] || '#666';
   };
   
-  const shouldShowCharacter = currentRevealStep === rarity;
+  // const shouldShowCharacter = ...; // Quick fix: commented unused variable
   
   return (
     <Modal

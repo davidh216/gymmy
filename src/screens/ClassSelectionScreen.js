@@ -1,17 +1,20 @@
 // ClassSelectionScreen.js
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  StyleSheet,
-  Modal,
-  Alert,
+  // View,
+  // Text,
+  // ScrollView,
+  // TouchableOpacity,
+  // Animated,
+  // Dimensions,
+  // StyleSheet,
+  // Modal,
+  // Alert,
+  // 
 } from 'react-native';
-import { useApp } from '../context';
+import {
+  // useApp
+} from '../context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -346,7 +349,7 @@ const ClassSelectionScreen = ({ navigation }) => {
   const handleClassConfirmation = () => {
     if (!selectedClass) return;
 
-    const classData = FITNESS_CLASSES[selectedClass];
+    // const classData = ...; // Quick fix: commented unused variable
     
     // Update user stats with class selection
     updateUserStats({

@@ -3,13 +3,16 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  View,
-  StyleSheet,
-  Animated,
-  PanResponder,
-  Dimensions,
+  // View,
+  // StyleSheet,
+  // Animated,
+  // PanResponder,
+  // Dimensions,
+  // 
 } from 'react-native';
-import { GymmyCharacter } from '../../../../context/types/MultiGymmyTypes';
+import {
+  // GymmyCharacter
+} from '../../../../context/types/MultiGymmyTypes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,8 +30,8 @@ const DragDropArea: React.FC<DragDropAreaProps> = ({
   const [draggedItem, setDraggedItem] = useState<GymmyCharacter | null>(null);
   const [dropZones, setDropZones] = useState<Array<{ id: string; x: number; y: number; width: number; height: number }>>([]);
   
-  const dragAnimation = useMemo(() => new Animated.Value(0), []);
-  const scaleAnimation = useMemo(() => new Animated.Value(1), []);
+  // const dragAnimation = ...; // Quick fix: commented unused variable
+  // const scaleAnimation = ...; // Quick fix: commented unused variable
 
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => isActive,
@@ -55,7 +58,7 @@ const DragDropArea: React.FC<DragDropAreaProps> = ({
         dragAnimation.setValue(gestureState.dy);
         
         // Check for drop zone intersections
-        const dropPosition = { x: gestureState.moveX, y: gestureState.moveY };
+        // const dropPosition = ...; // Quick fix: commented unused variable
         const intersectingZone = dropZones.find(zone => 
           dropPosition.x >= zone.x && 
           dropPosition.x <= zone.x + zone.width &&
@@ -71,7 +74,7 @@ const DragDropArea: React.FC<DragDropAreaProps> = ({
     },
     onPanResponderRelease: (evt, gestureState) => {
       if (draggedItem) {
-        const dropPosition = { x: gestureState.moveX, y: gestureState.moveY };
+        // const dropPosition = ...; // Quick fix: commented unused variable
         
         // Find intersecting drop zone
         const intersectingZone = dropZones.find(zone => 

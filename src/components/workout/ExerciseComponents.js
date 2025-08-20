@@ -1,13 +1,16 @@
 // src/components/workout/ExerciseComponents.js
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // TextInput,
+  // 
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 
 export const CardioExercise = ({
   exercise,

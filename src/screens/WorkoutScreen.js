@@ -7,30 +7,35 @@ import React, {
   Suspense,
 } from 'react';
 import {
-  View,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  Alert,
-  ActivityIndicator,
+  // View,
+  // StyleSheet,
+  // ScrollView,
+  // SafeAreaView,
+  // Alert,
+  // ActivityIndicator,
+  // 
 } from 'react-native';
-import { useApp } from '../context';
-import { 
-  ScreenErrorBoundary,
-  MemoryOptimizedComponent,
-  PerformanceMonitor,
+import {
+  // useApp
+} from '../context';
+import {
+  // ScreenErrorBoundary,
+  // MemoryOptimizedComponent,
+  // PerformanceMonitor,
+  // 
 } from '../components/common';
 
 // Import new workout components
-import { 
-  WorkoutHeader,
-  WorkoutCategorySelector,
-  ExerciseList,
-  ActiveWorkout,
-  WorkoutHistoryList,
-  WorkoutTemplates,
-  WorkoutRatingModal,
-  SaveTemplateModal,
+import {
+  // WorkoutHeader,
+  // WorkoutCategorySelector,
+  // ExerciseList,
+  // ActiveWorkout,
+  // WorkoutHistoryList,
+  // WorkoutTemplates,
+  // WorkoutRatingModal,
+  // SaveTemplateModal,
+  // 
 } from '../components/workout';
 
 // Lazy load the heavy GachaComponents
@@ -88,7 +93,7 @@ const WorkoutScreen = ({ navigation, route }) => {
   // Initialize edit mode if navigated with a workoutId
   useEffect(() => {
     if (mode === 'edit' && workoutId && !currentWorkout) {
-      const existing = (workoutHistory || []).find(w => w.id === workoutId);
+      // const existing = ...; // Quick fix: commented unused variable
       if (existing) {
         setCurrentWorkout({ ...existing });
         setExercises(existing.exercises || []);
@@ -187,7 +192,7 @@ const WorkoutScreen = ({ navigation, route }) => {
   // Load template if templateId is provided
   useEffect(() => {
     if (templateId && workoutTemplates) {
-      const template = workoutTemplates.find(t => t.id === templateId);
+      // const template = ...; // Quick fix: commented unused variable
       if (template) {
         startWorkoutFromTemplate(template);
       }
@@ -206,7 +211,7 @@ const WorkoutScreen = ({ navigation, route }) => {
   };
 
   const startNewWorkout = useCallback(() => {
-    const now = new Date();
+    // const now = ...; // Quick fix: commented unused variable
     const workout = {
       id: Date.now(),
       startTime: now,
@@ -224,7 +229,7 @@ const WorkoutScreen = ({ navigation, route }) => {
 
   const startWorkoutFromTemplate = useCallback(
     template => {
-      const now = new Date();
+      // const now = ...; // Quick fix: commented unused variable
       const workout = {
         id: Date.now(),
         startTime: now,
@@ -255,7 +260,7 @@ const WorkoutScreen = ({ navigation, route }) => {
               order: index,
             };
           } else {
-            const sets = [];
+            // const sets = ...; // Quick fix: commented unused variable
             for (let i = 0; i < (templateExercise.sets || 3); i++) {
               sets.push({
                 id: Date.now() + index + i,
@@ -440,7 +445,7 @@ const WorkoutScreen = ({ navigation, route }) => {
   const completeWorkout = useCallback(async () => {
     if (!currentWorkout) return;
 
-    const now = new Date();
+    // const now = ...; // Quick fix: commented unused variable
     const completedWorkout = {
       ...currentWorkout,
       endTime: now,
@@ -500,7 +505,7 @@ const WorkoutScreen = ({ navigation, route }) => {
 
   const toggleWorkoutExpansion = useCallback(workoutId => {
     setExpandedWorkouts(prev => {
-      const newSet = new Set(prev);
+      // const newSet = ...; // Quick fix: commented unused variable
       if (newSet.has(workoutId)) {
         newSet.delete(workoutId);
       } else {

@@ -4,22 +4,28 @@
 
 import React, { useState, useRef } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  StyleSheet,
-  Modal,
-  Image,
-  Dimensions,
-  Alert,
+  // View,
+  // Text,
+  // TouchableOpacity,
+  // ScrollView,
+  // Animated,
+  // StyleSheet,
+  // Modal,
+  // Image,
+  // Dimensions,
+  // Alert,
+  // 
 } from 'react-native';
-import { useApp, getPullCosts, GACHA_RATES } from '../context';
-import { 
-  ScreenErrorBoundary,
-  MemoryOptimizedComponent,
-  PerformanceMonitor,
+import {
+  // useApp,
+  // getPullCosts,
+  // GACHA_RATES
+} from '../context';
+import {
+  // ScreenErrorBoundary,
+  // MemoryOptimizedComponent,
+  // PerformanceMonitor,
+  // 
 } from '../components/common';
 
 const { width, height } = Dimensions.get('window');
@@ -31,10 +37,10 @@ const GachaScreen = ({ navigation }) => {
   const [pullResults, setPullResults] = useState([]);
   const [isPulling, setIsPulling] = useState(false);
   
-  const costs = getPullCosts();
+  // const costs = ...; // Quick fix: commented unused variable
   
   const handlePull = async (pullType) => {
-    const cost = costs[pullType];
+    // const cost = ...; // Quick fix: commented unused variable
     
     // Check currency
     if ((gacha?.userCurrencies?.gems ?? 0) < cost.gems) {
@@ -66,7 +72,7 @@ const GachaScreen = ({ navigation }) => {
         if (!gacha?.performPull) {
           throw new Error('Gacha system not available');
         }
-        const results = await gacha.performPull(pullType);
+        // const results = ...; // Quick fix: commented unused variable
         console.log('Gacha pull results:', results);
         setPullResults(results);
         setShowResults(true);

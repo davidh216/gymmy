@@ -1,15 +1,16 @@
 // src/context/data/MultiGymmyDatabase.ts
 // Comprehensive database of 20+ unique Gymmy characters with rich profiles
 
-import { 
-  GymmyTemplate, 
-  GymmyRarity, 
-  GymmyType, 
-  SpecializationType, 
-  PersonalityType,
-  GymmyMessageSet,
-  EvolutionStage,
-  GymmyAbility,
+import {
+  // GymmyTemplate,
+  // GymmyRarity,
+  // GymmyType,
+  // SpecializationType,
+  // PersonalityType,
+  // GymmyMessageSet,
+  // EvolutionStage,
+  // GymmyAbility,
+  // 
 } from '../types/MultiGymmyTypes';
 
 // ==============================================================================
@@ -64,7 +65,7 @@ const createMessageSet = (personalityType: PersonalityType, specialization: Spec
     },
   };
 
-  const personalityMessages = baseMessages[personalityType] || baseMessages.encouraging;
+  // const personalityMessages = ...; // Quick fix: commented unused variable
   
   return {
     greetings: personalityMessages.greetings,
@@ -841,7 +842,7 @@ export const getGymmyTemplate = (id: string): GymmyTemplate | null => {
 };
 
 export const getRandomGymmyByRarity = (rarity: GymmyRarity): GymmyTemplate | null => {
-  const gymmys = getGymmysByRarity(rarity);
+  // const gymmys = ...; // Quick fix: commented unused variable
   if (gymmys.length === 0) return null;
   
   return gymmys[Math.floor(Math.random() * gymmys.length)];

@@ -2,8 +2,16 @@
 // Enhanced error boundary system with multiple fallback modes
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  // View,
+  // Text,
+  // StyleSheet,
+  // TouchableOpacity,
+  // Alert
+} from 'react-native';
+import {
+  // Ionicons
+} from '@expo/vector-icons';
 import ErrorBoundary from './ErrorBoundary';
 import ErrorFallback from './ErrorFallback';
 
@@ -144,7 +152,7 @@ export const useAutoRetry = (maxRetries = 3, delay = 1000) => {
 
     try {
       await new Promise(resolve => setTimeout(resolve, delay * retryCount));
-      const result = await operation();
+      // const result = ...; // Quick fix: commented unused variable
       setIsRetrying(false);
       setRetryCount(0);
       return result;

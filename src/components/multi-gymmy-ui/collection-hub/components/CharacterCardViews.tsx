@@ -1,18 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { EnhancedCharacter } from '../utils/CollectionUtils';
 import {
-  getRarityColor,
-  getClassIcon,
-  getStatusColor,
-  formatCharacterLevel,
-  formatExperience,
-  getCharacterDescription,
+  // View,
+  // Text,
+  // StyleSheet
+} from 'react-native';
+import {
+  // EnhancedCharacter
 } from '../utils/CollectionUtils';
 import {
-  calculateCharacterStats,
-  getCharacterTier,
-  getCharacterSpecialties,
+  // getRarityColor,
+  // getClassIcon,
+  // getStatusColor,
+  // formatCharacterLevel,
+  // formatExperience,
+  // getCharacterDescription,
+  // 
+} from '../utils/CollectionUtils';
+import {
+  // calculateCharacterStats,
+  // getCharacterTier,
+  // getCharacterSpecialties,
+  // 
 } from '../utils/CharacterUtils';
 
 interface CharacterCardViewProps {
@@ -23,9 +31,9 @@ interface CharacterCardViewProps {
 
 
 export const ListCardView: React.FC<CharacterCardViewProps> = ({ character, isSelected = false }) => {
-  const characterStats = calculateCharacterStats(character);
-  const tier = getCharacterTier(character);
-  const specialties = getCharacterSpecialties(character);
+  // const characterStats = ...; // Quick fix: commented unused variable
+  // const tier = ...; // Quick fix: commented unused variable
+  // const specialties = ...; // Quick fix: commented unused variable
 
   return (
     <View style={[styles.listCard, isSelected && styles.selectedCard]}>
@@ -93,7 +101,7 @@ export const ListCardView: React.FC<CharacterCardViewProps> = ({ character, isSe
 };
 
 export const CompactCardView: React.FC<CharacterCardViewProps> = ({ character, isSelected = false }) => {
-  const tier = getCharacterTier(character);
+  // const tier = ...; // Quick fix: commented unused variable
 
   return (
     <View style={[styles.compactCard, isSelected && styles.selectedCard]}>
