@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ConfirmHost } from '@/components/confirm-host';
 import { useGymmy, useHydrated } from '@/store/gymmy';
 import { colors } from '@/theme';
 
@@ -53,6 +54,7 @@ export default function RootLayout() {
             />
           </Stack.Protected>
         </Stack>
+        <ConfirmHost />
       </ThemeProvider>
     </GestureHandlerRootView>
   );
