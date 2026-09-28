@@ -1,0 +1,59 @@
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import { useGymmy, useHydrated } from '@/store/gymmy';
+import { colors } from '@/theme';
+
+SplashScreen.preventAutoHideAsync();
+
+const theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: colors.bg,
+    card: colors.card,
+    primary: colors.accent,
+    text: colors.text,
+    border: colors.border,
+  },
+};
+
+export default function RootLayout() {
+  const hydrated = useHydrated();
+  const onboarded = useGymmy((s) => s.profile !== null);
+
+  useEffect(() => {
+    if (hydrated) SplashScreen.hideAsync();
+  }, [hydrated]);
+
+  if (!hydrated) return null;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ThemeProvider value={theme}>
+        <StatusBar style="light" />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+          <Stack.Protected guard={!onboarded}>
+            <Stack.Screen name="onboarding" />
+          </Stack.Protected>
+          <Stack.Protected guard={onboarded}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="workout"
+              options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen name="exercise-picker" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="session/[id]" options={{ presentation: 'modal' }} />
+            <Stack.Screen
+              name="summon-reveal"
+              options={{ presentation: 'fullScreenModal', animation: 'fade' }}
+            />
+          </Stack.Protected>
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
