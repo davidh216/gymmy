@@ -9,14 +9,14 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#09090B",
     "ios": {
-      "bundleIdentifier": "com.gymmy.app",
+      "bundleIdentifier": "com.davidh216.gymmy",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.gymmy.app",
+      "package": "com.davidh216.gymmy",
       "adaptiveIcon": {
         "backgroundColor": "#09090B",
         "foregroundImage": "./assets/images/android-icon-foreground.png"

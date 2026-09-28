@@ -44,12 +44,22 @@ npm run typecheck
 npm run lint
 ```
 
-## Shipping to iOS
+## Shipping to TestFlight
 
-The app is configured for EAS (`eas.json`, bundle ID `com.gymmy.app` in `app.json`; change the ID to one you own):
+You need an [Apple Developer Program](https://developer.apple.com/programs/) membership and a free
+[Expo account](https://expo.dev/signup). No Mac or Xcode is required. EAS builds in the cloud.
 
 ```bash
-npx eas-cli@latest build --platform ios --profile preview     # internal build for your devices
+npx testflight        # log in to Expo + Apple, then build, sign and upload in one step
+```
+
+The first run links the project to EAS, which adds `extra.eas.projectId` to `app.json` (commit that change).
+It also registers the bundle ID and creates the signing certificates and the App Store Connect app.
+The build shows up in TestFlight about 10–30 minutes later.
+
+To do it in separate steps:
+
+```bash
 npx eas-cli@latest build --platform ios --profile production
-npx eas-cli@latest submit --platform ios                      # TestFlight / App Store Connect
+npx eas-cli@latest submit --platform ios --latest
 ```
