@@ -20,6 +20,8 @@ import type { ActiveWorkout, SetEntry, Units, Workout } from '@/lib/types';
 
 export type Profile = {
   name: string;
+  /** Public handle shown on gym leaderboards. */
+  username: string;
   weeklyGoal: number;
   units: Units;
 };
@@ -82,6 +84,11 @@ function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
   const kind = getExercise(exerciseId).kind;
   const count = kind === 'duration' ? 1 : 3;
   return Array.from({ length: count }, () => ({ id: uid(), done: false }));
+}
+
+/** Lowercase handle from a display name, e.g. "Alex R" -> "alexr". */
+export function toUsername(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 20) || 'lifter';
 }
 
 export const useGymmy = create<State & Actions>()(
@@ -253,8 +260,15 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persisted, version) => {
+        const state = persisted as State;
+        if (version < 2 && state.profile && !state.profile.username) {
+          state.profile = { ...state.profile, username: toUsername(state.profile.name) };
+        }
+        return state;
+      },
     },
   ),
 );

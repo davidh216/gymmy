@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -9,6 +10,8 @@ import { useGymmy, useHydrated } from '@/store/gymmy';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } });
 
 const theme = {
   ...DarkTheme,
@@ -34,6 +37,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <QueryClientProvider client={queryClient}>
       <ThemeProvider value={theme}>
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
@@ -48,6 +52,11 @@ export default function RootLayout() {
             />
             <Stack.Screen name="exercise-picker" options={{ presentation: 'modal' }} />
             <Stack.Screen name="session/[id]" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="gym/[id]" />
+            <Stack.Screen name="board/[gymId]/[challengeId]" />
+            <Stack.Screen name="gym-find" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="post-entry" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="entry/[id]" options={{ presentation: 'modal' }} />
             <Stack.Screen
               name="summon-reveal"
               options={{ presentation: 'fullScreenModal', animation: 'fade' }}
@@ -56,6 +65,7 @@ export default function RootLayout() {
         </Stack>
         <ConfirmHost />
       </ThemeProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

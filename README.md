@@ -14,6 +14,9 @@ personal records and weekly goals earn gems, and gems summon new companions who 
 - **Progression**: XP and levels, a weekly training-day goal, and week streaks that multiply XP (up to +50%).
 - **Companions**: pick a starter, then summon more with gems (14 buddies across 4 rarities, with pity).
   Duplicates add stars, and your active buddy grants bonus XP and reacts to how recently you trained.
+- **Gyms**: leaderboards you can conquer at any public gym, your home gym (invite code) or globally.
+  Post a video of your attempt, climb the top 10 and hold a medal. Other lifters can report entries.
+  Currently runs on a local stand-in backend with sample gyms; see [docs/gyms-spec.md](docs/gyms-spec.md).
 - **History**: an 8-week consistency chart, lifetime volume, PR count, and per-workout detail with "repeat workout".
 - Local-first: all data lives on the device (AsyncStorage). No account needed.
 
@@ -27,6 +30,7 @@ src/
   app/          routes (expo-router): onboarding, tabs, workout, picker, session detail, summon reveal
   components/   UI kit (buttons, cards, avatars) and tab bars (native iOS + web fallback)
   lib/          pure domain logic: exercises, companions, XP, streaks, PRs, gacha, formatting
+  services/     gyms backend interface, local implementation and React Query hooks
   store/        persisted Zustand store and derived selectors
   theme/        colors, spacing, type scale
 ```
@@ -42,6 +46,7 @@ npm run web        # browser preview
 npm test           # unit tests for the game logic
 npm run typecheck
 npm run lint
+npm run preview:web  # single-file web build in dist/gymmy-preview.html
 ```
 
 ## Shipping to TestFlight

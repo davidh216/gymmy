@@ -8,7 +8,7 @@ import { CompanionAvatar } from '@/components/companion-avatar';
 import { Button, Chip, T, haptic } from '@/components/ui';
 import { STARTER_IDS, getCompanion } from '@/lib/companions';
 import type { Units } from '@/lib/types';
-import { useGymmy } from '@/store/gymmy';
+import { toUsername, useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
 const STEPS = 4;
@@ -26,7 +26,11 @@ export default function Onboarding() {
     if (step < STEPS - 1) setStep(step + 1);
     else {
       haptic('success');
-      completeOnboarding({ name: name.trim() || 'Champ', weeklyGoal: goal, units }, starter);
+      const displayName = name.trim() || 'Champ';
+      completeOnboarding(
+        { name: displayName, username: toUsername(displayName), weeklyGoal: goal, units },
+        starter,
+      );
     }
   };
 

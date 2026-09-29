@@ -13,6 +13,10 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>History</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="calendar" md="calendar_month" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="gyms">
+        <NativeTabs.Trigger.Label>Gyms</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'trophy', selected: 'trophy.fill' }} md="trophy" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="squad">
         <NativeTabs.Trigger.Label>Squad</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'sparkles', selected: 'sparkles' }} md="auto_awesome" />

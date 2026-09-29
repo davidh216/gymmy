@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -5,7 +6,8 @@ import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components
 import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
 import { formatNumber } from '@/lib/format';
-import { useGymmy } from '@/store/gymmy';
+import { resetLocalGyms } from '@/services/gyms/local';
+import { toUsername, useGymmy } from '@/store/gymmy';
 import { useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
@@ -15,6 +17,7 @@ export default function Profile() {
   const owned = useGymmy((s) => Object.keys(s.collection).length);
   const { updateProfile, reset } = useGymmy.getState();
   const { level, streak } = useProgress();
+  const queryClient = useQueryClient();
 
   if (!profile) return null;
 
@@ -29,6 +32,25 @@ export default function Profile() {
           placeholder="Your name"
           placeholderTextColor={colors.textFaint}
         />
+        <View style={styles.usernameRow}>
+          <T variant="caption" color={colors.textFaint}>
+            @
+          </T>
+          <TextInput
+            value={profile.username}
+            onChangeText={(username) => updateProfile({ username: toUsername(username) })}
+            style={styles.username}
+            maxLength={20}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="username"
+            placeholderTextColor={colors.textFaint}
+            accessibilityLabel="Leaderboard username"
+          />
+          <T variant="caption" color={colors.textFaint}>
+            on leaderboards
+          </T>
+        </View>
         <View style={{ flexDirection: 'row' }}>
           <Stat value={String(level)} label="Level" color={colors.accent} />
           <Stat value={formatNumber(xp)} label="Total XP" />
@@ -71,6 +93,8 @@ export default function Profile() {
             () => {
               haptic('heavy');
               reset();
+              resetLocalGyms();
+              queryClient.clear();
             },
           )
         }
@@ -92,6 +116,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.cardHigh,
   },
+  usernameRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: -space.sm },
+  username: { flex: 1, minWidth: 0, color: colors.text, fontSize: 15, fontWeight: '600', paddingVertical: 4 },
   goalRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   footer: { textAlign: 'center', marginTop: space.xl },
 });

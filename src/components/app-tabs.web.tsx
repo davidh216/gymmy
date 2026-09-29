@@ -12,9 +12,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon, T } from '@/components/ui';
 import { colors, radius, space } from '@/theme';
 
-const TABS: { name: string; href: '/' | '/history' | '/squad' | '/profile'; label: string; icon: SymbolViewProps['name'] }[] = [
+const TABS: { name: string; href: '/' | '/history' | '/gyms' | '/squad' | '/profile'; label: string; icon: SymbolViewProps['name'] }[] = [
   { name: 'index', href: '/', label: 'Today', icon: { ios: 'flame.fill', web: 'local_fire_department' } },
   { name: 'history', href: '/history', label: 'History', icon: { ios: 'calendar', web: 'calendar_month' } },
+  { name: 'gyms', href: '/gyms', label: 'Gyms', icon: { ios: 'trophy.fill', web: 'trophy' } },
   { name: 'squad', href: '/squad', label: 'Squad', icon: { ios: 'sparkles', web: 'auto_awesome' } },
   { name: 'profile', href: '/profile', label: 'Profile', icon: { ios: 'person.crop.circle', web: 'account_circle' } },
 ];
