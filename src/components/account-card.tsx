@@ -32,7 +32,11 @@ export function AccountCard() {
       await signInWithApple();
       haptic('success');
     } catch (e) {
-      setError(e instanceof AuthError ? e.message : 'Couldn’t reach Gymmy. Check your connection and try again.');
+      setError(
+        e instanceof AuthError
+          ? e.message
+          : `Couldn’t reach Gymmy. Check your connection and try again. (${e instanceof Error ? e.message : String(e)})`,
+      );
     }
   };
 
