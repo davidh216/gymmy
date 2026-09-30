@@ -1,0 +1,41 @@
+# Publishes JavaScript changes as an over-the-air update to TestFlight builds.
+# Runs on every push to the app branch that touches app code. Skips quietly until
+# the EXPO_TOKEN repository secret is set.
+name: OTA update
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+    paths: ['src/**', 'assets/**', 'package.json', 'package-lock.json']
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - id: check
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -n "$EXPO_TOKEN" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"; else echo "EXPO_TOKEN not set; skipping."; fi
+      - if: steps.check.outputs.ready == 'true'
+        uses: actions/checkout@v4
+      - if: steps.check.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.check.outputs.ready == 'true'
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - if: steps.check.outputs.ready == 'true'
+        run: npm ci
+      - if: steps.check.outputs.ready == 'true'
+        run: npx jest
+      - if: steps.check.outputs.ready == 'true'
+        name: Publish update
+        env:
+          MESSAGE: ${{ github.event.head_commit.message || 'Manual update' }}
+        run: eas update --channel production --message "${MESSAGE%%$'\n'*}" --non-interactive
