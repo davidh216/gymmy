@@ -1,8 +1,7 @@
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
-
 import { searchTerm, toEntry, videoFormat } from '../supabase';
+
+// Storage is never touched by these pure helpers; stub the native module (jest hoists this).
+jest.mock('@react-native-async-storage/async-storage', () => ({ __esModule: true, default: {} }));
 
 describe('supabase gyms helpers', () => {
   it('maps entry rows to app entries', () => {
