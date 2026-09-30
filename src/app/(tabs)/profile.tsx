@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
@@ -7,7 +8,8 @@ import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components
 import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
 import { formatNumber } from '@/lib/format';
-import { signOut, useAuth } from '@/services/auth';
+import { deleteAccount, signOut, useAuth } from '@/services/auth';
+import { useMyProfile } from '@/services/gyms/queries';
 import { gymsApi } from '@/services/gyms';
 import { resetLocalGyms } from '@/services/gyms/local';
 import { isRemote } from '@/services/supabase';
@@ -23,6 +25,8 @@ export default function Profile() {
   const { level, streak } = useProgress();
   const queryClient = useQueryClient();
   const email = useAuth((s) => s.email);
+  const { data: serverProfile } = useMyProfile();
+  const [accountError, setAccountError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
   if (!profile) return null;
@@ -111,6 +115,40 @@ export default function Profile() {
             </T>
             {email && <Button title="Sign out" variant="secondary" onPress={() => signOut()} />}
           </Card>
+          {serverProfile?.isAdmin && (
+            <Button
+              title="Review reports"
+              icon={{ ios: 'shield.lefthalf.filled', web: 'shield' }}
+              variant="secondary"
+              style={{ marginTop: space.sm }}
+              onPress={() => router.push('/admin')}
+            />
+          )}
+          {email && (
+            <Button
+              title="Delete account"
+              variant="ghost"
+              style={{ marginTop: space.sm }}
+              onPress={() =>
+                confirm(
+                  'Delete your account?',
+                  'This permanently deletes your Gymmy account, your leaderboard entries and videos. Workouts on this phone stay.',
+                  'Delete',
+                  () => {
+                    setAccountError(null);
+                    deleteAccount().catch(() =>
+                      setAccountError('Couldn’t delete your account. Check your connection and try again.'),
+                    );
+                  },
+                )
+              }
+            />
+          )}
+          {accountError && (
+            <T variant="caption" color={colors.danger}>
+              {accountError}
+            </T>
+          )}
         </>
       )}
 

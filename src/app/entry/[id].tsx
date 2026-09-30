@@ -7,11 +7,12 @@ import { Clip } from '@/components/clip';
 import { CompanionAvatar } from '@/components/companion-avatar';
 import { Button, Card, SectionHeader, T, haptic } from '@/components/ui';
 import { formatResult, getChallenge } from '@/lib/challenges';
+import { confirm } from '@/lib/confirm';
 import { getCompanion } from '@/lib/companions';
 import { formatDate, formatWeight } from '@/lib/format';
 import type { ReportKind } from '@/lib/leaderboard';
 import { useMeId } from '@/services/gyms';
-import { useEntry, useGym, useReportEntry } from '@/services/gyms/queries';
+import { useBlockUser, useEntry, useGym, useReportEntry } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -35,6 +36,7 @@ export default function EntryScreen() {
   const { data: gym } = useGym(entry?.gymId ?? '');
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const report = useReportEntry();
+  const block = useBlockUser();
   const [picking, setPicking] = useState<ReportKind | null>(null);
   const meId = useMeId();
 
@@ -137,6 +139,21 @@ export default function EntryScreen() {
                 <Button title="Inappropriate content" variant="danger" onPress={() => setPicking('inappropriate')} />
               </View>
             )}
+            <Button
+              title={`Block @${entry.athlete.username}`}
+              variant="ghost"
+              onPress={() =>
+                confirm(
+                  `Block @${entry.athlete.username}?`,
+                  'You won’t see their entries or videos anywhere in Gymmy.',
+                  'Block',
+                  () => {
+                    block.mutate(entry.athlete.id);
+                    router.back();
+                  },
+                )
+              }
+            />
           </>
         )}
       </ScrollView>

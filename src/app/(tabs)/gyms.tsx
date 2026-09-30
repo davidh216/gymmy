@@ -3,11 +3,12 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { AccountCard } from '@/components/account-card';
+import { ChooseUsername } from '@/components/choose-username';
 import { GymCard } from '@/components/gym-parts';
 import { Screen } from '@/components/screen';
 import { Button, Card, Icon, SectionHeader, T } from '@/components/ui';
 import { useAuth } from '@/services/auth';
-import { useMyGyms, useMyMedals } from '@/services/gyms/queries';
+import { useMyGyms, useMyMedals, useMyProfile } from '@/services/gyms/queries';
 import { isRemote } from '@/services/supabase';
 import { colors, space } from '@/theme';
 
@@ -25,9 +26,18 @@ export default function Gyms() {
 function GymsHome({ header }: { header: ReactNode }) {
   const { data: gyms = [], isLoading, isError, refetch } = useMyGyms();
   const { data: medals = [] } = useMyMedals();
+  const { data: profile } = useMyProfile();
 
   return (
     <Screen header={header}>
+      {profile && !profile.usernameSet && <ChooseUsername />}
+      {profile?.banned && (
+        <Card style={styles.error}>
+          <T variant="body" color={colors.danger} style={{ flex: 1 }}>
+            This account has been suspended from posting after repeated removed entries.
+          </T>
+        </Card>
+      )}
       {isError && (
         <Card style={styles.error}>
           <T variant="body" color={colors.textDim} style={{ flex: 1 }}>

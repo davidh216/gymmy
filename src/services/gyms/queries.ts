@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { BoardMode, ReportKind } from '@/lib/leaderboard';
 
+import { fetchMyProfile, useAuth } from '../auth';
 import { gymsApi, type GymKind, type PostEntryInput } from './index';
 
 export const gymKeys = {
@@ -13,6 +14,12 @@ export const gymKeys = {
   board: (gymId: string | null, challengeId: string, mode: BoardMode) =>
     ['gyms', 'board', gymId ?? 'global', challengeId, mode] as const,
   entry: (id: string) => ['gyms', 'entry', id] as const,
+};
+
+/** Server profile (username status, admin flag); null when signed out or offline. */
+export const useMyProfile = () => {
+  const userId = useAuth((s) => s.userId);
+  return useQuery({ queryKey: ['gyms', 'profile', userId], queryFn: fetchMyProfile, enabled: Boolean(userId) });
 };
 
 export const useMyGyms = () => useQuery({ queryKey: gymKeys.mine, queryFn: gymsApi.myGyms });
@@ -44,6 +51,8 @@ export const useJoinByInvite = () => useGymMutation((code: string) => gymsApi.jo
 export const useCreateGym = () =>
   useGymMutation((input: { kind: GymKind; name: string; area?: string }) => gymsApi.createGym(input));
 export const usePostEntry = () => useGymMutation((input: PostEntryInput) => gymsApi.postEntry(input));
+export const useBlockUser = () => useGymMutation((athleteId: string) => gymsApi.blockUser(athleteId));
+
 export const useReportEntry = () =>
   useGymMutation(({ id, kind, reason }: { id: string; kind: ReportKind; reason: string }) =>
     gymsApi.reportEntry(id, kind, reason),

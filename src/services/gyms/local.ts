@@ -21,6 +21,7 @@ type World = {
   entries: StoredEntry[];
   /** Reports filed by the current user, keyed by entry id. */
   myReports: Record<string, { kind: ReportKind; reason: string }>;
+  blocked?: string[];
 };
 
 let world: World | null = null;
@@ -96,7 +97,8 @@ function visible(w: World, gymId: string | null, challengeId: string) {
       e.challengeId === challengeId &&
       (gymId === null || e.gymId === gymId) &&
       e.status === 'live' &&
-      w.myReports[e.id]?.kind !== 'inappropriate',
+      w.myReports[e.id]?.kind !== 'inappropriate' &&
+      !w.blocked?.includes(e.userId),
   );
 }
 
@@ -234,6 +236,12 @@ export const localGymsApi: GymsApi = {
     // Locally there's one reporter, so the hide thresholds can't be reached; the
     // report is recorded and inappropriate content is hidden for this user.
     w.myReports[id] = { kind, reason };
+    await save();
+  },
+
+  async blockUser(athleteId) {
+    const w = await load();
+    w.blocked = [...new Set([...(w.blocked ?? []), athleteId])];
     await save();
   },
 

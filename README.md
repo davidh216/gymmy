@@ -54,9 +54,14 @@ npm run preview:web  # single-file web build in dist/gymmy-preview.html
 Gyms use the Supabase project in `.env` (public URL and publishable key; access is enforced by
 row level security). Workouts, XP and the squad stay on the device.
 
-- **Set up the database:** paste `supabase/migrations/20260930000000_gyms.sql` into the Supabase
-  SQL Editor and run it once. It creates the tables, security rules, triggers and the `attempts`
-  video bucket.
+- **Set up the database:** run each file in `supabase/migrations/` once, in name order, in the
+  Supabase SQL Editor. Together they create the tables, security rules, triggers, the `attempts`
+  video bucket, the admin review queue and account deletion.
+- **Make yourself an admin:** in the SQL Editor run
+  `update public.profiles set is_admin = true where username = 'your_username';`
+  A **Review reports** button then appears in Profile.
+- **Sign in with Apple:** Authentication → Sign In / Providers → Apple → enable, and add the bundle ID
+  `com.davidh216.gymmy` under Client IDs. Works in TestFlight/dev builds, not in Expo Go.
 - **Test the rules locally:** `npm run test:db` runs the migration plus scenario tests against a
   throwaway local Postgres database.
 - **Offline preview:** `npm run preview:web` builds with `EXPO_PUBLIC_GYMS_BACKEND=local`, which

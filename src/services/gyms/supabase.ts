@@ -279,6 +279,11 @@ export const supabaseGymsApi: GymsApi = {
     if (error && error.code !== '23505') throw new Error(error.message);
   },
 
+  async blockUser(athleteId) {
+    const { error } = await db().from('blocks').insert({ blocked_id: athleteId });
+    if (error && error.code !== '23505') throw new Error(error.message);
+  },
+
   async myMedals() {
     const rows = check(
       await db().from('entries').select('gym_id, challenge_id').eq('user_id', me()).eq('status', 'live'),

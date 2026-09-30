@@ -1,7 +1,8 @@
 # Gyms: leaderboards you can conquer
 
-Status: stage 1 (app UI) done; stage 2 in progress: database, security rules, email accounts and
-video storage are built (`supabase/migrations`). Next: Sign in with Apple, moderation scan, admin review.
+Status: stages 1–2 built except the automatic video scan. Database, security rules, email and Apple
+accounts, video storage, blocking, account deletion, strikes/bans and the admin review queue live in
+`supabase/migrations`. Entries go live immediately until a moderation provider is connected.
 
 ## The loop
 

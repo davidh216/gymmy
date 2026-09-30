@@ -88,6 +88,8 @@ export interface GymsApi {
   getEntry(id: string): Promise<Entry | null>;
   postEntry(input: PostEntryInput): Promise<PostEntryResult>;
   reportEntry(id: string, kind: ReportKind, reason: string): Promise<void>;
+  /** Hides everything this athlete posts, for the current user. */
+  blockUser(athleteId: string): Promise<void>;
 
   /** Current user's podium finishes per gym, for badges. */
   myMedals(): Promise<{ gymId: string; challengeId: string; rank: number }[]>;
