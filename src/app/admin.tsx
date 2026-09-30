@@ -59,7 +59,14 @@ function ReviewCard({ item }: { item: ReviewItem }) {
   }, [item.videoPath]);
 
   const challenge = getChallenge(item.challengeId);
-  const inappropriate = item.inappropriateReports > 0;
+  const inappropriate = item.inappropriateReports > 0 || Boolean(item.scanFlag);
+  const label = item.scanFlag
+    ? 'Scan flagged'
+    : item.status === 'processing' || item.scanError
+      ? 'Scan didn’t finish'
+      : inappropriate
+        ? 'Inappropriate'
+        : 'Invalid lift';
 
   return (
     <Card style={styles.card}>
@@ -72,7 +79,7 @@ function ReviewCard({ item }: { item: ReviewItem }) {
         </View>
         <View style={[styles.badge, inappropriate && styles.badgeDanger]}>
           <T variant="label" color={inappropriate ? colors.danger : colors.textDim}>
-            {inappropriate ? 'Inappropriate' : 'Invalid lift'}
+            {label}
           </T>
         </View>
       </View>
@@ -81,8 +88,19 @@ function ReviewCard({ item }: { item: ReviewItem }) {
         {challenge.name}: {formatResult(challenge, item.value, units)}
         {item.bodyweightKg ? ` at ${formatWeight(item.bodyweightKg, units)} bodyweight` : ''}
       </T>
+      {item.scanFlag && (
+        <T variant="caption" color={colors.danger}>
+          Automatic scan: {item.scanFlag.replace(/_/g, ' ')}
+          {item.scanScore !== undefined ? ` (${Math.round(item.scanScore * 100)}% confidence)` : ''}
+        </T>
+      )}
+      {item.scanError && (
+        <T variant="caption" color={colors.textDim}>
+          Scan error: {item.scanError}
+        </T>
+      )}
       <T variant="caption" color={colors.textDim}>
-        {item.invalidReports} invalid-lift · {item.inappropriateReports} inappropriate
+        {item.invalidReports} invalid-lift · {item.inappropriateReports} inappropriate reports
       </T>
       {item.reasons.map((r) => (
         <T key={r} variant="caption" color={colors.textDim}>

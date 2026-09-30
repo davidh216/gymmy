@@ -1,8 +1,8 @@
 # Gyms: leaderboards you can conquer
 
-Status: stages 1–2 built except the automatic video scan. Database, security rules, email and Apple
-accounts, video storage, blocking, account deletion, strikes/bans and the admin review queue live in
-`supabase/migrations`. Entries go live immediately until a moderation provider is connected.
+Status: stages 1–2 built. Database, security rules, email and Apple accounts, video storage,
+blocking, account deletion, strikes/bans, the admin review queue and the Hive video scan
+(`supabase/functions/moderate-entry`, off until `moderation_enabled` is set) are in place.
 
 ## The loop
 
@@ -47,9 +47,13 @@ Each challenge has a short standards checklist (e.g. "plates visible", "full loc
   hidden for everyone after 1 counted report, top of the review queue.
 
 **Content safety** (server, stage 2)
-- Clips stay `processing` until an automated video moderation API clears them (e.g. AWS Rekognition
-  or Hive), plus hash matching for known abuse material (e.g. Thorn Safer / PhotoDNA) with the
-  legally required reporting path.
+- Clips stay `processing` until Hive's visual moderation clears them. Blocking classes (score ≥ 0.9):
+  general_nsfw, sexual activity, nudity, sex toys, very bloody, human corpse, self-harm, hanging, and
+  hate/terror symbols. `general_suggestive` is intentionally not blocking (shirtless lifters, gym wear).
+  If the scan fails, the entry fails closed into the review queue; entries stuck in `processing`
+  for 15 minutes also surface there.
+- Still to add before a public launch: hash matching for known abuse material (e.g. Thorn Safer /
+  PhotoDNA) with the legally required reporting path.
 - Sign in with Apple accounts, blocking, strikes and bans, upload rate limits, 17+ age rating,
   published contact. Private gym content is visible to members only; boards show a still until tapped.
 

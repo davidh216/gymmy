@@ -64,6 +64,8 @@ export type PostEntryInput = {
 
 export type PostEntryResult = {
   entry: Entry;
+  /** 'live' once on the board; 'processing' or 'hidden' while the video is checked or reviewed. */
+  status: EntryStatus;
   rank: number;
   /** Who got pushed off the podium by this entry, if anyone. */
   dethroned: Athlete[];

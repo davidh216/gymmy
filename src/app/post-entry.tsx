@@ -97,6 +97,25 @@ export default function PostEntry() {
     }
   };
 
+  if (done && done.status !== 'live') {
+    return (
+      <View style={[styles.root, styles.doneWrap, { paddingBottom: insets.bottom + space.lg }]}>
+        <Animated.View entering={ZoomIn.springify().damping(9)} style={{ alignItems: 'center', gap: space.sm }}>
+          <T style={{ fontSize: 72 }}>{done.status === 'processing' ? '⏳' : '🔍'}</T>
+          <T variant="hero" style={{ textAlign: 'center' }}>
+            {done.status === 'processing' ? 'Checking your video' : 'Your video is being reviewed'}
+          </T>
+          <T variant="body" color={colors.textDim} style={{ textAlign: 'center', lineHeight: 21 }}>
+            {done.status === 'processing'
+              ? 'Every clip gets a quick automatic check. Your entry shows up on the board as soon as it passes.'
+              : 'The automatic check wants a person to take a look. If it’s fine, your entry goes on the board.'}
+          </T>
+        </Animated.View>
+        <Button size="lg" title="Back to the board" onPress={() => router.back()} style={styles.doneButton} />
+      </View>
+    );
+  }
+
   if (done) {
     const medal = medalFor(done.rank);
     return (

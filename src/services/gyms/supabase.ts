@@ -106,6 +106,17 @@ export function videoFormat(uri: string, blobType?: string): { ext: string; cont
   return { ext: 'mp4', contentType: 'video/mp4' };
 }
 
+/**
+ * Asks the moderate-entry Edge Function to scan a new video. If the call fails the
+ * entry stays 'processing' and reaches the admin queue after 15 minutes.
+ */
+async function scanVideo(entryId: string): Promise<EntryStatus> {
+  const { data, error } = await db().functions.invoke<{ status: EntryStatus }>('moderate-entry', {
+    body: { entryId },
+  });
+  return error || !data?.status ? 'processing' : data.status;
+}
+
 async function myGymIds(): Promise<Set<string>> {
   const rows = check(await db().from('gym_members').select('gym_id').eq('user_id', me()));
   return new Set((rows as { gym_id: string }[]).map((r) => r.gym_id));
@@ -265,13 +276,17 @@ export const supabaseGymsApi: GymsApi = {
       throw new Error(inserted.error.message);
     }
 
+    const entry = toEntry(inserted.data as unknown as EntryRow);
+    const status = entry.status === 'processing' ? await scanVideo(entry.id) : entry.status;
+    if (status !== 'live') return { entry: { ...entry, status }, status, rank: 0, dethroned: [] };
+
     const after = await topUsers();
     const rank = after.find((r) => r.entry.userId === userId)?.rank ?? after.length;
     const podium = new Set(after.slice(0, 3).map((r) => r.entry.userId));
     const dethroned = before
       .filter((r) => r.entry.userId !== userId && !podium.has(r.entry.userId))
       .map((r) => toEntry(r.entry.row).athlete);
-    return { entry: toEntry(inserted.data as unknown as EntryRow), rank, dethroned };
+    return { entry: { ...entry, status }, status, rank, dethroned };
   },
 
   async reportEntry(id, kind, reason) {

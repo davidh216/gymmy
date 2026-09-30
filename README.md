@@ -60,6 +60,11 @@ row level security). Workouts, XP and the squad stay on the device.
 - **Make yourself an admin:** in the SQL Editor run
   `update public.profiles set is_admin = true where username = 'your_username';`
   A **Review reports** button then appears in Profile.
+- **Video scan (Hive):** deploy `supabase/functions/moderate-entry/index.ts` as an Edge Function
+  named `moderate-entry`, add the `HIVE_API_KEY` secret, then switch it on with
+  `update public.app_settings set value = 'true' where key = 'moderation_enabled';`
+  New entries then wait as "processing" until the scan clears them; flagged or unscannable videos
+  go to the admin review queue.
 - **Sign in with Apple:** Authentication → Sign In / Providers → Apple → enable, and add the bundle ID
   `com.davidh216.gymmy` under Client IDs. Works in TestFlight/dev builds, not in Expo Go.
 - **Test the rules locally:** `npm run test:db` runs the migration plus scenario tests against a

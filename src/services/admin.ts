@@ -12,6 +12,13 @@ export type ReviewItem = {
   inappropriateReports: number;
   invalidReports: number;
   reasons: string[];
+  /** Hive class that flagged the video, e.g. general_nsfw. */
+  scanFlag?: string;
+  scanScore?: number;
+  /** Set when the automatic scan couldn't run. */
+  scanError?: string;
+  /** 'processing' when the scan never finished. */
+  status: string;
 };
 
 type Row = {
@@ -26,6 +33,10 @@ type Row = {
   inappropriate_reports: number;
   invalid_reports: number;
   reasons: string[] | null;
+  scan_flag: string | null;
+  scan_score: number | null;
+  scan_error: string | null;
+  status: string;
 };
 
 export async function reviewQueue(): Promise<ReviewItem[]> {
@@ -44,6 +55,10 @@ export async function reviewQueue(): Promise<ReviewItem[]> {
     inappropriateReports: r.inappropriate_reports,
     invalidReports: r.invalid_reports,
     reasons: r.reasons ?? [],
+    scanFlag: r.scan_flag ?? undefined,
+    scanScore: r.scan_score === null ? undefined : Number(r.scan_score),
+    scanError: r.scan_error ?? undefined,
+    status: r.status,
   }));
 }
 

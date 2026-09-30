@@ -228,7 +228,7 @@ export const localGymsApi: GymsApi = {
     const dethroned = podiumBefore
       .filter((id) => id !== ME && !podiumAfter.includes(id))
       .map((id) => w.athletes[id]);
-    return { entry: toEntry(w, stored), rank, dethroned };
+    return { entry: toEntry(w, stored), status: 'live', rank, dethroned };
   },
 
   async reportEntry(id, kind, reason) {
