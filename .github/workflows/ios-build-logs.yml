@@ -23,20 +23,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       # eas reads app.json plugins, which needs the project's packages installed.
       - run: npm ci
-      - name: Latest build status and logs
+      - name: Recent builds and errors
         run: |
-          eas build:list --platform ios --limit 1 --json --non-interactive > build.json
-          node -e '
-            const [b] = require("./build.json");
-            console.log("Build", b.id, "status:", b.status);
-            if (b.error) console.log("Error:", JSON.stringify(b.error, null, 2));
-            require("fs").writeFileSync("logs.txt", (b.logFiles || []).join("\n"));
-          '
-          n=0
-          while read -r url; do
-            [ -z "$url" ] && continue
-            n=$((n+1))
-            curl -sL "$url" -o "log$n.txt"
-            echo "===== log file $n (last 150 lines) ====="
-            tail -n 150 "log$n.txt" | cut -c1-400
-          done < logs.txt
+          eas build:list --platform ios --limit 3 --json --non-interactive > builds.json
+          node scripts/eas-build-report.mjs builds.json
