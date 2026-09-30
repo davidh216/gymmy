@@ -1,0 +1,23 @@
+# Uploads the latest EAS iOS build to TestFlight (waits for it if still building).
+# Trigger with a commit whose message contains [ios submit], or from the Actions tab.
+name: iOS submit → TestFlight
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+  workflow_dispatch:
+
+jobs:
+  submit:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios submit]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: eas submit --platform ios --profile production --latest --non-interactive
