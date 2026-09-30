@@ -13,8 +13,7 @@
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "usesAppleSignIn": true
+      }
     },
     "android": {
       "package": "com.davidh216.gymmy",
@@ -46,8 +45,7 @@
           "photosPermission": false
         }
       ],
-      "expo-video",
-      "expo-apple-authentication"
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -65,8 +65,12 @@ row level security). Workouts, XP and the squad stay on the device.
   `update public.app_settings set value = 'true' where key = 'moderation_enabled';`
   New entries then wait as "processing" until the scan clears them; flagged or unscannable videos
   go to the admin review queue.
-- **Sign in with Apple:** Authentication → Sign In / Providers → Apple → enable, and add the bundle ID
-  `com.davidh216.gymmy` under Client IDs. Works in TestFlight/dev builds, not in Expo Go.
+- **Sign in with Apple (currently off):** the first signing profile was created without the capability,
+  and automated builds can't add it. To turn it back on: `npx expo install expo-apple-authentication`,
+  restore the button (see git history of `src/components/account-card.tsx`), add
+  `"usesAppleSignIn": true` under `ios` in `app.json`, then run one interactive
+  `npx eas-cli@latest build -p ios` from a computer so EAS can update the Apple profile. Also enable
+  Apple under Supabase → Authentication → Providers with client ID `com.davidh216.gymmy`.
 - **Test the rules locally:** `npm run test:db` runs the migration plus scenario tests against a
   throwaway local Postgres database.
 - **Offline preview:** `npm run preview:web` builds with `EXPO_PUBLIC_GYMS_BACKEND=local`, which

@@ -75,24 +75,6 @@ export async function fetchMyUsername(): Promise<string | null> {
   return data?.username ?? null;
 }
 
-/** Native Sign in with Apple (iOS). New accounts get a placeholder username to replace. */
-export async function signInWithApple() {
-  if (!supabase) throw new AuthError('Online features are not set up in this build.');
-  const AppleAuthentication = await import('expo-apple-authentication');
-  let credential;
-  try {
-    credential = await AppleAuthentication.signInAsync({
-      requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
-    });
-  } catch (e) {
-    if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
-    throw new AuthError('Sign in with Apple didn’t finish. Try again.');
-  }
-  if (!credential.identityToken) throw new AuthError('Apple didn’t return a sign-in token. Try again.');
-  const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
-  if (error) throw new AuthError(error.message);
-}
-
 export type MyProfile = { username: string; usernameSet: boolean; isAdmin: boolean; banned: boolean };
 
 export async function fetchMyProfile(): Promise<MyProfile | null> {

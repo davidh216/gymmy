@@ -1,9 +1,8 @@
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { useEffect, useState } from 'react';
-import { Platform, StyleSheet, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Button, Card, T, haptic } from '@/components/ui';
-import { AuthError, fetchMyUsername, signIn, signInWithApple, signUp } from '@/services/auth';
+import { AuthError, fetchMyUsername, signIn, signUp } from '@/services/auth';
 import { toUsername, useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -19,27 +18,6 @@ export function AccountCard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [appleAvailable, setAppleAvailable] = useState(false);
-
-  useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    AppleAuthentication.isAvailableAsync().then(setAppleAvailable, () => setAppleAvailable(false));
-  }, []);
-
-  const apple = async () => {
-    setError(null);
-    try {
-      await signInWithApple();
-      haptic('success');
-    } catch (e) {
-      setError(
-        e instanceof AuthError
-          ? e.message
-          : `Couldn’t reach Gymmy. Check your connection and try again. (${e instanceof Error ? e.message : String(e)})`,
-      );
-    }
-  };
-
   const valid =
     /\S+@\S+\.\S+/.test(email) && password.length >= 8 && (mode === 'signin' || username.length >= 3);
 
@@ -76,20 +54,6 @@ export function AccountCard() {
         Gyms are shared with other lifters, so posting and reporting need an account. Your workouts stay on
         this phone.
       </T>
-      {appleAvailable && (
-        <>
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
-            cornerRadius={radius.pill}
-            style={styles.apple}
-            onPress={apple}
-          />
-          <T variant="caption" color={colors.textFaint} style={{ textAlign: 'center' }}>
-            or use email
-          </T>
-        </>
-      )}
       {mode === 'signup' && (
         <View style={styles.field}>
           <T variant="label" color={colors.textFaint}>
@@ -179,7 +143,6 @@ export function AccountCard() {
 const styles = StyleSheet.create({
   card: { gap: space.md },
   field: { gap: 6 },
-  apple: { height: 52, width: '100%' },
   usernameRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   input: {
     minWidth: 0,
