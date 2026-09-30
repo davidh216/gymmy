@@ -81,6 +81,7 @@ function toEntry(w: World, e: StoredEntry): Entry {
     athlete: w.athletes[e.userId],
     value: e.value,
     bodyweightKg: e.bodyweightKg,
+    hasVideo: Boolean(e.videoUri),
     videoUri: e.videoUri,
     status: e.status,
     createdAt: e.createdAt,
@@ -105,6 +106,20 @@ function inviteCode() {
 }
 
 export const localGymsApi: GymsApi = {
+  currentUserId: () => ME,
+
+  async updateMe(patch) {
+    const w = await load();
+    const me = w.athletes[ME];
+    if (!me) return;
+    w.athletes[ME] = {
+      ...me,
+      username: patch.username ?? me.username,
+      companionId: patch.companionId ?? me.companionId,
+    };
+    await save();
+  },
+
   async myGyms() {
     const w = await load();
     return w.gyms.filter((g) => g.members.includes(ME)).map(toGym);

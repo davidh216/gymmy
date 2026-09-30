@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -6,7 +7,10 @@ import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components
 import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
 import { formatNumber } from '@/lib/format';
+import { signOut, useAuth } from '@/services/auth';
+import { gymsApi } from '@/services/gyms';
 import { resetLocalGyms } from '@/services/gyms/local';
+import { isRemote } from '@/services/supabase';
 import { toUsername, useGymmy } from '@/store/gymmy';
 import { useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
@@ -18,6 +22,8 @@ export default function Profile() {
   const { updateProfile, reset } = useGymmy.getState();
   const { level, streak } = useProgress();
   const queryClient = useQueryClient();
+  const email = useAuth((s) => s.email);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
   if (!profile) return null;
 
@@ -38,7 +44,17 @@ export default function Profile() {
           </T>
           <TextInput
             value={profile.username}
-            onChangeText={(username) => updateProfile({ username: toUsername(username) })}
+            onChangeText={(username) => {
+              updateProfile({ username: toUsername(username) });
+              setUsernameError(null);
+            }}
+            onEndEditing={() => {
+              if (email) {
+                gymsApi.updateMe({ username: profile.username }).catch(() =>
+                  setUsernameError('That username is taken or invalid. Your leaderboard name didn’t change.'),
+                );
+              }
+            }}
             style={styles.username}
             maxLength={20}
             autoCapitalize="none"
@@ -51,6 +67,11 @@ export default function Profile() {
             on leaderboards
           </T>
         </View>
+        {usernameError && (
+          <T variant="caption" color={colors.danger}>
+            {usernameError}
+          </T>
+        )}
         <View style={{ flexDirection: 'row' }}>
           <Stat value={String(level)} label="Level" color={colors.accent} />
           <Stat value={formatNumber(xp)} label="Total XP" />
@@ -80,6 +101,18 @@ export default function Profile() {
         <Chip label="Pounds (lb)" active={profile.units === 'lb'} onPress={() => updateProfile({ units: 'lb' })} />
         <Chip label="Kilograms (kg)" active={profile.units === 'kg'} onPress={() => updateProfile({ units: 'kg' })} />
       </Card>
+
+      {isRemote && (
+        <>
+          <SectionHeader title="Account" />
+          <Card style={styles.account}>
+            <T variant="body" color={colors.textDim} style={{ flex: 1 }} numberOfLines={1}>
+              {email ? `Signed in as ${email}` : 'Not signed in. Sign in from the Gyms tab.'}
+            </T>
+            {email && <Button title="Sign out" variant="secondary" onPress={() => signOut()} />}
+          </Card>
+        </>
+      )}
 
       <SectionHeader title="Data" />
       <Button
@@ -118,6 +151,7 @@ const styles = StyleSheet.create({
   },
   usernameRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: -space.sm },
   username: { flex: 1, minWidth: 0, color: colors.text, fontSize: 15, fontWeight: '600', paddingVertical: 4 },
+  account: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   goalRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   footer: { textAlign: 'center', marginTop: space.xl },
 });

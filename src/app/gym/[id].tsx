@@ -9,7 +9,7 @@ import { Button, Card, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import { CHALLENGES, formatResult, type Challenge } from '@/lib/challenges';
 import { confirm } from '@/lib/confirm';
 import { medalFor } from '@/lib/leaderboard';
-import { ME } from '@/services/gyms/local';
+import { useMeId } from '@/services/gyms';
 import { useBoard, useGym, useJoinGym, useLeaveGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
@@ -104,8 +104,9 @@ export default function GymScreen() {
 function ChallengeRow({ gymId, challenge }: { gymId: string | null; challenge: Challenge }) {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const { data } = useBoard(gymId, challenge.id, 'open');
+  const meId = useMeId();
   const leader = data?.rows[0];
-  const mine = data?.rows.find((r) => r.entry.athlete.id === ME) ?? data?.me;
+  const mine = data?.rows.find((r) => r.entry.athlete.id === meId) ?? data?.me;
 
   return (
     <Card

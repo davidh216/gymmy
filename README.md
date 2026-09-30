@@ -16,7 +16,7 @@ personal records and weekly goals earn gems, and gems summon new companions who 
   Duplicates add stars, and your active buddy grants bonus XP and reacts to how recently you trained.
 - **Gyms**: leaderboards you can conquer at any public gym, your home gym (invite code) or globally.
   Post a video of your attempt, climb the top 10 and hold a medal. Other lifters can report entries.
-  Currently runs on a local stand-in backend with sample gyms; see [docs/gyms-spec.md](docs/gyms-spec.md).
+  Backed by Supabase (accounts, shared boards, video storage); see [docs/gyms-spec.md](docs/gyms-spec.md).
 - **History**: an 8-week consistency chart, lifetime volume, PR count, and per-workout detail with "repeat workout".
 - Local-first: all data lives on the device (AsyncStorage). No account needed.
 
@@ -48,6 +48,19 @@ npm run typecheck
 npm run lint
 npm run preview:web  # single-file web build in dist/gymmy-preview.html
 ```
+
+## Backend (Supabase)
+
+Gyms use the Supabase project in `.env` (public URL and publishable key; access is enforced by
+row level security). Workouts, XP and the squad stay on the device.
+
+- **Set up the database:** paste `supabase/migrations/20260930000000_gyms.sql` into the Supabase
+  SQL Editor and run it once. It creates the tables, security rules, triggers and the `attempts`
+  video bucket.
+- **Test the rules locally:** `npm run test:db` runs the migration plus scenario tests against a
+  throwaway local Postgres database.
+- **Offline preview:** `npm run preview:web` builds with `EXPO_PUBLIC_GYMS_BACKEND=local`, which
+  swaps in the on-device stand-in with sample gyms.
 
 ## Shipping to TestFlight
 

@@ -7,8 +7,7 @@ import { formatResult, getChallenge } from '@/lib/challenges';
 import { getCompanion } from '@/lib/companions';
 import { medalFor, type BoardMode } from '@/lib/leaderboard';
 import type { Units } from '@/lib/types';
-import { ME } from '@/services/gyms/local';
-import type { BoardRow, Gym } from '@/services/gyms';
+import { useMeId, type BoardRow, type Gym } from '@/services/gyms';
 import { colors, radius, space } from '@/theme';
 
 export function GymCard({ gym, medals }: { gym: Gym; medals: number[] }) {
@@ -53,7 +52,8 @@ export function BoardRowView({
   units: Units;
 }) {
   const medal = medalFor(row.rank);
-  const isMe = row.entry.athlete.id === ME;
+  const meId = useMeId();
+  const isMe = row.entry.athlete.id === meId;
   return (
     <Card
       onPress={() => router.push({ pathname: '/entry/[id]', params: { id: row.entry.id } })}
@@ -74,7 +74,7 @@ export function BoardRowView({
           {isMe ? ' (you)' : ''}
         </T>
         <T variant="caption" color={colors.textFaint}>
-          {row.entry.videoUri ? '▶ Video' : row.entry.athlete.sample ? 'Sample entry' : 'No video'}
+          {row.entry.hasVideo ? '▶ Video' : row.entry.athlete.sample ? 'Sample entry' : 'No video'}
           {row.entry.myReport ? ' · Reported' : ''}
         </T>
       </View>

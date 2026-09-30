@@ -33,6 +33,8 @@ export type Entry = {
   /** kg, reps or seconds depending on the challenge metric. */
   value: number;
   bodyweightKg?: number;
+  hasVideo: boolean;
+  /** Playable URL; only filled in when loading a single entry. */
   videoUri?: string;
   status: EntryStatus;
   createdAt: number;
@@ -69,6 +71,11 @@ export type PostEntryResult = {
 
 /** Everything the app needs from the gyms backend. Local now, Supabase later. */
 export interface GymsApi {
+  /** Id of the signed-in athlete, or null when signed out. */
+  currentUserId(): string | null;
+  /** Keep the public profile in sync with local settings. */
+  updateMe(patch: { username?: string; companionId?: string }): Promise<void>;
+
   myGyms(): Promise<Gym[]>;
   searchGyms(query: string): Promise<Gym[]>;
   getGym(id: string): Promise<Gym | null>;

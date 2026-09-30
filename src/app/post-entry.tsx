@@ -91,8 +91,9 @@ export default function PostEntry() {
       });
       haptic(res.rank <= 3 ? 'success' : 'medium');
       setDone(res);
-    } catch {
-      setError('Posting failed. Check your connection and try again.');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : '';
+      setError(message.startsWith('Too many') || message.startsWith('Video upload') ? message : 'Posting failed. Check your connection and try again.');
     }
   };
 

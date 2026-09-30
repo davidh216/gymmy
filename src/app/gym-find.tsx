@@ -118,6 +118,7 @@ function CreateTab({
 }) {
   const [name, setName] = useState(initialName);
   const [area, setArea] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const create = useCreateGym();
   const valid = name.trim().length >= 3;
 
@@ -153,11 +154,21 @@ function CreateTab({
         title={kind === 'private' ? 'Create home gym' : 'Add gym'}
         disabled={!valid || create.isPending}
         onPress={async () => {
-          haptic('success');
-          const gym = await create.mutateAsync({ kind, name, area });
-          openGym(gym);
+          setError(null);
+          try {
+            const gym = await create.mutateAsync({ kind, name, area });
+            haptic('success');
+            openGym(gym);
+          } catch (e) {
+            setError(e instanceof Error ? e.message : 'Couldn’t create the gym. Try again.');
+          }
         }}
       />
+      {error && (
+        <T variant="body" color={colors.danger}>
+          {error}
+        </T>
+      )}
       {onCancel && <Button title="Back to search" variant="ghost" onPress={onCancel} />}
     </View>
   );
@@ -197,12 +208,16 @@ function InviteTab() {
         title="Join gym"
         disabled={code.length !== 6 || join.isPending}
         onPress={async () => {
-          const gym = await join.mutateAsync(code);
-          if (gym) {
-            haptic('success');
-            openGym(gym);
-          } else {
-            setError('No gym uses that code. Check it with your friend.');
+          try {
+            const gym = await join.mutateAsync(code);
+            if (gym) {
+              haptic('success');
+              openGym(gym);
+            } else {
+              setError('No gym uses that code. Check it with your friend.');
+            }
+          } catch {
+            setError('Couldn’t reach Gymmy. Check your connection and try again.');
           }
         }}
       />

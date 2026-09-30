@@ -1,6 +1,7 @@
 # Gyms: leaderboards you can conquer
 
-Status: design agreed, stage 1 (app UI on a local stand-in backend) in progress.
+Status: stage 1 (app UI) done; stage 2 in progress: database, security rules, email accounts and
+video storage are built (`supabase/migrations`). Next: Sign in with Apple, moderation scan, admin review.
 
 ## The loop
 

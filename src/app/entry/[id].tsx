@@ -10,7 +10,7 @@ import { formatResult, getChallenge } from '@/lib/challenges';
 import { getCompanion } from '@/lib/companions';
 import { formatDate, formatWeight } from '@/lib/format';
 import type { ReportKind } from '@/lib/leaderboard';
-import { ME } from '@/services/gyms/local';
+import { useMeId } from '@/services/gyms';
 import { useEntry, useGym, useReportEntry } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
@@ -36,6 +36,7 @@ export default function EntryScreen() {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const report = useReportEntry();
   const [picking, setPicking] = useState<ReportKind | null>(null);
+  const meId = useMeId();
 
   if (isLoading) return <View style={styles.root} />;
   if (!entry) {
@@ -48,7 +49,7 @@ export default function EntryScreen() {
   }
 
   const challenge = getChallenge(entry.challengeId);
-  const isMine = entry.athlete.id === ME;
+  const isMine = entry.athlete.id === meId;
 
   const submitReport = (kind: ReportKind, reason: string) => {
     haptic('medium');
@@ -79,7 +80,7 @@ export default function EntryScreen() {
 
         <Clip
           uri={entry.videoUri}
-          emptyLabel={entry.athlete.sample ? 'Sample entry, no video' : 'Video unavailable'}
+          emptyLabel={entry.athlete.sample ? 'Sample entry, no video' : entry.hasVideo ? 'Video unavailable' : 'No video'}
         />
 
         <Card style={styles.result}>
