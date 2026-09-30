@@ -1,15 +1,17 @@
 # Full iOS build, uploaded to TestFlight. Needed when native code or app config changes;
 # JavaScript-only fixes ship faster through the OTA update workflow.
-# Trigger by pushing a tag like ios-build-12, or from the Actions tab.
+# Trigger with a commit on the app branch whose message contains [ios build],
+# or from the Actions tab.
 name: iOS build → TestFlight
 
 on:
   push:
-    tags: ['ios-build-*']
+    branches: [claude/modernize-ios-mvp]
   workflow_dispatch:
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios build]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
