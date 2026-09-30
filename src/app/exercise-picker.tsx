@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   searchInput: { flex: 1, color: colors.text, fontSize: 16, height: '100%' },
-  chips: { flexGrow: 0, marginVertical: space.md },
+  // Don't let the list below squeeze the chip row (clipped the chips on iOS).
+  chips: { flexGrow: 0, flexShrink: 0, marginVertical: space.md },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
