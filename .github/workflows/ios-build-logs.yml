@@ -1,0 +1,39 @@
+# Prints the status and log tail of the latest EAS iOS build, so failures can be read
+# from GitHub. Trigger with a commit whose message contains [ios logs], or from the Actions tab.
+name: iOS build logs
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+  workflow_dispatch:
+
+jobs:
+  logs:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios logs]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Latest build status and logs
+        run: |
+          eas build:list --platform ios --limit 1 --json --non-interactive > build.json
+          node -e '
+            const [b] = require("./build.json");
+            console.log("Build", b.id, "status:", b.status);
+            if (b.error) console.log("Error:", JSON.stringify(b.error, null, 2));
+            require("fs").writeFileSync("logs.txt", (b.logFiles || []).join("\n"));
+          '
+          n=0
+          while read -r url; do
+            [ -z "$url" ] && continue
+            n=$((n+1))
+            curl -sL "$url" -o "log$n.txt"
+            echo "===== log file $n (last 150 lines) ====="
+            tail -n 150 "log$n.txt" | cut -c1-400
+          done < logs.txt
