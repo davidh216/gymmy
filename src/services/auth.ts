@@ -45,7 +45,7 @@ export async function signUp(input: {
   const { data: available, error: checkError } = await supabase.rpc('username_available', {
     p_username: username,
   });
-  if (checkError) throw new AuthError('Couldn’t reach Gymmy. Check your connection and try again.');
+  if (checkError) throw new AuthError(`Couldn’t reach Gymmy. Check your connection and try again. (${checkError.message})`);
   if (!available) throw new AuthError(`@${username} is taken. Try another username.`);
 
   const { data, error } = await supabase.auth.signUp({
