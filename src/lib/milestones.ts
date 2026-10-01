@@ -3,6 +3,7 @@ import { getExercise } from './exercises';
 import { formatDistanceKm, formatMinutes, formatVolume } from './format';
 import { completedPrograms } from './programs';
 import { setLogged, volume } from './records';
+import type { CheckIn } from './recovery';
 import { bestWeekStreak } from './streaks';
 import type { Units, Workout } from './types';
 
@@ -25,6 +26,8 @@ export type MilestoneStats = {
   plansCompleted: number;
   earlyBirds: number;
   nightOwls: number;
+  checkIns: number;
+  restDays: number;
 };
 
 type Format = 'count' | 'weeks' | 'kg' | 'minutes' | 'km';
@@ -215,6 +218,28 @@ const TRACKS: Track[] = [
     ],
   },
   {
+    id: 'check-ins',
+    category: 'Recovery',
+    icon: '🫶',
+    metric: 'checkIns',
+    format: 'count',
+    tiers: [1, 7, 30, 100],
+    names: ['Self-Aware', 'Week of Wellness', 'Recovery Pro', 'Zen Master'],
+    detail: 'Do {n} recovery check-ins',
+    first: 'Do your first recovery check-in',
+  },
+  {
+    id: 'rest',
+    category: 'Recovery',
+    icon: '💤',
+    metric: 'restDays',
+    format: 'count',
+    tiers: [1, 10, 50],
+    names: ['Rest Is Training', 'Smart Recovery', 'Built to Last'],
+    detail: 'Log {n} rest days',
+    first: 'Log a rest day',
+  },
+  {
     id: 'variety',
     category: 'Explorer',
     icon: '🧭',
@@ -275,6 +300,7 @@ export function milestoneStats(input: {
   weeklyGoal: number;
   buddies: number;
   customExercises: number;
+  checkIns?: CheckIn[];
 }): MilestoneStats {
   const { workouts } = input;
   let sets = 0;
@@ -321,6 +347,8 @@ export function milestoneStats(input: {
     plansCompleted: completedPrograms(workouts).length,
     earlyBirds: workouts.filter((w) => hour(w.startedAt) < 7 && hour(w.startedAt) >= 3).length,
     nightOwls: workouts.filter((w) => hour(w.startedAt) >= 22).length,
+    checkIns: input.checkIns?.length ?? 0,
+    restDays: input.checkIns?.filter((c) => c.rest).length ?? 0,
   };
 }
 

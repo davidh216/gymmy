@@ -9,6 +9,7 @@ import { defaultWorkoutName, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import { getMilestone, milestoneStats } from '@/lib/milestones';
 import { getProgram, planSession, targetReps } from '@/lib/programs';
+import { dayKey, type CheckIn } from '@/lib/recovery';
 import {
   STARTING_GEMS,
   SUMMON_10_COST,
@@ -61,6 +62,8 @@ type State = {
   plan: { programId: string; startedAt: number } | null;
   /** Milestone id -> when its reward was claimed. */
   claimedMilestones: Record<string, number>;
+  /** Daily recovery check-ins by local date (YYYY-MM-DD). */
+  checkIns: Record<string, CheckIn>;
 };
 
 type Actions = {
@@ -93,6 +96,9 @@ type Actions = {
   /** Grants XP and gems for achieved, unclaimed milestones. Returns what was granted. */
   claimMilestones: (ids: string[]) => { xp: number; gems: number };
 
+  /** Saves today's check-in. The first one each day earns a small reward, returned here. */
+  saveCheckIn: (input: Omit<CheckIn, 'date' | 'at'>) => { xp: number; gems: number };
+
   summon: (count: 1 | 10) => SummonResult[] | null;
   reset: () => void;
 };
@@ -111,6 +117,7 @@ const initialState: State = {
   communityExercises: [],
   plan: null,
   claimedMilestones: {},
+  checkIns: {},
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -123,6 +130,9 @@ function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
   const count = kind === 'duration' || kind === 'distance' ? 1 : 3;
   return Array.from({ length: count }, () => ({ id: uid(), done: false }));
 }
+
+export const CHECK_IN_XP = 10;
+export const CHECK_IN_GEMS = 5;
 
 /** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from last time. */
 function planSets(
@@ -228,6 +238,7 @@ export const useGymmy = create<State & Actions>()(
             weeklyGoal: s.profile?.weeklyGoal ?? 3,
             buddies: Object.keys(s.collection).length,
             customExercises: s.customExercises.length,
+            checkIns: Object.values(s.checkIns),
           });
           const now = Date.now();
           const claimed = { ...s.claimedMilestones };
@@ -242,6 +253,20 @@ export const useGymmy = create<State & Actions>()(
           }
           if (xp || gems) set({ claimedMilestones: claimed, xp: s.xp + xp, gems: s.gems + gems });
           return { xp, gems };
+        },
+
+        saveCheckIn: (input) => {
+          const now = Date.now();
+          const date = dayKey(now);
+          const s = get();
+          const first = !s.checkIns[date];
+          const reward = first ? { xp: CHECK_IN_XP, gems: CHECK_IN_GEMS } : { xp: 0, gems: 0 };
+          set({
+            checkIns: { ...s.checkIns, [date]: { ...input, date, at: now } },
+            xp: s.xp + reward.xp,
+            gems: s.gems + reward.gems,
+          });
+          return reward;
         },
 
         renameWorkout: (name) => mutateActive((a) => ({ ...a, name })),
@@ -404,7 +429,7 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
@@ -415,6 +440,7 @@ export const useGymmy = create<State & Actions>()(
         state.communityExercises ??= [];
         state.plan ??= null;
         state.claimedMilestones ??= {};
+        state.checkIns ??= {};
         return state;
       },
     },

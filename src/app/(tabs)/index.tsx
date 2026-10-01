@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { CompanionHero } from '@/components/companion-hero';
 import { MilestoneBanner } from '@/components/milestone-banner';
+import { ReadinessCard } from '@/components/readiness-card';
 import { Screen } from '@/components/screen';
 import { WorkoutRow } from '@/components/workout-row';
 import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
@@ -10,6 +11,8 @@ import { useNow } from '@/hooks/use-now';
 import { TEMPLATES } from '@/lib/exercises';
 import { formatDuration, greeting } from '@/lib/format';
 import { PROGRAMS, getProgram, planProgress, planSession } from '@/lib/programs';
+import { dayKeyTime } from '@/lib/recovery';
+import { activeDaysThisWeek } from '@/lib/streaks';
 import { useGymmy } from '@/store/gymmy';
 import { useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
@@ -22,7 +25,14 @@ export default function Today() {
   const workouts = useGymmy((s) => s.workouts);
   const startWorkout = useGymmy((s) => s.startWorkout);
   const { streak, thisWeek, goal, activeDays } = useProgress();
+  const checkIns = useGymmy((s) => s.checkIns);
   const now = useNow(60_000);
+  const restDays = activeDaysThisWeek(
+    Object.values(checkIns)
+      .filter((c) => c.rest)
+      .map((c) => dayKeyTime(c.date)),
+    now,
+  );
   const today = (new Date(now).getDay() + 6) % 7;
 
   const start = (opts?: Parameters<typeof startWorkout>[0]) => {
@@ -60,16 +70,18 @@ export default function Today() {
         <View style={styles.days}>
           {DAYS.map((d, i) => {
             const done = activeDays.has(i);
+            const rest = !done && restDays.has(i);
             return (
               <View key={i} style={styles.dayCol}>
                 <View
                   style={[
                     styles.day,
                     done && styles.dayDone,
+                    rest && styles.dayRest,
                     i === today && !done && styles.dayToday,
                   ]}>
                   <T variant="caption" color={done ? colors.accentInk : colors.textDim}>
-                    {done ? '✓' : d}
+                    {done ? '✓' : rest ? '💤' : d}
                   </T>
                 </View>
               </View>
@@ -79,6 +91,10 @@ export default function Today() {
       </Card>
 
       <MilestoneBanner />
+
+      <View style={{ marginTop: space.md }}>
+        <ReadinessCard compact />
+      </View>
 
       <ActiveOrStart onStart={() => start()} />
 
@@ -252,6 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cardHigh,
   },
   dayDone: { backgroundColor: colors.accent },
+  dayRest: { backgroundColor: 'rgba(167,139,250,0.18)' },
   dayToday: { borderWidth: 2, borderColor: colors.accent },
   cta: { marginTop: space.lg },
   templates: { marginHorizontal: -space.lg },

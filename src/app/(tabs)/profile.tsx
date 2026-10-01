@@ -216,6 +216,18 @@ function ProfileLinks() {
           →
         </T>
       </Card>
+      <Card style={styles.link} onPress={() => router.push('/recovery')}>
+        <T style={{ fontSize: 24 }}>🫶</T>
+        <View style={{ flex: 1 }}>
+          <T variant="heading">Recovery</T>
+          <T variant="caption" color={colors.textDim}>
+            Daily check-in, readiness and muscle recovery
+          </T>
+        </View>
+        <T variant="heading" color={colors.textFaint}>
+          →
+        </T>
+      </Card>
       <Card style={styles.link} onPress={() => router.push('/programs')}>
         <T style={{ fontSize: 24 }}>{program?.emoji ?? '📋'}</T>
         <View style={{ flex: 1 }}>

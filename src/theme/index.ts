@@ -12,6 +12,7 @@ export const colors = {
   accentInk: '#0B0F00',
   gem: '#A78BFA',
   flame: '#FF8A3D',
+  gold: '#FACC15',
   danger: '#F43F5E',
   success: '#34D399',
 } as const;
