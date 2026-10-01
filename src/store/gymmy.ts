@@ -120,12 +120,16 @@ function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
     return previous.map((s) => ({ ...s, id: uid(), done: false }));
   }
   const kind = getExercise(exerciseId).kind;
-  const count = kind === 'duration' ? 1 : 3;
+  const count = kind === 'duration' || kind === 'distance' ? 1 : 3;
   return Array.from({ length: count }, () => ({ id: uid(), done: false }));
 }
 
 /** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from last time. */
-function planSets(exerciseId: string, target: { sets: number; reps?: string; minutes?: number }, history: Workout[]): SetEntry[] {
+function planSets(
+  exerciseId: string,
+  target: { sets: number; reps?: string; minutes?: number; distance?: number },
+  history: Workout[],
+): SetEntry[] {
   const previous = lastPerformance(exerciseId, history) ?? [];
   const reps = targetReps(target.reps);
   return Array.from({ length: Math.max(1, target.sets) }, (_, i) => {
@@ -134,7 +138,8 @@ function planSets(exerciseId: string, target: { sets: number; reps?: string; min
       id: uid(),
       weight: last?.weight,
       reps: reps ?? last?.reps,
-      minutes: target.minutes ?? last?.minutes,
+      minutes: target.minutes ?? (target.distance ? undefined : last?.minutes),
+      distance: target.distance,
       done: false,
     };
   });

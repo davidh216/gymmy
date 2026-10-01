@@ -12,8 +12,9 @@ export type MuscleGroup =
  * - `weight`: load × reps
  * - `reps`: bodyweight reps
  * - `duration`: minutes (holds, cardio)
+ * - `distance`: distance and time (runs, rides, rows); time alone also counts
  */
-export type ExerciseKind = 'weight' | 'reps' | 'duration';
+export type ExerciseKind = 'weight' | 'reps' | 'duration' | 'distance';
 
 export type Exercise = {
   id: string;
@@ -28,6 +29,7 @@ export const EXERCISE_KINDS: { id: ExerciseKind; label: string }[] = [
   { id: 'weight', label: 'Weight × reps' },
   { id: 'reps', label: 'Reps only' },
   { id: 'duration', label: 'Time' },
+  { id: 'distance', label: 'Distance + time' },
 ];
 
 export const MUSCLE_GROUPS: { id: MuscleGroup; label: string }[] = [
@@ -96,12 +98,14 @@ export const EXERCISES: Exercise[] = [
 
   ex('farmers_carry', 'Farmers Carry', 'core'),
 
-  ex('run', 'Run', 'cardio', 'duration'),
-  ex('bike', 'Bike', 'cardio', 'duration'),
-  ex('rower', 'Rower', 'cardio', 'duration'),
+  ex('run', 'Run', 'cardio', 'distance'),
+  ex('walk', 'Walk', 'cardio', 'distance'),
+  ex('bike', 'Bike', 'cardio', 'distance'),
+  ex('rower', 'Rower', 'cardio', 'distance'),
+  ex('swim', 'Swim', 'cardio', 'distance'),
   ex('stair_climber', 'Stair Climber', 'cardio', 'duration'),
   ex('jump_rope', 'Jump Rope', 'cardio', 'duration'),
-  ex('ski_erg', 'SkiErg', 'cardio', 'duration'),
+  ex('ski_erg', 'SkiErg', 'cardio', 'distance'),
   ex('burpee_broad_jump', 'Burpee Broad Jump', 'cardio', 'reps'),
 ];
 

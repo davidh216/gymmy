@@ -16,7 +16,20 @@ import { Button, Icon, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { getExercise, type ExerciseKind } from '@/lib/exercises';
-import { formatAgo, formatDuration, formatSet, formatTarget, fromDisplayWeight, toDisplayWeight } from '@/lib/format';
+import {
+  distanceUnit,
+  formatAgo,
+  formatClock,
+  formatDuration,
+  formatPace,
+  formatSet,
+  formatTarget,
+  fromDisplayDistance,
+  fromDisplayWeight,
+  parseClock,
+  toDisplayDistance,
+  toDisplayWeight,
+} from '@/lib/format';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
@@ -213,7 +226,7 @@ function ExerciseCard({
               Target
             </T>
             <T variant="heading" color={colors.accent}>
-              {formatTarget(workoutExercise.target)}
+              {formatTarget(workoutExercise.target, units)}
             </T>
           </View>
         )}
@@ -301,24 +314,67 @@ function ExerciseCard({
   );
 }
 
-type Field = 'weight' | 'reps' | 'minutes';
+type Field = 'weight' | 'reps' | 'minutes' | 'distance';
 
-function columns(kind: ExerciseKind, units: Units): { field: Field; label: string }[] {
+type Column = {
+  field: Field;
+  label: string;
+  /** Stored value -> text in the box. */
+  format: (v: number) => string;
+  /** Typed text -> stored value (undefined while incomplete or empty). */
+  parse: (text: string) => number | undefined;
+  keyboard: 'decimal-pad' | 'number-pad' | 'numbers-and-punctuation';
+};
+
+const decimal = (text: string) => {
+  const n = parseFloat(text.replace(',', '.'));
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+};
+
+function columns(kind: ExerciseKind, units: Units): Column[] {
+  const reps: Column = { field: 'reps', label: 'Reps', format: String, parse: (t) => decimal(t) && Math.round(decimal(t)!), keyboard: 'number-pad' };
   if (kind === 'weight') {
     return [
-      { field: 'weight', label: units },
-      { field: 'reps', label: 'Reps' },
+      {
+        field: 'weight',
+        label: units,
+        format: (v) => String(toDisplayWeight(v, units)),
+        parse: (t) => decimal(t) && fromDisplayWeight(decimal(t)!, units),
+        keyboard: 'decimal-pad',
+      },
+      reps,
     ];
   }
-  if (kind === 'reps') return [{ field: 'reps', label: 'Reps' }];
-  return [{ field: 'minutes', label: 'Min' }];
+  if (kind === 'reps') return [reps];
+  if (kind === 'distance') {
+    return [
+      {
+        field: 'distance',
+        label: distanceUnit(units),
+        format: (v) => String(toDisplayDistance(v, units)),
+        parse: (t) => decimal(t) && fromDisplayDistance(decimal(t)!, units),
+        keyboard: 'decimal-pad',
+      },
+      // Typed like a race clock, e.g. 25:30.
+      { field: 'minutes', label: 'Time', format: formatClock, parse: parseClock, keyboard: 'numbers-and-punctuation' },
+    ];
+  }
+  return [{ field: 'minutes', label: 'Min', format: (v) => String(Math.round(v * 10) / 10), parse: decimal, keyboard: 'decimal-pad' }];
+}
+
+/** Whether a set has enough to be checked off. Distance sets need a distance or a time. */
+function isLoggable(kind: ExerciseKind, cols: Column[], set: SetEntry) {
+  if (kind === 'distance') return Boolean(set.distance || set.minutes);
+  return cols.every((c) => (set[c.field] ?? 0) > 0);
 }
 
 function formatPrevious(set: SetEntry | undefined, kind: ExerciseKind, units: Units) {
   if (!set) return '—';
   if (kind === 'weight' && set.weight && set.reps) return `${toDisplayWeight(set.weight, units)}×${set.reps}`;
   if (kind === 'reps' && set.reps) return `${set.reps}`;
-  if (kind === 'duration' && set.minutes) return `${set.minutes}m`;
+  if (kind === 'duration' && set.minutes) return `${Math.round(set.minutes * 10) / 10}m`;
+  if (kind === 'distance' && set.distance) return `${toDisplayDistance(set.distance, units)}${distanceUnit(units)}`;
+  if (kind === 'distance' && set.minutes) return formatClock(set.minutes);
   return '—';
 }
 
@@ -341,26 +397,19 @@ function SetRow({
 }) {
   const { updateSet, removeSet } = useGymmy.getState();
   const cols = columns(kind, units);
-  const valid = cols.every((c) => (set[c.field] ?? 0) > 0);
+  const valid = isLoggable(kind, cols, set);
 
-  const display = (field: Field) => {
-    const v = set[field];
-    if (v === undefined) return '';
-    return field === 'weight' ? String(toDisplayWeight(v, units)) : String(v);
-  };
-
-  const onChange = (field: Field, text: string) => {
-    const n = parseFloat(text.replace(',', '.'));
-    const value = Number.isFinite(n) ? (field === 'weight' ? fromDisplayWeight(n, units) : n) : undefined;
-    updateSet(workoutExerciseId, set.id, { [field]: value, done: set.done && value !== undefined });
+  const onChange = (field: Field, value: number | undefined) => {
+    const next = { ...set, [field]: value };
+    updateSet(workoutExerciseId, set.id, { [field]: value, done: set.done && isLoggable(kind, cols, next) });
   };
 
   const toggle = () => {
     if (!set.done && !valid) {
       // Fill from previous session on first tap, like most lifting apps.
-      if (previous && cols.every((c) => (previous[c.field] ?? 0) > 0)) {
+      if (previous && isLoggable(kind, cols, previous)) {
         const patch: Partial<SetEntry> = { done: true };
-        for (const c of cols) patch[c.field] = previous[c.field];
+        for (const c of cols) patch[c.field] = set[c.field] ?? previous[c.field];
         updateSet(workoutExerciseId, set.id, patch);
         haptic('medium');
         onDone();
@@ -376,51 +425,86 @@ function SetRow({
   };
 
   return (
-    <View style={[styles.setRow, set.done && styles.setDone]}>
-      <Pressable
-        style={styles.colSet}
-        onLongPress={() => removeSet(workoutExerciseId, set.id)}
-        delayLongPress={400}>
-        <T variant="heading" color={set.done ? colors.accent : colors.textDim}>
-          {index + 1}
+    <View>
+      <View style={[styles.setRow, set.done && styles.setDone]}>
+        <Pressable
+          style={styles.colSet}
+          onLongPress={() => removeSet(workoutExerciseId, set.id)}
+          delayLongPress={400}>
+          <T variant="heading" color={set.done ? colors.accent : colors.textDim}>
+            {index + 1}
+          </T>
+        </Pressable>
+        <T variant="caption" color={colors.textFaint} style={styles.colPrev} numberOfLines={1}>
+          {formatPrevious(previous, kind, units)}
         </T>
-      </Pressable>
-      <T variant="caption" color={colors.textFaint} style={styles.colPrev} numberOfLines={1}>
-        {formatPrevious(previous, kind, units)}
-      </T>
-      {cols.map((c) => (
-        <TextInput
-          key={c.field}
-          value={display(c.field)}
-          onChangeText={(t) => onChange(c.field, t)}
-          keyboardType="decimal-pad"
-          selectTextOnFocus
-          placeholder={previous ? formatPlaceholder(previous, c.field, units) : '0'}
-          placeholderTextColor={colors.textFaint}
-          style={[styles.colInput, styles.input, set.done && styles.inputDone]}
-        />
-      ))}
-      <Pressable
-        onPress={toggle}
-        hitSlop={8}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: set.done }}
-        accessibilityLabel={`Complete set ${index + 1}`}
-        style={[styles.colCheck, styles.check, set.done && styles.checkDone]}>
-        <Icon
-          name={{ ios: 'checkmark', web: 'check' }}
-          size={16}
-          color={set.done ? colors.accentInk : colors.textFaint}
-        />
-      </Pressable>
+        {cols.map((c) => (
+          <SetInput
+            key={c.field}
+            column={c}
+            value={set[c.field]}
+            placeholder={previous?.[c.field] !== undefined ? c.format(previous[c.field]!) : c.field === 'minutes' && kind === 'distance' ? 'mm:ss' : '0'}
+            done={set.done}
+            onChange={(v) => onChange(c.field, v)}
+          />
+        ))}
+        <Pressable
+          onPress={toggle}
+          hitSlop={8}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: set.done }}
+          accessibilityLabel={`Complete set ${index + 1}`}
+          style={[styles.colCheck, styles.check, set.done && styles.checkDone]}>
+          <Icon
+            name={{ ios: 'checkmark', web: 'check' }}
+            size={16}
+            color={set.done ? colors.accentInk : colors.textFaint}
+          />
+        </Pressable>
+      </View>
+      {kind === 'distance' && set.distance && set.minutes ? (
+        <T variant="caption" color={colors.textDim} style={styles.pace}>
+          {formatPace(set.distance, set.minutes, units)} pace
+        </T>
+      ) : null}
     </View>
   );
 }
 
-function formatPlaceholder(previous: SetEntry, field: Field, units: Units) {
-  const v = previous[field];
-  if (v === undefined) return '0';
-  return field === 'weight' ? String(toDisplayWeight(v, units)) : String(v);
+/**
+ * A number box that keeps what you type (e.g. "62." or "25:") while you're editing,
+ * and shows the stored value otherwise.
+ */
+function SetInput({
+  column,
+  value,
+  placeholder,
+  done,
+  onChange,
+}: {
+  column: Column;
+  value: number | undefined;
+  placeholder: string;
+  done: boolean;
+  onChange: (value: number | undefined) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <TextInput
+      value={draft ?? (value === undefined ? '' : column.format(value))}
+      onChangeText={(t) => {
+        setDraft(t);
+        onChange(column.parse(t));
+      }}
+      onBlur={() => setDraft(null)}
+      keyboardType={column.keyboard}
+      selectTextOnFocus
+      placeholder={placeholder}
+      placeholderTextColor={colors.textFaint}
+      accessibilityLabel={column.label}
+      style={[styles.colInput, styles.input, done && styles.inputDone]}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
@@ -488,6 +572,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   inputDone: { backgroundColor: 'transparent' },
+  pace: { marginLeft: 32 + space.sm * 2, marginTop: -2, marginBottom: 2 },
   check: {
     height: 36,
     borderRadius: radius.sm,

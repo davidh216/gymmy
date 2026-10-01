@@ -19,7 +19,15 @@ export function setScore(exerciseId: string, set: SetEntry): number | null {
       return set.reps ? set.reps : null;
     case 'duration':
       return set.minutes ? set.minutes : null;
+    case 'distance':
+      return set.distance ? set.distance : null;
   }
+}
+
+/** A finished set with something logged. Distance sets can be time-only (e.g. older runs). */
+export function setLogged(exerciseId: string, set: SetEntry): boolean {
+  if (setScore(exerciseId, set) !== null) return true;
+  return set.done && getExercise(exerciseId).kind === 'distance' && Boolean(set.minutes);
 }
 
 export function bestScore(exercise: WorkoutExercise): number | null {
@@ -64,7 +72,7 @@ export function detectPRs(exercises: WorkoutExercise[], history: Workout[]): Per
 
 export function completedSets(exercises: WorkoutExercise[]): number {
   return exercises.reduce(
-    (n, ex) => n + ex.sets.filter((s) => setScore(ex.exerciseId, s) !== null).length,
+    (n, ex) => n + ex.sets.filter((s) => setLogged(ex.exerciseId, s)).length,
     0,
   );
 }
@@ -95,6 +103,13 @@ export function topSet(kind: ExerciseKind, sets: SetEntry[]): SetEntry | null {
     if (kind === 'weight') {
       if (!s.weight || !s.reps) continue;
       if (!top || s.weight > top.weight! || (s.weight === top.weight && s.reps > top.reps!)) top = s;
+    } else if (kind === 'distance') {
+      // Longest distance; time-only sets only when nothing has a distance.
+      if (s.distance) {
+        if (!top?.distance || s.distance > top.distance) top = s;
+      } else if (s.minutes && !top?.distance && (!top || s.minutes > top.minutes!)) {
+        top = s;
+      }
     } else {
       const v = kind === 'reps' ? s.reps : s.minutes;
       const best = top ? (kind === 'reps' ? top.reps : top.minutes) : undefined;

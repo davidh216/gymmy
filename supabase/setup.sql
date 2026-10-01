@@ -920,3 +920,9 @@ revoke execute on function public.admin_exercise_submissions(), public.admin_res
   from public, anon;
 grant execute on function public.admin_exercise_submissions(), public.admin_resolve_exercise(uuid, text, text)
   to authenticated;
+
+-- ===== 20261005000000_distance_kind.sql =====
+-- Gymmy: custom exercises can be tracked by distance + time. Safe to re-run.
+alter table public.exercise_submissions drop constraint if exists exercise_submissions_kind_check;
+alter table public.exercise_submissions
+  add constraint exercise_submissions_kind_check check (kind in ('weight', 'reps', 'duration', 'distance'));

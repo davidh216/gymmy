@@ -4,6 +4,8 @@ export type SetEntry = {
   weight?: number;
   reps?: number;
   minutes?: number;
+  /** Distance in km (canonical unit; shown in mi for lb users). */
+  distance?: number;
   done: boolean;
 };
 
@@ -12,6 +14,8 @@ export type Target = {
   sets: number;
   reps?: string;
   minutes?: number;
+  /** km */
+  distance?: number;
   note?: string;
 };
 

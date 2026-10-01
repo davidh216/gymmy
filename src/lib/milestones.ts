@@ -1,8 +1,8 @@
 import { COMPANIONS } from './companions';
 import { getExercise } from './exercises';
-import { formatMinutes, formatVolume } from './format';
+import { formatDistanceKm, formatMinutes, formatVolume } from './format';
 import { completedPrograms } from './programs';
-import { bestScore, volume } from './records';
+import { setLogged, volume } from './records';
 import { bestWeekStreak } from './streaks';
 import type { Units, Workout } from './types';
 
@@ -14,6 +14,10 @@ export type MilestoneStats = {
   sets: number;
   cardioMinutes: number;
   longestCardio: number;
+  /** km across every distance exercise */
+  distanceKm: number;
+  /** Longest single run, km */
+  longestRun: number;
   exercisesTried: number;
   customExercises: number;
   buddies: number;
@@ -23,7 +27,7 @@ export type MilestoneStats = {
   nightOwls: number;
 };
 
-type Format = 'count' | 'weeks' | 'kg' | 'minutes';
+type Format = 'count' | 'weeks' | 'kg' | 'minutes' | 'km';
 
 type Track = {
   id: string;
@@ -38,6 +42,8 @@ type Track = {
   detail: string;
   /** Wording when the target is 1. */
   first?: string;
+  /** Wording per tier, overriding `detail`. */
+  details?: string[];
   rewards?: { xp: number; gems: number }[];
 };
 
@@ -155,6 +161,34 @@ const TRACKS: Track[] = [
     detail: 'Do {n} of cardio in one workout',
   },
   {
+    id: 'distance',
+    category: 'Endurance',
+    icon: '🗺️',
+    metric: 'distanceKm',
+    format: 'km',
+    tiers: [10, 50, 100, 250, 500, 1000],
+    names: ['First Ten', 'Fifty Club', 'Century', 'Road Warrior', 'Five Hundred', 'Thousand Club'],
+    detail: 'Cover {n} running, riding, rowing and more',
+  },
+  {
+    id: 'race',
+    category: 'Endurance',
+    icon: '🏅',
+    metric: 'longestRun',
+    format: 'km',
+    // A little under the race distances so 3.1 mi counts as a 5K and 26.2 mi as a marathon.
+    tiers: [4.9, 9.9, 21, 42],
+    names: ['5K', '10K', 'Half Marathon', 'Marathon'],
+    detail: 'Run {n} in one go',
+    details: ['Run a 5K in one go', 'Run 10K in one go', 'Run a half marathon in one go', 'Run a marathon in one go'],
+    rewards: [
+      { xp: 100, gems: 50 },
+      { xp: 250, gems: 100 },
+      { xp: 600, gems: 250 },
+      { xp: 1500, gems: 600 },
+    ],
+  },
+  {
     id: 'plan-sessions',
     category: 'Training plans',
     icon: '📋',
@@ -222,7 +256,7 @@ export const MILESTONES: Milestone[] = TRACKS.flatMap((t) =>
     format: t.format,
     target,
     title: t.names[i],
-    detail: target === 1 && t.first ? t.first : t.detail,
+    detail: t.details?.[i] ?? (target === 1 && t.first ? t.first : t.detail),
     xp: t.rewards?.[i].xp ?? TIER_XP[i],
     gems: t.rewards?.[i].gems ?? TIER_GEMS[i],
   })),
@@ -246,17 +280,21 @@ export function milestoneStats(input: {
   let sets = 0;
   let cardioMinutes = 0;
   let longestCardio = 0;
+  let distanceKm = 0;
+  let longestRun = 0;
   const tried = new Set<string>();
   for (const w of workouts) {
     let cardio = 0;
     for (const e of w.exercises) {
-      if (bestScore(e) === null) continue;
-      tried.add(e.exerciseId);
-      const kind = getExercise(e.exerciseId).kind;
+      const exercise = getExercise(e.exerciseId);
+      const timed = exercise.group === 'cardio' && (exercise.kind === 'duration' || exercise.kind === 'distance');
       for (const s of e.sets) {
-        if (!s.done) continue;
+        if (!setLogged(e.exerciseId, s)) continue;
+        tried.add(e.exerciseId);
         sets++;
-        if (kind === 'duration' && getExercise(e.exerciseId).group === 'cardio') cardio += s.minutes ?? 0;
+        if (timed) cardio += s.minutes ?? 0;
+        if (exercise.kind === 'distance') distanceKm += s.distance ?? 0;
+        if (e.exerciseId === 'run') longestRun = Math.max(longestRun, s.distance ?? 0);
       }
     }
     cardioMinutes += cardio;
@@ -274,6 +312,8 @@ export function milestoneStats(input: {
     sets,
     cardioMinutes,
     longestCardio,
+    distanceKm,
+    longestRun,
     exercisesTried: tried.size,
     customExercises: input.customExercises,
     buddies: input.buddies,
@@ -320,6 +360,8 @@ export function formatMilestoneValue(format: Format, n: number, units: Units): s
       return formatVolume(n, units);
     case 'minutes':
       return formatMinutes(n * 60_000);
+    case 'km':
+      return formatDistanceKm(n, units);
     case 'weeks':
       return `${n} ${n === 1 ? 'week' : 'weeks'}`;
     default:

@@ -73,6 +73,13 @@ select public.admin_resolve_exercise((select id from public.exercise_submissions
 reset role;
 update public.profiles set is_admin = false where username = 'carol';
 
+-- Distance exercises can be submitted.
+select pg_temp.act_as('dave');
+insert into public.exercise_submissions (name, muscle_group, kind) values ('Trail Run', 'cardio', 'distance');
+reset role;
+select pg_temp.check((select kind from public.exercise_submissions where name = 'Trail Run') = 'distance',
+  'distance exercises can be submitted');
+
 -- Rate limit.
 select pg_temp.act_as('alice');
 do $$ begin

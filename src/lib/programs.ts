@@ -31,6 +31,9 @@ const lift = (exerciseId: string, sets: number, reps: string, note?: string): Pl
   note,
 });
 
+/** A set distance in km, e.g. a race. */
+const distance = (exerciseId: string, km: number, note?: string): PlanExercise => ({ exerciseId, sets: 1, distance: km, note });
+
 /** Timed work: `sets` rounds of `minutes` each. */
 const timed = (exerciseId: string, minutes: number, note?: string, sets = 1): PlanExercise => ({
   exerciseId,
@@ -93,7 +96,7 @@ const hyrox: Program = {
         ? {
             name: 'Race day',
             focus: '8 × 1 km run, each followed by a station. Go get it.',
-            exercises: [timed('run', 90, 'Pace the first runs; the wall balls come last')],
+            exercises: [distance('run', 8, '8 × 1 km. Pace the first runs; the wall balls come last')],
           }
         : {
             name: 'Race simulation',
@@ -160,7 +163,7 @@ const marathon: Program = {
         ],
       },
       race
-        ? { name: 'Race day', focus: '26.2 miles. Start slow, finish strong.', exercises: [timed('run', 240, 'Marathon')] }
+        ? { name: 'Race day', focus: '26.2 miles. Start slow, finish strong.', exercises: [distance('run', 42.2, 'Marathon')] }
         : {
             name: 'Long run',
             focus: w % 4 === 0 ? 'Cutback week: shorter, let your body absorb the work' : 'Slow and steady time on your feet',
@@ -214,7 +217,7 @@ const first5k: Program = {
         ],
       },
       w === 8
-        ? { name: 'Run your 5K', focus: 'Easy start, then hold a pace you could talk at', exercises: [timed('run', 35, '5K')] }
+        ? { name: 'Run your 5K', focus: 'Easy start, then hold a pace you could talk at', exercises: [distance('run', 5, '5K')] }
         : session('Run/walk'),
     ];
   },

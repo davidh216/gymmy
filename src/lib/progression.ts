@@ -40,7 +40,10 @@ export function workoutRewards(input: RewardInput): Rewards {
   const lines: RewardLine[] = [];
   lines.push({ label: 'Workout complete', xp: 50, gems: 25 });
   if (input.completedSets > 0) {
-    lines.push({ label: `${input.completedSets} sets logged`, xp: input.completedSets * 8 });
+    lines.push({
+      label: `${input.completedSets} ${input.completedSets === 1 ? 'set' : 'sets'} logged`,
+      xp: input.completedSets * 8,
+    });
   }
   if (input.prCount > 0) {
     lines.push({

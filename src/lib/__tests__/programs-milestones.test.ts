@@ -32,7 +32,7 @@ describe('programs', () => {
           for (const e of s.exercises) {
             expect(getExercise(e.exerciseId).name).not.toBe('Unknown exercise');
             expect(e.sets).toBeGreaterThan(0);
-            expect(e.reps !== undefined || e.minutes !== undefined).toBe(true);
+            expect(e.reps !== undefined || e.minutes !== undefined || e.distance !== undefined).toBe(true);
             if (e.minutes !== undefined) expect(e.minutes).toBeGreaterThan(0);
           }
         }

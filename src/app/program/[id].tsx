@@ -161,6 +161,7 @@ function SessionCard({
   highlight: boolean;
   onStart?: () => void;
 }) {
+  const units = useGymmy((s) => s.profile?.units ?? 'lb');
   return (
     <Card style={[styles.session, highlight && styles.next, done && { opacity: 0.65 }]}>
       <View style={styles.sessionHead}>
@@ -186,7 +187,7 @@ function SessionCard({
             {getExercise(e.exerciseId).name}
           </T>
           <T variant="caption" color={colors.accent}>
-            {formatTarget(e)}
+            {formatTarget(e, units)}
           </T>
         </View>
       ))}

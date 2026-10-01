@@ -12,6 +12,51 @@ export function fromDisplayWeight(value: number, units: Units): number {
   return units === 'lb' ? value / LB_PER_KG : value;
 }
 
+const KM_PER_MI = 1.609344;
+
+export function distanceUnit(units: Units): 'mi' | 'km' {
+  return units === 'lb' ? 'mi' : 'km';
+}
+
+export function toDisplayDistance(km: number, units: Units): number {
+  const value = units === 'lb' ? km / KM_PER_MI : km;
+  return Math.round(value * 100) / 100;
+}
+
+export function fromDisplayDistance(value: number, units: Units): number {
+  return units === 'lb' ? value * KM_PER_MI : value;
+}
+
+/** "5 km", "3.11 mi"; whole numbers above 100. */
+export function formatDistanceKm(km: number, units: Units): string {
+  const v = toDisplayDistance(km, units);
+  return `${v >= 100 ? Math.round(v).toLocaleString('en-US') : v} ${distanceUnit(units)}`;
+}
+
+/** Minutes as a race clock: 25.5 -> "25:30", 65 -> "1:05:00". */
+export function formatClock(minutes: number): string {
+  const total = Math.round(minutes * 60);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+/** "25:30" / "1:05:00" / "25.5" -> minutes. */
+export function parseClock(text: string): number | undefined {
+  const parts = text.trim().split(':');
+  if (parts.length > 3 || parts.some((p) => p === '' || !/^\d+(\.\d+)?$/.test(p))) return undefined;
+  const n = parts.map(Number);
+  const minutes = n.length === 3 ? n[0] * 60 + n[1] + n[2] / 60 : n.length === 2 ? n[0] + n[1] / 60 : n[0];
+  return minutes > 0 ? minutes : undefined;
+}
+
+/** Pace per mile or km, e.g. "8:12/mi". */
+export function formatPace(km: number, minutes: number, units: Units): string {
+  return `${formatClock(minutes / toDisplayDistance(km, units))}/${distanceUnit(units)}`;
+}
+
 export function formatNumber(n: number): string {
   return Math.round(n).toLocaleString('en-US');
 }
@@ -40,15 +85,22 @@ export function formatMinutes(ms: number): string {
   return min >= 60 ? `${Math.floor(min / 60)}h ${min % 60}m` : `${min}m`;
 }
 
-/** A set as people say it: "185 lb × 5", "12 reps", "20 min". */
-export function formatSet(set: SetEntry, kind: ExerciseKind, units: Units): string {
+/** A set as people say it: "185 lb × 5", "12 reps", "20 min", "3.1 mi · 25:30". */
+export function formatSet(set: SetEntry, kind: ExerciseKind, units: Units, opts?: { pace?: boolean }): string {
   if (kind === 'weight') return `${toDisplayWeight(set.weight ?? 0, units)} ${units} × ${set.reps ?? 0}`;
   if (kind === 'reps') return `${set.reps ?? 0} reps`;
-  return `${set.minutes ?? 0} min`;
+  if (kind === 'distance' && set.distance) {
+    const parts = [formatDistanceKm(set.distance, units)];
+    if (set.minutes) parts.push(formatClock(set.minutes));
+    if (opts?.pace && set.minutes) parts.push(formatPace(set.distance, set.minutes, units));
+    return parts.join(' · ');
+  }
+  return `${Math.round((set.minutes ?? 0) * 10) / 10} min`;
 }
 
-/** A plan target: "4 × 8–10", "30 min", "3 × 1 min". */
-export function formatTarget(target: Target): string {
+/** A plan target: "4 × 8–10", "30 min", "3 × 1 min", "5 km". */
+export function formatTarget(target: Target, units: Units): string {
+  if (target.distance !== undefined) return formatDistanceKm(target.distance, units);
   if (target.minutes !== undefined) {
     const t = target.minutes < 1 ? `${Math.round(target.minutes * 60)} s` : `${target.minutes} min`;
     return target.sets > 1 ? `${target.sets} × ${t}` : t;
@@ -93,8 +145,9 @@ export function defaultWorkoutName(now: number): string {
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
 /** Human-readable value for a record score (see `setScore`). */
-export function formatScore(kind: 'weight' | 'reps' | 'duration', value: number, units: Units) {
+export function formatScore(kind: ExerciseKind, value: number, units: Units) {
   if (kind === 'weight') return formatWeight(value, units);
+  if (kind === 'distance') return formatDistanceKm(value, units);
   if (kind === 'reps') return `${value} reps`;
   return `${Math.round(value * 10) / 10} min`;
 }

@@ -14,12 +14,11 @@ import {
   formatDate,
   formatMinutes,
   formatScore,
+  formatSet,
   formatVolume,
-  toDisplayWeight,
 } from '@/lib/format';
 import { levelFromXp } from '@/lib/progression';
 import { completedSets, volume } from '@/lib/records';
-import type { SetEntry, Units } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -70,7 +69,11 @@ export default function SessionScreen() {
           </View>
         )}
 
-        {isCelebration && <MilestoneBanner />}
+        {isCelebration && (
+          <View style={{ marginBottom: space.md }}>
+            <MilestoneBanner />
+          </View>
+        )}
 
         <Card style={styles.stats}>
           <Stat value={formatMinutes(workout.endedAt - workout.startedAt)} label="Duration" />
@@ -135,7 +138,7 @@ export default function SessionScreen() {
                   <T variant="caption" color={colors.textFaint} style={{ width: 24 }}>
                     {i + 1}
                   </T>
-                  <T variant="body">{describeSet(s, ex.kind, units)}</T>
+                  <T variant="body">{formatSet(s, ex.kind, units, { pace: true })}</T>
                 </View>
               ))}
             </Card>
@@ -175,11 +178,6 @@ export default function SessionScreen() {
   );
 }
 
-function describeSet(s: SetEntry, kind: 'weight' | 'reps' | 'duration', units: Units) {
-  if (kind === 'weight') return `${toDisplayWeight(s.weight ?? 0, units)} ${units} × ${s.reps ?? 0}`;
-  if (kind === 'reps') return `${s.reps ?? 0} reps`;
-  return `${s.minutes ?? 0} min`;
-}
 
 function Celebration({
   xpBefore,
