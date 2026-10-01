@@ -22,6 +22,8 @@ export type RewardInput = {
   companionBonus: number;
   /** True when this workout is the one that hits this week's goal. */
   hitsWeeklyGoal: boolean;
+  /** Name of the training plan, when this was a plan session. */
+  plan?: string;
 };
 
 export type RewardLine = { label: string; xp?: number; gems?: number };
@@ -47,6 +49,7 @@ export function workoutRewards(input: RewardInput): Rewards {
       gems: input.prCount * 15,
     });
   }
+  if (input.plan) lines.push({ label: `${input.plan} session`, xp: 30, gems: 10 });
   if (input.hitsWeeklyGoal) lines.push({ label: 'Weekly goal smashed', gems: 100 });
 
   const baseXp = lines.reduce((n, l) => n + (l.xp ?? 0), 0);

@@ -7,11 +7,23 @@ export type SetEntry = {
   done: boolean;
 };
 
+/** What a training plan asks for, e.g. 4 × "8–10" or 30 minutes. */
+export type Target = {
+  sets: number;
+  reps?: string;
+  minutes?: number;
+  note?: string;
+};
+
 export type WorkoutExercise = {
   id: string;
   exerciseId: string;
   sets: SetEntry[];
+  target?: Target;
 };
+
+/** A training plan session this workout came from (weeks and sessions are 1-based). */
+export type PlanRef = { programId: string; week: number; session: number };
 
 export type PersonalRecord = {
   exerciseId: string;
@@ -25,6 +37,7 @@ export type ActiveWorkout = {
   name: string;
   startedAt: number;
   exercises: WorkoutExercise[];
+  plan?: PlanRef;
 };
 
 export type Workout = ActiveWorkout & {

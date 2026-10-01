@@ -7,6 +7,8 @@ import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
 import { getExercise, setExtraExercises, tidyExerciseName, type Exercise } from '@/lib/exercises';
 import { defaultWorkoutName, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
+import { getMilestone, milestoneStats } from '@/lib/milestones';
+import { getProgram, planSession, targetReps } from '@/lib/programs';
 import {
   STARTING_GEMS,
   SUMMON_10_COST,
@@ -16,7 +18,7 @@ import {
 } from '@/lib/progression';
 import { completedSets, detectPRs, lastPerformance } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
-import type { ActiveWorkout, SetEntry, Units, Workout } from '@/lib/types';
+import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout } from '@/lib/types';
 
 export type Profile = {
   name: string;
@@ -55,6 +57,10 @@ type State = {
   customExercises: CustomExercise[];
   /** Approved community exercises, cached so history works offline. */
   communityExercises: Exercise[];
+  /** The training plan you're following. Progress counts workouts since `startedAt`. */
+  plan: { programId: string; startedAt: number } | null;
+  /** Milestone id -> when its reward was claimed. */
+  claimedMilestones: Record<string, number>;
 };
 
 type Actions = {
@@ -80,6 +86,13 @@ type Actions = {
   /** Applies server-side review results to your submitted exercises. */
   setSubmissionStatuses: (statuses: Record<string, SubmissionStatus>) => void;
 
+  startPlan: (programId: string) => void;
+  leavePlan: () => void;
+  /** Starts a workout prefilled from a plan session. */
+  startPlanSession: (ref: PlanRef) => void;
+  /** Grants XP and gems for achieved, unclaimed milestones. Returns what was granted. */
+  claimMilestones: (ids: string[]) => { xp: number; gems: number };
+
   summon: (count: 1 | 10) => SummonResult[] | null;
   reset: () => void;
 };
@@ -96,6 +109,8 @@ const initialState: State = {
   lastRewards: null,
   customExercises: [],
   communityExercises: [],
+  plan: null,
+  claimedMilestones: {},
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -107,6 +122,22 @@ function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
   const kind = getExercise(exerciseId).kind;
   const count = kind === 'duration' ? 1 : 3;
   return Array.from({ length: count }, () => ({ id: uid(), done: false }));
+}
+
+/** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from last time. */
+function planSets(exerciseId: string, target: { sets: number; reps?: string; minutes?: number }, history: Workout[]): SetEntry[] {
+  const previous = lastPerformance(exerciseId, history) ?? [];
+  const reps = targetReps(target.reps);
+  return Array.from({ length: Math.max(1, target.sets) }, (_, i) => {
+    const last = previous[Math.min(i, previous.length - 1)];
+    return {
+      id: uid(),
+      weight: last?.weight,
+      reps: reps ?? last?.reps,
+      minutes: target.minutes ?? last?.minutes,
+      done: false,
+    };
+  });
 }
 
 /** Lowercase handle from a display name, e.g. "Alex R" -> "alexr". */
@@ -156,6 +187,56 @@ export const useGymmy = create<State & Actions>()(
               })),
             },
           });
+        },
+
+        startPlan: (programId) => {
+          if (getProgram(programId)) set({ plan: { programId, startedAt: Date.now() } });
+        },
+
+        leavePlan: () => set({ plan: null }),
+
+        startPlanSession: (ref) => {
+          const program = getProgram(ref.programId);
+          const session = planSession(ref);
+          if (get().active || !program || !session) return;
+          const history = get().workouts;
+          set({
+            active: {
+              id: uid(),
+              name: `${program.name} · ${session.name}`,
+              startedAt: Date.now(),
+              plan: ref,
+              exercises: session.exercises.map(({ exerciseId, ...target }) => ({
+                id: uid(),
+                exerciseId,
+                target,
+                sets: planSets(exerciseId, target, history),
+              })),
+            },
+          });
+        },
+
+        claimMilestones: (ids) => {
+          const s = get();
+          const stats = milestoneStats({
+            workouts: s.workouts,
+            weeklyGoal: s.profile?.weeklyGoal ?? 3,
+            buddies: Object.keys(s.collection).length,
+            customExercises: s.customExercises.length,
+          });
+          const now = Date.now();
+          const claimed = { ...s.claimedMilestones };
+          let xp = 0;
+          let gems = 0;
+          for (const id of ids) {
+            const m = getMilestone(id);
+            if (!m || claimed[id] || stats[m.metric] < m.target) continue;
+            claimed[id] = now;
+            xp += m.xp;
+            gems += m.gems;
+          }
+          if (xp || gems) set({ claimedMilestones: claimed, xp: s.xp + xp, gems: s.gems + gems });
+          return { xp, gems };
         },
 
         renameWorkout: (name) => mutateActive((a) => ({ ...a, name })),
@@ -237,6 +318,7 @@ export const useGymmy = create<State & Actions>()(
             streakWeeks: weekStreak(times, goal, now),
             companionBonus: companionXpBonus(companion, collection[companionId]?.stars ?? 1),
             hitsWeeklyGoal: daysBefore < goal && daysAfter >= goal,
+            plan: active.plan ? getProgram(active.plan.programId)?.name : undefined,
           });
 
           const workout: Workout = {
@@ -317,7 +399,7 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
@@ -326,6 +408,8 @@ export const useGymmy = create<State & Actions>()(
         }
         state.customExercises ??= [];
         state.communityExercises ??= [];
+        state.plan ??= null;
+        state.claimedMilestones ??= {};
         return state;
       },
     },

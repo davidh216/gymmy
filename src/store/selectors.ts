@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useNow } from '@/hooks/use-now';
 
+import { milestoneStates, milestoneStats } from '@/lib/milestones';
 import { levelFromXp } from '@/lib/progression';
 import { activeDaysThisWeek, countInWeek, daysSince, weekStreak } from '@/lib/streaks';
 
@@ -26,4 +27,20 @@ export function useProgress() {
       goal,
     };
   }, [workouts, xp, goal, now]);
+}
+
+/** Every milestone with progress, plus how many are ready to claim. */
+export function useMilestones() {
+  const workouts = useGymmy((s) => s.workouts);
+  const goal = useGymmy((s) => s.profile?.weeklyGoal ?? 3);
+  const buddies = useGymmy((s) => Object.keys(s.collection).length);
+  const customExercises = useGymmy((s) => s.customExercises.length);
+  const claimed = useGymmy((s) => s.claimedMilestones);
+
+  return useMemo(() => {
+    const stats = milestoneStats({ workouts, weeklyGoal: goal, buddies, customExercises });
+    const all = milestoneStates(stats, claimed);
+    const ready = all.filter((m) => m.achieved && !m.claimedAt);
+    return { all, ready, earned: all.filter((m) => m.claimedAt).length };
+  }, [workouts, goal, buddies, customExercises, claimed]);
 }

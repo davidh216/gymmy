@@ -2,12 +2,14 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { CompanionHero } from '@/components/companion-hero';
+import { MilestoneBanner } from '@/components/milestone-banner';
 import { Screen } from '@/components/screen';
 import { WorkoutRow } from '@/components/workout-row';
-import { Button, Card, GemCount, SectionHeader, Stat, T } from '@/components/ui';
+import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { TEMPLATES } from '@/lib/exercises';
 import { formatDuration, greeting } from '@/lib/format';
+import { PROGRAMS, getProgram, planProgress, planSession } from '@/lib/programs';
 import { useGymmy } from '@/store/gymmy';
 import { useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
@@ -76,7 +78,11 @@ export default function Today() {
         </View>
       </Card>
 
+      <MilestoneBanner />
+
       <ActiveOrStart onStart={() => start()} />
+
+      <PlanSection />
 
       <SectionHeader title="Quick start" />
       <ScrollView
@@ -109,6 +115,100 @@ export default function Today() {
         </>
       )}
     </Screen>
+  );
+}
+
+/** The plan you're following and its next session, or a way into the plans. */
+function PlanSection() {
+  const plan = useGymmy((s) => s.plan);
+  const workouts = useGymmy((s) => s.workouts);
+  const hasActive = useGymmy((s) => s.active !== null);
+  const startPlanSession = useGymmy((s) => s.startPlanSession);
+  const program = plan ? getProgram(plan.programId) : undefined;
+
+  if (!plan || !program) {
+    return (
+      <>
+        <SectionHeader
+          title="Training plans"
+          action={
+            <T variant="caption" color={colors.accent} onPress={() => router.push('/programs')}>
+              See all
+            </T>
+          }
+        />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.templates}
+          contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg }}>
+          {PROGRAMS.map((p) => (
+            <Card
+              key={p.id}
+              style={styles.template}
+              onPress={() => router.push({ pathname: '/program/[id]', params: { id: p.id } })}>
+              <T style={{ fontSize: 26 }}>{p.emoji}</T>
+              <T variant="heading">{p.name}</T>
+              <T variant="caption" color={colors.textDim} numberOfLines={1}>
+                {p.tagline}
+              </T>
+              <T variant="caption" color={colors.accent} style={{ marginTop: space.sm }}>
+                {p.weeks} weeks →
+              </T>
+            </Card>
+          ))}
+        </ScrollView>
+      </>
+    );
+  }
+
+  const progress = planProgress(program, workouts, plan.startedAt);
+  const next = progress.next;
+  const session = next ? planSession({ programId: program.id, ...next }) : undefined;
+  return (
+    <>
+      <SectionHeader title="Your plan" />
+      <Card
+        style={{ gap: space.sm }}
+        onPress={() => router.push({ pathname: '/program/[id]', params: { id: program.id } })}>
+        <View style={styles.planHead}>
+          <T style={{ fontSize: 28 }}>{program.emoji}</T>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <T variant="heading" numberOfLines={1}>
+              {program.name}
+            </T>
+            <T variant="caption" color={colors.textDim}>
+              {next ? `Week ${next.week} of ${program.weeks}` : 'Complete! 🎉'} · {progress.completed}/{progress.total} sessions
+            </T>
+          </View>
+        </View>
+        <ProgressBar progress={progress.completed / progress.total} height={6} />
+        {next && session && (
+          <View style={styles.planNext}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <T variant="label" color={colors.accent}>
+                Up next
+              </T>
+              <T variant="heading" numberOfLines={1}>
+                {session.name}
+              </T>
+              <T variant="caption" color={colors.textDim} numberOfLines={1}>
+                {session.focus}
+              </T>
+            </View>
+            {!hasActive && (
+              <Button
+                title="Start"
+                onPress={() => {
+                  startPlanSession({ programId: program.id, ...next });
+                  router.push('/workout');
+                }}
+              />
+            )}
+          </View>
+        )}
+      </Card>
+    </>
   );
 }
 
@@ -156,4 +256,13 @@ const styles = StyleSheet.create({
   cta: { marginTop: space.lg },
   templates: { marginHorizontal: -space.lg },
   template: { width: 170, gap: 2, borderRadius: radius.md },
+  planHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  planNext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.cardHigh,
+  },
 });

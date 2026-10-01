@@ -5,6 +5,7 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CompanionAvatar } from '@/components/companion-avatar';
+import { MilestoneBanner } from '@/components/milestone-banner';
 import { Button, Card, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
 import { getCompanion } from '@/lib/companions';
@@ -68,6 +69,8 @@ export default function SessionScreen() {
             <T variant="hero">{workout.name}</T>
           </View>
         )}
+
+        {isCelebration && <MilestoneBanner />}
 
         <Card style={styles.stats}>
           <Stat value={formatMinutes(workout.endedAt - workout.startedAt)} label="Duration" />

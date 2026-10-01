@@ -21,6 +21,12 @@ function prevWeek(start: number): number {
   return d.getTime();
 }
 
+function nextWeek(start: number): number {
+  const d = new Date(start);
+  d.setDate(d.getDate() + 7);
+  return d.getTime();
+}
+
 /** Calendar days between the latest workout and now; null if none. */
 export function daysSince(timestamps: number[], now: number): number | null {
   if (timestamps.length === 0) return null;
@@ -79,4 +85,22 @@ export function weeklyCounts(timestamps: number[], weeks: number, now: number): 
   }
   const days = trainingDays(timestamps);
   return starts.map((s) => days.filter((t) => weekStart(t) === s).length);
+}
+
+/** Longest run of consecutive weeks meeting the goal, ever. */
+export function bestWeekStreak(timestamps: number[], goal: number): number {
+  const counts = new Map<number, number>();
+  for (const t of trainingDays(timestamps)) {
+    const w = weekStart(t);
+    counts.set(w, (counts.get(w) ?? 0) + 1);
+  }
+  const hits = new Set([...counts].filter(([, n]) => n >= goal).map(([w]) => w));
+  let best = 0;
+  for (const w of hits) {
+    if (hits.has(prevWeek(w))) continue;
+    let length = 0;
+    for (let x = w; hits.has(x); x = nextWeek(x)) length++;
+    best = Math.max(best, length);
+  }
+  return best;
 }

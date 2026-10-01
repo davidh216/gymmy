@@ -71,6 +71,10 @@ export const EXERCISES: Exercise[] = [
   ex('leg_extension', 'Leg Extension', 'legs'),
   ex('hip_thrust', 'Hip Thrust', 'legs'),
   ex('calf_raise', 'Calf Raise', 'legs'),
+  ex('sled_push', 'Sled Push', 'legs'),
+  ex('sled_pull', 'Sled Pull', 'back'),
+  ex('sandbag_lunge', 'Sandbag Lunge', 'legs'),
+  ex('wall_ball', 'Wall Ball', 'legs', 'reps'),
 
   ex('overhead_press', 'Overhead Press', 'shoulders'),
   ex('db_shoulder_press', 'Dumbbell Shoulder Press', 'shoulders'),
@@ -90,11 +94,15 @@ export const EXERCISES: Exercise[] = [
   ex('cable_crunch', 'Cable Crunch', 'core'),
   ex('ab_wheel', 'Ab Wheel Rollout', 'core', 'reps'),
 
+  ex('farmers_carry', 'Farmers Carry', 'core'),
+
   ex('run', 'Run', 'cardio', 'duration'),
   ex('bike', 'Bike', 'cardio', 'duration'),
   ex('rower', 'Rower', 'cardio', 'duration'),
   ex('stair_climber', 'Stair Climber', 'cardio', 'duration'),
   ex('jump_rope', 'Jump Rope', 'cardio', 'duration'),
+  ex('ski_erg', 'SkiErg', 'cardio', 'duration'),
+  ex('burpee_broad_jump', 'Burpee Broad Jump', 'cardio', 'reps'),
 ];
 
 const BY_ID = new Map(EXERCISES.map((e) => [e.id, e]));

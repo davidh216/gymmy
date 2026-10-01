@@ -16,7 +16,7 @@ import { Button, Icon, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { getExercise, type ExerciseKind } from '@/lib/exercises';
-import { formatAgo, formatDuration, formatSet, fromDisplayWeight, toDisplayWeight } from '@/lib/format';
+import { formatAgo, formatDuration, formatSet, formatTarget, fromDisplayWeight, toDisplayWeight } from '@/lib/format';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
@@ -207,6 +207,16 @@ function ExerciseCard({
             {exercise.group}
           </T>
         </View>
+        {workoutExercise.target && (
+          <View style={styles.target}>
+            <T variant="label" color={colors.textFaint}>
+              Target
+            </T>
+            <T variant="heading" color={colors.accent}>
+              {formatTarget(workoutExercise.target)}
+            </T>
+          </View>
+        )}
         <Pressable
           hitSlop={10}
           accessibilityLabel={`Remove ${exercise.name}`}
@@ -219,6 +229,11 @@ function ExerciseCard({
         </Pressable>
       </View>
 
+      {workoutExercise.target?.note && (
+        <T variant="caption" color={colors.textDim} style={{ marginBottom: space.xs }}>
+          {workoutExercise.target.note}
+        </T>
+      )}
       {last ? (
         <View style={styles.stats}>
           <View style={styles.stat}>
@@ -441,6 +456,7 @@ const styles = StyleSheet.create({
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: space.sm },
   stats: { flexDirection: 'row', gap: space.sm, marginBottom: space.sm },
+  target: { alignItems: 'flex-end', marginRight: space.md },
   stat: {
     flex: 1,
     minWidth: 0,

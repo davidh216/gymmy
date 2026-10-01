@@ -57,7 +57,7 @@ describe('custom exercises', () => {
   const mine: Exercise = { id: 'custom_1', name: 'Landmine Press', group: 'shoulders', kind: 'weight', source: 'custom' };
   const shared: Exercise[] = [
     { id: 'community_1', name: 'Landmine Press', group: 'shoulders', kind: 'weight', source: 'community' },
-    { id: 'community_2', name: 'Sled Push', group: 'legs', kind: 'duration', source: 'community' },
+    { id: 'community_2', name: 'Tire Flip', group: 'legs', kind: 'reps', source: 'community' },
   ];
   afterEach(() => setExtraExercises([]));
 
@@ -65,7 +65,7 @@ describe('custom exercises', () => {
     const results = searchExercises('', 'shoulders', [mine, ...shared]);
     expect(results[0].id).toBe('custom_1');
     expect(results.some((e) => e.id === 'community_1')).toBe(false);
-    expect(searchExercises('sled', null, [mine, ...shared]).map((e) => e.id)).toEqual(['community_2']);
+    expect(searchExercises('tire', null, [mine, ...shared]).map((e) => e.id)).toEqual(['community_2']);
   });
   it('resolves names and catches duplicates in any case', () => {
     setExtraExercises([mine]);

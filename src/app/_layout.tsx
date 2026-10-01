@@ -57,6 +57,9 @@ export default function RootLayout() {
             <Stack.Screen name="gym/[id]" />
             <Stack.Screen name="board/[gymId]/[challengeId]" />
             <Stack.Screen name="admin" />
+            <Stack.Screen name="milestones" />
+            <Stack.Screen name="programs" />
+            <Stack.Screen name="program/[id]" />
             <Stack.Screen name="gym-find" options={{ presentation: 'modal' }} />
             <Stack.Screen name="post-entry" options={{ presentation: 'modal' }} />
             <Stack.Screen name="entry/[id]" options={{ presentation: 'modal' }} />

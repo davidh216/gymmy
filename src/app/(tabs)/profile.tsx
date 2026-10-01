@@ -8,13 +8,14 @@ import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components
 import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
 import { formatNumber } from '@/lib/format';
+import { getProgram } from '@/lib/programs';
 import { deleteAccount, signOut, useAuth } from '@/services/auth';
 import { useMyProfile } from '@/services/gyms/queries';
 import { gymsApi } from '@/services/gyms';
 import { resetLocalGyms } from '@/services/gyms/local';
 import { isRemote } from '@/services/supabase';
 import { toUsername, useGymmy } from '@/store/gymmy';
-import { useProgress } from '@/store/selectors';
+import { useMilestones, useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 export default function Profile() {
@@ -82,6 +83,8 @@ export default function Profile() {
           <Stat value={`${owned}/${COMPANIONS.length}`} label="Buddies" />
         </View>
       </Card>
+
+      <ProfileLinks />
 
       <SectionHeader title="Weekly goal" />
       <Card style={{ gap: space.md }}>
@@ -178,6 +181,7 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
+  link: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   name: {
     fontSize: 24,
     fontWeight: '800',
@@ -193,3 +197,37 @@ const styles = StyleSheet.create({
   goalRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   footer: { textAlign: 'center', marginTop: space.xl },
 });
+
+function ProfileLinks() {
+  const { ready, earned, all } = useMilestones();
+  const plan = useGymmy((s) => s.plan);
+  const program = plan ? getProgram(plan.programId) : undefined;
+  return (
+    <View style={{ gap: space.sm, marginTop: space.md }}>
+      <Card style={styles.link} onPress={() => router.push('/milestones')}>
+        <T style={{ fontSize: 24 }}>🏆</T>
+        <View style={{ flex: 1 }}>
+          <T variant="heading">Milestones</T>
+          <T variant="caption" color={ready.length ? colors.accent : colors.textDim}>
+            {ready.length ? `${ready.length} ready to claim` : `${earned} of ${all.length} earned`}
+          </T>
+        </View>
+        <T variant="heading" color={colors.textFaint}>
+          →
+        </T>
+      </Card>
+      <Card style={styles.link} onPress={() => router.push('/programs')}>
+        <T style={{ fontSize: 24 }}>{program?.emoji ?? '📋'}</T>
+        <View style={{ flex: 1 }}>
+          <T variant="heading">Training plans</T>
+          <T variant="caption" color={colors.textDim}>
+            {program ? `Following ${program.name}` : 'HYROX, marathon, 5K, strength and more'}
+          </T>
+        </View>
+        <T variant="heading" color={colors.textFaint}>
+          →
+        </T>
+      </Card>
+    </View>
+  );
+}

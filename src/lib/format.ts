@@ -1,5 +1,5 @@
 import type { ExerciseKind } from './exercises';
-import type { SetEntry, Units } from './types';
+import type { SetEntry, Target, Units } from './types';
 
 const LB_PER_KG = 2.20462;
 
@@ -45,6 +45,15 @@ export function formatSet(set: SetEntry, kind: ExerciseKind, units: Units): stri
   if (kind === 'weight') return `${toDisplayWeight(set.weight ?? 0, units)} ${units} × ${set.reps ?? 0}`;
   if (kind === 'reps') return `${set.reps ?? 0} reps`;
   return `${set.minutes ?? 0} min`;
+}
+
+/** A plan target: "4 × 8–10", "30 min", "3 × 1 min". */
+export function formatTarget(target: Target): string {
+  if (target.minutes !== undefined) {
+    const t = target.minutes < 1 ? `${Math.round(target.minutes * 60)} s` : `${target.minutes} min`;
+    return target.sets > 1 ? `${target.sets} × ${t}` : t;
+  }
+  return `${target.sets} × ${target.reps ?? '—'}`;
 }
 
 /** "today", "yesterday", "3d ago", "5w ago". */
