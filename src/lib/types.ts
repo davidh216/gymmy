@@ -50,6 +50,8 @@ export type Workout = ActiveWorkout & {
   xp: number;
   gems: number;
   prs: PersonalRecord[];
+  /** Set for workouts imported from Apple Health. */
+  source?: 'health';
 };
 
 export type Units = 'kg' | 'lb';

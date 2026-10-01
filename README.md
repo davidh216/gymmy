@@ -95,3 +95,16 @@ To do it in separate steps:
 npx eas-cli@latest build --platform ios --profile production
 npx eas-cli@latest submit --platform ios --latest
 ```
+
+### Apple Health (HealthKit)
+
+Gymmy reads sleep and Apple Watch runs, walks, rides, rows and swims, and saves logged workouts
+to Health (`@kingstinct/react-native-healthkit`, configured in `app.json`). HealthKit is an app
+capability, so the App ID and provisioning profile must include it. CI builds run
+non-interactively and can't add capabilities themselves; do one of these once:
+
+- In the Apple Developer portal: Certificates, IDs & Profiles → Identifiers →
+  `com.davidh216.gymmy` → tick **HealthKit** → Save. The next `[ios build]` regenerates the
+  profile with the App Store Connect API key EAS already has.
+- Or from a computer: `npx eas-cli@latest build -p ios --profile production` and log in to Apple
+  when asked; EAS syncs capabilities and updates the profile.

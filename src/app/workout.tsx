@@ -32,6 +32,7 @@ import {
 } from '@/lib/format';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
+import { saveWorkoutToHealth } from '@/services/health';
 import { useGymmy } from '@/store/gymmy';
 import { colors, fonts, radius, space } from '@/theme';
 
@@ -82,6 +83,7 @@ export default function WorkoutScreen() {
     haptic('success');
     const workout = finishWorkout();
     if (workout) {
+      saveWorkoutToHealth(workout);
       router.replace({ pathname: '/session/[id]', params: { id: workout.id, celebrate: '1' } });
     }
   };

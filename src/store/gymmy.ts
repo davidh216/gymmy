@@ -64,6 +64,8 @@ type State = {
   claimedMilestones: Record<string, number>;
   /** Daily recovery check-ins by local date (YYYY-MM-DD). */
   checkIns: Record<string, CheckIn>;
+  /** Apple Health sync. Workouts finished after `connectedAt` earn rewards when imported. */
+  health: { enabled: boolean; connectedAt?: number; lastSync?: number };
 };
 
 type Actions = {
@@ -96,6 +98,9 @@ type Actions = {
   /** Grants XP and gems for achieved, unclaimed milestones. Returns what was granted. */
   claimMilestones: (ids: string[]) => { xp: number; gems: number };
 
+  setHealth: (patch: Partial<State['health']>) => void;
+  /** Adds workouts imported from Apple Health that aren't in history yet. Returns how many were added. */
+  importWorkouts: (workouts: Workout[]) => number;
   /** Saves today's check-in. The first one each day earns a small reward, returned here. */
   saveCheckIn: (input: Omit<CheckIn, 'date' | 'at'>) => { xp: number; gems: number };
 
@@ -118,6 +123,7 @@ const initialState: State = {
   plan: null,
   claimedMilestones: {},
   checkIns: {},
+  health: { enabled: false },
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -253,6 +259,44 @@ export const useGymmy = create<State & Actions>()(
           }
           if (xp || gems) set({ claimedMilestones: claimed, xp: s.xp + xp, gems: s.gems + gems });
           return { xp, gems };
+        },
+
+        setHealth: (patch) => set((s) => ({ health: { ...s.health, ...patch } })),
+
+        importWorkouts: (incoming) => {
+          const s = get();
+          const known = new Set(s.workouts.map((w) => w.id));
+          const fresh = incoming.filter((w) => !known.has(w.id)).sort((a, b) => a.endedAt - b.endedAt);
+          if (fresh.length === 0) return 0;
+          let history = s.workouts;
+          let xp = 0;
+          let gems = 0;
+          const since = s.health.connectedAt ?? Infinity;
+          const added = fresh.map((w) => {
+            const prs = detectPRs(w.exercises, history);
+            // Only workouts done after connecting earn rewards; the backfill doesn't.
+            const rewards =
+              w.endedAt >= since
+                ? workoutRewards({
+                    completedSets: completedSets(w.exercises),
+                    prCount: prs.length,
+                    streakWeeks: 0,
+                    companionBonus: 0,
+                    hitsWeeklyGoal: false,
+                  })
+                : { xp: 0, gems: 0 };
+            xp += rewards.xp;
+            gems += rewards.gems;
+            const workout = { ...w, prs, xp: rewards.xp, gems: rewards.gems };
+            history = [workout, ...history];
+            return workout;
+          });
+          set({
+            workouts: [...added, ...s.workouts].sort((a, b) => b.endedAt - a.endedAt),
+            xp: s.xp + xp,
+            gems: s.gems + gems,
+          });
+          return added.length;
         },
 
         saveCheckIn: (input) => {
@@ -429,7 +473,7 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 5,
+      version: 6,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
@@ -441,6 +485,7 @@ export const useGymmy = create<State & Actions>()(
         state.plan ??= null;
         state.claimedMilestones ??= {};
         state.checkIns ??= {};
+        state.health ??= { enabled: false };
         return state;
       },
     },

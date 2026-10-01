@@ -53,6 +53,14 @@
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false
         }
+      ],
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Gymmy reads your sleep to fill in your recovery check-in, and your runs, walks, rides, rows and swims to add them to your training log.",
+          "NSHealthUpdateUsageDescription": "Gymmy saves the workouts you log so they count toward your Apple Health activity.",
+          "background": false
+        }
       ]
     ],
     "experiments": {

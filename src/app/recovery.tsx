@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
@@ -15,6 +16,7 @@ import {
   type CheckIn,
   type Rating,
 } from '@/lib/recovery';
+import { lastNightSleep } from '@/services/health';
 import { CHECK_IN_GEMS, useGymmy } from '@/store/gymmy';
 import { useReadiness } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
@@ -33,7 +35,17 @@ export default function RecoveryScreen() {
   const checkIns = useGymmy((s) => s.checkIns);
   const saveCheckIn = useGymmy((s) => s.saveCheckIn);
 
-  const [sleep, setSleep] = useState<number | undefined>(today?.sleepHours ?? 7.5);
+  const healthOn = useGymmy((s) => s.health.enabled);
+  const { data: healthSleep } = useQuery({
+    queryKey: ['health', 'sleep', today?.date ?? 'today'],
+    queryFn: lastNightSleep,
+    enabled: healthOn,
+    staleTime: 15 * 60 * 1000,
+  });
+  // What you set wins; otherwise Apple Health's number, then a typical night.
+  const [sleepEdit, setSleep] = useState<number | undefined>(today?.sleepHours);
+  const fromHealth = sleepEdit === undefined && typeof healthSleep === 'number';
+  const sleep = sleepEdit ?? (fromHealth ? healthSleep : 7.5);
   const [ratings, setRatings] = useState<Partial<Record<RatingField, Rating>>>({
     soreness: today?.soreness,
     energy: today?.energy,
@@ -61,11 +73,11 @@ export default function RecoveryScreen() {
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             <T variant="heading">Sleep</T>
-            <T variant="caption" color={colors.textDim}>
-              Last night
+            <T variant="caption" color={fromHealth ? colors.accent : colors.textDim}>
+              {fromHealth ? 'Last night · from Apple Health' : 'Last night'}
             </T>
           </View>
-          <Stepper value={sleep ?? 7.5} onChange={setSleep} />
+          <Stepper value={sleep} onChange={setSleep} />
         </View>
 
         {(Object.keys(RATING_LABELS) as RatingField[]).map((field) => (

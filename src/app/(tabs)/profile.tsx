@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
+import { HealthCard } from '@/components/health-card';
 import { Screen } from '@/components/screen';
 import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
@@ -85,6 +86,10 @@ export default function Profile() {
       </Card>
 
       <ProfileLinks />
+
+      <View style={{ marginTop: space.sm }}>
+        <HealthCard />
+      </View>
 
       <SectionHeader title="Weekly goal" />
       <Card style={{ gap: space.md }}>
