@@ -1,4 +1,5 @@
 import { getExercise } from './exercises';
+import type { ExerciseKind } from './exercises';
 import type { PersonalRecord, SetEntry, Workout, WorkoutExercise } from './types';
 
 /** Estimated one-rep max (Epley). */
@@ -80,12 +81,65 @@ export function volume(exercises: WorkoutExercise[]): number {
 
 /** The most recent finished performance of an exercise, for "previous" hints. */
 export function lastPerformance(exerciseId: string, history: Workout[]): SetEntry[] | null {
-  let latest: Workout | null = null;
-  for (const w of history) {
-    if (w.exercises.some((e) => e.exerciseId === exerciseId && bestScore(e) !== null)) {
-      if (!latest || w.endedAt > latest.endedAt) latest = w;
+  return lastSession(exerciseId, history)?.sets ?? null;
+}
+
+/**
+ * The set to headline: heaviest weight (more reps breaks a tie) for weighted lifts,
+ * most reps or longest time otherwise.
+ */
+export function topSet(kind: ExerciseKind, sets: SetEntry[]): SetEntry | null {
+  let top: SetEntry | null = null;
+  for (const s of sets) {
+    if (!s.done) continue;
+    if (kind === 'weight') {
+      if (!s.weight || !s.reps) continue;
+      if (!top || s.weight > top.weight! || (s.weight === top.weight && s.reps > top.reps!)) top = s;
+    } else {
+      const v = kind === 'reps' ? s.reps : s.minutes;
+      const best = top ? (kind === 'reps' ? top.reps : top.minutes) : undefined;
+      if (v && (best === undefined || v > best)) top = s;
     }
   }
-  const match = latest?.exercises.find((e) => e.exerciseId === exerciseId);
-  return match ? match.sets.filter((s) => s.done) : null;
+  return top;
+}
+
+export type SessionStats = { endedAt: number; sets: SetEntry[]; top: SetEntry };
+
+/** Latest finished session of an exercise and its top set. */
+export function lastSession(exerciseId: string, history: Workout[]): SessionStats | null {
+  const kind = getExercise(exerciseId).kind;
+  let latest: SessionStats | null = null;
+  for (const w of history) {
+    if (latest && w.endedAt <= latest.endedAt) continue;
+    for (const e of w.exercises) {
+      if (e.exerciseId !== exerciseId) continue;
+      const top = topSet(kind, e.sets);
+      if (top) latest = { endedAt: w.endedAt, sets: e.sets.filter((s) => s.done), top };
+    }
+  }
+  return latest;
+}
+
+/** Top set ever logged for an exercise. */
+export function bestSet(exerciseId: string, history: Workout[]): SetEntry | null {
+  const kind = getExercise(exerciseId).kind;
+  const all = history.flatMap((w) => w.exercises.filter((e) => e.exerciseId === exerciseId).flatMap((e) => e.sets));
+  return topSet(kind, all);
+}
+
+/** Latest session per exercise, for showing stats in lists. */
+export function lastSessions(history: Workout[]): Map<string, SessionStats> {
+  const ids = new Set(history.flatMap((w) => w.exercises.map((e) => e.exerciseId)));
+  const out = new Map<string, SessionStats>();
+  for (const id of ids) {
+    const s = lastSession(id, history);
+    if (s) out.set(id, s);
+  }
+  return out;
+}
+
+/** Whether any saved or in-progress workout uses this exercise. */
+export function exerciseInUse(exerciseId: string, history: Workout[], active?: { exercises: WorkoutExercise[] } | null) {
+  return [...history, ...(active ? [active] : [])].some((w) => w.exercises.some((e) => e.exerciseId === exerciseId));
 }

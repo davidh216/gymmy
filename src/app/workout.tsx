@@ -16,8 +16,8 @@ import { Button, Icon, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { getExercise, type ExerciseKind } from '@/lib/exercises';
-import { formatDuration, fromDisplayWeight, toDisplayWeight } from '@/lib/format';
-import { lastPerformance } from '@/lib/records';
+import { formatAgo, formatDuration, formatSet, fromDisplayWeight, toDisplayWeight } from '@/lib/format';
+import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
 import { colors, fonts, radius, space } from '@/theme';
@@ -104,7 +104,7 @@ export default function WorkoutScreen() {
 
         {active.exercises.map((we) => (
           <Animated.View key={we.id} layout={LinearTransition} entering={FadeInDown}>
-            <ExerciseCard workoutExercise={we} units={units} onSetDone={startRest} />
+            <ExerciseCard workoutExercise={we} units={units} now={now} onSetDone={startRest} />
           </Animated.View>
         ))}
 
@@ -181,16 +181,20 @@ export default function WorkoutScreen() {
 function ExerciseCard({
   workoutExercise,
   units,
+  now,
   onSetDone,
 }: {
   workoutExercise: WorkoutExercise;
   units: Units;
+  now: number;
   onSetDone: () => void;
 }) {
   const exercise = getExercise(workoutExercise.exerciseId);
   const history = useGymmy((s) => s.workouts);
   const { addSet, removeExercise } = useGymmy.getState();
-  const previous = lastPerformance(exercise.id, history);
+  const last = lastSession(exercise.id, history);
+  const best = bestSet(exercise.id, history);
+  const previous = last?.sets;
 
   return (
     <View style={styles.card}>
@@ -205,6 +209,7 @@ function ExerciseCard({
         </View>
         <Pressable
           hitSlop={10}
+          accessibilityLabel={`Remove ${exercise.name}`}
           onPress={() =>
             confirm(`Remove ${exercise.name}?`, 'Its sets will be removed from this workout.', 'Remove', () =>
               removeExercise(workoutExercise.id),
@@ -213,6 +218,31 @@ function ExerciseCard({
           <Icon name={{ ios: 'trash', web: 'delete' }} size={18} color={colors.textFaint} />
         </Pressable>
       </View>
+
+      {last ? (
+        <View style={styles.stats}>
+          <View style={styles.stat}>
+            <T variant="label" color={colors.textFaint}>
+              Last · {formatAgo(last.endedAt, now)}
+            </T>
+            <T variant="heading">{formatSet(last.top, exercise.kind, units)}</T>
+          </View>
+          {best && (
+            <View style={styles.stat}>
+              <T variant="label" color={colors.textFaint}>
+                Best
+              </T>
+              <T variant="heading" color={best === last.top ? colors.accent : colors.text}>
+                {formatSet(best, exercise.kind, units)}
+              </T>
+            </View>
+          )}
+        </View>
+      ) : (
+        <T variant="caption" color={colors.textFaint} style={{ marginBottom: space.xs }}>
+          First time logging this. Your numbers will show here next time.
+        </T>
+      )}
 
       <View style={styles.setRow}>
         <T variant="label" color={colors.textFaint} style={styles.colSet}>
@@ -410,6 +440,16 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: space.sm },
+  stats: { flexDirection: 'row', gap: space.sm, marginBottom: space.sm },
+  stat: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.cardHigh,
+  },
   setRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,4 +1,5 @@
-import type { Units } from './types';
+import type { ExerciseKind } from './exercises';
+import type { SetEntry, Units } from './types';
 
 const LB_PER_KG = 2.20462;
 
@@ -37,6 +38,23 @@ export function formatDuration(ms: number): string {
 export function formatMinutes(ms: number): string {
   const min = Math.round(ms / 60000);
   return min >= 60 ? `${Math.floor(min / 60)}h ${min % 60}m` : `${min}m`;
+}
+
+/** A set as people say it: "185 lb × 5", "12 reps", "20 min". */
+export function formatSet(set: SetEntry, kind: ExerciseKind, units: Units): string {
+  if (kind === 'weight') return `${toDisplayWeight(set.weight ?? 0, units)} ${units} × ${set.reps ?? 0}`;
+  if (kind === 'reps') return `${set.reps ?? 0} reps`;
+  return `${set.minutes ?? 0} min`;
+}
+
+/** "today", "yesterday", "3d ago", "5w ago". */
+export function formatAgo(ts: number, now: number): string {
+  const days = Math.max(0, Math.round((new Date(now).setHours(0, 0, 0, 0) - new Date(ts).setHours(0, 0, 0, 0)) / 86400000));
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 14) return `${days}d ago`;
+  if (days < 60) return `${Math.round(days / 7)}w ago`;
+  return formatDate(ts);
 }
 
 export function formatDate(ts: number): string {

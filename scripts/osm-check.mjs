@@ -16,7 +16,7 @@ for (const url of OVERPASS_ENDPOINTS) {
     ['no user-agent', { 'Content-Type': OVERPASS_HEADERS['Content-Type'] }],
   ]) {
     try {
-      const res = await fetch(url, { method: 'POST', headers, body: `data=${encodeURIComponent(overpassQuery(probe))}` });
+      const res = await fetch(url, { method: 'POST', headers, body: `data=${encodeURIComponent(overpassQuery(probe))}`, signal: AbortSignal.timeout(30_000) });
       console.log(`${url} (${label}): HTTP ${res.status}${res.ok ? '' : ` ${(await res.text()).slice(0, 200).replace(/\s+/g, ' ')}`}`);
     } catch (e) {
       console.log(`${url} (${label}): ${e.message}`);
@@ -29,7 +29,7 @@ for (const spot of spots) {
   const started = Date.now();
   let res;
   for (const url of OVERPASS_ENDPOINTS) {
-    res = await fetch(url, { method: 'POST', headers: OVERPASS_HEADERS, body: `data=${encodeURIComponent(overpassQuery(spot))}` }).catch(() => undefined);
+    res = await fetch(url, { method: 'POST', headers: OVERPASS_HEADERS, body: `data=${encodeURIComponent(overpassQuery(spot))}`, signal: AbortSignal.timeout(30_000) }).catch(() => undefined);
     if (res?.ok) break;
   }
   if (!res?.ok) {

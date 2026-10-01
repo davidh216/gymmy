@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
-import { getExercise } from '@/lib/exercises';
+import { getExercise, setExtraExercises, tidyExerciseName, type Exercise } from '@/lib/exercises';
 import { defaultWorkoutName, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import {
@@ -30,6 +30,17 @@ export type Owned = { stars: number; obtainedAt: number };
 
 export type SummonResult = { id: string; isNew: boolean };
 
+export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+/** An exercise made on this device, optionally submitted for everyone. */
+export type CustomExercise = Exercise & {
+  source: 'custom';
+  createdAt: number;
+  submission?: { id: string; status: SubmissionStatus };
+};
+
+export type CustomExerciseInput = Pick<Exercise, 'name' | 'group' | 'kind'>;
+
 type State = {
   profile: Profile | null;
   workouts: Workout[];
@@ -41,6 +52,9 @@ type State = {
   pity: Pity;
   /** Rewards from the most recently finished workout, for the summary screen. */
   lastRewards: Rewards | null;
+  customExercises: CustomExercise[];
+  /** Approved community exercises, cached so history works offline. */
+  communityExercises: Exercise[];
 };
 
 type Actions = {
@@ -59,6 +73,13 @@ type Actions = {
   finishWorkout: () => Workout | null;
   deleteWorkout: (id: string) => void;
 
+  addCustomExercise: (input: CustomExerciseInput) => CustomExercise;
+  updateCustomExercise: (id: string, patch: Partial<CustomExerciseInput> & Pick<CustomExercise, 'submission'>) => void;
+  deleteCustomExercise: (id: string) => void;
+  setCommunityExercises: (list: Exercise[]) => void;
+  /** Applies server-side review results to your submitted exercises. */
+  setSubmissionStatuses: (statuses: Record<string, SubmissionStatus>) => void;
+
   summon: (count: 1 | 10) => SummonResult[] | null;
   reset: () => void;
 };
@@ -73,6 +94,8 @@ const initialState: State = {
   companionId: 'kong',
   pity: EMPTY_PITY,
   lastRewards: null,
+  customExercises: [],
+  communityExercises: [],
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -237,6 +260,40 @@ export const useGymmy = create<State & Actions>()(
 
         deleteWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
 
+        addCustomExercise: (input) => {
+          const exercise: CustomExercise = {
+            ...input,
+            name: tidyExerciseName(input.name),
+            id: `custom_${uid()}`,
+            source: 'custom',
+            createdAt: Date.now(),
+          };
+          set((s) => ({ customExercises: [exercise, ...s.customExercises] }));
+          return exercise;
+        },
+
+        updateCustomExercise: (id, patch) =>
+          set((s) => ({
+            customExercises: s.customExercises.map((e) =>
+              e.id === id ? { ...e, ...patch, name: tidyExerciseName(patch.name ?? e.name) } : e,
+            ),
+          })),
+
+        deleteCustomExercise: (id) =>
+          set((s) => ({ customExercises: s.customExercises.filter((e) => e.id !== id) })),
+
+        setCommunityExercises: (list) => set({ communityExercises: list }),
+
+        setSubmissionStatuses: (statuses) =>
+          set((s) => ({
+            customExercises: s.customExercises.map((e) => {
+              const status = e.submission && statuses[e.submission.id];
+              return status && status !== e.submission!.status
+                ? { ...e, submission: { ...e.submission!, status } }
+                : e;
+            }),
+          })),
+
         summon: (count) => {
           const cost = count === 10 ? SUMMON_10_COST : SUMMON_COST;
           const { gems, pity, collection } = get();
@@ -260,18 +317,29 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
         if (version < 2 && state.profile && !state.profile.username) {
           state.profile = { ...state.profile, username: toUsername(state.profile.name) };
         }
+        state.customExercises ??= [];
+        state.communityExercises ??= [];
         return state;
       },
     },
   ),
 );
+
+// Keep exercise lookups (names, kinds) in step with your custom and community exercises.
+const syncExtraExercises = (s: State) => setExtraExercises([...s.customExercises, ...s.communityExercises]);
+syncExtraExercises(useGymmy.getState());
+useGymmy.subscribe((s, prev) => {
+  if (s.customExercises !== prev.customExercises || s.communityExercises !== prev.communityExercises) {
+    syncExtraExercises(s);
+  }
+});
 
 const subscribeHydration = (cb: () => void) => useGymmy.persist.onFinishHydration(cb);
 

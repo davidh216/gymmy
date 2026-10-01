@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { BackHeader } from '@/components/back-header';
 import { Clip } from '@/components/clip';
 import { Screen } from '@/components/screen';
 import { Button, Card, T, haptic } from '@/components/ui';
 import { formatResult, getChallenge } from '@/lib/challenges';
+import { EXERCISE_KINDS } from '@/lib/exercises';
 import { formatDate, formatWeight } from '@/lib/format';
 import { resolveEntry, reviewQueue, videoUrl, type ReviewItem } from '@/services/admin';
+import { pendingExercises, resolveExercise, type PendingExercise } from '@/services/exercises';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -19,8 +21,24 @@ export default function AdminScreen() {
     queryFn: reviewQueue,
   });
 
+  const { data: exercises = [] } = useQuery({
+    queryKey: ['gyms', 'admin-exercises'],
+    queryFn: pendingExercises,
+  });
+
   return (
-    <Screen header={<BackHeader title="Review reports" subtitle="Admin" />}>
+    <Screen header={<BackHeader title="Review" subtitle="Admin" />}>
+      {exercises.length > 0 && (
+        <T variant="label" color={colors.textFaint} style={styles.section}>
+          Exercise submissions
+        </T>
+      )}
+      {exercises.map((item) => (
+        <ExerciseCard key={item.id} item={item} />
+      ))}
+      <T variant="label" color={colors.textFaint} style={styles.section}>
+        Reported entries
+      </T>
       {isError && (
         <Card style={styles.row}>
           <T variant="body" color={colors.textDim} style={{ flex: 1 }}>
@@ -32,7 +50,7 @@ export default function AdminScreen() {
       {!isLoading && !isError && queue.length === 0 && (
         <Card style={styles.empty}>
           <T style={{ fontSize: 40 }}>✅</T>
-          <T variant="heading">Nothing to review</T>
+          <T variant="heading">No reported entries</T>
           <T variant="caption" color={colors.textDim}>
             Entries hidden by reports show up here.
           </T>
@@ -42,6 +60,52 @@ export default function AdminScreen() {
         <ReviewCard key={item.entryId} item={item} />
       ))}
     </Screen>
+  );
+}
+
+function ExerciseCard({ item }: { item: PendingExercise }) {
+  const client = useQueryClient();
+  const [name, setName] = useState(item.name);
+  const resolve = useMutation({
+    mutationFn: (decision: 'approve' | 'reject') =>
+      resolveExercise(item.id, decision, name.trim() === item.name ? undefined : name),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['gyms', 'admin-exercises'] }),
+  });
+  const kind = EXERCISE_KINDS.find((k) => k.id === item.kind)?.label;
+
+  return (
+    <Card style={styles.card}>
+      <TextInput
+        value={name}
+        onChangeText={setName}
+        maxLength={40}
+        style={styles.nameInput}
+        accessibilityLabel="Exercise name"
+      />
+      <T variant="caption" color={colors.textFaint} style={{ textTransform: 'capitalize' }}>
+        {item.group} · {kind} · @{item.username} · {formatDate(item.createdAt)}
+      </T>
+      {resolve.isError && (
+        <T variant="caption" color={colors.danger}>
+          {resolve.error.message}
+        </T>
+      )}
+      <View style={styles.row}>
+        <Button
+          title="Reject"
+          variant="secondary"
+          disabled={resolve.isPending}
+          style={{ flex: 1 }}
+          onPress={() => resolve.mutate('reject')}
+        />
+        <Button
+          title="Approve"
+          disabled={resolve.isPending || name.trim().length < 2}
+          style={{ flex: 1 }}
+          onPress={() => resolve.mutate('approve')}
+        />
+      </View>
+    </Card>
   );
 }
 
@@ -137,6 +201,17 @@ function ReviewCard({ item }: { item: ReviewItem }) {
 
 const styles = StyleSheet.create({
   card: { gap: space.sm, marginBottom: space.md },
+  section: { marginBottom: space.sm, marginTop: space.sm },
+  nameInput: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    backgroundColor: colors.cardHigh,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.md,
+    height: 44,
+    minWidth: 0,
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   empty: { alignItems: 'center', gap: space.xs, paddingVertical: space.xl },
   badge: {
