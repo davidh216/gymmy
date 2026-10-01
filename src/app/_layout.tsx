@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, ErrorBoundary as RouterErrorBoundary, Stack, ThemeProvider, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -8,11 +8,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ConfirmHost } from '@/components/confirm-host';
 import { initAuth } from '@/services/auth';
 import { useHealthAutoSync } from '@/services/health';
+import { initMonitoring, reportError, withMonitoring } from '@/services/monitoring';
 import { useAutoSync } from '@/services/sync';
 import { queryClient } from '@/services/query-client';
 import { useGymmy, useHydrated } from '@/store/gymmy';
 import { colors } from '@/theme';
 
+initMonitoring();
 SplashScreen.preventAutoHideAsync();
 initAuth();
 
@@ -28,7 +30,17 @@ const theme = {
   },
 };
 
-export default function RootLayout() {
+export default withMonitoring(RootLayout);
+
+/** Shown when a screen crashes: reports it, then offers a retry. */
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  useEffect(() => {
+    reportError(props.error, { boundary: 'root' });
+  }, [props.error]);
+  return <RouterErrorBoundary {...props} />;
+}
+
+function RootLayout() {
   const hydrated = useHydrated();
   const onboarded = useGymmy((s) => s.profile !== null);
 

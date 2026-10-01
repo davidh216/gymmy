@@ -61,7 +61,8 @@
           "NSHealthUpdateUsageDescription": "Gymmy saves the workouts you log so they count toward your Apple Health activity.",
           "background": false
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,

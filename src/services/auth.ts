@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { setMonitoringUser } from './monitoring';
 import { queryClient } from './query-client';
 import { isRemote, supabase } from './supabase';
 
@@ -20,7 +21,10 @@ export function initAuth() {
   started = true;
   const apply = (session: { user: { id: string; email?: string } } | null) => {
     const userId = session?.user.id ?? null;
-    if (userId !== useAuth.getState().userId) queryClient.invalidateQueries({ queryKey: ['gyms'] });
+    if (userId !== useAuth.getState().userId) {
+      queryClient.invalidateQueries({ queryKey: ['gyms'] });
+      setMonitoringUser(userId);
+    }
     useAuth.setState({ ready: true, userId, email: session?.user.email ?? null });
   };
   supabase.auth.getSession().then(({ data }) => apply(data.session));
