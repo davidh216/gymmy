@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ConfirmHost } from '@/components/confirm-host';
 import { initAuth } from '@/services/auth';
 import { useHealthAutoSync } from '@/services/health';
+import { useAutoSync } from '@/services/sync';
 import { queryClient } from '@/services/query-client';
 import { useGymmy, useHydrated } from '@/store/gymmy';
 import { colors } from '@/theme';
@@ -35,6 +36,7 @@ export default function RootLayout() {
     if (hydrated) SplashScreen.hideAsync();
   }, [hydrated]);
   useHealthAutoSync(hydrated);
+  useAutoSync(hydrated);
 
   if (!hydrated) return null;
 

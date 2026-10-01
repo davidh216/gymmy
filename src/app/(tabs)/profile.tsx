@@ -5,6 +5,7 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { HealthCard } from '@/components/health-card';
 import { Screen } from '@/components/screen';
+import { SyncCard } from '@/components/sync-card';
 import { Button, Card, Chip, SectionHeader, Stat, T, haptic } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
@@ -17,6 +18,7 @@ import { resetLocalGyms } from '@/services/gyms/local';
 import { isRemote } from '@/services/supabase';
 import { toUsername, useGymmy } from '@/store/gymmy';
 import { useMilestones, useProgress } from '@/store/selectors';
+import { resetSync } from '@/store/sync';
 import { colors, radius, space } from '@/theme';
 
 export default function Profile() {
@@ -87,7 +89,8 @@ export default function Profile() {
 
       <ProfileLinks />
 
-      <View style={{ marginTop: space.sm }}>
+      <View style={{ marginTop: space.sm, gap: space.sm }}>
+        <SyncCard />
         <HealthCard />
       </View>
 
@@ -140,11 +143,11 @@ export default function Profile() {
               onPress={() =>
                 confirm(
                   'Delete your account?',
-                  'This permanently deletes your Gymmy account, your leaderboard entries and videos. Workouts on this phone stay.',
+                  'This permanently deletes your Gymmy account, your cloud backup, leaderboard entries and videos. Workouts on this phone stay.',
                   'Delete',
                   () => {
                     setAccountError(null);
-                    deleteAccount().catch(() =>
+                    deleteAccount().then(resetSync, () =>
                       setAccountError('Couldn’t delete your account. Check your connection and try again.'),
                     );
                   },
