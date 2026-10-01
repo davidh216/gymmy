@@ -56,7 +56,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "preview:web": "EXPO_PUBLIC_GYMS_BACKEND=local expo export -p web --clear && node scripts/web-preview.mjs",
-    "test:db": "bash supabase/tests/run.sh"
+    "test:db": "bash supabase/tests/run.sh",
+    "db:setup": "bash scripts/build-setup-sql.sh"
   },
   "private": true,
   "jest": {

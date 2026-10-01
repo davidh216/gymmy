@@ -4,15 +4,16 @@
 -- HIVE_API_KEY secret, then run:
 --   update public.app_settings set value = 'true' where key = 'moderation_enabled';
 
-create table public.app_settings (
+create table if not exists public.app_settings (
   key text primary key,
   value jsonb not null
 );
 alter table public.app_settings enable row level security; -- no policies: server-side only
 
-insert into public.app_settings (key, value) values ('moderation_enabled', 'false');
+insert into public.app_settings (key, value) values ('moderation_enabled', 'false')
+on conflict (key) do nothing;
 
-create table public.moderation_results (
+create table if not exists public.moderation_results (
   entry_id uuid primary key references public.entries (id) on delete cascade,
   provider text not null,
   flagged boolean not null default false,
@@ -47,8 +48,8 @@ $$;
 
 -- The review queue now also holds entries the scan flagged or couldn't check,
 -- and entries stuck waiting for a scan for more than 15 minutes.
-drop function public.admin_review_queue();
-create function public.admin_review_queue()
+drop function if exists public.admin_review_queue();
+create or replace function public.admin_review_queue()
 returns table (
   entry_id uuid,
   gym_name text,

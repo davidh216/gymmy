@@ -6,15 +6,15 @@
 -- ---------------------------------------------------------------------------
 
 alter table public.profiles
-  add column is_admin boolean not null default false,
+  add column if not exists is_admin boolean not null default false,
   -- False for generated handles (Sign in with Apple has no username); the app asks the user to pick one.
-  add column username_set boolean not null default true,
+  add column if not exists username_set boolean not null default true,
   -- Rejected reports: three and your reports stop counting.
-  add column report_rejections int not null default 0,
+  add column if not exists report_rejections int not null default 0,
   -- Set after three strikes for removed entries; banned accounts can't post or report.
-  add column banned_at timestamptz;
+  add column if not exists banned_at timestamptz;
 
-create function public.is_admin() returns boolean
+create or replace function public.is_admin() returns boolean
 language sql stable security definer set search_path = '' as $$
   select coalesce((select p.is_admin from public.profiles p where p.id = auth.uid()), false);
 $$;
@@ -45,7 +45,7 @@ end;
 $$;
 
 -- Picking a new username marks it as chosen.
-create function public.before_profile_update() returns trigger
+create or replace function public.before_profile_update() returns trigger
 language plpgsql set search_path = '' as $$
 begin
   new.username := lower(new.username);
@@ -56,6 +56,7 @@ begin
 end;
 $$;
 
+drop trigger if exists profiles_before_update on public.profiles;
 create trigger profiles_before_update
   before update on public.profiles
   for each row execute function public.before_profile_update();
@@ -100,7 +101,8 @@ $$;
 -- ---------------------------------------------------------------------------
 
 -- Hidden entries waiting for a decision, inappropriate-content reports first.
-create function public.admin_review_queue()
+drop function if exists public.admin_review_queue();
+create or replace function public.admin_review_queue()
 returns table (
   entry_id uuid,
   gym_name text,
@@ -136,7 +138,7 @@ $$;
 
 -- 'restore' puts the entry back and counts a rejection against each reporter.
 -- 'remove' takes it down for good and gives the poster a strike (three strikes bans).
-create function public.admin_resolve(p_entry uuid, p_decision text) returns void
+create or replace function public.admin_resolve(p_entry uuid, p_decision text) returns void
 language plpgsql security definer set search_path = '' as $$
 declare
   owner uuid;
@@ -172,7 +174,7 @@ revoke execute on function public.admin_review_queue(), public.admin_resolve(uui
 grant execute on function public.admin_review_queue(), public.admin_resolve(uuid, text) to authenticated;
 
 -- Admins can watch videos of hidden entries to review them.
-drop policy "attempts read" on storage.objects;
+drop policy if exists "attempts read" on storage.objects;
 create policy "attempts read" on storage.objects
   for select to authenticated using (
     bucket_id = 'attempts'
@@ -189,7 +191,7 @@ create policy "attempts read" on storage.objects
   );
 
 -- Banned accounts can't file reports.
-drop policy "reports file" on public.reports;
+drop policy if exists "reports file" on public.reports;
 create policy "reports file" on public.reports
   for insert to authenticated with check (
     reporter_id = auth.uid()
@@ -205,7 +207,7 @@ create policy "reports file" on public.reports
 -- blocks cascade from the profile; the app deletes the user's videos first.
 -- ---------------------------------------------------------------------------
 
-create function public.delete_my_account() returns void
+create or replace function public.delete_my_account() returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   if auth.uid() is null then

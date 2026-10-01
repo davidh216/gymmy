@@ -54,9 +54,9 @@ npm run preview:web  # single-file web build in dist/gymmy-preview.html
 Gyms use the Supabase project in `.env` (public URL and publishable key; access is enforced by
 row level security). Workouts, XP and the squad stay on the device.
 
-- **Set up the database:** run each file in `supabase/migrations/` once, in name order, in the
-  Supabase SQL Editor. Together they create the tables, security rules, triggers, the `attempts`
-  video bucket, the admin review queue and account deletion.
+- **Set up the database:** paste all of `supabase/setup.sql` into the Supabase SQL Editor and run it.
+  It's every migration combined, and safe to re-run: it fills in whatever is missing. Regenerate it
+  with `npm run db:setup` after adding a migration.
 - **Make yourself an admin:** in the SQL Editor run
   `update public.profiles set is_admin = true where username = 'your_username';`
   A **Review reports** button then appears in Profile.
