@@ -4,6 +4,8 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { Button, Card, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { formatAgo } from '@/lib/format';
+import { bucket } from '@/lib/analytics';
+import { track } from '@/services/analytics';
 import { connectHealth, disconnectHealth, healthSupported, syncHealth } from '@/services/health';
 import { useGymmy } from '@/store/gymmy';
 import { colors, space } from '@/theme';
@@ -16,7 +18,10 @@ export function HealthCard() {
   const { data: supported } = useQuery({ queryKey: ['health', 'supported'], queryFn: healthSupported, enabled: Platform.OS === 'ios' });
   const connect = useMutation({
     mutationFn: connectHealth,
-    onSuccess: () => haptic('success'),
+    onSuccess: (r) => {
+      haptic('success');
+      track({ event: 'health_connect', props: { imported: bucket(r.imported) } });
+    },
   });
   const sync = useMutation({ mutationFn: () => syncHealth({ force: true }) });
 

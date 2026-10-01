@@ -16,6 +16,8 @@ import {
   type CheckIn,
   type Rating,
 } from '@/lib/recovery';
+import { bucket } from '@/lib/analytics';
+import { track } from '@/services/analytics';
 import { lastNightSleep } from '@/services/health';
 import { CHECK_IN_GEMS, useGymmy } from '@/store/gymmy';
 import { useReadiness } from '@/store/selectors';
@@ -57,6 +59,7 @@ export default function RecoveryScreen() {
 
   const save = () => {
     const reward = saveCheckIn({ sleepHours: sleep, ...ratings, rest, activities });
+    track({ event: 'check_in', props: { first: reward.gems > 0, rest, activities: bucket(activities.length, [1, 2, 4]) } });
     haptic('success');
     setSaved(reward);
   };

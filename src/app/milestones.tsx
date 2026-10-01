@@ -12,6 +12,8 @@ import {
   visibleMilestones,
   type MilestoneState,
 } from '@/lib/milestones';
+import { bucket } from '@/lib/analytics';
+import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
 import { useMilestones } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
@@ -27,6 +29,7 @@ export default function MilestonesScreen() {
   const claim = (ids: string[]) => {
     const got = claimMilestones(ids);
     if (got.xp || got.gems) {
+      track({ event: 'milestone_claim', props: { count: bucket(ids.length, [1, 2, 5, 10]) } });
       haptic('success');
       setLast(got);
     }

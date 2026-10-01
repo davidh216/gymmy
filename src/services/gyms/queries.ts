@@ -5,6 +5,7 @@ import type { NearbyPlace } from '@/lib/places';
 
 import { fetchMyProfile, useAuth } from '../auth';
 import { gymsApi, type GymKind, type PostEntryInput } from './index';
+import { track } from '@/services/analytics';
 
 export const gymKeys = {
   all: ['gyms'] as const,
@@ -38,22 +39,43 @@ export const useEntry = (id: string) =>
   useQuery({ queryKey: gymKeys.entry(id), queryFn: () => gymsApi.getEntry(id) });
 
 /** Mutations refresh everything gym-related; boards are cheap to refetch. */
-function useGymMutation<A, R>(fn: (args: A) => Promise<R>) {
+function useGymMutation<A, R>(fn: (args: A) => Promise<R>, onDone?: (args: A, result: R) => void) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: fn,
-    onSuccess: () => client.invalidateQueries({ queryKey: gymKeys.all }),
+    onSuccess: (result, args) => {
+      onDone?.(args, result);
+      return client.invalidateQueries({ queryKey: gymKeys.all });
+    },
   });
 }
 
 export const useJoinPlace = () =>
-  useGymMutation((place: NearbyPlace) => gymsApi.joinPlace(place));
-export const useJoinGym = () => useGymMutation((id: string) => gymsApi.joinGym(id));
+  useGymMutation(
+    (place: NearbyPlace) => gymsApi.joinPlace(place),
+    () => track({ event: 'gym_join', props: { via: 'nearby' } }),
+  );
+export const useJoinGym = () =>
+  useGymMutation(
+    (id: string) => gymsApi.joinGym(id),
+    () => track({ event: 'gym_join', props: { via: 'gym' } }),
+  );
 export const useLeaveGym = () => useGymMutation((id: string) => gymsApi.leaveGym(id));
-export const useJoinByInvite = () => useGymMutation((code: string) => gymsApi.joinByInvite(code));
+export const useJoinByInvite = () =>
+  useGymMutation(
+    (code: string) => gymsApi.joinByInvite(code),
+    () => track({ event: 'gym_join', props: { via: 'invite' } }),
+  );
 export const useCreateGym = () =>
-  useGymMutation((input: { kind: GymKind; name: string; area?: string }) => gymsApi.createGym(input));
-export const usePostEntry = () => useGymMutation((input: PostEntryInput) => gymsApi.postEntry(input));
+  useGymMutation(
+    (input: { kind: GymKind; name: string; area?: string }) => gymsApi.createGym(input),
+    () => track({ event: 'gym_join', props: { via: 'create' } }),
+  );
+export const usePostEntry = () =>
+  useGymMutation(
+    (input: PostEntryInput) => gymsApi.postEntry(input),
+    (input, result) => track({ event: 'entry_post', props: { challenge: input.challengeId, status: String(result.status) } }),
+  );
 export const useBlockUser = () => useGymMutation((athleteId: string) => gymsApi.blockUser(athleteId));
 
 export const useReportEntry = () =>

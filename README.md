@@ -120,6 +120,7 @@ message on the app branch (or run it from the Actions tab):
 | `[db sql]` | Runs `supabase/ops/run.sql` once (one-off fixes; git keeps the history) |
 | `[functions deploy]` | Deploys Edge Functions and sets `HIVE_API_KEY` if that secret exists |
 | `[db check]` | Read-only status report (also printed after every run) |
+| `[db report]` | Read-only anonymous analytics report (last 28 days) |
 
 Repository secrets: `SUPABASE_ACCESS_TOKEN` (supabase.com → Account → Access Tokens) and
 `SUPABASE_DB_PASSWORD` (Project Settings → Database); optionally `HIVE_API_KEY`.

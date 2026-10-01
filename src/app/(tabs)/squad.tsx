@@ -8,6 +8,7 @@ import { Button, GemCount, ProgressBar, SectionHeader, T, haptic } from '@/compo
 import { COMPANIONS, RARITY, RARITY_ORDER, companionXpBonus } from '@/lib/companions';
 import { EPIC_PITY, LEGENDARY_PITY } from '@/lib/gacha';
 import { SUMMON_10_COST, SUMMON_COST } from '@/lib/progression';
+import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -26,6 +27,7 @@ export default function Squad() {
   const pull = (count: 1 | 10) => {
     const results = summon(count);
     if (!results) return;
+    track({ event: 'summon', props: { count } });
     haptic('heavy');
     router.push({
       pathname: '/summon-reveal',

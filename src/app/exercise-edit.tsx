@@ -14,6 +14,7 @@ import {
   type MuscleGroup,
 } from '@/lib/exercises';
 import { exerciseInUse } from '@/lib/records';
+import { track } from '@/services/analytics';
 import { submitExercise } from '@/services/exercises';
 import { useGymmy, type CustomExercise } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
@@ -51,6 +52,7 @@ export default function ExerciseEdit() {
     setBusy(true);
     try {
       await submitExercise(exercise);
+      track({ event: 'custom_exercise_submit' });
       return true;
     } catch (e) {
       setError(`Saved on this phone, but couldn’t submit: ${e instanceof Error ? e.message : 'unknown error'}`);
@@ -70,6 +72,7 @@ export default function ExerciseEdit() {
       return;
     }
     const created = addCustomExercise({ name: tidy, group, kind });
+    track({ event: 'custom_exercise_create', props: { submitted: share } });
     if (share && !(await submit(created))) {
       // Stay here showing the error; the exercise is saved and can be submitted again.
       router.setParams({ id: created.id });

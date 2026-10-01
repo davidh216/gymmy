@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ConfirmHost } from '@/components/confirm-host';
 import { initAuth } from '@/services/auth';
+import { useAnalyticsTracking } from '@/services/analytics';
 import { useHealthAutoSync } from '@/services/health';
 import { initMonitoring, reportError, withMonitoring } from '@/services/monitoring';
 import { useAutoSync } from '@/services/sync';
@@ -49,6 +50,7 @@ function RootLayout() {
   }, [hydrated]);
   useHealthAutoSync(hydrated);
   useAutoSync(hydrated);
+  useAnalyticsTracking(hydrated);
 
   if (!hydrated) return null;
 

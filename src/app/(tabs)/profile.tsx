@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import { HealthCard } from '@/components/health-card';
 import { Screen } from '@/components/screen';
@@ -11,6 +11,7 @@ import { confirm } from '@/lib/confirm';
 import { COMPANIONS } from '@/lib/companions';
 import { formatNumber } from '@/lib/format';
 import { getProgram } from '@/lib/programs';
+import { analyticsAvailable, setAnalyticsEnabled, useAnalytics } from '@/services/analytics';
 import { deleteAccount, signOut, useAuth } from '@/services/auth';
 import { useMyProfile } from '@/services/gyms/queries';
 import { gymsApi } from '@/services/gyms';
@@ -30,6 +31,7 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const email = useAuth((s) => s.email);
   const { data: serverProfile } = useMyProfile();
+  const analyticsOn = useAnalytics((s) => s.enabled);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
@@ -116,6 +118,26 @@ export default function Profile() {
         <Chip label="Pounds (lb)" active={profile.units === 'lb'} onPress={() => updateProfile({ units: 'lb' })} />
         <Chip label="Kilograms (kg)" active={profile.units === 'kg'} onPress={() => updateProfile({ units: 'kg' })} />
       </Card>
+
+      {analyticsAvailable && (
+        <>
+          <SectionHeader title="Privacy" />
+          <Card style={styles.link}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <T variant="heading">Share anonymous usage stats</T>
+              <T variant="caption" color={colors.textDim}>
+                Which screens and features get used, with a random id that isn’t tied to your account. Never your
+                workouts, health data, name or email.
+              </T>
+            </View>
+            <Switch
+              value={analyticsOn}
+              onValueChange={setAnalyticsEnabled}
+              trackColor={{ true: colors.accent, false: colors.cardHigh }}
+            />
+          </Card>
+        </>
+      )}
 
       {isRemote && (
         <>

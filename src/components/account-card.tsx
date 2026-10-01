@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Button, Card, T, haptic } from '@/components/ui';
+import { track } from '@/services/analytics';
 import { AuthError, fetchMyUsername, signIn, signUp } from '@/services/auth';
 import { toUsername, useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
@@ -28,10 +29,12 @@ export function AccountCard() {
     try {
       if (mode === 'signup') {
         const { needsConfirmation } = await signUp({ email, password, username, companionId });
+        track({ event: 'account', props: { action: 'sign_up' } });
         updateProfile({ username: toUsername(username) });
         if (needsConfirmation) setNotice(`Check ${email} for a confirmation link, then sign in.`);
       } else {
         await signIn(email, password);
+        track({ event: 'account', props: { action: 'sign_in' } });
         const serverName = await fetchMyUsername();
         if (serverName) updateProfile({ username: serverName });
       }

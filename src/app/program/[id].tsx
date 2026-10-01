@@ -9,6 +9,8 @@ import { confirm } from '@/lib/confirm';
 import { getExercise } from '@/lib/exercises';
 import { formatTarget } from '@/lib/format';
 import { getProgram, isSessionDone, planProgress, type PlanSession } from '@/lib/programs';
+import { bucket } from '@/lib/analytics';
+import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -54,6 +56,7 @@ export default function ProgramScreen() {
     const go = () => {
       haptic('success');
       startPlan(program.id);
+      track({ event: 'plan_start', props: { program: program.id } });
       setWeek(null);
     };
     if (switching) {
@@ -139,6 +142,7 @@ export default function ProgramScreen() {
           onPress={() =>
             confirm('Leave this plan?', 'Your finished workouts stay in your history.', 'Leave', () => {
               leavePlan();
+              track({ event: 'plan_leave', props: { program: program.id, done: bucket(progress.completed / progress.total * 100, [1, 25, 50, 75, 100]) } });
               setWeek(null);
             })
           }

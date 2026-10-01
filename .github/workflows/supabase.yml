@@ -4,6 +4,7 @@
 #   [db sql]            run supabase/ops/run.sql (one-off fixes, e.g. making someone admin)
 #   [functions deploy]  deploy Edge Functions; also sets HIVE_API_KEY if that secret exists
 #   [db check]          only print the status report
+#   [db report]         print the anonymous analytics report (read-only)
 # Every run ends with the status report (read-only).
 #
 # Repository secrets (Settings → Secrets and variables → Actions):
@@ -20,7 +21,7 @@ on:
       action:
         description: What to run
         type: choice
-        options: [check, push, sql, functions]
+        options: [check, push, sql, functions, report]
         default: check
 
 concurrency:
@@ -39,7 +40,8 @@ jobs:
       contains(github.event.head_commit.message, '[db push]') ||
       contains(github.event.head_commit.message, '[db sql]') ||
       contains(github.event.head_commit.message, '[functions deploy]') ||
-      contains(github.event.head_commit.message, '[db check]')
+      contains(github.event.head_commit.message, '[db check]') ||
+      contains(github.event.head_commit.message, '[db report]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -54,6 +56,7 @@ jobs:
           has '[db push]' push && echo "push=true" >> "$GITHUB_OUTPUT"
           has '[db sql]' sql && echo "sql=true" >> "$GITHUB_OUTPUT"
           has '[functions deploy]' functions && echo "functions=true" >> "$GITHUB_OUTPUT"
+          has '[db report]' report && echo "report=true" >> "$GITHUB_OUTPUT"
           echo "hive=$HAS_HIVE" >> "$GITHUB_OUTPUT"
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
             echo "::error::Add the SUPABASE_ACCESS_TOKEN repository secret first."
@@ -95,6 +98,10 @@ jobs:
             supabase secrets set --project-ref "$PROJECT_REF" HIVE_API_KEY="$HIVE_API_KEY"
           fi
           supabase functions deploy moderate-entry --project-ref "$PROJECT_REF" --use-api
+
+      - name: Analytics report
+        if: steps.plan.outputs.report == 'true'
+        run: supabase db query --linked -f supabase/ops/analytics-report.sql
 
       - name: Status report
         if: always() && steps.plan.outcome == 'success'
