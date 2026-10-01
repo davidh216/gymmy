@@ -108,3 +108,18 @@ non-interactively and can't add capabilities themselves; do one of these once:
   profile with the App Store Connect API key EAS already has.
 - Or from a computer: `npx eas-cli@latest build -p ios --profile production` and log in to Apple
   when asked; EAS syncs capabilities and updates the profile.
+
+### Supabase from GitHub (no SQL Editor)
+
+`.github/workflows/supabase.yml` applies database changes from CI. Put a marker in a commit
+message on the app branch (or run it from the Actions tab):
+
+| Marker | Does |
+|---|---|
+| `[db push]` | Applies new files in `supabase/migrations` (all safe to re-run) |
+| `[db sql]` | Runs `supabase/ops/run.sql` once (one-off fixes; git keeps the history) |
+| `[functions deploy]` | Deploys Edge Functions and sets `HIVE_API_KEY` if that secret exists |
+| `[db check]` | Read-only status report (also printed after every run) |
+
+Repository secrets: `SUPABASE_ACCESS_TOKEN` (supabase.com → Account → Access Tokens) and
+`SUPABASE_DB_PASSWORD` (Project Settings → Database); optionally `HIVE_API_KEY`.

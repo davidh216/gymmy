@@ -1,0 +1,104 @@
+# Runs Supabase changes from GitHub so they don't need the SQL Editor or a computer.
+# Trigger with a commit whose message contains a marker (or from the Actions tab):
+#   [db push]           apply new migrations in supabase/migrations
+#   [db sql]            run supabase/ops/run.sql (one-off fixes, e.g. making someone admin)
+#   [functions deploy]  deploy Edge Functions; also sets HIVE_API_KEY if that secret exists
+#   [db check]          only print the status report
+# Every run ends with the status report (read-only).
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_ACCESS_TOKEN  required; supabase.com → Account → Access Tokens
+#   SUPABASE_DB_PASSWORD   required for [db push]; Project Settings → Database
+#   HIVE_API_KEY           optional; for the video moderation function
+name: Supabase
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to run
+        type: choice
+        options: [check, push, sql, functions]
+        default: check
+
+concurrency:
+  group: supabase
+  cancel-in-progress: false
+
+env:
+  PROJECT_REF: isogislpzsaaszmbkshz
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+jobs:
+  supabase:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[db push]') ||
+      contains(github.event.head_commit.message, '[db sql]') ||
+      contains(github.event.head_commit.message, '[functions deploy]') ||
+      contains(github.event.head_commit.message, '[db check]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Decide what to run
+        id: plan
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          INPUT: ${{ inputs.action }}
+          HAS_HIVE: ${{ secrets.HIVE_API_KEY != '' }}
+        run: |
+          has() { [[ "$MESSAGE" == *"$1"* ]] || [[ "$INPUT" == "$2" ]]; }
+          has '[db push]' push && echo "push=true" >> "$GITHUB_OUTPUT"
+          has '[db sql]' sql && echo "sql=true" >> "$GITHUB_OUTPUT"
+          has '[functions deploy]' functions && echo "functions=true" >> "$GITHUB_OUTPUT"
+          echo "hive=$HAS_HIVE" >> "$GITHUB_OUTPUT"
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error::Add the SUPABASE_ACCESS_TOKEN repository secret first."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+
+      - name: Link project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Apply migrations
+        if: steps.plan.outputs.push == 'true'
+        run: |
+          if [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "::error::Add the SUPABASE_DB_PASSWORD repository secret to push migrations."
+            exit 1
+          fi
+          echo "Migrations not yet recorded as applied:"
+          supabase db push --linked --include-all --dry-run
+          # Every migration is safe to re-run (checked in supabase/tests), so ones that were
+          # first applied by hand in the SQL Editor just run again and get recorded.
+          supabase db push --linked --include-all
+
+      - name: Run supabase/ops/run.sql
+        if: steps.plan.outputs.sql == 'true'
+        run: supabase db query --linked -f supabase/ops/run.sql
+
+      - name: Deploy Edge Functions
+        if: steps.plan.outputs.functions == 'true'
+        env:
+          HIVE_API_KEY: ${{ secrets.HIVE_API_KEY }}
+        run: |
+          if [ "${{ steps.plan.outputs.hive }}" = "true" ]; then
+            supabase secrets set --project-ref "$PROJECT_REF" HIVE_API_KEY="$HIVE_API_KEY"
+          fi
+          supabase functions deploy moderate-entry --project-ref "$PROJECT_REF" --use-api
+
+      - name: Status report
+        if: always() && steps.plan.outcome == 'success'
+        run: |
+          supabase migration list --linked || true
+          supabase db query --linked -f supabase/ops/status.sql
+          supabase functions list --project-ref "$PROJECT_REF" || true
