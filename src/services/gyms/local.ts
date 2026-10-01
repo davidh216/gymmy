@@ -68,6 +68,7 @@ function toGym(g: StoredGym): Gym {
     name: g.name,
     area: g.area,
     inviteCode: g.inviteCode,
+    placeId: g.placeId,
     sample: g.sample,
     memberCount: g.members.length,
     isMember: g.members.includes(ME),
@@ -176,6 +177,25 @@ export const localGymsApi: GymsApi = {
       members: [ME],
     };
     w.gyms.push(gym);
+    await save();
+    return toGym(gym);
+  },
+
+  async gymsForPlaces(placeIds) {
+    const w = await load();
+    const out: Record<string, Gym> = {};
+    for (const g of w.gyms) if (g.placeId && placeIds.includes(g.placeId)) out[g.placeId] = toGym(g);
+    return out;
+  },
+
+  async joinPlace(place) {
+    const w = await load();
+    let gym = w.gyms.find((g) => g.placeId === place.placeId);
+    if (!gym) {
+      gym = { id: uid(), kind: 'public', name: place.name, area: place.area, placeId: place.placeId, members: [] };
+      w.gyms.push(gym);
+    }
+    if (!gym.members.includes(ME)) gym.members.push(ME);
     await save();
     return toGym(gym);
   },

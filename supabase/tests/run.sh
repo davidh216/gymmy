@@ -8,7 +8,7 @@ if [ "$(id -u)" = 0 ]; then RUN=(sudo -u postgres); else RUN=(); fi
 
 FILES=(-f stubs.sql)
 for f in ../migrations/*.sql; do FILES+=(-f "$f"); done
-for f in gyms.test.sql moderation.test.sql scan.test.sql; do FILES+=(-f "$f"); done
+for f in gyms.test.sql moderation.test.sql scan.test.sql places.test.sql; do FILES+=(-f "$f"); done
 
 "${RUN[@]}" dropdb --if-exists "$DB" 2>/dev/null
 "${RUN[@]}" createdb "$DB"

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { BoardMode, ReportKind } from '@/lib/leaderboard';
+import type { NearbyPlace } from '@/lib/places';
 
 import { fetchMyProfile, useAuth } from '../auth';
 import { gymsApi, type GymKind, type PostEntryInput } from './index';
@@ -45,6 +46,8 @@ function useGymMutation<A, R>(fn: (args: A) => Promise<R>) {
   });
 }
 
+export const useJoinPlace = () =>
+  useGymMutation((place: NearbyPlace) => gymsApi.joinPlace(place));
 export const useJoinGym = () => useGymMutation((id: string) => gymsApi.joinGym(id));
 export const useLeaveGym = () => useGymMutation((id: string) => gymsApi.leaveGym(id));
 export const useJoinByInvite = () => useGymMutation((code: string) => gymsApi.joinByInvite(code));

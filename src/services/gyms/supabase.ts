@@ -17,6 +17,7 @@ type GymRow = {
   name: string;
   area: string | null;
   invite_code: string | null;
+  place_id: string | null;
   gym_members: { count: number }[];
 };
 
@@ -33,7 +34,7 @@ type EntryRow = {
   profile: { username: string; companion_id: string } | null;
 };
 
-const GYM_COLUMNS = 'id, kind, name, area, invite_code, gym_members(count)';
+const GYM_COLUMNS = 'id, kind, name, area, invite_code, place_id, gym_members(count)';
 const ENTRY_COLUMNS =
   'id, gym_id, challenge_id, user_id, value, bodyweight_kg, video_path, status, created_at, profile:profiles(username, companion_id)';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -66,6 +67,7 @@ function toGym(row: GymRow, isMember: boolean): Gym {
     name: row.name,
     area: row.area ?? undefined,
     inviteCode: row.invite_code ?? undefined,
+    placeId: row.place_id ?? undefined,
     memberCount: row.gym_members[0]?.count ?? 0,
     isMember,
   };
@@ -195,11 +197,35 @@ export const supabaseGymsApi: GymsApi = {
     const { data, error } = await db()
       .from('gyms')
       .insert({ kind, name, area: area || null })
-      .select('id, kind, name, area, invite_code')
+      .select('id, kind, name, area, invite_code, place_id')
       .single();
     if (error?.code === '23505') throw new Error('That gym is already on Gymmy. Search for it instead.');
     if (error || !data) throw new Error(error?.message ?? 'Couldn’t create the gym.');
     return toGym({ ...(data as Omit<GymRow, 'gym_members'>), gym_members: [{ count: 1 }] }, true);
+  },
+
+  async gymsForPlaces(placeIds) {
+    if (placeIds.length === 0) return {};
+    const [rows, mine] = await Promise.all([
+      db().from('gyms').select(GYM_COLUMNS).in('place_id', placeIds).then((r) => check(r) as unknown as GymRow[]),
+      myGymIds(),
+    ]);
+    return Object.fromEntries(rows.map((g) => [g.place_id as string, toGym(g, mine.has(g.id))]));
+  },
+
+  async joinPlace(place) {
+    const gymId = check(
+      await db().rpc('join_place_gym', {
+        p_place_id: place.placeId,
+        p_name: place.name,
+        p_area: place.area ?? null,
+        p_lat: place.lat,
+        p_lng: place.lng,
+      }),
+    ) as string;
+    const gym = await supabaseGymsApi.getGym(gymId);
+    if (!gym) throw new Error('Couldn’t open that gym.');
+    return gym;
   },
 
   async getBoard({ gymId, challengeId, mode }) {

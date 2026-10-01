@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, Chip, Icon, T, haptic } from '@/components/ui';
+import { NearbyGyms } from '@/components/nearby-gyms';
+import { Button, Card, Chip, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import type { Gym } from '@/services/gyms';
 import { useCreateGym, useGymSearch, useJoinByInvite, useJoinGym } from '@/services/gyms/queries';
 import { colors, radius, space } from '@/theme';
@@ -48,7 +49,10 @@ function openGym(gym: Gym) {
 function FindTab() {
   const [query, setQuery] = useState('');
   const [adding, setAdding] = useState(false);
-  const { data: results = [] } = useGymSearch(query);
+  const { data: allResults = [] } = useGymSearch(query);
+  const [nearbyIds, setNearbyIds] = useState<string[]>([]);
+  // Gyms already listed under "Near you" aren't repeated here.
+  const results = allResults.filter((g) => !g.placeId || !nearbyIds.includes(g.placeId));
   const join = useJoinGym();
 
   if (adding) return <CreateTab kind="public" initialName={query} onCancel={() => setAdding(false)} />;
@@ -67,6 +71,9 @@ function FindTab() {
           accessibilityLabel="Search gyms"
         />
       </View>
+      <NearbyGyms filter={query} onOpen={openGym} onPlaces={setNearbyIds} />
+
+      {results.length > 0 && <SectionHeader title="On Gymmy" />}
       {results.map((g) => (
         <Card key={g.id} style={styles.result}>
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -91,9 +98,9 @@ function FindTab() {
           )}
         </Card>
       ))}
-      {results.length === 0 && (
+      {results.length === 0 && query.trim() !== '' && (
         <T variant="body" color={colors.textDim} style={{ textAlign: 'center', marginVertical: space.lg }}>
-          No gyms match “{query}” yet.
+          No Gymmy gyms match “{query}” yet.
         </T>
       )}
       <Card style={{ gap: space.sm, marginTop: space.md }}>

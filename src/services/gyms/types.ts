@@ -1,4 +1,5 @@
 import type { BoardMode, ReportKind } from '@/lib/leaderboard';
+import type { NearbyPlace } from '@/lib/places';
 
 export type GymKind = 'public' | 'private';
 
@@ -10,6 +11,8 @@ export type Gym = {
   area?: string;
   /** Private gyms only. */
   inviteCode?: string;
+  /** Map place this gym is linked to (osm:node/123), if any. */
+  placeId?: string;
   memberCount: number;
   isMember: boolean;
   /** Seeded for the local preview, not a real place. */
@@ -85,6 +88,10 @@ export interface GymsApi {
   joinByInvite(code: string): Promise<Gym | null>;
   leaveGym(id: string): Promise<void>;
   createGym(input: { kind: GymKind; name: string; area?: string }): Promise<Gym>;
+  /** Gymmy gyms already linked to these map places, keyed by place id. */
+  gymsForPlaces(placeIds: string[]): Promise<Record<string, Gym>>;
+  /** Joins the Gymmy gym for a map place, creating it on first use. */
+  joinPlace(place: NearbyPlace): Promise<Gym>;
 
   getBoard(query: BoardQuery): Promise<Board>;
   getEntry(id: string): Promise<Entry | null>;

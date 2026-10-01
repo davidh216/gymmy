@@ -1,0 +1,19 @@
+# Live check that the nearby-gym search returns real gyms from OpenStreetMap.
+# Trigger with a commit whose message contains [osm check], or from the Actions tab.
+name: OSM nearby-gym check
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+  workflow_dispatch:
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[osm check]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --experimental-strip-types scripts/osm-check.mjs

@@ -8,6 +8,7 @@ export type StoredGym = {
   name: string;
   area?: string;
   inviteCode?: string;
+  placeId?: string;
   sample?: boolean;
   members: string[];
 };

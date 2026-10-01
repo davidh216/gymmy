@@ -12,7 +12,10 @@ immediately → someone beats you, you get notified → go reclaim it.
 ## Rules
 
 **Gyms**
-- *Public gyms* are real places, found by map search and shared by everyone (deduplicated by map place ID).
+- *Public gyms* are real places. "Near you" lists gyms from OpenStreetMap (Overpass API, 8 km radius,
+  `leisure=fitness_centre`, `amenity=gym`, fitness sports centres). Joining one creates the Gymmy gym
+  linked by `place_id` (`osm:node/123`), so each place exists once. Gyms missing from the map can still
+  be added by hand. Location is only used on the phone for the search and is never stored.
 - *Private gyms* (home and garage gyms) are joined with an invite code.
 - Every challenge also has a *Global* board across all gyms.
 
