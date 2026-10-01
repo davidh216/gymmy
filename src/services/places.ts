@@ -1,14 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
-  OVERPASS_ENDPOINTS,
-  OVERPASS_HEADERS,
+  fetchOverpass,
   overpassQuery,
   parseOverpass,
+  placesCacheKey,
   type Coords,
   type NearbyPlace,
+  type OverpassElement,
 } from '@/lib/places';
 
 /** Public Overpass instances, tried in order. */
-const TIMEOUT_MS = 20_000;
+/** Gyms rarely move; reuse a search of the same ~1 km area for a week. */
+const CACHE_MS = 7 * 24 * 3600 * 1000;
 
 export class PlacesError extends Error {
   constructor(
@@ -59,30 +63,26 @@ export async function currentCoords(): Promise<Coords> {
   }
 }
 
-/** Real gyms near a point, from OpenStreetMap. */
+/** Real gyms near a point, from OpenStreetMap. Cached on the device per ~1 km area. */
 export async function nearbyGyms(origin: Coords): Promise<NearbyPlace[]> {
-  const body = `data=${encodeURIComponent(overpassQuery(origin))}`;
-  let lastError: unknown;
-  for (const url of OVERPASS_ENDPOINTS) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: OVERPASS_HEADERS,
-        body,
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`Overpass ${res.status}`);
-      return parseOverpass(await res.json(), origin);
-    } catch (e) {
-      lastError = e;
-    } finally {
-      clearTimeout(timer);
-    }
+  const key = placesCacheKey(origin);
+  try {
+    const cached = JSON.parse((await AsyncStorage.getItem(key)) ?? 'null') as
+      | { at: number; elements: OverpassElement[] }
+      | null;
+    if (cached && Date.now() - cached.at < CACHE_MS) return parseOverpass(cached, origin);
+  } catch {
+    // Unreadable cache: fetch fresh.
   }
-  throw new PlacesError(
-    `Couldn’t load nearby gyms. Check your connection and try again. (${lastError instanceof Error ? lastError.message : 'unknown error'})`,
-    'network',
-  );
+  let json: { elements?: OverpassElement[] };
+  try {
+    json = await fetchOverpass(overpassQuery(origin));
+  } catch (e) {
+    throw new PlacesError(
+      `Couldn’t load nearby gyms. The map service may be busy; try again in a minute. (${e instanceof Error ? e.message : 'unknown error'})`,
+      'network',
+    );
+  }
+  AsyncStorage.setItem(key, JSON.stringify({ at: Date.now(), elements: json.elements ?? [] })).catch(() => {});
+  return parseOverpass(json, origin);
 }

@@ -10,7 +10,7 @@ export type NearbyPlace = Coords & {
   distanceKm: number;
 };
 
-export const SEARCH_RADIUS_M = 8000;
+export const SEARCH_RADIUS_M = 5000;
 export const MAX_RESULTS = 30;
 
 export const OVERPASS_ENDPOINTS = [
@@ -25,11 +25,48 @@ export const OVERPASS_HEADERS = {
   'User-Agent': 'Gymmy/1.0 (+https://github.com/davidh216/gymmy)',
 };
 
+/**
+ * Posts a query to every Overpass mirror at once and returns the first good JSON answer.
+ * Public mirrors are often slow or overloaded, so racing beats trying them in turn.
+ */
+export async function fetchOverpass(query: string, timeoutMs = 35_000): Promise<{ elements?: OverpassElement[] }> {
+  const body = `data=${encodeURIComponent(query)}`;
+  const controllers = OVERPASS_ENDPOINTS.map(() => new AbortController());
+  const timer = setTimeout(() => controllers.forEach((c) => c.abort()), timeoutMs);
+  const errors: string[] = [];
+  try {
+    return await new Promise((resolve, reject) => {
+      let pending = OVERPASS_ENDPOINTS.length;
+      OVERPASS_ENDPOINTS.forEach((url, i) => {
+        fetch(url, { method: 'POST', headers: OVERPASS_HEADERS, body, signal: controllers[i].signal })
+          .then(async (res) => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            if (!Array.isArray(json?.elements)) throw new Error('bad response');
+            resolve(json);
+          })
+          .catch((e: unknown) => {
+            errors.push(`${new URL(url).host}: ${e instanceof Error ? e.message : 'failed'}`);
+            if (--pending === 0) reject(new Error(errors.join('; ')));
+          });
+      });
+    });
+  } finally {
+    clearTimeout(timer);
+    controllers.forEach((c) => c.abort());
+  }
+}
+
+/** Cache key for a spot, ~1 km grid. */
+export function placesCacheKey({ lat, lng }: Coords): string {
+  return `places:v1:${lat.toFixed(2)},${lng.toFixed(2)}`;
+}
+
 /** Overpass QL for gyms and fitness centres around a point. */
 export function overpassQuery({ lat, lng }: Coords, radiusM = SEARCH_RADIUS_M): string {
   const around = `around:${Math.round(radiusM)},${lat.toFixed(5)},${lng.toFixed(5)}`;
   return [
-    '[out:json][timeout:20];',
+    '[out:json][timeout:25];',
     '(',
     `  nwr["leisure"="fitness_centre"](${around});`,
     `  nwr["amenity"="gym"](${around});`,

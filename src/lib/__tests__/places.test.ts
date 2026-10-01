@@ -1,6 +1,7 @@
 import {
   areaFromTags,
   distanceKm,
+  fetchOverpass,
   formatDistance,
   overpassQuery,
   parseOverpass,
@@ -63,5 +64,34 @@ describe('helpers', () => {
     expect(areaFromTags({ 'addr:suburb': 'Brooklyn' })).toBe('Brooklyn');
     expect(areaFromTags({})).toBeUndefined();
     expect(areaFromTags({ 'addr:street': 'A Very Long Street Name That Keeps Going', 'addr:city': 'Somewhere' })!.length).toBeLessThanOrEqual(40);
+  });
+});
+
+describe('fetchOverpass', () => {
+  const realFetch = global.fetch;
+  afterEach(() => {
+    global.fetch = realFetch;
+  });
+  const reply = (status: number, body: unknown, delay = 0) =>
+    new Promise<Response>((resolve) =>
+      setTimeout(() => resolve({ ok: status === 200, status, json: async () => body } as Response), delay),
+    );
+
+  it('takes the first good answer from any mirror', async () => {
+    const urls: string[] = [];
+    global.fetch = jest.fn((url: string) => {
+      urls.push(url);
+      if (url.includes('overpass-api.de')) return reply(504, null, 5);
+      if (url.includes('kumi')) return reply(200, { elements: [{ type: 'node', id: 1 }] }, 20);
+      return reply(200, { elements: [] }, 50);
+    }) as unknown as typeof fetch;
+    const json = await fetchOverpass('q');
+    expect(json.elements).toHaveLength(1);
+    expect(urls).toHaveLength(3);
+  });
+
+  it('explains every failure when all mirrors fail', async () => {
+    global.fetch = jest.fn(() => reply(429, null)) as unknown as typeof fetch;
+    await expect(fetchOverpass('q')).rejects.toThrow(/overpass-api\.de: HTTP 429.*HTTP 429.*HTTP 429/);
   });
 });
