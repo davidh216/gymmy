@@ -13,6 +13,18 @@ export type NearbyPlace = Coords & {
 export const SEARCH_RADIUS_M = 8000;
 export const MAX_RESULTS = 30;
 
+export const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
+/** Overpass rejects anonymous clients (HTTP 406), so identify the app. */
+export const OVERPASS_HEADERS = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'User-Agent': 'Gymmy/1.0 (+https://github.com/davidh216/gymmy)',
+};
+
 /** Overpass QL for gyms and fitness centres around a point. */
 export function overpassQuery({ lat, lng }: Coords, radiusM = SEARCH_RADIUS_M): string {
   const around = `around:${Math.round(radiusM)},${lat.toFixed(5)},${lng.toFixed(5)}`;

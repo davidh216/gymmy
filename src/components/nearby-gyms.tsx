@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import * as Location from 'expo-location';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -7,7 +6,7 @@ import { Button, Card, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import { formatDistance, type NearbyPlace } from '@/lib/places';
 import { gymsApi, type Gym } from '@/services/gyms';
 import { useJoinPlace } from '@/services/gyms/queries';
-import { PlacesError, currentCoords, nearbyGyms } from '@/services/places';
+import { PlacesError, currentCoords, hasLocationPermission, nearbyGyms } from '@/services/places';
 import { useGymmy } from '@/store/gymmy';
 import { colors, space } from '@/theme';
 
@@ -50,11 +49,9 @@ export function NearbyGyms({
 
   // Search straight away when location access was already granted.
   const loadIfAllowed = useEffectEvent(() => {
-    Location.getForegroundPermissionsAsync()
-      .then((p) => {
-        if (p.granted) load();
-      })
-      .catch(() => {});
+    hasLocationPermission().then((granted) => {
+      if (granted) load();
+    });
   });
   useEffect(() => {
     loadIfAllowed();
