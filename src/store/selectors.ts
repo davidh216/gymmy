@@ -5,7 +5,15 @@ import { useNow } from '@/hooks/use-now';
 import { freshVitals, heartScore } from '@/lib/health';
 import { milestoneStates, milestoneStats } from '@/lib/milestones';
 import { levelFromXp } from '@/lib/progression';
-import { planAdvice, type PlanAdvice, type PlanProgress, type Program } from '@/lib/programs';
+import {
+  getProgram,
+  isCustomProgram,
+  planAdvice,
+  programFromCustom,
+  type PlanAdvice,
+  type PlanProgress,
+  type Program,
+} from '@/lib/programs';
 import { dayKey, readiness } from '@/lib/recovery';
 import { activeDaysThisWeek, countInWeek, daysSince, weekStreak } from '@/lib/streaks';
 
@@ -75,4 +83,16 @@ export function usePlanAdvice(program: Program | undefined, progress: PlanProgre
   const r = useReadiness();
   if (!program || !progress || plan?.programId !== program.id) return null;
   return planAdvice({ program, plan, progress, workouts, readiness: r.score, now: r.now });
+}
+
+/**
+ * A plan by id that updates when a custom plan is edited or deleted. (Reading the custom list
+ * here, rather than only calling getProgram, is what makes screens re-render.)
+ */
+export function useProgram(id: string | undefined): Program | undefined {
+  const custom = useGymmy((s) => s.customPrograms);
+  if (!id) return undefined;
+  const mine = custom.find((p) => p.id === id);
+  if (mine) return mine.days.length ? programFromCustom(mine) : undefined;
+  return isCustomProgram(id) ? undefined : getProgram(id);
 }

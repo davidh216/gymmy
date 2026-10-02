@@ -19,12 +19,12 @@ import {
 import { bucket } from '@/lib/analytics';
 import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
-import { usePlanAdvice } from '@/store/selectors';
+import { usePlanAdvice, useProgram } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 export default function ProgramScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const program = getProgram(id);
+  const program = useProgram(id);
   const plan = useGymmy((s) => s.plan);
   const workouts = useGymmy((s) => s.workouts);
   const hasActive = useGymmy((s) => s.active !== null);

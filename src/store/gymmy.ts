@@ -24,7 +24,7 @@ import {
   workoutRewards,
   type Rewards,
 } from '@/lib/progression';
-import { completedSets, detectPRs, lastPerformance, lastSession } from '@/lib/records';
+import { completedSets, detectPRs, exerciseSettings, lastPerformance } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
 import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout, WorkoutExercise } from '@/lib/types';
 
@@ -178,7 +178,9 @@ export const CHECK_IN_GEMS = 5;
 export function lighterLoad(kg: number, units: Units): number {
   const step = units === 'lb' ? 5 : 2.5;
   const display = toDisplayWeight(kg, units) * 0.9;
-  return fromDisplayWeight(Math.max(step, Math.floor(display / step) * step), units);
+  const rounded = Math.floor(display / step) * step;
+  // Never heavier than last time (a 2 kg dumbbell stays 2 kg rather than rounding up).
+  return rounded > 0 ? fromDisplayWeight(rounded, units) : kg;
 }
 
 function planSets(
@@ -204,13 +206,13 @@ function planSets(
 
 /** A new exercise in a workout, keeping your note and rest time from last time. */
 function workoutExercise(exerciseId: string, history: Workout[], sets?: SetEntry[]): WorkoutExercise {
-  const last = lastSession(exerciseId, history);
+  const last = exerciseSettings(exerciseId, history);
   return {
     id: uid(),
     exerciseId,
     sets: sets ?? seedSets(exerciseId, history),
-    ...(last?.note ? { note: last.note } : {}),
-    ...(last?.rest !== undefined ? { rest: last.rest } : {}),
+    ...(last.note ? { note: last.note } : {}),
+    ...(last.rest !== undefined ? { rest: last.rest } : {}),
   };
 }
 

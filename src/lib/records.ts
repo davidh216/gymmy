@@ -143,6 +143,17 @@ export function lastSession(exerciseId: string, history: Workout[]): SessionStat
   return latest;
 }
 
+/** Your note and rest time from the latest workout that had this exercise (warm-ups only counts). */
+export function exerciseSettings(exerciseId: string, history: Workout[]): { note?: string; rest?: number } {
+  let latest: { endedAt: number; note?: string; rest?: number } | null = null;
+  for (const w of history) {
+    if (latest && w.endedAt <= latest.endedAt) continue;
+    const e = w.exercises.find((x) => x.exerciseId === exerciseId);
+    if (e) latest = { endedAt: w.endedAt, note: e.note, rest: e.rest };
+  }
+  return { note: latest?.note, rest: latest?.rest };
+}
+
 /** Top set ever logged for an exercise. */
 export function bestSet(exerciseId: string, history: Workout[]): SetEntry | null {
   const kind = getExercise(exerciseId).kind;

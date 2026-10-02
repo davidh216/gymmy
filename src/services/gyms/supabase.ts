@@ -138,8 +138,9 @@ async function boardRows(gymId: string | null, challengeId: string): Promise<Ent
     .select(ENTRY_COLUMNS)
     .eq('challenge_id', challengeId)
     .eq('status', 'live')
-    .order('created_at', { ascending: true })
-    .limit(2000);
+    // Newest first, so this month's season is never cut off as a board grows.
+    .order('created_at', { ascending: false })
+    .limit(5000);
   if (gymId) query = query.eq('gym_id', gymId);
   return check(await query) as unknown as EntryRow[];
 }

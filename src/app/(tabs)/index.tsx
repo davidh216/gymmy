@@ -11,11 +11,11 @@ import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/c
 import { useNow } from '@/hooks/use-now';
 import { TEMPLATES } from '@/lib/exercises';
 import { formatDuration, greeting } from '@/lib/format';
-import { PROGRAMS, getProgram, lighterReason, planProgress, planSession } from '@/lib/programs';
+import { PROGRAMS, lighterReason, planProgress } from '@/lib/programs';
 import { dayKeyTime } from '@/lib/recovery';
 import { activeDaysThisWeek } from '@/lib/streaks';
 import { useGymmy } from '@/store/gymmy';
-import { usePlanAdvice, useProgress } from '@/store/selectors';
+import { usePlanAdvice, useProgram, useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -143,7 +143,7 @@ function PlanSection() {
   const workouts = useGymmy((s) => s.workouts);
   const hasActive = useGymmy((s) => s.active !== null);
   const startPlanSession = useGymmy((s) => s.startPlanSession);
-  const program = plan ? getProgram(plan.programId) : undefined;
+  const program = useProgram(plan?.programId);
   const advice = usePlanAdvice(program, program && plan ? planProgress(program, workouts, plan.startedAt) : null);
 
   if (!plan || !program) {
@@ -184,7 +184,7 @@ function PlanSection() {
 
   const progress = planProgress(program, workouts, plan.startedAt);
   const next = progress.next;
-  const session = next ? planSession({ programId: program.id, ...next }) : undefined;
+  const session = next ? program.week(next.week)[next.session - 1] : undefined;
   const reason = advice ? lighterReason(advice) : undefined;
   const begin = (light: boolean) => {
     if (!next) return;

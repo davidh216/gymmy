@@ -218,7 +218,9 @@ export default function PlanEditScreen() {
             onPress={() =>
               confirm(`Delete ${existing.name}?`, 'Workouts you did from it stay in your history.', 'Delete', () => {
                 deleteCustomProgram(existing.id);
-                router.dismissTo('/programs');
+                // The plan's own screen is underneath; go back to the list instead.
+                router.dismissAll();
+                router.push('/programs');
               })
             }
           />

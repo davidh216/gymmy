@@ -61,8 +61,11 @@ export default function RecoveryScreen() {
   const [saved, setSaved] = useState<{ xp: number; gems: number } | null>(null);
 
   const save = () => {
+    // Don't invent sleep for a check-in that came from another phone without it (Health
+    // sleep stays on that phone); a brand-new check-in keeps the typical-night default.
+    const keepSleep = sleepEdit !== undefined || fromHealth || !today;
     const reward = saveCheckIn({
-      sleepHours: sleep,
+      ...(keepSleep ? { sleepHours: sleep } : {}),
       // Sleep from Apple Health stays on this phone (see recordsOf in lib/sync).
       ...(fromHealth ? { sleepSource: 'health' as const } : {}),
       ...ratings,

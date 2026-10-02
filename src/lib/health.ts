@@ -74,7 +74,7 @@ export function healthExport(workout: Workout): { activityType: number; distance
     ? Number(Object.entries(IMPORTED).find(([, v]) => v.exerciseId === only && v.name !== 'Hike')?.[0])
     : NaN;
   if (Number.isFinite(type)) {
-    const km = exercises[0].sets.reduce((n, s) => n + (s.done ? (s.distance ?? 0) : 0), 0);
+    const km = exercises[0].sets.reduce((n, s) => n + (s.done && !s.warmup ? (s.distance ?? 0) : 0), 0);
     return { activityType: type, distanceMeters: km ? Math.round(km * 1000) : undefined };
   }
   return { activityType: ACTIVITY.traditionalStrengthTraining };

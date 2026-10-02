@@ -50,7 +50,7 @@ it('loads about 90% on lighter plan days, in steps the plates can make', () => {
   expect(lighterLoad(102.5, 'kg')).toBe(90);
   // 225 lb → 202.5 → 200 lb
   expect(toDisplayWeight(lighterLoad(fromDisplayWeight(225, 'lb'), 'lb'), 'lb')).toBe(200);
-  expect(lighterLoad(1, 'kg')).toBe(2.5);
+  expect(lighterLoad(1, 'kg')).toBe(1);
 });
 
 it('saves custom plans that work like built-in ones, and leaves them when deleted', () => {
@@ -80,4 +80,15 @@ it('saves custom plans that work like built-in ones, and leaves them when delete
   store().deleteCustomProgram(id);
   expect(getProgram(id)).toBeUndefined();
   expect(store().plan).toBeNull();
+});
+
+it('never makes a lighter day heavier, and carries notes from warm-up-only sessions', () => {
+  expect(lighterLoad(2, 'kg')).toBe(2);
+  store().startWorkout({ exerciseIds: ['squat'] });
+  const e = store().active!.exercises[0];
+  store().updateExercise(e.id, { note: 'Knee sleeves' });
+  store().updateSet(e.id, e.sets[0].id, { weight: 40, reps: 5, done: true, warmup: true });
+  store().finishWorkout();
+  store().startWorkout({ exerciseIds: ['squat'] });
+  expect(store().active!.exercises[0].note).toBe('Knee sleeves');
 });
