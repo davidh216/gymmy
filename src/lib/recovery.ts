@@ -12,6 +12,8 @@ export type CheckIn = {
   date: string;
   at: number;
   sleepHours?: number;
+  /** Set when the sleep came from Apple Health; that sleep stays on the phone and never syncs. */
+  sleepSource?: 'health';
   soreness?: Rating;
   energy?: Rating;
   stress?: Rating;

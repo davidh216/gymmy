@@ -46,9 +46,11 @@ export default function RecoveryScreen() {
     staleTime: 15 * 60 * 1000,
   });
   // What you set wins; otherwise Apple Health's number, then a typical night.
-  const [sleepEdit, setSleep] = useState<number | undefined>(today?.sleepHours);
-  const fromHealth = sleepEdit === undefined && typeof healthSleep === 'number';
-  const sleep = sleepEdit ?? (fromHealth ? healthSleep : 7.5);
+  const savedFromHealth = today?.sleepSource === 'health';
+  const [sleepEdit, setSleep] = useState<number | undefined>(savedFromHealth ? undefined : today?.sleepHours);
+  const healthValue = typeof healthSleep === 'number' ? healthSleep : savedFromHealth ? today?.sleepHours : undefined;
+  const fromHealth = sleepEdit === undefined && healthValue !== undefined;
+  const sleep = sleepEdit ?? (fromHealth ? healthValue! : 7.5);
   const [ratings, setRatings] = useState<Partial<Record<RatingField, Rating>>>({
     soreness: today?.soreness,
     energy: today?.energy,
@@ -59,7 +61,14 @@ export default function RecoveryScreen() {
   const [saved, setSaved] = useState<{ xp: number; gems: number } | null>(null);
 
   const save = () => {
-    const reward = saveCheckIn({ sleepHours: sleep, ...ratings, rest, activities });
+    const reward = saveCheckIn({
+      sleepHours: sleep,
+      // Sleep from Apple Health stays on this phone (see recordsOf in lib/sync).
+      ...(fromHealth ? { sleepSource: 'health' as const } : {}),
+      ...ratings,
+      rest,
+      activities,
+    });
     track({ event: 'check_in', props: { first: reward.gems > 0, rest, activities: bucket(activities.length, [1, 2, 4]) } });
     haptic('success');
     setSaved(reward);

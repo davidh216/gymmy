@@ -153,3 +153,28 @@ describe('custom plans', () => {
     expect(gone.customPrograms).toEqual([]);
   });
 });
+
+describe('Apple Health sleep', () => {
+  const healthNight = { date: '2026-10-02', at: 5, sleepHours: 7.2, sleepSource: 'health' as const, energy: 4 as const, rest: false, activities: [] };
+  const typedNight = { date: '2026-10-01', at: 4, sleepHours: 6, rest: false, activities: [] };
+
+  it('stays on the phone; typed-in sleep still syncs', () => {
+    const s = state({ checkIns: { [healthNight.date]: healthNight, [typedNight.date]: typedNight } });
+    const pushed = pushRecords(s, { 'check_in:2026-10-02': 9, 'check_in:2026-10-01': 9 });
+    const health = pushed.find((r) => r.id === '2026-10-02')!.data as Record<string, unknown>;
+    expect(health).toMatchObject({ energy: 4 });
+    expect(health).not.toHaveProperty('sleepHours');
+    expect(health).not.toHaveProperty('sleepSource');
+    expect(pushed.find((r) => r.id === '2026-10-01')!.data).toMatchObject({ sleepHours: 6 });
+  });
+
+  it('isn’t wiped when the synced copy comes back', () => {
+    const s = state({ checkIns: { [healthNight.date]: healthNight } });
+    const remote = { date: '2026-10-02', at: 6, energy: 5, rest: false, activities: [] };
+    const merged = applyRecords(s, [{ kind: 'check_in', id: '2026-10-02', data: remote, updatedAt: 99 }], {
+      dirty: {},
+      firstSync: false,
+    });
+    expect(merged.checkIns!['2026-10-02']).toMatchObject({ energy: 5, sleepHours: 7.2, sleepSource: 'health' });
+  });
+});

@@ -16,9 +16,7 @@ You sign up with an email address and password, and pick a public username. Gymm
 
 It is stored with Supabase (our database provider) and only you can read it.
 
-**Not backed up:** workouts imported from Apple Health, heart rate variability, resting heart rate and body weight read from Apple Health. Those stay on your phone.
-
-> ⚠️ Decision needed before launch: check-ins are backed up, and their sleep hours can be prefilled from Apple Health. Either keep this and say so here, or stop syncing Health-prefilled sleep. See the "Health data in the cloud" decision.
+**Not backed up:** anything from Apple Health. Workouts imported from Health, sleep read from Health (even when it fills in a check-in), heart rate variability, resting heart rate and body weight stay on your phone. Sleep hours you type in yourself are part of your check-in and are backed up.
 
 ## Gym leaderboards
 

@@ -10,7 +10,7 @@ Data **linked to the user** (only when they create an account):
 | User Content → Photos or videos | App functionality | Leaderboard attempt videos |
 | User Content → Other user content | App functionality | Usernames, results, reports |
 | Health & Fitness → Fitness | App functionality | Workouts and check-ins in the cloud backup |
-| Health & Fitness → Health | App functionality | Only if check-in sleep hours keep syncing (see policy decision) |
+| Health & Fitness → Health | App functionality | Check-in ratings and sleep hours the user types in (Apple Health data is never uploaded) |
 | Identifiers → User ID | App functionality | Account id |
 
 Data **not linked to the user**:

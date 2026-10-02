@@ -38,6 +38,13 @@ export type Syncable = {
   claimedMilestones: Record<string, number>;
 };
 
+/** Sleep that came from Apple Health stays on the phone: it's removed before a check-in syncs. */
+export function withoutHealthSleep(c: CheckIn): CheckIn {
+  if (c.sleepSource !== 'health') return c;
+  const { sleepHours: _sleep, sleepSource: _source, ...rest } = c;
+  return rest;
+}
+
 export const recordKey = (kind: SyncKind, id: string) => `${kind}:${id}`;
 
 export function parseKey(key: string): { kind: SyncKind; id: string } {
@@ -52,7 +59,7 @@ export function recordsOf(s: Syncable): Map<string, unknown> {
   const out = new Map<string, unknown>();
   out.set(recordKey('meta', 'main'), Object.fromEntries(META_FIELDS.map((f) => [f, s[f]])));
   for (const w of s.workouts) if (w.source !== 'health') out.set(recordKey('workout', w.id), w);
-  for (const c of Object.values(s.checkIns)) out.set(recordKey('check_in', c.date), c);
+  for (const c of Object.values(s.checkIns)) out.set(recordKey('check_in', c.date), withoutHealthSleep(c));
   for (const e of s.customExercises) out.set(recordKey('custom_exercise', e.id), e);
   for (const p of s.customPrograms) out.set(recordKey('custom_program', p.id), p);
   for (const [id, owned] of Object.entries(s.collection)) out.set(recordKey('companion', id), owned);
@@ -132,10 +139,20 @@ export function applyRecords(
         if (r.deleted) workouts.delete(r.id);
         else workouts.set(r.id, r.data as Workout);
         break;
-      case 'check_in':
-        if (r.deleted) delete checkIns[r.id];
-        else checkIns[r.id] = r.data as CheckIn;
+      case 'check_in': {
+        if (r.deleted) {
+          delete checkIns[r.id];
+          break;
+        }
+        const remote = r.data as CheckIn;
+        const mine = checkIns[r.id];
+        // The synced copy never has Health sleep; keep this phone's.
+        checkIns[r.id] =
+          mine?.sleepSource === 'health' && remote.sleepHours === undefined
+            ? { ...remote, sleepHours: mine.sleepHours, sleepSource: 'health' }
+            : remote;
         break;
+      }
       case 'custom_exercise':
         if (r.deleted) custom.delete(r.id);
         else custom.set(r.id, r.data as Syncable['customExercises'][number]);
