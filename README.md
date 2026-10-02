@@ -7,18 +7,24 @@ personal records and weekly goals earn gems, and gems summon new companions who 
 
 ## Features
 
-- **Fast workout logging**: weight × reps, bodyweight reps, and timed sets. The previous session
-  pre-fills each exercise, and a rest timer starts when you check off a set.
-- **40+ exercises** across 7 muscle groups, plus Push / Pull / Legs / Full Body quick starts.
-- **Personal records** detected automatically (estimated 1RM for weighted lifts, best reps or duration otherwise).
-- **Progression**: XP and levels, a weekly training-day goal, and week streaks that multiply XP (up to +50%).
-- **Companions**: pick a starter, then summon more with gems (14 buddies across 4 rarities, with pity).
-  Duplicates add stars, and your active buddy grants bonus XP and reacts to how recently you trained.
-- **Gyms**: leaderboards you can conquer at any public gym, your home gym (invite code) or globally.
-  Post a video of your attempt, climb the top 10 and hold a medal. Other lifters can report entries.
-  Backed by Supabase (accounts, shared boards, video storage); see [docs/gyms-spec.md](docs/gyms-spec.md).
-- **History**: an 8-week consistency chart, lifetime volume, PR count, and per-workout detail with "repeat workout".
-- Local-first: all data lives on the device (AsyncStorage). No account needed.
+- **Fast logging**: weight × reps, reps, time and distance (with pace). Last time's numbers fill in,
+  with "Last" and "Best" shown for every exercise. Warm-up sets, RPE, per-exercise rest timers,
+  notes, reordering and a plate calculator. Custom exercises can be submitted for everyone.
+- **Records and progress**: automatic PRs (estimated 1RM for lifts), per-exercise progress charts,
+  a weekly recap (shareable as text), and CSV/JSON export.
+- **Training plans**: HYROX, marathon, first 5K, 5×5 strength, muscle building, or build your own.
+  Sessions get lighter when readiness is low or after a long break.
+- **Recovery**: daily check-ins, a readiness score (check-in, training load, and Apple Health heart
+  rate variability and resting heart rate), a muscle recovery map and rest days.
+- **Apple Health**: imports Watch runs, walks, rides, rows and swims, reads sleep, heart data and
+  weight, and saves Gymmy workouts. Health data never leaves the phone.
+- **Game loop**: XP and levels, weekly streaks, milestones that pay gems, and companions to summon.
+- **Gyms**: leaderboards at public gyms, your home gym or globally, for lifts, pull-ups, rows, runs
+  and carries. Post a video, take the top spot, and finish a monthly season at #1 for a 👑.
+  Reports, blocks, an admin queue and optional automatic video scanning. See
+  [docs/gyms-spec.md](docs/gyms-spec.md).
+- **Local-first with optional cloud sync**: everything works offline without an account; signing
+  in backs up and syncs across devices. Anonymous usage stats (opt-out) and crash reporting.
 
 ## Stack
 
@@ -51,8 +57,9 @@ npm run preview:web  # single-file web build in dist/gymmy-preview.html
 
 ## Backend (Supabase)
 
-Gyms use the Supabase project in `.env` (public URL and publishable key; access is enforced by
-row level security). Workouts, XP and the squad stay on the device.
+Accounts, gyms, cloud sync and analytics use the Supabase project in `.env` (public URL and
+publishable key; access is enforced by row level security). Without an account everything stays
+on the device.
 
 - **Set up the database:** paste all of `supabase/setup.sql` into the Supabase SQL Editor and run it.
   It's every migration combined, and safe to re-run: it fills in whatever is missing. Regenerate it
@@ -118,7 +125,7 @@ message on the app branch (or run it from the Actions tab):
 |---|---|
 | `[db push]` | Applies new files in `supabase/migrations` (all safe to re-run) |
 | `[db sql]` | Runs `supabase/ops/run.sql` once (one-off fixes; git keeps the history) |
-| `[functions deploy]` | Deploys Edge Functions and sets `HIVE_API_KEY` if that secret exists |
+| `[functions deploy]` | Deploys `gym-places` (shared, cached nearby-gym search) and smoke-tests it; deploys `moderate-entry` and sets `HIVE_API_KEY` only when that secret exists |
 | `[db check]` | Read-only status report (also printed after every run) |
 | `[db report]` | Read-only anonymous analytics report (last 28 days) |
 
