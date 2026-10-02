@@ -5,6 +5,7 @@ import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { BackHeader } from '@/components/back-header';
 import { ReadinessCard } from '@/components/readiness-card';
+import { MuscleMap, recoveryColor, recoveryLabel } from '@/components/muscle-map';
 import { Screen } from '@/components/screen';
 import { Button, Card, Chip, ProgressBar, SectionHeader, T, haptic } from '@/components/ui';
 import { formatDate } from '@/lib/format';
@@ -159,17 +160,18 @@ export default function RecoveryScreen() {
 
       <SectionHeader title="Muscle recovery" />
       <Card style={{ gap: space.md }}>
-        {muscles.map((m) => (
+        <MuscleMap muscles={muscles} />
+        {[...muscles].sort((x, y) => x.recovered - y.recovered).map((m) => (
           <View key={m.group} style={{ gap: 4 }}>
             <View style={styles.row}>
               <T variant="body" style={{ flex: 1, textTransform: 'capitalize' }}>
                 {m.group}
               </T>
-              <T variant="caption" color={statusColor(m.recovered)}>
-                {m.recovered >= 0.9 ? 'Fresh' : m.recovered >= 0.6 ? 'Recovering' : 'Fatigued'} · {Math.round(m.recovered * 100)}%
+              <T variant="caption" color={recoveryColor(m.recovered)}>
+                {recoveryLabel(m.recovered)} · {Math.round(m.recovered * 100)}%
               </T>
             </View>
-            <ProgressBar progress={m.recovered} height={6} color={statusColor(m.recovered)} />
+            <ProgressBar progress={m.recovered} height={6} color={recoveryColor(m.recovered)} />
           </View>
         ))}
         <T variant="caption" color={colors.textFaint}>
@@ -187,10 +189,6 @@ export default function RecoveryScreen() {
       )}
     </Screen>
   );
-}
-
-function statusColor(recovered: number) {
-  return recovered >= 0.9 ? colors.accent : recovered >= 0.6 ? colors.flame : colors.danger;
 }
 
 function Stepper({ value, onChange }: { value: number; onChange: (v: number) => void }) {
