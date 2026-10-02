@@ -166,9 +166,11 @@ describe('cloud sync between two phones', () => {
     const b = phone('u3');
     await boot(a);
     await boot(b);
-    jest.setSystemTime(Date.parse('2026-10-02T10:00:00Z'));
+    // Relative to now, so the test doesn't depend on today's date.
+    const start = Date.now();
+    jest.setSystemTime(start + 3600_000);
     a.gymmy.useGymmy.getState().updateProfile({ weeklyGoal: 5 });
-    jest.setSystemTime(Date.parse('2026-10-02T11:00:00Z'));
+    jest.setSystemTime(start + 2 * 3600_000);
     b.gymmy.useGymmy.getState().updateProfile({ weeklyGoal: 2 });
     await b.sync.syncNow();
     await a.sync.syncNow();

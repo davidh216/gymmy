@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Switch, TextInput, View } from 'react-native';
 
+import { ExportCard } from '@/components/export-card';
 import { HealthCard } from '@/components/health-card';
 import { Screen } from '@/components/screen';
 import { SyncCard } from '@/components/sync-card';
@@ -94,6 +95,7 @@ export default function Profile() {
       <View style={{ marginTop: space.sm, gap: space.sm }}>
         <SyncCard />
         <HealthCard />
+        <ExportCard />
       </View>
 
       <SectionHeader title="Weekly goal" />
