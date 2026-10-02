@@ -443,6 +443,7 @@ function SetRow({
         {cols.map((c) => (
           <SetInput
             key={c.field}
+            testID={`set-${index + 1}-${c.field}`}
             column={c}
             value={set[c.field]}
             placeholder={previous?.[c.field] !== undefined ? c.format(previous[c.field]!) : c.field === 'minutes' && kind === 'distance' ? 'mm:ss' : '0'}
@@ -452,6 +453,7 @@ function SetRow({
         ))}
         <Pressable
           onPress={toggle}
+          testID={`set-${index + 1}-done`}
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: set.done }}
@@ -478,12 +480,14 @@ function SetRow({
  * and shows the stored value otherwise.
  */
 function SetInput({
+  testID,
   column,
   value,
   placeholder,
   done,
   onChange,
 }: {
+  testID: string;
   column: Column;
   value: number | undefined;
   placeholder: string;
@@ -504,6 +508,7 @@ function SetInput({
       placeholder={placeholder}
       placeholderTextColor={colors.textFaint}
       accessibilityLabel={column.label}
+      testID={testID}
       style={[styles.colInput, styles.input, done && styles.inputDone]}
     />
   );

@@ -182,7 +182,12 @@ function SessionCard({
           </T>
         </View>
         {onStart && (
-          <Button title={done ? 'Redo' : 'Start'} variant={highlight ? 'primary' : 'secondary'} onPress={onStart} />
+          <Button
+            title={done ? 'Redo' : 'Start'}
+            variant={highlight ? 'primary' : 'secondary'}
+            testID={`plan-day-${index}-start`}
+            onPress={onStart}
+          />
         )}
       </View>
       {session.exercises.map((e) => (

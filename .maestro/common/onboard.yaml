@@ -1,0 +1,12 @@
+# Fresh install through onboarding to the Today screen.
+appId: com.davidh216.gymmy
+---
+- launchApp:
+    clearState: true
+- tapOn: "Let's go"
+- tapOn: "Your name"
+- inputText: "Alex"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Start with Kong"
+- assertVisible: "Start empty workout"

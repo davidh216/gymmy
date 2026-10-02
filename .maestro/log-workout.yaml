@@ -1,0 +1,26 @@
+appId: com.davidh216.gymmy
+name: Log a set and finish a workout
+---
+- runFlow: common/onboard.yaml
+- tapOn: "Start empty workout"
+- tapOn: "Add exercises"
+- tapOn: "Search exercises"
+- inputText: "squat"
+- tapOn: "Back Squat"
+- tapOn: "Add 1 exercise"
+- tapOn:
+    id: "set-1-weight"
+- inputText: "225"
+- tapOn:
+    id: "set-1-reps"
+- inputText: "5"
+- tapOn:
+    id: "set-1-done"
+- tapOn:
+    text: "Skip"
+    optional: true
+- tapOn: "Finish"
+- assertVisible: "Done"
+- assertVisible: "Back Squat"
+- tapOn: "Done"
+- assertVisible: "Start empty workout"

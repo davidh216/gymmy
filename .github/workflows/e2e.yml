@@ -1,0 +1,39 @@
+# Runs the Maestro end-to-end flows on EAS (simulator build + tests) and waits for the result.
+# Trigger with a commit whose message contains [e2e], or from the Actions tab.
+name: E2E (Maestro on EAS)
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[e2e]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+      # The e2e build profile lives outside eas.json: eas.json is part of the native
+      # fingerprint, and changing it would cut installed TestFlight builds off from updates.
+      - name: Add the e2e build profile (CI only)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const eas = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
+            eas.build.e2e = JSON.parse(fs.readFileSync('.maestro/eas-profile.json', 'utf8'));
+            fs.writeFileSync('eas.json', JSON.stringify(eas, null, 2));
+          "
+      - name: Validate workflow file
+        run: eas workflow:validate .eas/workflows/e2e.yml --non-interactive
+      - name: Run on EAS and wait
+        run: eas workflow:run .eas/workflows/e2e.yml --wait --non-interactive

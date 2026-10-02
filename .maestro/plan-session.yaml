@@ -1,0 +1,15 @@
+appId: com.davidh216.gymmy
+name: Start a training plan session
+---
+- runFlow: common/onboard.yaml
+- scrollUntilVisible:
+    element: "HYROX Prep"
+    direction: DOWN
+- tapOn: "HYROX Prep"
+- tapOn: "Start this plan"
+- assertVisible: "Week 1 of 8"
+- tapOn:
+    id: "plan-day-1-start"
+- assertVisible: "3 × 8"
+- assertVisible:
+    id: "set-1-reps"

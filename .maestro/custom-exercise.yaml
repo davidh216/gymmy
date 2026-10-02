@@ -1,0 +1,13 @@
+appId: com.davidh216.gymmy
+name: Create a custom exercise from the picker
+---
+- runFlow: common/onboard.yaml
+- tapOn: "Start empty workout"
+- tapOn: "Add exercises"
+- tapOn: "Search exercises"
+- inputText: "Landmine"
+- tapOn: "Create .Landmine."
+- tapOn: "Save exercise"
+- assertVisible: "Landmine"
+- assertVisible:
+    id: "set-1-weight"

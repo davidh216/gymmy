@@ -1,0 +1,16 @@
+appId: com.davidh216.gymmy
+name: Daily recovery check-in earns gems
+---
+- runFlow: common/onboard.yaml
+- scrollUntilVisible:
+    element: "Daily check-in"
+    direction: DOWN
+- tapOn: "Daily check-in"
+- tapOn: "Soreness: Light"
+- tapOn: "Energy: Good"
+- tapOn: "Stress: Low"
+- scrollUntilVisible:
+    element: "Save check-in.*"
+    direction: DOWN
+- tapOn: "Save check-in.*"
+- assertVisible: "Saved!.*"

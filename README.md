@@ -124,3 +124,12 @@ message on the app branch (or run it from the Actions tab):
 
 Repository secrets: `SUPABASE_ACCESS_TOKEN` (supabase.com → Account → Access Tokens) and
 `SUPABASE_DB_PASSWORD` (Project Settings → Database); optionally `HIVE_API_KEY`.
+
+### End-to-end tests (Maestro)
+
+Flows in `.maestro/` (onboarding, logging a workout, recovery check-in, a plan session, a custom
+exercise) run on an iOS simulator build via EAS Workflows (`.eas/workflows/e2e.yml`, build
+profile `e2e` from `.maestro/eas-profile.json`, merged into `eas.json` only in CI because `eas.json` is
+part of the native fingerprint). Start them with a commit containing `[e2e]`;
+GitHub waits for the result. Elements without stable text use `testID`s
+(`set-1-weight`, `set-1-reps`, `set-1-done`, `plan-day-1-start`).
