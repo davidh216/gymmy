@@ -336,7 +336,8 @@ export function getProgram(id: string): Program | undefined {
 export function planSession(ref: PlanRef): PlanSession | undefined {
   const program = getProgram(ref.programId);
   if (!program || ref.week < 1 || ref.week > program.weeks) return undefined;
-  return program.week(ref.week)[ref.session - 1];
+  const session = program.week(ref.week)[ref.session - 1];
+  return session && ref.light ? lightenSession(session) : session;
 }
 
 const key = (week: number, session: number) => `${week}-${session}`;
@@ -390,4 +391,66 @@ export function completedPrograms(workouts: Workout[]): string[] {
 export function targetReps(reps?: string): number | undefined {
   const m = reps?.match(/^\d+/);
   return m ? Number(m[0]) : undefined;
+}
+
+/** Readiness below this suggests the lighter version of a plan session. */
+export const LOW_READINESS = 40;
+/** A break this long (days since the last plan session) suggests easing back in. */
+export const COMEBACK_DAYS = 10;
+const DAY = 86_400_000;
+
+/**
+ * The lighter version of a session: one set fewer (at least one), and about 70% of the
+ * distance or time. Reps stay the same; the weight is up to you.
+ */
+export function lightenSession(session: PlanSession): PlanSession {
+  return {
+    ...session,
+    name: `${session.name} (lighter)`,
+    exercises: session.exercises.map((e) => ({
+      ...e,
+      sets: Math.max(1, e.sets - (e.sets > 2 ? 1 : 0)),
+      ...(e.distance !== undefined ? { distance: Math.round(e.distance * 0.7 * 10) / 10 } : {}),
+      ...(e.minutes !== undefined && e.sets === 1 ? { minutes: Math.max(1, Math.round(e.minutes * 0.7)) } : {}),
+    })),
+  };
+}
+
+export type PlanAdvice = {
+  /** Why a lighter session makes sense today, if it does. */
+  lighter?: 'readiness' | 'comeback';
+  /** Days since your last session in this plan. */
+  daysAway?: number;
+  /** Where the calendar says you'd be if you'd done every week on time. */
+  scheduledWeek: number;
+  /** Whole weeks behind that schedule (0 when on track or ahead). */
+  weeksBehind: number;
+};
+
+/** How to adapt the next plan session to today's readiness and recent breaks. */
+export function planAdvice(input: {
+  program: Program;
+  plan: { programId: string; startedAt: number };
+  progress: PlanProgress;
+  workouts: Workout[];
+  readiness: number;
+  now: number;
+}): PlanAdvice {
+  const { program, plan, progress, workouts, readiness, now } = input;
+  const scheduledWeek = Math.min(program.weeks, Math.floor(Math.max(0, now - plan.startedAt) / (7 * DAY)) + 1);
+  const weeksBehind = progress.next ? Math.max(0, scheduledWeek - progress.next.week) : 0;
+  const lastPlanWorkout = workouts
+    .filter((w) => w.plan?.programId === program.id && w.endedAt >= plan.startedAt)
+    .reduce((t, w) => Math.max(t, w.endedAt), 0);
+  const daysAway = lastPlanWorkout ? Math.floor((now - lastPlanWorkout) / DAY) : undefined;
+  const lighter =
+    readiness < LOW_READINESS ? 'readiness' : daysAway !== undefined && daysAway >= COMEBACK_DAYS ? 'comeback' : undefined;
+  return { lighter, daysAway, scheduledWeek, weeksBehind };
+}
+
+/** One line explaining a lighter-session suggestion. */
+export function lighterReason(advice: PlanAdvice): string | undefined {
+  if (advice.lighter === 'readiness') return 'Readiness is low today. A lighter session still counts.';
+  if (advice.lighter === 'comeback') return `Welcome back after ${advice.daysAway} days. Ease in with a lighter session.`;
+  return undefined;
 }

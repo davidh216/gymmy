@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- inside a jest.mock factory */
-import { useGymmy } from '@/store/gymmy';
+import { fromDisplayWeight, toDisplayWeight } from '@/lib/format';
+import { lighterLoad, useGymmy } from '@/store/gymmy';
 
 // Hoisted above the import by Jest.
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -41,4 +42,12 @@ it('reorders exercises and stops at the ends', () => {
   store().moveExercise(deadlift.id, 1);
   store().moveExercise(deadlift.id, 1);
   expect(ids()).toEqual(['squat', 'bench_press', 'deadlift']);
+});
+
+it('loads about 90% on lighter plan days, in steps the plates can make', () => {
+  expect(lighterLoad(100, 'kg')).toBe(90);
+  expect(lighterLoad(102.5, 'kg')).toBe(90);
+  // 225 lb → 202.5 → 200 lb
+  expect(toDisplayWeight(lighterLoad(fromDisplayWeight(225, 'lb'), 'lb'), 'lb')).toBe(200);
+  expect(lighterLoad(1, 'kg')).toBe(2.5);
 });

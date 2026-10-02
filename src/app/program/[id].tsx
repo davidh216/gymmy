@@ -8,10 +8,11 @@ import { Button, Card, Chip, ProgressBar, T, haptic } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
 import { getExercise } from '@/lib/exercises';
 import { formatTarget } from '@/lib/format';
-import { getProgram, isSessionDone, planProgress, type PlanSession } from '@/lib/programs';
+import { getProgram, isSessionDone, lighterReason, planProgress, type PlanSession } from '@/lib/programs';
 import { bucket } from '@/lib/analytics';
 import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
+import { usePlanAdvice } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 export default function ProgramScreen() {
@@ -25,6 +26,8 @@ export default function ProgramScreen() {
   const enrolled = plan?.programId === id;
   const progress = program ? planProgress(program, workouts, enrolled ? plan!.startedAt : Infinity) : null;
   const [week, setWeek] = useState<number | null>(null);
+  const advice = usePlanAdvice(enrolled ? program : undefined, progress);
+  const reason = advice ? lighterReason(advice) : undefined;
 
   if (!program || !progress) {
     return (
@@ -39,7 +42,7 @@ export default function ProgramScreen() {
   const shownWeek = week ?? (enrolled ? progress.currentWeek : 1);
   const sessions = program.week(shownWeek);
 
-  const begin = (session: number) => {
+  const begin = (session: number, light = false) => {
     if (hasActive) {
       confirm('Workout in progress', 'Finish or discard your current workout first.', 'Open it', () =>
         router.push('/workout'),
@@ -47,7 +50,7 @@ export default function ProgramScreen() {
       return;
     }
     haptic('medium');
-    startPlanSession({ programId: program.id, week: shownWeek, session });
+    startPlanSession({ programId: program.id, week: shownWeek, session, ...(light ? { light } : {}) });
     router.push('/workout');
   };
 
@@ -130,6 +133,7 @@ export default function ProgramScreen() {
             done={done}
             highlight={isNext}
             onStart={enrolled ? () => begin(n) : undefined}
+            lighter={isNext && reason ? { reason, onStart: () => begin(n, true) } : undefined}
           />
         );
       })}
@@ -158,12 +162,14 @@ function SessionCard({
   done,
   highlight,
   onStart,
+  lighter,
 }: {
   index: number;
   session: PlanSession;
   done: boolean;
   highlight: boolean;
   onStart?: () => void;
+  lighter?: { reason: string; onStart: () => void };
 }) {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   return (
@@ -200,6 +206,14 @@ function SessionCard({
           </T>
         </View>
       ))}
+      {lighter && (
+        <View style={styles.lighter}>
+          <T variant="caption" color={colors.textDim} style={{ flex: 1 }}>
+            {lighter.reason}
+          </T>
+          <Button title="Lighter" variant="secondary" onPress={lighter.onStart} />
+        </View>
+      )}
       {session.exercises.some((e) => e.note) && (
         <T variant="caption" color={colors.textFaint}>
           {session.exercises
@@ -222,4 +236,12 @@ const styles = StyleSheet.create({
   next: { borderWidth: 1, borderColor: colors.accent },
   sessionHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   exercise: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  lighter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.sm,
+    borderRadius: radius.sm,
+    backgroundColor: colors.cardHigh,
+  },
 });

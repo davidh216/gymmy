@@ -4,6 +4,7 @@ import { useNow } from '@/hooks/use-now';
 
 import { milestoneStates, milestoneStats } from '@/lib/milestones';
 import { levelFromXp } from '@/lib/progression';
+import { planAdvice, type PlanAdvice, type PlanProgress, type Program } from '@/lib/programs';
 import { dayKey, readiness } from '@/lib/recovery';
 import { activeDaysThisWeek, countInWeek, daysSince, weekStreak } from '@/lib/streaks';
 
@@ -62,4 +63,13 @@ export function useReadiness() {
     const today = checkIns[dayKey(now)];
     return { today, now, ...readiness(today, workouts, now) };
   }, [workouts, checkIns, now]);
+}
+
+/** How to adapt your plan's next session to today (lighter day, comeback, behind schedule). */
+export function usePlanAdvice(program: Program | undefined, progress: PlanProgress | null): PlanAdvice | null {
+  const plan = useGymmy((s) => s.plan);
+  const workouts = useGymmy((s) => s.workouts);
+  const r = useReadiness();
+  if (!program || !progress || plan?.programId !== program.id) return null;
+  return planAdvice({ program, plan, progress, workouts, readiness: r.score, now: r.now });
 }

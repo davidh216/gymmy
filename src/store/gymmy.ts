@@ -5,7 +5,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
 import { getExercise, setExtraExercises, tidyExerciseName, type Exercise } from '@/lib/exercises';
-import { defaultWorkoutName, uid } from '@/lib/format';
+import { defaultWorkoutName, fromDisplayWeight, toDisplayWeight, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import { getMilestone, milestoneStats } from '@/lib/milestones';
 import { getProgram, planSession, targetReps } from '@/lib/programs';
@@ -151,10 +151,18 @@ export const CHECK_IN_XP = 10;
 export const CHECK_IN_GEMS = 5;
 
 /** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from last time. */
+/** About 90% of a load, rounded down to what plates make (5 lb or 2.5 kg steps), for lighter days. */
+export function lighterLoad(kg: number, units: Units): number {
+  const step = units === 'lb' ? 5 : 2.5;
+  const display = toDisplayWeight(kg, units) * 0.9;
+  return fromDisplayWeight(Math.max(step, Math.floor(display / step) * step), units);
+}
+
 function planSets(
   exerciseId: string,
   target: { sets: number; reps?: string; minutes?: number; distance?: number },
   history: Workout[],
+  light?: { units: Units },
 ): SetEntry[] {
   const previous = (lastPerformance(exerciseId, history) ?? []).filter((s) => !s.warmup);
   const reps = targetReps(target.reps);
@@ -162,7 +170,7 @@ function planSets(
     const last = previous[Math.min(i, previous.length - 1)];
     return {
       id: uid(),
-      weight: last?.weight,
+      weight: last?.weight && light ? lighterLoad(last.weight, light.units) : last?.weight,
       reps: reps ?? last?.reps,
       minutes: target.minutes ?? (target.distance ? undefined : last?.minutes),
       distance: target.distance,
@@ -246,7 +254,11 @@ export const useGymmy = create<State & Actions>()(
               startedAt: Date.now(),
               plan: ref,
               exercises: session.exercises.map(({ exerciseId, ...target }) => ({
-                ...workoutExercise(exerciseId, history, planSets(exerciseId, target, history)),
+                ...workoutExercise(
+                  exerciseId,
+                  history,
+                  planSets(exerciseId, target, history, ref.light ? { units: get().profile?.units ?? 'lb' } : undefined),
+                ),
                 target,
               })),
             },

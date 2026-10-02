@@ -11,11 +11,11 @@ import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/c
 import { useNow } from '@/hooks/use-now';
 import { TEMPLATES } from '@/lib/exercises';
 import { formatDuration, greeting } from '@/lib/format';
-import { PROGRAMS, getProgram, planProgress, planSession } from '@/lib/programs';
+import { PROGRAMS, getProgram, lighterReason, planProgress, planSession } from '@/lib/programs';
 import { dayKeyTime } from '@/lib/recovery';
 import { activeDaysThisWeek } from '@/lib/streaks';
 import { useGymmy } from '@/store/gymmy';
-import { useProgress } from '@/store/selectors';
+import { usePlanAdvice, useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -144,6 +144,7 @@ function PlanSection() {
   const hasActive = useGymmy((s) => s.active !== null);
   const startPlanSession = useGymmy((s) => s.startPlanSession);
   const program = plan ? getProgram(plan.programId) : undefined;
+  const advice = usePlanAdvice(program, program && plan ? planProgress(program, workouts, plan.startedAt) : null);
 
   if (!plan || !program) {
     return (
@@ -184,6 +185,12 @@ function PlanSection() {
   const progress = planProgress(program, workouts, plan.startedAt);
   const next = progress.next;
   const session = next ? planSession({ programId: program.id, ...next }) : undefined;
+  const reason = advice ? lighterReason(advice) : undefined;
+  const begin = (light: boolean) => {
+    if (!next) return;
+    startPlanSession({ programId: program.id, ...next, ...(light ? { light } : {}) });
+    router.push('/workout');
+  };
   return (
     <>
       <SectionHeader title="Your plan" />
@@ -215,16 +222,26 @@ function PlanSection() {
                 {session.focus}
               </T>
             </View>
-            {!hasActive && (
-              <Button
-                title="Start"
-                onPress={() => {
-                  startPlanSession({ programId: program.id, ...next });
-                  router.push('/workout');
-                }}
-              />
-            )}
+            {!hasActive && !reason && <Button title="Start" onPress={() => begin(false)} />}
           </View>
+        )}
+        {next && !hasActive && reason && (
+          <View style={styles.lighter}>
+            <T variant="caption" color={colors.textDim}>
+              {advice?.lighter === 'readiness' ? '🔋 ' : '👋 '}
+              {reason}
+            </T>
+            <View style={{ flexDirection: 'row', gap: space.sm }}>
+              <Button title="Lighter session" style={{ flex: 1 }} onPress={() => begin(true)} testID="plan-start-lighter" />
+              <Button title="Full session" variant="secondary" style={{ flex: 1 }} onPress={() => begin(false)} />
+            </View>
+          </View>
+        )}
+        {next && advice && advice.weeksBehind > 0 && (
+          <T variant="caption" color={colors.textFaint}>
+            {advice.weeksBehind === 1 ? '1 week' : `${advice.weeksBehind} weeks`} behind the calendar. No stress: the plan
+            picks up where you left off.
+          </T>
         )}
       </Card>
     </>
@@ -277,6 +294,7 @@ const styles = StyleSheet.create({
   templates: { marginHorizontal: -space.lg },
   template: { width: 170, gap: 2, borderRadius: radius.md },
   planHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  lighter: { gap: space.sm, padding: space.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   planNext: {
     flexDirection: 'row',
     alignItems: 'center',

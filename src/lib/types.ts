@@ -35,7 +35,13 @@ export type WorkoutExercise = {
 };
 
 /** A training plan session this workout came from (weeks and sessions are 1-based). */
-export type PlanRef = { programId: string; week: number; session: number };
+export type PlanRef = {
+  programId: string;
+  week: number;
+  session: number;
+  /** Done as the lighter version; still counts as that session. */
+  light?: boolean;
+};
 
 export type PersonalRecord = {
   exerciseId: string;
