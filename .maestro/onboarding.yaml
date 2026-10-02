@@ -3,4 +3,7 @@ name: Onboarding lands on Today
 ---
 - runFlow: common/onboard.yaml
 - assertVisible: "Alex.*"
-- assertVisible: "(?i)quick start"
+- scrollUntilVisible:
+    element: "(?i)quick start"
+    direction: DOWN
+    centerElement: true

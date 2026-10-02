@@ -10,7 +10,13 @@ name: Create a custom exercise from the picker
 - tapOn: "Add exercises"
 - tapOn: "Search exercises"
 - inputText: "Landmine"
+- hideKeyboard
 - tapOn: ".*Create .Landmine.*"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Save exercise"
+    direction: DOWN
+    centerElement: true
 - tapOn: "Save exercise"
 - assertVisible: ".*Landmine.*"
 - assertVisible:

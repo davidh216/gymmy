@@ -6,6 +6,7 @@ appId: com.davidh216.gymmy
 - tapOn: "Let's go"
 - tapOn: "Your name"
 - inputText: "Alex"
+- hideKeyboard
 - tapOn: "Continue"
 - tapOn: "Continue"
 - tapOn: "Start with Kong"

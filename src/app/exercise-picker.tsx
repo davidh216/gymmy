@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Chip, Icon, T, haptic } from '@/components/ui';
@@ -39,7 +39,10 @@ export default function ExercisePicker() {
   };
 
   return (
-    <View style={[styles.root, { paddingBottom: insets.bottom + space.md }]}>
+    // Keeps the Add button above the keyboard while searching.
+    <KeyboardAvoidingView
+      style={[styles.root, { paddingBottom: insets.bottom + space.md }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.header}>
         <T variant="title">Add exercises</T>
         <Pressable onPress={() => router.back()} hitSlop={12}>
@@ -73,6 +76,7 @@ export default function ExercisePicker() {
         data={results}
         keyExtractor={(e) => e.id}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingHorizontal: space.lg }}
         renderItem={({ item }) => {
           const index = selected.indexOf(item.id);
@@ -140,7 +144,7 @@ export default function ExercisePicker() {
           }}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
