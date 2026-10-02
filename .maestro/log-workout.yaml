@@ -2,6 +2,10 @@ appId: com.davidh216.gymmy
 name: Log a set and finish a workout
 ---
 - runFlow: common/onboard.yaml
+- scrollUntilVisible:
+    element: "Start empty workout"
+    direction: DOWN
+    centerElement: true
 - tapOn: "Start empty workout"
 - tapOn: "Add exercises"
 - tapOn: "Search exercises"
@@ -23,4 +27,9 @@ name: Log a set and finish a workout
 - assertVisible: "Done"
 - assertVisible: "Back Squat"
 - tapOn: "Done"
-- assertVisible: "Start empty workout"
+- assertVisible:
+    id: "today"
+- scrollUntilVisible:
+    element: "(?i)recent"
+    direction: DOWN
+    centerElement: true

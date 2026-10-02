@@ -5,6 +5,7 @@ name: Daily recovery check-in earns gems
 - scrollUntilVisible:
     element: "Daily check-in"
     direction: DOWN
+    centerElement: true
 - tapOn: "Daily check-in"
 - tapOn: "Soreness: Light"
 - tapOn: "Energy: Good"
@@ -12,5 +13,6 @@ name: Daily recovery check-in earns gems
 - scrollUntilVisible:
     element: "Save check-in.*"
     direction: DOWN
+    centerElement: true
 - tapOn: "Save check-in.*"
 - assertVisible: "Saved!.*"

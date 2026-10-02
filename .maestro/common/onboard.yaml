@@ -9,4 +9,8 @@ appId: com.davidh216.gymmy
 - tapOn: "Continue"
 - tapOn: "Continue"
 - tapOn: "Start with Kong"
-- assertVisible: "Start empty workout"
+# The header is always on screen; buttons further down may need a scroll.
+- extendedWaitUntil:
+    visible:
+      id: "today"
+    timeout: 15000

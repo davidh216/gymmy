@@ -44,7 +44,7 @@ export default function Today() {
   return (
     <Screen
       header={
-        <View style={styles.header}>
+        <View style={styles.header} testID="today">
           <View style={{ flex: 1 }}>
             <T variant="caption" color={colors.textDim}>
               {greeting(now)},

@@ -5,6 +5,7 @@ name: Start a training plan session
 - scrollUntilVisible:
     element: "HYROX Prep"
     direction: DOWN
+    centerElement: true
 - tapOn: "HYROX Prep"
 - tapOn: "Start this plan"
 - assertVisible: "Week 1 of 8"

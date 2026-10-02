@@ -2,6 +2,10 @@ appId: com.davidh216.gymmy
 name: Create a custom exercise from the picker
 ---
 - runFlow: common/onboard.yaml
+- scrollUntilVisible:
+    element: "Start empty workout"
+    direction: DOWN
+    centerElement: true
 - tapOn: "Start empty workout"
 - tapOn: "Add exercises"
 - tapOn: "Search exercises"

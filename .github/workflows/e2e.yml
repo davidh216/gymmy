@@ -71,6 +71,17 @@ jobs:
       - name: Run Maestro flows
         run: maestro test .maestro --format junit --output maestro-report.xml
 
+      # Artifacts can't always be downloaded, so print what was on screen when a flow failed.
+      - name: Show the screen after a failure
+        if: failure()
+        run: |
+          for f in ~/.maestro/tests/*/commands-*.json; do
+            echo "== $f"
+            grep -o '"message" *: *"[^"]*"' "$f" | sort -u | head -20 || true
+          done
+          echo "== Elements on screen now"
+          maestro hierarchy 2>/dev/null | grep -oE '"(accessibilityText|text|resource-id|title|value)" *: *"[^"]+"' | sort -u | head -150 || true
+
       - name: Save results
         if: always()
         uses: actions/upload-artifact@v4
