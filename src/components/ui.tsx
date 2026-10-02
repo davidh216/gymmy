@@ -104,6 +104,8 @@ export function Button({
       {...props}
       disabled={disabled}
       accessibilityRole="button"
+      // Just the title, so VoiceOver (and UI tests) don't read the icon name too.
+      accessibilityLabel={props.accessibilityLabel ?? title}
       onPress={(e) => {
         haptic(variant === 'primary' ? 'medium' : 'light');
         onPress?.(e);

@@ -3,4 +3,4 @@ name: Onboarding lands on Today
 ---
 - runFlow: common/onboard.yaml
 - assertVisible: "Alex.*"
-- assertVisible: "Quick start"
+- assertVisible: "(?i)quick start"

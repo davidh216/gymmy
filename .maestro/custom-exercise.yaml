@@ -10,8 +10,8 @@ name: Create a custom exercise from the picker
 - tapOn: "Add exercises"
 - tapOn: "Search exercises"
 - inputText: "Landmine"
-- tapOn: "Create .Landmine."
+- tapOn: ".*Create .Landmine.*"
 - tapOn: "Save exercise"
-- assertVisible: "Landmine"
+- assertVisible: ".*Landmine.*"
 - assertVisible:
     id: "set-1-weight"

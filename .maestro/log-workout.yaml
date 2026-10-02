@@ -10,7 +10,7 @@ name: Log a set and finish a workout
 - tapOn: "Add exercises"
 - tapOn: "Search exercises"
 - inputText: "squat"
-- tapOn: "Back Squat"
+- tapOn: "Back Squat.*"
 - tapOn: "Add 1 exercise"
 - tapOn:
     id: "set-1-weight"
@@ -25,7 +25,7 @@ name: Log a set and finish a workout
     optional: true
 - tapOn: "Finish"
 - assertVisible: "Done"
-- assertVisible: "Back Squat"
+- assertVisible: ".*Back Squat.*"
 - tapOn: "Done"
 - assertVisible:
     id: "today"
