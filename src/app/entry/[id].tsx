@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Clip } from '@/components/clip';
 import { CompanionAvatar } from '@/components/companion-avatar';
+import { ErrorState } from '@/components/error-state';
 import { Button, Card, SectionHeader, T, haptic } from '@/components/ui';
 import { formatResult, getChallenge } from '@/lib/challenges';
 import { confirm } from '@/lib/confirm';
@@ -14,6 +15,7 @@ import type { ReportKind } from '@/lib/leaderboard';
 import { useMeId } from '@/services/gyms';
 import { useBlockUser, useEntry, useGym, useReportEntry } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
+import { friendlyError } from '@/lib/errors';
 import { colors, radius, space } from '@/theme';
 
 const REASONS: Record<ReportKind, { title: string; blurb: string; reasons: string[] }> = {
@@ -32,7 +34,7 @@ const REASONS: Record<ReportKind, { title: string; blurb: string; reasons: strin
 export default function EntryScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: entry, isLoading } = useEntry(id);
+  const { data: entry, isLoading, isError, error, refetch, isRefetching } = useEntry(id);
   const { data: gym } = useGym(entry?.gymId ?? '');
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const report = useReportEntry();
@@ -41,6 +43,14 @@ export default function EntryScreen() {
   const meId = useMeId();
 
   if (isLoading) return <View style={styles.root} />;
+  if (isError && !entry) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <ErrorState error={error} action="load this entry" onRetry={() => refetch()} retrying={isRefetching} />
+        <Button title="Close" variant="ghost" onPress={() => router.back()} />
+      </View>
+    );
+  }
   if (!entry) {
     return (
       <View style={[styles.root, styles.center]}>
@@ -55,9 +65,11 @@ export default function EntryScreen() {
 
   const submitReport = (kind: ReportKind, reason: string) => {
     haptic('medium');
-    report.mutate({ id: entry.id, kind, reason });
     setPicking(null);
-    if (kind === 'inappropriate') router.back();
+    report.mutate(
+      { id: entry.id, kind, reason },
+      { onSuccess: () => kind === 'inappropriate' && router.back() },
+    );
   };
 
   return (
@@ -148,13 +160,17 @@ export default function EntryScreen() {
                   'You won’t see their entries or videos anywhere in Gymmy.',
                   'Block',
                   () => {
-                    block.mutate(entry.athlete.id);
-                    router.back();
+                    block.mutate(entry.athlete.id, { onSuccess: () => router.back() });
                   },
                 )
               }
             />
           </>
+        )}
+        {(report.isError || block.isError) && (
+          <T variant="caption" color={colors.danger} style={{ textAlign: 'center', marginTop: space.md }}>
+            {friendlyError(report.error ?? block.error, report.isError ? 'send your report' : 'block this person')}
+          </T>
         )}
       </ScrollView>
     </View>

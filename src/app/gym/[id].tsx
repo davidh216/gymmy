@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { BackHeader } from '@/components/back-header';
+import { ErrorState } from '@/components/error-state';
 import { Screen } from '@/components/screen';
 import { Button, Card, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import { CHALLENGES, formatResult, type Challenge } from '@/lib/challenges';
@@ -12,15 +13,24 @@ import { medalFor } from '@/lib/leaderboard';
 import { useMeId } from '@/services/gyms';
 import { useBoard, useGym, useJoinGym, useLeaveGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
+import { friendlyError } from '@/lib/errors';
 import { colors, radius, space } from '@/theme';
 
 export default function GymScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isGlobal = id === 'global';
-  const { data: gym, isLoading } = useGym(id);
+  const { data: gym, isLoading, isError, error, refetch, isRefetching } = useGym(id);
   const join = useJoinGym();
   const leave = useLeaveGym();
   const [copied, setCopied] = useState(false);
+
+  if (!isGlobal && isError && !gym) {
+    return (
+      <Screen header={<BackHeader title="Gym" />}>
+        <ErrorState error={error} action="load this gym" onRetry={() => refetch()} retrying={isRefetching} />
+      </Screen>
+    );
+  }
 
   if (!isGlobal && !isLoading && !gym) {
     return (
@@ -70,13 +80,16 @@ export default function GymScreen() {
             Join to post attempts and get alerts when someone takes your spot.
           </T>
           <Button
-            title="Join gym"
-            onPress={() => {
-              haptic('success');
-              join.mutate(gym.id);
-            }}
+            title={join.isPending ? 'Joining…' : 'Join gym'}
+            disabled={join.isPending}
+            onPress={() => join.mutate(gym.id, { onSuccess: () => haptic('success') })}
           />
         </Card>
+      )}
+      {(join.isError || leave.isError) && (
+        <T variant="caption" color={colors.danger} style={{ marginBottom: space.md }}>
+          {friendlyError(join.error ?? leave.error, join.isError ? `join ${gym?.name ?? 'this gym'}` : 'leave this gym')}
+        </T>
       )}
 
       <SectionHeader title="Challenges" />
@@ -91,8 +104,7 @@ export default function GymScreen() {
           style={{ marginTop: space.xl }}
           onPress={() =>
             confirm(`Leave ${gym.name}?`, 'Your entries stay on its boards. You can rejoin any time.', 'Leave', () => {
-              leave.mutate(gym.id);
-              router.back();
+              leave.mutate(gym.id, { onSuccess: () => router.back() });
             })
           }
         />

@@ -4,12 +4,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BackHeader } from '@/components/back-header';
 import { BoardRowView } from '@/components/gym-parts';
+import { ErrorState } from '@/components/error-state';
 import { Screen } from '@/components/screen';
 import { Button, Card, Chip, SectionHeader, T } from '@/components/ui';
 import { getChallenge, supportsPoundForPound } from '@/lib/challenges';
 import type { BoardMode } from '@/lib/leaderboard';
 import { useBoard, useGym, useJoinGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
+import { friendlyError } from '@/lib/errors';
 import { colors, space } from '@/theme';
 
 export default function BoardScreen() {
@@ -19,7 +21,7 @@ export default function BoardScreen() {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const [mode, setMode] = useState<BoardMode>('open');
   const [showRules, setShowRules] = useState(false);
-  const { data: board, isLoading } = useBoard(gymId, challenge.id, mode);
+  const { data: board, isLoading, isError, error, refetch, isRefetching } = useBoard(gymId, challenge.id, mode);
   const { data: gym } = useGym(gymId ?? 'global');
   const join = useJoinGym();
 
@@ -53,6 +55,10 @@ export default function BoardScreen() {
         </Card>
       )}
 
+      {isError && !board && (
+        <ErrorState error={error} action="load the leaderboard" onRetry={() => refetch()} retrying={isRefetching} />
+      )}
+
       {!isLoading && board && board.rows.length === 0 && (
         <Card style={styles.empty}>
           <T style={{ fontSize: 40 }}>👑</T>
@@ -82,7 +88,19 @@ export default function BoardScreen() {
             Post attempts from one of your gyms. Your best counts here too.
           </T>
         ) : gym && !gym.isMember ? (
-          <Button size="lg" title={`Join ${gym.name} to compete`} onPress={() => join.mutate(gym.id)} />
+          <View style={{ gap: space.sm }}>
+            <Button
+              size="lg"
+              title={join.isPending ? 'Joining…' : `Join ${gym.name} to compete`}
+              disabled={join.isPending}
+              onPress={() => join.mutate(gym.id)}
+            />
+            {join.isError && (
+              <T variant="caption" color={colors.danger} style={{ textAlign: 'center' }}>
+                {friendlyError(join.error, `join ${gym.name}`)}
+              </T>
+            )}
+          </View>
         ) : (
           <Button
             size="lg"

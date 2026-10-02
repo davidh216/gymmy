@@ -4,9 +4,11 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NearbyGyms } from '@/components/nearby-gyms';
+import { ErrorState } from '@/components/error-state';
 import { Button, Card, Chip, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import type { Gym } from '@/services/gyms';
 import { useCreateGym, useGymSearch, useJoinByInvite, useJoinGym } from '@/services/gyms/queries';
+import { friendlyError, isNetworkError } from '@/lib/errors';
 import { colors, radius, space } from '@/theme';
 
 type Tab = 'find' | 'home' | 'invite';
@@ -49,7 +51,8 @@ function openGym(gym: Gym) {
 function FindTab() {
   const [query, setQuery] = useState('');
   const [adding, setAdding] = useState(false);
-  const { data: allResults = [] } = useGymSearch(query);
+  const { data: allResults = [], isError: searchFailed, error: searchError } = useGymSearch(query);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [nearbyIds, setNearbyIds] = useState<string[]>([]);
   // Gyms already listed under "Near you" aren't repeated here.
   const results = allResults.filter((g) => !g.placeId || !nearbyIds.includes(g.placeId));
@@ -73,6 +76,12 @@ function FindTab() {
       </View>
       <NearbyGyms filter={query} onOpen={openGym} onPlaces={setNearbyIds} />
 
+      {searchFailed && <ErrorState error={searchError} action="search gyms on Gymmy" />}
+      {joinError && (
+        <T variant="caption" color={colors.danger} style={{ marginBottom: space.sm }}>
+          {joinError}
+        </T>
+      )}
       {results.length > 0 && <SectionHeader title="On Gymmy" />}
       {results.map((g) => (
         <Card key={g.id} style={styles.result}>
@@ -89,10 +98,16 @@ function FindTab() {
           ) : (
             <Button
               title="Join"
+              disabled={join.isPending}
               onPress={async () => {
-                haptic('success');
-                await join.mutateAsync(g.id);
-                openGym(g);
+                setJoinError(null);
+                try {
+                  await join.mutateAsync(g.id);
+                  haptic('success');
+                  openGym(g);
+                } catch (e) {
+                  setJoinError(friendlyError(e, `join ${g.name}`));
+                }
               }}
             />
           )}
@@ -167,7 +182,7 @@ function CreateTab({
             haptic('success');
             openGym(gym);
           } catch (e) {
-            setError(e instanceof Error ? e.message : 'Couldn’t create the gym. Try again.');
+            setError(isNetworkError(e) || !(e instanceof Error) ? friendlyError(e, 'create the gym') : e.message);
           }
         }}
       />
