@@ -25,6 +25,13 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # Expo SDK 57 needs Xcode 26; the runner defaults to an older one.
+      - name: Select the newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Using $XCODE"
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+
       # ios/ is generated (Continuous Native Generation), only inside CI.
       - name: Generate the iOS project
         run: npx expo prebuild --platform ios --clean
