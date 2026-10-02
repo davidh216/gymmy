@@ -19,4 +19,11 @@ do $$ begin
   raise exception 'FAILED: unknown challenge accepted';
 exception when check_violation then raise notice 'ok - unknown challenges are still refused';
 end $$;
+
+-- 20261009000000_sync_custom_plans.sql: custom plans sync.
+select set_config('request.jwt.claim.sub', (select id::text from public.profiles where username = 'alice'), false);
+set role authenticated;
+select pg_temp.check(public.sync_push('[{"kind":"custom_program","id":"custom-1","data":{"name":"PPL"},"updated_at":"2026-10-02T10:00:00Z"}]') = 1,
+  'custom plans sync');
+reset role;
 \echo ALL CHALLENGE DB TESTS PASSED

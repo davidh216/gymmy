@@ -1,14 +1,15 @@
 import type { Exercise } from './exercises';
+import type { CustomProgram } from './programs';
 import type { CheckIn } from './recovery';
 import type { Workout } from './types';
 
 /**
- * Cloud sync works on records: one per workout, check-in, custom exercise, companion and
+ * Cloud sync works on records: one per workout, check-in, custom exercise, custom plan, companion and
  * claimed milestone, plus one "meta" record for profile, XP, gems and settings. Each local
  * change marks its record dirty; dirty records are pushed, and records changed elsewhere are
  * pulled and merged. The newest edit of a record wins.
  */
-export type SyncKind = 'meta' | 'workout' | 'check_in' | 'custom_exercise' | 'companion' | 'milestone';
+export type SyncKind = 'meta' | 'workout' | 'check_in' | 'custom_exercise' | 'custom_program' | 'companion' | 'milestone';
 
 export type SyncRecord = {
   kind: SyncKind;
@@ -32,6 +33,7 @@ export type Syncable = {
   workouts: Workout[];
   checkIns: Record<string, CheckIn>;
   customExercises: (Exercise & { createdAt: number })[];
+  customPrograms: CustomProgram[];
   collection: Record<string, Owned>;
   claimedMilestones: Record<string, number>;
 };
@@ -52,6 +54,7 @@ export function recordsOf(s: Syncable): Map<string, unknown> {
   for (const w of s.workouts) if (w.source !== 'health') out.set(recordKey('workout', w.id), w);
   for (const c of Object.values(s.checkIns)) out.set(recordKey('check_in', c.date), c);
   for (const e of s.customExercises) out.set(recordKey('custom_exercise', e.id), e);
+  for (const p of s.customPrograms) out.set(recordKey('custom_program', p.id), p);
   for (const [id, owned] of Object.entries(s.collection)) out.set(recordKey('companion', id), owned);
   for (const [id, claimedAt] of Object.entries(s.claimedMilestones)) out.set(recordKey('milestone', id), { claimedAt });
   return out;
@@ -74,6 +77,7 @@ export function changedKeys(prev: Syncable, next: Syncable): string[] {
   };
   diff('workout', prev.workouts, next.workouts, (w) => w.id, (w) => w.source !== 'health');
   diff('custom_exercise', prev.customExercises, next.customExercises, (e) => e.id);
+  diff('custom_program', prev.customPrograms, next.customPrograms, (p) => p.id);
   const byId = <V>(kind: SyncKind, a: Record<string, V>, b: Record<string, V>) => {
     if (a === b) return;
     for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) if (a[id] !== b[id]) keys.push(recordKey(kind, id));
@@ -110,6 +114,7 @@ export function applyRecords(
   const workouts = new Map(local.workouts.map((w) => [w.id, w]));
   const checkIns = { ...local.checkIns };
   const custom = new Map(local.customExercises.map((e) => [e.id, e]));
+  const programs = new Map(local.customPrograms.map((p) => [p.id, p]));
   const collection = { ...local.collection };
   const claimed = { ...local.claimedMilestones };
   let meta: Partial<Syncable> = {};
@@ -134,6 +139,10 @@ export function applyRecords(
       case 'custom_exercise':
         if (r.deleted) custom.delete(r.id);
         else custom.set(r.id, r.data as Syncable['customExercises'][number]);
+        break;
+      case 'custom_program':
+        if (r.deleted) programs.delete(r.id);
+        else programs.set(r.id, r.data as CustomProgram);
         break;
       case 'companion': {
         const remote = r.data as Owned | undefined;
@@ -165,6 +174,7 @@ export function applyRecords(
     workouts: [...workouts.values()].sort((a, b) => b.endedAt - a.endedAt),
     checkIns,
     customExercises: [...custom.values()].sort((a, b) => b.createdAt - a.createdAt),
+    customPrograms: [...programs.values()].sort((a, b) => b.createdAt - a.createdAt),
     collection,
     claimedMilestones: claimed,
   };

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- inside a jest.mock factory */
 import { fromDisplayWeight, toDisplayWeight } from '@/lib/format';
+import { getProgram } from '@/lib/programs';
 import { lighterLoad, useGymmy } from '@/store/gymmy';
 
 // Hoisted above the import by Jest.
@@ -50,4 +51,33 @@ it('loads about 90% on lighter plan days, in steps the plates can make', () => {
   // 225 lb → 202.5 → 200 lb
   expect(toDisplayWeight(lighterLoad(fromDisplayWeight(225, 'lb'), 'lb'), 'lb')).toBe(200);
   expect(lighterLoad(1, 'kg')).toBe(2.5);
+});
+
+it('saves custom plans that work like built-in ones, and leaves them when deleted', () => {
+  const id = store().saveCustomProgram({
+    name: '  Push Pull Legs ',
+    emoji: '💪',
+    weeks: 6,
+    days: [
+      { name: 'Push', focus: '', exercises: [{ exerciseId: 'bench_press', sets: 4, reps: '6–8' }] },
+      { name: 'Legs', focus: '', exercises: [{ exerciseId: 'squat', sets: 5, reps: '5' }] },
+    ],
+  });
+  const program = getProgram(id)!;
+  expect(program).toMatchObject({ name: 'Push Pull Legs', weeks: 6, daysPerWeek: 2 });
+  expect(program.week(3)[1].name).toBe('Legs');
+
+  store().startPlan(id);
+  store().startPlanSession({ programId: id, week: 1, session: 2 });
+  expect(store().active).toMatchObject({ name: 'Push Pull Legs · Legs', exercises: [{ exerciseId: 'squat' }] });
+  expect(store().active!.exercises[0].sets).toHaveLength(5);
+  store().discardWorkout();
+
+  store().saveCustomProgram({ name: 'PPL', emoji: '🔥', weeks: 8, days: program.week(1) }, id);
+  expect(getProgram(id)?.name).toBe('PPL');
+  expect(store().customPrograms).toHaveLength(1);
+
+  store().deleteCustomProgram(id);
+  expect(getProgram(id)).toBeUndefined();
+  expect(store().plan).toBeNull();
 });

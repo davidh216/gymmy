@@ -24,6 +24,7 @@ const state = (patch: Partial<Syncable> = {}): Syncable => ({
   workouts: [],
   checkIns: {},
   customExercises: [],
+  customPrograms: [],
   collection: { kong: { stars: 1, obtainedAt: 5 } },
   claimedMilestones: {},
   ...patch,
@@ -119,5 +120,36 @@ describe('applyRecords', () => {
 
   it('does nothing for an empty pull', () => {
     expect(applyRecords(state(), [], { dirty: {}, firstSync: false })).toEqual({});
+  });
+});
+
+describe('custom plans', () => {
+  const plan = {
+    id: 'custom-1',
+    name: 'Push Pull Legs',
+    emoji: '💪',
+    weeks: 8,
+    days: [{ name: 'Push', focus: '', exercises: [{ exerciseId: 'bench_press', sets: 4, reps: '8' }] }],
+    createdAt: 1,
+    updatedAt: 1,
+  };
+
+  it('syncs as their own records, including deletes', () => {
+    const before = state();
+    const after = { ...before, customPrograms: [plan] };
+    expect(changedKeys(before, after)).toEqual(['custom_program:custom-1']);
+    expect(pushRecords(after, { 'custom_program:custom-1': 9 })[0]).toMatchObject({ kind: 'custom_program', data: plan });
+    expect(changedKeys(after, before)).toEqual(['custom_program:custom-1']);
+
+    const merged = applyRecords(before, [{ kind: 'custom_program', id: 'custom-1', data: plan, updatedAt: 9 }], {
+      dirty: {},
+      firstSync: false,
+    });
+    expect(merged.customPrograms).toEqual([plan]);
+    const gone = applyRecords(after, [{ kind: 'custom_program', id: 'custom-1', deleted: true, updatedAt: 10 }], {
+      dirty: {},
+      firstSync: false,
+    });
+    expect(gone.customPrograms).toEqual([]);
   });
 });

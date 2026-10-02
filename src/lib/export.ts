@@ -81,6 +81,7 @@ export function fullExport(state: Record<string, unknown>, now: number): string 
     'workouts',
     'checkIns',
     'customExercises',
+    'customPrograms',
     'plan',
     'claimedMilestones',
     'collection',

@@ -168,7 +168,7 @@ async function run() {
 export async function switchToThisAccount() {
   applyingRemote = true;
   try {
-    useGymmy.setState({ workouts: [], checkIns: {}, customExercises: [], claimedMilestones: {} });
+    useGymmy.setState({ workouts: [], checkIns: {}, customExercises: [], customPrograms: [], claimedMilestones: {} });
   } finally {
     applyingRemote = false;
   }

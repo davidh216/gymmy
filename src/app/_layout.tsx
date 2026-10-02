@@ -71,6 +71,7 @@ function RootLayout() {
             />
             <Stack.Screen name="exercise-picker" options={{ presentation: 'modal' }} />
             <Stack.Screen name="exercise-edit" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="plan-edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="session/[id]" options={{ presentation: 'modal' }} />
             <Stack.Screen name="gym/[id]" />
             <Stack.Screen name="board/[gymId]/[challengeId]" />

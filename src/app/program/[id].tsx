@@ -8,7 +8,14 @@ import { Button, Card, Chip, ProgressBar, T, haptic } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
 import { getExercise } from '@/lib/exercises';
 import { formatTarget } from '@/lib/format';
-import { getProgram, isSessionDone, lighterReason, planProgress, type PlanSession } from '@/lib/programs';
+import {
+  getProgram,
+  isCustomProgram,
+  isSessionDone,
+  lighterReason,
+  planProgress,
+  type PlanSession,
+} from '@/lib/programs';
 import { bucket } from '@/lib/analytics';
 import { track } from '@/services/analytics';
 import { useGymmy } from '@/store/gymmy';
@@ -71,7 +78,22 @@ export default function ProgramScreen() {
   };
 
   return (
-    <Screen header={<BackHeader title={program.name} subtitle={program.tagline} />}>
+    <Screen
+      header={
+        <BackHeader
+          title={program.name}
+          subtitle={program.tagline}
+          right={
+            isCustomProgram(program.id) ? (
+              <Button
+                title="Edit"
+                variant="secondary"
+                onPress={() => router.push({ pathname: '/plan-edit', params: { id: program.id } })}
+              />
+            ) : undefined
+          }
+        />
+      }>
       <Card style={{ gap: space.md }}>
         <View style={styles.hero}>
           <T style={{ fontSize: 44 }}>{program.emoji}</T>

@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,11 +10,15 @@ import { formatAgo, formatSet } from '@/lib/format';
 import { lastSessions } from '@/lib/records';
 import { useExerciseSync } from '@/services/exercises';
 import { useGymmy } from '@/store/gymmy';
+import { usePicked } from '@/store/picker';
 import { colors, radius, space } from '@/theme';
 
 export default function ExercisePicker() {
   const insets = useSafeAreaInsets();
   const addExercises = useGymmy((s) => s.addExercises);
+  // Opened from the plan builder: hand the picks back instead of adding them to a workout.
+  const { for: forTarget } = useLocalSearchParams<{ for?: string }>();
+  const deliver = usePicked((s) => s.deliver);
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState<MuscleGroup | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
@@ -30,7 +34,7 @@ export default function ExercisePicker() {
   const create = () =>
     router.push({
       pathname: '/exercise-edit',
-      params: { name: query.trim(), add: '1', with: selected.join(',') },
+      params: forTarget ? { name: query.trim() } : { name: query.trim(), add: '1', with: selected.join(',') },
     });
 
   const toggle = (id: string) => {
@@ -139,7 +143,8 @@ export default function ExercisePicker() {
           title={selected.length ? `Add ${selected.length} exercise${selected.length > 1 ? 's' : ''}` : 'Select exercises'}
           disabled={!selected.length}
           onPress={() => {
-            addExercises(selected);
+            if (forTarget) deliver(selected);
+            else addExercises(selected);
             router.back();
           }}
         />

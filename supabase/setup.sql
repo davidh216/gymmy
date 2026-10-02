@@ -1083,3 +1083,9 @@ alter table public.entries add constraint entries_challenge_id_check check (chal
   'bench_1rm', 'squat_1rm', 'deadlift_1rm', 'ohp_1rm',
   'pullups_max', 'pushups_1min', 'plank_hold', 'row_500m',
   'row_2k', 'run_1mi', 'run_5k', 'farmers_carry'));
+
+-- ===== 20261009000000_sync_custom_plans.sql =====
+-- Custom training plans sync like custom exercises. Safe to re-run.
+alter table public.sync_records drop constraint if exists sync_records_kind_check;
+alter table public.sync_records add constraint sync_records_kind_check check (kind in (
+  'meta', 'workout', 'check_in', 'custom_exercise', 'custom_program', 'companion', 'milestone'));

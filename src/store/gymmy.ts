@@ -8,7 +8,13 @@ import { getExercise, setExtraExercises, tidyExerciseName, type Exercise } from 
 import { defaultWorkoutName, fromDisplayWeight, toDisplayWeight, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import { getMilestone, milestoneStats } from '@/lib/milestones';
-import { getProgram, planSession, targetReps } from '@/lib/programs';
+import {
+  getProgram,
+  planSession,
+  setCustomPrograms,
+  targetReps,
+  type CustomProgram,
+} from '@/lib/programs';
 import { dayKey, type CheckIn } from '@/lib/recovery';
 import {
   STARTING_GEMS,
@@ -44,6 +50,8 @@ export type CustomExercise = Exercise & {
   submission?: { id: string; status: SubmissionStatus };
 };
 
+export type CustomProgramInput = Pick<CustomProgram, 'name' | 'emoji' | 'weeks' | 'days'>;
+
 export type CustomExerciseInput = Pick<Exercise, 'name' | 'group' | 'kind'>;
 
 type State = {
@@ -58,6 +66,8 @@ type State = {
   /** Rewards from the most recently finished workout, for the summary screen. */
   lastRewards: Rewards | null;
   customExercises: CustomExercise[];
+  /** Training plans you built. */
+  customPrograms: CustomProgram[];
   /** Approved community exercises, cached so history works offline. */
   communityExercises: Exercise[];
   /** The training plan you're following. Progress counts workouts since `startedAt`. */
@@ -100,6 +110,10 @@ type Actions = {
 
   startPlan: (programId: string) => void;
   leavePlan: () => void;
+  /** Creates a custom plan, or updates it when `id` is given. Returns its id. */
+  saveCustomProgram: (input: CustomProgramInput, id?: string) => string;
+  /** Deletes a custom plan, leaving it first if you're following it. */
+  deleteCustomProgram: (id: string) => void;
   /** Starts a workout prefilled from a plan session. */
   startPlanSession: (ref: PlanRef) => void;
   /** Grants XP and gems for achieved, unclaimed milestones. Returns what was granted. */
@@ -128,6 +142,7 @@ const initialState: State = {
   pity: EMPTY_PITY,
   lastRewards: null,
   customExercises: [],
+  customPrograms: [],
   communityExercises: [],
   plan: null,
   claimedMilestones: {},
@@ -241,6 +256,30 @@ export const useGymmy = create<State & Actions>()(
         },
 
         leavePlan: () => set({ plan: null }),
+
+        saveCustomProgram: (input, id) => {
+          const now = Date.now();
+          const existing = id ? get().customPrograms.find((p) => p.id === id) : undefined;
+          const program: CustomProgram = {
+            ...input,
+            name: input.name.trim(),
+            id: existing?.id ?? `custom-${uid()}`,
+            createdAt: existing?.createdAt ?? now,
+            updatedAt: now,
+          };
+          set((s) => ({
+            customPrograms: existing
+              ? s.customPrograms.map((p) => (p.id === program.id ? program : p))
+              : [program, ...s.customPrograms],
+          }));
+          return program.id;
+        },
+
+        deleteCustomProgram: (id) =>
+          set((s) => ({
+            customPrograms: s.customPrograms.filter((p) => p.id !== id),
+            plan: s.plan?.programId === id ? null : s.plan,
+          })),
 
         startPlanSession: (ref) => {
           const program = getProgram(ref.programId);
@@ -529,6 +568,7 @@ export const useGymmy = create<State & Actions>()(
         state.checkIns ??= {};
         state.health ??= { enabled: false };
         state.recapSeen ??= 0;
+        state.customPrograms ??= [];
         return state;
       },
     },
@@ -536,6 +576,12 @@ export const useGymmy = create<State & Actions>()(
 );
 
 // Keep exercise lookups (names, kinds) in step with your custom and community exercises.
+// Keep plan lookups in step with your custom plans.
+setCustomPrograms(useGymmy.getState().customPrograms);
+useGymmy.subscribe((s, prev) => {
+  if (s.customPrograms !== prev.customPrograms) setCustomPrograms(s.customPrograms);
+});
+
 const syncExtraExercises = (s: State) => setExtraExercises([...s.customExercises, ...s.communityExercises]);
 syncExtraExercises(useGymmy.getState());
 useGymmy.subscribe((s, prev) => {

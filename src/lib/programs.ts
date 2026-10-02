@@ -15,7 +15,7 @@ export type Program = {
   emoji: string;
   tagline: string;
   description: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Custom';
   weeks: number;
   daysPerWeek: number;
   tags: string[];
@@ -329,8 +329,63 @@ export const PROGRAMS: Program[] = [hyrox, marathon, first5k, strength, muscle];
 
 const BY_ID = new Map(PROGRAMS.map((p) => [p.id, p]));
 
+/** A plan you built yourself: the same days every week. */
+export type CustomProgram = {
+  id: string;
+  name: string;
+  emoji: string;
+  weeks: number;
+  days: PlanSession[];
+  createdAt: number;
+  updatedAt: number;
+};
+
+export const CUSTOM_PLAN_EMOJI = ['💪', '🏋️', '🏃', '🚴', '🧗', '🥊', '🧘', '🔥', '⚡', '🎯'];
+export const MAX_PLAN_WEEKS = 26;
+export const MAX_PLAN_DAYS = 7;
+
+/** A custom plan in the shape every plan screen understands. */
+export function programFromCustom(c: CustomProgram): Program {
+  const exercises = c.days.reduce((n, d) => n + d.exercises.length, 0);
+  return {
+    id: c.id,
+    name: c.name,
+    emoji: c.emoji,
+    tagline: `${c.days.length} ${c.days.length === 1 ? 'day' : 'days'} a week · ${exercises} exercises`,
+    description: 'Your own plan. The same sessions repeat each week; add weight or reps as they get easier.',
+    level: 'Custom',
+    weeks: c.weeks,
+    daysPerWeek: c.days.length,
+    tags: [],
+    week: () => c.days,
+  };
+}
+
+let custom = new Map<string, Program>();
+
+/** Keeps plan lookups in step with your custom plans. */
+export function setCustomPrograms(list: CustomProgram[]) {
+  custom = new Map(list.filter((c) => c.days.length > 0).map((c) => [c.id, programFromCustom(c)]));
+}
+
+export function isCustomProgram(id: string): boolean {
+  return id.startsWith('custom-');
+}
+
+/** A custom plan with something to train every day it lists. */
+export function validCustomProgram(c: Pick<CustomProgram, 'name' | 'weeks' | 'days'>): boolean {
+  return (
+    c.name.trim().length > 0 &&
+    c.weeks >= 1 &&
+    c.weeks <= MAX_PLAN_WEEKS &&
+    c.days.length >= 1 &&
+    c.days.length <= MAX_PLAN_DAYS &&
+    c.days.every((d) => d.exercises.length > 0)
+  );
+}
+
 export function getProgram(id: string): Program | undefined {
-  return BY_ID.get(id);
+  return BY_ID.get(id) ?? custom.get(id);
 }
 
 export function planSession(ref: PlanRef): PlanSession | undefined {
