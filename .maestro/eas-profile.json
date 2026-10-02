@@ -1,5 +1,0 @@
-{
-  "ios": { "simulator": true },
-  "distribution": "internal",
-  "env": { "EXPO_PUBLIC_GYMS_BACKEND": "local", "SENTRY_DISABLE_AUTO_UPLOAD": "true" }
-}

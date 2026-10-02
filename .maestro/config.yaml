@@ -1,0 +1,3 @@
+# Top-level flows run by `maestro test .maestro`; common/ holds shared sub-flows.
+flows:
+  - "*"
