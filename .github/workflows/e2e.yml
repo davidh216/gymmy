@@ -31,11 +31,17 @@ jobs:
 
       - name: Build for the simulator
         run: |
-          set -o pipefail
+          xcodebuild -version
+          xcrun simctl list runtimes | grep -i ios || true
+          status=0
           xcodebuild -workspace ios/Gymmy.xcworkspace -scheme Gymmy -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO \
-            | tail -n 80
+            > xcodebuild.log 2>&1 || status=$?
+          echo "xcodebuild exit: $status"
+          grep -nE "error:|fatal error|\*\* BUILD" xcodebuild.log | head -60 || true
+          tail -n 25 xcodebuild.log
+          exit $status
 
       - name: Install Maestro
         run: |
@@ -63,5 +69,6 @@ jobs:
           name: maestro-results
           path: |
             maestro-report.xml
+            xcodebuild.log
             ~/.maestro/tests
           if-no-files-found: ignore
