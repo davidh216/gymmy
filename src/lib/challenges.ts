@@ -16,6 +16,8 @@ export type Challenge = {
 };
 
 const LIFT_STANDARDS = ['Plates and bar visible', 'Full range of motion', 'Controlled lockout, no spotter help'];
+/** Endurance efforts outlast a clip, so the clip films the finish and the display. */
+const FINISH_STANDARDS = ['Clip shows the finish with the display readable', 'Distance and time visible together'];
 
 export const CHALLENGES: Challenge[] = [
   {
@@ -81,6 +83,38 @@ export const CHALLENGES: Challenge[] = [
     metric: 'seconds',
     higherIsBetter: false,
     standards: ['Monitor visible at start and finish', 'Distance set to 500 m', 'One continuous clip'],
+  },
+  {
+    id: 'row_2k',
+    name: '2 km Row',
+    measure: 'Fastest time',
+    metric: 'seconds',
+    higherIsBetter: false,
+    standards: [...FINISH_STANDARDS, 'Monitor shows 2,000 m and the time'],
+  },
+  {
+    id: 'run_1mi',
+    name: 'Mile Run',
+    measure: 'Fastest time',
+    metric: 'seconds',
+    higherIsBetter: false,
+    standards: [...FINISH_STANDARDS, 'Treadmill at 1% incline or more, or a track or GPS screen showing 1 mile'],
+  },
+  {
+    id: 'run_5k',
+    name: '5K Run',
+    measure: 'Fastest time',
+    metric: 'seconds',
+    higherIsBetter: false,
+    standards: [...FINISH_STANDARDS, 'Treadmill at 1% incline or more, or a GPS screen showing 5 km'],
+  },
+  {
+    id: 'farmers_carry',
+    name: 'Farmers Carry',
+    measure: 'Heaviest 20 m carry, weight per hand',
+    metric: 'weight',
+    higherIsBetter: true,
+    standards: ['Weights visible', '20 m marked or paced out on camera', 'No setting the weights down'],
   },
 ];
 

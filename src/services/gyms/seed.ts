@@ -53,6 +53,10 @@ const BASE: Record<string, [number, number]> = {
   pushups_1min: [25, 75],
   plank_hold: [60, 300],
   row_500m: [125, 88],
+  row_2k: [540, 400],
+  run_1mi: [480, 310],
+  run_5k: [1800, 1150],
+  farmers_carry: [60, 180],
 };
 
 // Small deterministic PRNG so the sample world is the same on every device.

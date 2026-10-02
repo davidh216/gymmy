@@ -71,3 +71,19 @@ describe('time helpers', () => {
     expect(formatSeconds(45)).toBe('45s');
   });
 });
+
+describe('endurance and carry challenges', () => {
+  it('rank the fastest 5K first and read as a race clock', () => {
+    const run = getChallenge('run_5k');
+    const ranked = rankEntries([e('a', 'u1', 1530, 1), e('b', 'u2', 1395, 2)], run, 'open');
+    expect(ranked.map((r) => r.entry.id)).toEqual(['b', 'a']);
+    expect(formatSeconds(1530)).toBe('25:30');
+    expect(parseSeconds('25:30')).toBe(1530);
+  });
+
+  it('treat the farmers carry as a loaded lift with pound-for-pound', () => {
+    const carry = getChallenge('farmers_carry');
+    expect(carry.metric).toBe('weight');
+    expect(rankEntries([e('a', 'u1', 70, 1, 70), e('b', 'u2', 60, 2, 50)], carry, 'p4p')[0].entry.id).toBe('b');
+  });
+});
