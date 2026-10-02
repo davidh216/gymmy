@@ -17,9 +17,9 @@ import {
   workoutRewards,
   type Rewards,
 } from '@/lib/progression';
-import { completedSets, detectPRs, lastPerformance } from '@/lib/records';
+import { completedSets, detectPRs, lastPerformance, lastSession } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
-import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout } from '@/lib/types';
+import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout, WorkoutExercise } from '@/lib/types';
 
 export type Profile = {
   name: string;
@@ -27,6 +27,8 @@ export type Profile = {
   username: string;
   weeklyGoal: number;
   units: Units;
+  /** Ask how hard each set felt (RPE) after checking it off. */
+  rpe?: boolean;
 };
 
 export type Owned = { stars: number; obtainedAt: number };
@@ -79,6 +81,9 @@ type Actions = {
   renameWorkout: (name: string) => void;
   addExercises: (exerciseIds: string[]) => void;
   removeExercise: (workoutExerciseId: string) => void;
+  updateExercise: (workoutExerciseId: string, patch: Partial<Pick<WorkoutExercise, 'note' | 'rest'>>) => void;
+  /** Moves an exercise up (-1) or down (+1) in the workout. */
+  moveExercise: (workoutExerciseId: string, by: -1 | 1) => void;
   addSet: (workoutExerciseId: string) => void;
   removeSet: (workoutExerciseId: string, setId: string) => void;
   updateSet: (workoutExerciseId: string, setId: string, patch: Partial<SetEntry>) => void;
@@ -135,7 +140,7 @@ const initialState: State = {
 function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
   const previous = lastPerformance(exerciseId, history);
   if (previous?.length) {
-    return previous.map((s) => ({ ...s, id: uid(), done: false }));
+    return previous.map(({ rpe: _rpe, ...s }) => ({ ...s, id: uid(), done: false }));
   }
   const kind = getExercise(exerciseId).kind;
   const count = kind === 'duration' || kind === 'distance' ? 1 : 3;
@@ -151,7 +156,7 @@ function planSets(
   target: { sets: number; reps?: string; minutes?: number; distance?: number },
   history: Workout[],
 ): SetEntry[] {
-  const previous = lastPerformance(exerciseId, history) ?? [];
+  const previous = (lastPerformance(exerciseId, history) ?? []).filter((s) => !s.warmup);
   const reps = targetReps(target.reps);
   return Array.from({ length: Math.max(1, target.sets) }, (_, i) => {
     const last = previous[Math.min(i, previous.length - 1)];
@@ -164,6 +169,18 @@ function planSets(
       done: false,
     };
   });
+}
+
+/** A new exercise in a workout, keeping your note and rest time from last time. */
+function workoutExercise(exerciseId: string, history: Workout[], sets?: SetEntry[]): WorkoutExercise {
+  const last = lastSession(exerciseId, history);
+  return {
+    id: uid(),
+    exerciseId,
+    sets: sets ?? seedSets(exerciseId, history),
+    ...(last?.note ? { note: last.note } : {}),
+    ...(last?.rest !== undefined ? { rest: last.rest } : {}),
+  };
 }
 
 /** Lowercase handle from a display name, e.g. "Alex R" -> "alexr". */
@@ -206,11 +223,7 @@ export const useGymmy = create<State & Actions>()(
               id: uid(),
               name: opts?.name ?? defaultWorkoutName(Date.now()),
               startedAt: Date.now(),
-              exercises: (opts?.exerciseIds ?? []).map((exerciseId) => ({
-                id: uid(),
-                exerciseId,
-                sets: seedSets(exerciseId, history),
-              })),
+              exercises: (opts?.exerciseIds ?? []).map((exerciseId) => workoutExercise(exerciseId, history)),
             },
           });
         },
@@ -233,10 +246,8 @@ export const useGymmy = create<State & Actions>()(
               startedAt: Date.now(),
               plan: ref,
               exercises: session.exercises.map(({ exerciseId, ...target }) => ({
-                id: uid(),
-                exerciseId,
+                ...workoutExercise(exerciseId, history, planSets(exerciseId, target, history)),
                 target,
-                sets: planSets(exerciseId, target, history),
               })),
             },
           });
@@ -326,17 +337,27 @@ export const useGymmy = create<State & Actions>()(
             ...a,
             exercises: [
               ...a.exercises,
-              ...exerciseIds.map((exerciseId) => ({
-                id: uid(),
-                exerciseId,
-                sets: seedSets(exerciseId, history),
-              })),
+              ...exerciseIds.map((exerciseId) => workoutExercise(exerciseId, history)),
             ],
           }));
         },
 
         removeExercise: (weId) =>
           mutateActive((a) => ({ ...a, exercises: a.exercises.filter((e) => e.id !== weId) })),
+
+        updateExercise: (weId, patch) =>
+          mutateActive((a) => ({ ...a, exercises: a.exercises.map((e) => (e.id === weId ? { ...e, ...patch } : e)) })),
+
+        moveExercise: (weId, by) =>
+          mutateActive((a) => {
+            const from = a.exercises.findIndex((e) => e.id === weId);
+            const to = from + by;
+            if (from < 0 || to < 0 || to >= a.exercises.length) return a;
+            const exercises = [...a.exercises];
+            const [moved] = exercises.splice(from, 1);
+            exercises.splice(to, 0, moved);
+            return { ...a, exercises };
+          }),
 
         addSet: (weId) =>
           mutateActive((a) => ({

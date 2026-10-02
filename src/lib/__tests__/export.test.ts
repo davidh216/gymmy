@@ -16,7 +16,8 @@ const workout = (patch: Partial<Workout> = {}): Workout => ({
       id: 'e1',
       exerciseId: 'squat',
       sets: [
-        { id: 'a', weight: 100, reps: 5, done: true },
+        { id: 'w', weight: 60, reps: 8, done: true, warmup: true },
+        { id: 'a', weight: 100, reps: 5, done: true, rpe: 8.5 },
         { id: 'b', weight: 120, reps: 3, done: false },
       ],
     },
@@ -46,10 +47,11 @@ describe('workoutsCsv', () => {
     const lines = workoutsCsv([workout(), workout({ id: 'h', name: 'Run', source: 'health', startedAt: at - 86400_000, endedAt: at - 86000_000 })], 'lb')
       .trim()
       .split('\n');
-    expect(lines[0]).toBe('date,workout,exercise,set,weight_lb,reps,minutes,distance_mi,source');
+    expect(lines[0]).toBe('date,workout,exercise,set,weight_lb,reps,minutes,distance_mi,rpe,warmup,source');
     expect(lines[1]).toContain('Apple Health');
-    expect(lines).toContain('2026-10-01 18:05,"Leg day, heavy",Back Squat,1,220.5,5,,,Gymmy');
-    expect(lines).toContain('2026-10-01 18:05,"Leg day, heavy",Run,1,,,25.5,3.11,Gymmy');
+    expect(lines).toContain('2026-10-01 18:05,"Leg day, heavy",Back Squat,1,132.3,8,,,,yes,Gymmy');
+    expect(lines).toContain('2026-10-01 18:05,"Leg day, heavy",Back Squat,2,220.5,5,,,8.5,no,Gymmy');
+    expect(lines).toContain('2026-10-01 18:05,"Leg day, heavy",Run,1,,,25.5,3.11,,no,Gymmy');
     expect(lines.some((l) => l.includes('264.6'))).toBe(false);
   });
 });

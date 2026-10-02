@@ -48,7 +48,7 @@ export function progressSeries(exerciseId: string, workouts: Workout[]): Progres
   const kind = getExercise(exerciseId).kind;
   const points: ProgressPoint[] = [];
   for (const w of [...workouts].sort((a, b) => a.endedAt - b.endedAt)) {
-    const sets = w.exercises.filter((e) => e.exerciseId === exerciseId).flatMap((e) => e.sets.filter((s) => s.done));
+    const sets = w.exercises.filter((e) => e.exerciseId === exerciseId).flatMap((e) => e.sets.filter((s) => s.done && !s.warmup));
     let best: { value: number; set: SetEntry } | null = null;
     for (const s of sets) {
       const v = valueOf(kind, s);

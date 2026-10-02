@@ -53,7 +53,7 @@ function totals(workouts: Workout[]): WeekTotals {
     sets += completedSets(w.exercises);
     volumeKg += volume(w.exercises);
     minutes += Math.max(0, w.endedAt - w.startedAt) / 60_000;
-    for (const e of w.exercises) for (const s of e.sets) if (s.done && s.distance) distanceKm += s.distance;
+    for (const e of w.exercises) for (const s of e.sets) if (s.done && !s.warmup && s.distance) distanceKm += s.distance;
   }
   return {
     days: days.size,

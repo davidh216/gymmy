@@ -121,6 +121,22 @@ export default function Profile() {
         <Chip label="Kilograms (kg)" active={profile.units === 'kg'} onPress={() => updateProfile({ units: 'kg' })} />
       </Card>
 
+      <SectionHeader title="Logging" />
+      <Card style={styles.link}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T variant="heading">Ask for RPE</T>
+          <T variant="caption" color={colors.textDim}>
+            After each set, rate how hard it felt from 6 (easy) to 10 (nothing left).
+          </T>
+        </View>
+        <Switch
+          value={profile.rpe ?? false}
+          onValueChange={(rpe) => updateProfile({ rpe })}
+          trackColor={{ true: colors.accent, false: colors.cardHigh }}
+          testID="profile-rpe"
+        />
+      </Card>
+
       {analyticsAvailable && (
         <>
           <SectionHeader title="Privacy" />

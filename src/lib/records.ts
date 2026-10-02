@@ -11,7 +11,7 @@ export function e1rm(weight: number, reps: number): number {
 
 /** Comparable score for a completed set, or null if it doesn't count. */
 export function setScore(exerciseId: string, set: SetEntry): number | null {
-  if (!set.done) return null;
+  if (!set.done || set.warmup) return null;
   switch (getExercise(exerciseId).kind) {
     case 'weight':
       return set.weight && set.reps ? e1rm(set.weight, set.reps) : null;
@@ -27,7 +27,7 @@ export function setScore(exerciseId: string, set: SetEntry): number | null {
 /** A finished set with something logged. Distance sets can be time-only (e.g. older runs). */
 export function setLogged(exerciseId: string, set: SetEntry): boolean {
   if (setScore(exerciseId, set) !== null) return true;
-  return set.done && getExercise(exerciseId).kind === 'distance' && Boolean(set.minutes);
+  return set.done && !set.warmup && getExercise(exerciseId).kind === 'distance' && Boolean(set.minutes);
 }
 
 export function bestScore(exercise: WorkoutExercise): number | null {
@@ -82,7 +82,7 @@ export function volume(exercises: WorkoutExercise[]): number {
   let total = 0;
   for (const ex of exercises) {
     if (getExercise(ex.exerciseId).kind !== 'weight') continue;
-    for (const s of ex.sets) if (s.done && s.weight && s.reps) total += s.weight * s.reps;
+    for (const s of ex.sets) if (s.done && !s.warmup && s.weight && s.reps) total += s.weight * s.reps;
   }
   return total;
 }
@@ -99,7 +99,7 @@ export function lastPerformance(exerciseId: string, history: Workout[]): SetEntr
 export function topSet(kind: ExerciseKind, sets: SetEntry[]): SetEntry | null {
   let top: SetEntry | null = null;
   for (const s of sets) {
-    if (!s.done) continue;
+    if (!s.done || s.warmup) continue;
     if (kind === 'weight') {
       if (!s.weight || !s.reps) continue;
       if (!top || s.weight > top.weight! || (s.weight === top.weight && s.reps > top.reps!)) top = s;
@@ -119,7 +119,14 @@ export function topSet(kind: ExerciseKind, sets: SetEntry[]): SetEntry | null {
   return top;
 }
 
-export type SessionStats = { endedAt: number; sets: SetEntry[]; top: SetEntry };
+export type SessionStats = {
+  endedAt: number;
+  sets: SetEntry[];
+  top: SetEntry;
+  /** That session's note and rest time, which carry over. */
+  note?: string;
+  rest?: number;
+};
 
 /** Latest finished session of an exercise and its top set. */
 export function lastSession(exerciseId: string, history: Workout[]): SessionStats | null {
@@ -130,7 +137,7 @@ export function lastSession(exerciseId: string, history: Workout[]): SessionStat
     for (const e of w.exercises) {
       if (e.exerciseId !== exerciseId) continue;
       const top = topSet(kind, e.sets);
-      if (top) latest = { endedAt: w.endedAt, sets: e.sets.filter((s) => s.done), top };
+      if (top) latest = { endedAt: w.endedAt, sets: e.sets.filter((s) => s.done), top, note: e.note, rest: e.rest };
     }
   }
   return latest;

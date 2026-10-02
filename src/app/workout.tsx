@@ -12,7 +12,7 @@ import {
 import Animated, { FadeInDown, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Icon, T, haptic } from '@/components/ui';
+import { Button, Chip, Icon, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { getExercise, type ExerciseKind } from '@/lib/exercises';
@@ -30,6 +30,7 @@ import {
   toDisplayDistance,
   toDisplayWeight,
 } from '@/lib/format';
+import { BARS, PLATES, RPE_CHOICES, formatPlates, plateLoad, rpeLabel } from '@/lib/plates';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { saveWorkoutToHealth } from '@/services/health';
@@ -60,9 +61,10 @@ export default function WorkoutScreen() {
 
   if (!active) return null;
 
-  const startRest = () => {
-    setRestTotal(DEFAULT_REST);
-    setRestUntil(Date.now() + DEFAULT_REST * 1000);
+  const startRest = (seconds: number) => {
+    if (seconds <= 0) return;
+    setRestTotal(seconds);
+    setRestUntil(Date.now() + seconds * 1000);
   };
 
   const doneCount = active.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0);
@@ -117,9 +119,16 @@ export default function WorkoutScreen() {
           {doneCount} {doneCount === 1 ? 'set' : 'sets'} done · tap ✓ to log a set
         </T>
 
-        {active.exercises.map((we) => (
+        {active.exercises.map((we, i) => (
           <Animated.View key={we.id} layout={LinearTransition} entering={FadeInDown}>
-            <ExerciseCard workoutExercise={we} units={units} now={now} onSetDone={startRest} />
+            <ExerciseCard
+              workoutExercise={we}
+              index={i}
+              count={active.exercises.length}
+              units={units}
+              now={now}
+              onSetDone={startRest}
+            />
           </Animated.View>
         ))}
 
@@ -195,21 +204,35 @@ export default function WorkoutScreen() {
 
 function ExerciseCard({
   workoutExercise,
+  index,
+  count,
   units,
   now,
   onSetDone,
 }: {
   workoutExercise: WorkoutExercise;
+  index: number;
+  count: number;
   units: Units;
   now: number;
-  onSetDone: () => void;
+  onSetDone: (restSeconds: number) => void;
 }) {
   const exercise = getExercise(workoutExercise.exerciseId);
   const history = useGymmy((s) => s.workouts);
-  const { addSet, removeExercise } = useGymmy.getState();
+  const askRpe = useGymmy((s) => s.profile?.rpe ?? false);
+  const { addSet, removeExercise, updateExercise, moveExercise, updateSet } = useGymmy.getState();
+  const [tools, setTools] = useState(false);
+  const [plates, setPlates] = useState(false);
+  const [rpeFor, setRpeFor] = useState<string | null>(null);
   const last = lastSession(exercise.id, history);
   const best = bestSet(exercise.id, history);
   const previous = last?.sets;
+  const rest = workoutExercise.rest ?? DEFAULT_REST;
+  const weId = workoutExercise.id;
+
+  // Working sets are numbered 1, 2, 3…; warm-ups show as W.
+  let working = 0;
+  const labels = workoutExercise.sets.map((set) => (set.warmup ? 'W' : String(++working)));
 
   return (
     <View style={styles.card}>
@@ -220,6 +243,7 @@ function ExerciseCard({
           </T>
           <T variant="caption" color={colors.textFaint} style={{ textTransform: 'capitalize' }}>
             {exercise.group}
+            {rest !== DEFAULT_REST ? ` · rest ${rest ? formatClock(rest / 60) : 'off'}` : ''}
           </T>
         </View>
         {workoutExercise.target && (
@@ -234,21 +258,78 @@ function ExerciseCard({
         )}
         <Pressable
           hitSlop={10}
-          accessibilityLabel={`Remove ${exercise.name}`}
-          onPress={() =>
-            confirm(`Remove ${exercise.name}?`, 'Its sets will be removed from this workout.', 'Remove', () =>
-              removeExercise(workoutExercise.id),
-            )
-          }>
-          <Icon name={{ ios: 'trash', web: 'delete' }} size={18} color={colors.textFaint} />
+          accessibilityRole="button"
+          accessibilityLabel={`${exercise.name} options`}
+          testID={`exercise-${index + 1}-options`}
+          onPress={() => {
+            haptic();
+            setTools(!tools);
+          }}
+          style={[styles.more, tools && styles.moreOn]}>
+          <Icon name={{ ios: 'ellipsis', web: 'more_horiz' }} size={18} color={tools ? colors.accentInk : colors.textDim} />
         </Pressable>
       </View>
 
+      {tools && (
+        <View style={styles.tools}>
+          <TextInput
+            value={workoutExercise.note ?? ''}
+            onChangeText={(t) => updateExercise(weId, { note: t || undefined })}
+            placeholder="Note for next time (seat height, grip…)"
+            placeholderTextColor={colors.textFaint}
+            style={styles.noteInput}
+            maxLength={140}
+            multiline
+            testID={`exercise-${index + 1}-note`}
+          />
+          <View style={styles.toolRow}>
+            <T variant="caption" color={colors.textDim} style={{ flex: 1 }}>
+              Rest timer
+            </T>
+            <ToolButton
+              label="−15"
+              disabled={rest === 0}
+              onPress={() => updateExercise(weId, { rest: Math.max(0, rest - 15) })}
+            />
+            <T variant="heading" style={styles.restValue}>
+              {rest ? formatClock(rest / 60) : 'Off'}
+            </T>
+            <ToolButton label="+15" onPress={() => updateExercise(weId, { rest: Math.min(600, rest + 15) })} />
+          </View>
+          <View style={styles.toolRow}>
+            <ToolButton label="↑ Up" disabled={index === 0} onPress={() => moveExercise(weId, -1)} />
+            <ToolButton label="↓ Down" disabled={index === count - 1} onPress={() => moveExercise(weId, 1)} />
+            {exercise.kind === 'weight' && (
+              <ToolButton label="Plates" active={plates} onPress={() => setPlates(!plates)} />
+            )}
+            <View style={{ flex: 1 }} />
+            <ToolButton
+              label="Remove"
+              danger
+              onPress={() =>
+                confirm(`Remove ${exercise.name}?`, 'Its sets will be removed from this workout.', 'Remove', () =>
+                  removeExercise(weId),
+                )
+              }
+            />
+          </View>
+          <T variant="caption" color={colors.textFaint}>
+            Tap a set number to mark it as a warm-up. Hold it to delete the set.
+          </T>
+        </View>
+      )}
+
+      {!tools && workoutExercise.note ? (
+        <T variant="caption" color={colors.textDim} style={{ marginBottom: space.xs }}>
+          📝 {workoutExercise.note}
+        </T>
+      ) : null}
       {workoutExercise.target?.note && (
         <T variant="caption" color={colors.textDim} style={{ marginBottom: space.xs }}>
           {workoutExercise.target.note}
         </T>
       )}
+      {plates && exercise.kind === 'weight' && <PlatePanel sets={workoutExercise.sets} units={units} />}
       {last ? (
         <View style={styles.stats}>
           <View style={styles.stat}>
@@ -290,22 +371,37 @@ function ExerciseCard({
       </View>
 
       {workoutExercise.sets.map((set, i) => (
-        <SetRow
-          key={set.id}
-          index={i}
-          set={set}
-          kind={exercise.kind}
-          units={units}
-          previous={previous?.[i]}
-          workoutExerciseId={workoutExercise.id}
-          onDone={onSetDone}
-        />
+        <View key={set.id}>
+          <SetRow
+            index={i}
+            label={labels[i]}
+            set={set}
+            kind={exercise.kind}
+            units={units}
+            previous={previous?.[i]}
+            workoutExerciseId={weId}
+            onDone={() => {
+              setRpeFor(askRpe && !set.warmup ? set.id : null);
+              onSetDone(set.warmup ? Math.min(rest, 60) : rest);
+            }}
+          />
+          {rpeFor === set.id && set.done && (
+            <RpePicker
+              value={set.rpe}
+              onPick={(rpe) => {
+                updateSet(weId, set.id, { rpe });
+                setRpeFor(null);
+              }}
+              onSkip={() => setRpeFor(null)}
+            />
+          )}
+        </View>
       ))}
 
       <Pressable
         onPress={() => {
           haptic();
-          addSet(workoutExercise.id);
+          addSet(weId);
         }}
         style={styles.addSet}>
         <T variant="caption" color={colors.textDim}>
@@ -313,6 +409,120 @@ function ExerciseCard({
         </T>
       </Pressable>
     </View>
+  );
+}
+
+function ToolButton({
+  label,
+  onPress,
+  disabled,
+  active,
+  danger,
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  active?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={() => {
+        haptic();
+        onPress();
+      }}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      style={[styles.toolBtn, active && { backgroundColor: colors.accent }, disabled && { opacity: 0.35 }]}>
+      <T variant="caption" color={active ? colors.accentInk : danger ? colors.danger : colors.text}>
+        {label}
+      </T>
+    </Pressable>
+  );
+}
+
+/** Plates per side for the next set to lift (or the heaviest, once all are done). */
+function PlatePanel({ sets, units }: { sets: SetEntry[]; units: Units }) {
+  const [bar, setBar] = useState(BARS[units][0]);
+  const next = sets.find((s) => !s.done && s.weight) ?? [...sets].filter((s) => s.weight).sort((a, b) => b.weight! - a.weight!)[0];
+  const total = next?.weight ? toDisplayWeight(next.weight, units) : 0;
+  const load = plateLoad(total, bar, units);
+  const heaviest = PLATES[units][0];
+
+  return (
+    <View style={styles.plates}>
+      <T variant="label" color={colors.textFaint}>
+        {total ? `Plates per side for ${total} ${units}` : 'Enter a weight to see the plates'}
+      </T>
+      <View style={styles.toolRow}>
+        {BARS[units].map((b) => (
+          <Chip key={b} label={`${b} ${units} bar`} active={bar === b} onPress={() => setBar(b)} />
+        ))}
+      </View>
+      {total > 0 && (
+        <>
+          <View style={styles.barViz}>
+            <View style={styles.barShaft} />
+            {load.perSide.map((p, i) => (
+              <View
+                key={i}
+                style={[styles.plate, { height: 28 + 40 * Math.sqrt(p / heaviest), backgroundColor: plateColor(p, units) }]}
+              />
+            ))}
+            <View style={styles.barEnd} />
+          </View>
+          <T variant="heading">{load.perSide.length ? formatPlates(load.perSide) : total <= bar ? 'Just the bar' : '—'}</T>
+          {load.short > 0 && (
+            <T variant="caption" color={colors.flame}>
+              Plates make {load.loaded} {units}, {load.short} {units} short.
+            </T>
+          )}
+        </>
+      )}
+    </View>
+  );
+}
+
+/** Rough competition plate colors so the picture reads at a glance. */
+function plateColor(plate: number, units: Units): string {
+  const kg = units === 'kg' ? plate : plate / 2.2;
+  if (kg >= 24) return '#E5484D';
+  if (kg >= 19) return '#3E63DD';
+  if (kg >= 14) return '#F5D90A';
+  if (kg >= 9) return '#30A46C';
+  return colors.textDim;
+}
+
+function RpePicker({ value, onPick, onSkip }: { value?: number; onPick: (rpe: number) => void; onSkip: () => void }) {
+  return (
+    <Animated.View entering={FadeInDown} style={styles.rpe}>
+      <T variant="label" color={colors.textFaint}>
+        How hard? RPE
+      </T>
+      <View style={styles.rpeRow}>
+        {RPE_CHOICES.map((r) => (
+          <Pressable
+            key={r}
+            onPress={() => {
+              haptic();
+              onPick(r);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={`RPE ${r}, ${rpeLabel(r)}`}
+            style={[styles.rpeChip, value === r && { backgroundColor: colors.accent }]}>
+            <T variant="caption" color={value === r ? colors.accentInk : colors.text}>
+              {r}
+            </T>
+          </Pressable>
+        ))}
+        <Pressable onPress={onSkip} hitSlop={8} accessibilityRole="button" style={styles.rpeSkip}>
+          <T variant="caption" color={colors.textFaint}>
+            Skip
+          </T>
+        </Pressable>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -382,6 +592,7 @@ function formatPrevious(set: SetEntry | undefined, kind: ExerciseKind, units: Un
 
 function SetRow({
   index,
+  label,
   set,
   kind,
   units,
@@ -390,6 +601,7 @@ function SetRow({
   onDone,
 }: {
   index: number;
+  label: string;
   set: SetEntry;
   kind: ExerciseKind;
   units: Units;
@@ -431,10 +643,17 @@ function SetRow({
       <View style={[styles.setRow, set.done && styles.setDone]}>
         <Pressable
           style={styles.colSet}
+          onPress={() => {
+            haptic();
+            updateSet(workoutExerciseId, set.id, { warmup: !set.warmup || undefined, rpe: undefined });
+          }}
           onLongPress={() => removeSet(workoutExerciseId, set.id)}
-          delayLongPress={400}>
-          <T variant="heading" color={set.done ? colors.accent : colors.textDim}>
-            {index + 1}
+          delayLongPress={400}
+          accessibilityRole="button"
+          accessibilityLabel={`Set ${label === 'W' ? 'warm-up' : label}. Tap to ${set.warmup ? 'make it a working set' : 'mark as warm-up'}, hold to delete.`}
+          testID={`set-${index + 1}-label`}>
+          <T variant="heading" color={set.warmup ? colors.gold : set.done ? colors.accent : colors.textDim}>
+            {label}
           </T>
         </Pressable>
         <T variant="caption" color={colors.textFaint} style={styles.colPrev} numberOfLines={1}>
@@ -466,9 +685,14 @@ function SetRow({
           />
         </Pressable>
       </View>
-      {kind === 'distance' && set.distance && set.minutes ? (
+      {(kind === 'distance' && set.distance && set.minutes) || set.rpe ? (
         <T variant="caption" color={colors.textDim} style={styles.pace}>
-          {formatPace(set.distance, set.minutes, units)} pace
+          {[
+            kind === 'distance' && set.distance && set.minutes ? `${formatPace(set.distance, set.minutes, units)} pace` : '',
+            set.rpe ? `RPE ${set.rpe}` : '',
+          ]
+            .filter(Boolean)
+            .join(' · ')}
         </T>
       ) : null}
     </View>
@@ -546,6 +770,58 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: space.sm },
+  more: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.cardHigh,
+  },
+  moreOn: { backgroundColor: colors.accent },
+  tools: {
+    gap: space.sm,
+    padding: space.md,
+    marginBottom: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.cardHigh,
+  },
+  toolRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' },
+  toolBtn: {
+    paddingHorizontal: space.md,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restValue: { minWidth: 48, textAlign: 'center', fontFamily: fonts.mono },
+  noteInput: {
+    minHeight: 40,
+    borderRadius: radius.sm,
+    backgroundColor: colors.card,
+    color: colors.text,
+    fontSize: 15,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+  },
+  plates: { gap: space.sm, padding: space.md, marginBottom: space.sm, borderRadius: radius.md, backgroundColor: colors.cardHigh },
+  barViz: { flexDirection: 'row', alignItems: 'center', height: 72, gap: 2 },
+  barShaft: { width: 36, height: 8, borderRadius: 2, backgroundColor: colors.textFaint },
+  plate: { width: 12, borderRadius: 3 },
+  barEnd: { width: 18, height: 8, borderRadius: 2, backgroundColor: colors.textFaint },
+  rpe: { gap: 6, marginLeft: 32 + space.sm * 2, marginBottom: space.xs },
+  rpeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+  rpeChip: {
+    minWidth: 36,
+    height: 32,
+    paddingHorizontal: 6,
+    borderRadius: radius.sm,
+    backgroundColor: colors.cardHigh,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rpeSkip: { paddingHorizontal: space.sm },
   stats: { flexDirection: 'row', gap: space.sm, marginBottom: space.sm },
   target: { alignItems: 'flex-end', marginRight: space.md },
   stat: {

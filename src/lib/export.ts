@@ -24,7 +24,19 @@ const row = (cells: (string | number | undefined)[]) => cells.map(csvField).join
 export function workoutsCsv(workouts: Workout[], units: Units): string {
   const dist = distanceUnit(units);
   const lines = [
-    row(['date', 'workout', 'exercise', 'set', `weight_${units}`, 'reps', 'minutes', `distance_${dist}`, 'source']),
+    row([
+      'date',
+      'workout',
+      'exercise',
+      'set',
+      `weight_${units}`,
+      'reps',
+      'minutes',
+      `distance_${dist}`,
+      'rpe',
+      'warmup',
+      'source',
+    ]),
   ];
   for (const w of [...workouts].sort((a, b) => a.endedAt - b.endedAt)) {
     for (const e of w.exercises) {
@@ -42,6 +54,8 @@ export function workoutsCsv(workouts: Workout[], units: Units): string {
               s.reps,
               s.minutes !== undefined ? Math.round(s.minutes * 100) / 100 : undefined,
               s.distance !== undefined ? toDisplayDistance(s.distance, units) : undefined,
+              s.rpe,
+              s.warmup ? 'yes' : 'no',
               w.source === 'health' ? 'Apple Health' : 'Gymmy',
             ]),
           );
