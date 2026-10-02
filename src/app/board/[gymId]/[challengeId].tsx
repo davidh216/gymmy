@@ -7,11 +7,12 @@ import { BoardRowView } from '@/components/gym-parts';
 import { ErrorState } from '@/components/error-state';
 import { Screen } from '@/components/screen';
 import { Button, Card, Chip, SectionHeader, T } from '@/components/ui';
+import { useNow } from '@/hooks/use-now';
 import { getChallenge, supportsPoundForPound } from '@/lib/challenges';
-import type { BoardMode } from '@/lib/leaderboard';
+import { friendlyError } from '@/lib/errors';
+import { seasonDaysLeft, seasonName, type BoardMode, type Season } from '@/lib/leaderboard';
 import { useBoard, useGym, useJoinGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
-import { friendlyError } from '@/lib/errors';
 import { colors, space } from '@/theme';
 
 export default function BoardScreen() {
@@ -20,8 +21,10 @@ export default function BoardScreen() {
   const challenge = getChallenge(params.challengeId);
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const [mode, setMode] = useState<BoardMode>('open');
+  const [season, setSeason] = useState<Season>('month');
+  const now = useNow(60 * 60_000);
   const [showRules, setShowRules] = useState(false);
-  const { data: board, isLoading, isError, error, refetch, isRefetching } = useBoard(gymId, challenge.id, mode);
+  const { data: board, isLoading, isError, error, refetch, isRefetching } = useBoard(gymId, challenge.id, mode, season);
   const { data: gym } = useGym(gymId ?? 'global');
   const join = useJoinGym();
 
@@ -33,6 +36,16 @@ export default function BoardScreen() {
           subtitle={`${gymId ? gym?.name ?? '' : 'Global'} · ${challenge.measure}`}
         />
       }>
+      <View style={styles.modes}>
+        <Chip label="This month" active={season === 'month'} onPress={() => setSeason('month')} />
+        <Chip label="All time" active={season === 'all'} onPress={() => setSeason('all')} />
+      </View>
+      <T variant="caption" color={colors.textDim} style={{ marginBottom: space.md }}>
+        {season === 'month'
+          ? `${seasonName(now)} season · ${seasonDaysLeft(now)} ${seasonDaysLeft(now) === 1 ? 'day' : 'days'} left. #1 when it ends earns a 👑.`
+          : 'Best ever. 👑 marks past monthly champions.'}
+      </T>
+
       {supportsPoundForPound(challenge) && (
         <View style={styles.modes}>
           <Chip label="Open" active={mode === 'open'} onPress={() => setMode('open')} />
@@ -66,7 +79,9 @@ export default function BoardScreen() {
           <T variant="caption" color={colors.textDim} style={{ textAlign: 'center' }}>
             {mode === 'p4p'
               ? 'No entries with a bodyweight yet.'
-              : 'Nobody has posted here yet. The top spot is yours for the taking.'}
+              : season === 'month'
+                ? 'Nobody has posted this month yet. Take the top spot before the month ends.'
+                : 'Nobody has posted here yet. The top spot is yours for the taking.'}
           </T>
         </Card>
       )}

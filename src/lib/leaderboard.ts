@@ -71,3 +71,61 @@ export function reportCounts(reporterCreatedAt: number, now: number): boolean {
 export function shouldHide(counted: Record<ReportKind, number>): boolean {
   return (Object.keys(HIDE_THRESHOLD) as ReportKind[]).some((k) => counted[k] >= HIDE_THRESHOLD[k]);
 }
+
+/** Boards run as monthly seasons; "all" is the all-time board. */
+export type Season = 'month' | 'all';
+
+/** Local midnight on the 1st of the month containing `ts`. */
+export function monthStart(ts: number): number {
+  const d = new Date(ts);
+  return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+}
+
+/** Days left in the current season, counting today. */
+export function seasonDaysLeft(now: number): number {
+  const d = new Date(now);
+  const next = new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
+  return Math.max(1, Math.ceil((next - now) / 86_400_000));
+}
+
+/** "October 2026" */
+export function seasonName(ts: number): string {
+  return new Date(ts).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+/**
+ * Who finished #1 in each finished monthly season: userId -> number of crowns.
+ * Only months before the current one count.
+ */
+export function pastChampions<E extends RankableEntry>(
+  entries: E[],
+  challenge: Challenge,
+  mode: BoardMode,
+  now: number,
+): Map<string, number> {
+  const current = monthStart(now);
+  const byMonth = new Map<number, E[]>();
+  for (const e of entries) {
+    const m = monthStart(e.createdAt);
+    if (m >= current) continue;
+    byMonth.set(m, [...(byMonth.get(m) ?? []), e]);
+  }
+  const crowns = new Map<string, number>();
+  for (const monthEntries of byMonth.values()) {
+    const top = rankEntries(monthEntries, challenge, mode)[0];
+    if (top) crowns.set(top.entry.userId, (crowns.get(top.entry.userId) ?? 0) + 1);
+  }
+  return crowns;
+}
+
+/** The ranking for a season plus everyone's past-season crowns. */
+export function seasonBoard<E extends RankableEntry>(
+  entries: E[],
+  challenge: Challenge,
+  mode: BoardMode,
+  season: Season,
+  now: number,
+): { ranked: Ranked<E>[]; crowns: Map<string, number> } {
+  const inSeason = season === 'all' ? entries : entries.filter((e) => e.createdAt >= monthStart(now));
+  return { ranked: rankEntries(inSeason, challenge, mode), crowns: pastChampions(entries, challenge, mode, now) };
+}

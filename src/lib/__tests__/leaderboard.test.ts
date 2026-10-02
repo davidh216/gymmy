@@ -1,5 +1,15 @@
 import { formatSeconds, getChallenge, parseSeconds } from '../challenges';
-import { medalFor, rankEntries, reportCounts, shouldHide } from '../leaderboard';
+import {
+  medalFor,
+  monthStart,
+  pastChampions,
+  rankEntries,
+  reportCounts,
+  seasonBoard,
+  seasonDaysLeft,
+  seasonName,
+  shouldHide,
+} from '../leaderboard';
 
 const e = (id: string, userId: string, value: number, createdAt: number, bodyweightKg?: number) => ({
   id,
@@ -85,5 +95,40 @@ describe('endurance and carry challenges', () => {
     const carry = getChallenge('farmers_carry');
     expect(carry.metric).toBe('weight');
     expect(rankEntries([e('a', 'u1', 70, 1, 70), e('b', 'u2', 60, 2, 50)], carry, 'p4p')[0].entry.id).toBe('b');
+  });
+});
+
+describe('monthly seasons', () => {
+  const at = (month: number, day: number) => new Date(2026, month, day, 12).getTime();
+  const now = at(9, 2); // Oct 2
+
+  const entries = [
+    // August: u1 wins. September: u2 wins (u1 posted too).
+    e('aug1', 'u1', 150, at(7, 3)),
+    e('aug2', 'u2', 140, at(7, 9)),
+    e('sep1', 'u1', 155, at(8, 4)),
+    e('sep2', 'u2', 160, at(8, 20)),
+    // October so far: only u3.
+    e('oct3', 'u3', 120, at(9, 1)),
+  ];
+
+  it('ranks only this month’s entries in the current season', () => {
+    const { ranked } = seasonBoard(entries, bench, 'open', 'month', now);
+    expect(ranked.map((r) => r.entry.id)).toEqual(['oct3']);
+    expect(seasonBoard(entries, bench, 'open', 'all', now).ranked[0].entry.id).toBe('sep2');
+  });
+
+  it('crowns each finished month’s winner', () => {
+    const crowns = pastChampions(entries, bench, 'open', now);
+    expect(Object.fromEntries(crowns)).toEqual({ u1: 1, u2: 1 });
+    // A September best doesn't count again for October.
+    expect(pastChampions(entries, bench, 'open', at(8, 25)).get('u2')).toBeUndefined();
+  });
+
+  it('counts down the season', () => {
+    expect(monthStart(now)).toBe(new Date(2026, 9, 1).getTime());
+    expect(seasonDaysLeft(new Date(2026, 9, 31, 20).getTime())).toBe(1);
+    expect(seasonDaysLeft(new Date(2026, 9, 1, 0, 0, 1).getTime())).toBe(31);
+    expect(seasonName(now)).toBe('October 2026');
   });
 });

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { BoardMode, ReportKind } from '@/lib/leaderboard';
+import type { BoardMode, Season, ReportKind } from '@/lib/leaderboard';
 import type { NearbyPlace } from '@/lib/places';
 
 import { fetchMyProfile, useAuth } from '../auth';
@@ -13,8 +13,8 @@ export const gymKeys = {
   medals: ['gyms', 'medals'] as const,
   search: (q: string) => ['gyms', 'search', q] as const,
   gym: (id: string) => ['gyms', 'gym', id] as const,
-  board: (gymId: string | null, challengeId: string, mode: BoardMode) =>
-    ['gyms', 'board', gymId ?? 'global', challengeId, mode] as const,
+  board: (gymId: string | null, challengeId: string, mode: BoardMode, season: Season) =>
+    ['gyms', 'board', gymId ?? 'global', challengeId, mode, season] as const,
   entry: (id: string) => ['gyms', 'entry', id] as const,
 };
 
@@ -30,10 +30,10 @@ export const useGymSearch = (q: string) =>
   useQuery({ queryKey: gymKeys.search(q), queryFn: () => gymsApi.searchGyms(q) });
 export const useGym = (id: string) =>
   useQuery({ queryKey: gymKeys.gym(id), queryFn: () => gymsApi.getGym(id) });
-export const useBoard = (gymId: string | null, challengeId: string, mode: BoardMode) =>
+export const useBoard = (gymId: string | null, challengeId: string, mode: BoardMode, season: Season = 'all') =>
   useQuery({
-    queryKey: gymKeys.board(gymId, challengeId, mode),
-    queryFn: () => gymsApi.getBoard({ gymId, challengeId, mode }),
+    queryKey: gymKeys.board(gymId, challengeId, mode, season),
+    queryFn: () => gymsApi.getBoard({ gymId, challengeId, mode, season }),
   });
 export const useEntry = (id: string) =>
   useQuery({ queryKey: gymKeys.entry(id), queryFn: () => gymsApi.getEntry(id) });

@@ -1,4 +1,4 @@
-import type { BoardMode, ReportKind } from '@/lib/leaderboard';
+import type { BoardMode, ReportKind, Season } from '@/lib/leaderboard';
 import type { NearbyPlace } from '@/lib/places';
 
 export type GymKind = 'public' | 'private';
@@ -45,7 +45,13 @@ export type Entry = {
   myReport?: ReportKind;
 };
 
-export type BoardRow = { rank: number; score: number; entry: Entry };
+export type BoardRow = {
+  rank: number;
+  score: number;
+  entry: Entry;
+  /** Monthly seasons this athlete finished #1 on this board. */
+  crowns?: number;
+};
 
 export type Board = {
   rows: BoardRow[];
@@ -54,7 +60,13 @@ export type Board = {
   total: number;
 };
 
-export type BoardQuery = { gymId: string | null; challengeId: string; mode: BoardMode };
+export type BoardQuery = {
+  gymId: string | null;
+  challengeId: string;
+  mode: BoardMode;
+  /** The current monthly season, or all time (the default). */
+  season?: Season;
+};
 
 export type PostEntryInput = {
   gymId: string;

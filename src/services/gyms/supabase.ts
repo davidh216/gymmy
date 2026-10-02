@@ -1,6 +1,6 @@
 import { getChallenge } from '@/lib/challenges';
 import { uid } from '@/lib/format';
-import { BOARD_SIZE, rankEntries, type ReportKind } from '@/lib/leaderboard';
+import { BOARD_SIZE, rankEntries, seasonBoard, type ReportKind } from '@/lib/leaderboard';
 
 import { useAuth } from '../auth';
 import { supabase } from '../supabase';
@@ -228,9 +228,9 @@ export const supabaseGymsApi: GymsApi = {
     return gym;
   },
 
-  async getBoard({ gymId, challengeId, mode }) {
+  async getBoard({ gymId, challengeId, mode, season = 'all' }) {
     const rows = await boardRows(gymId, challengeId);
-    const ranked = rankEntries(
+    const { ranked, crowns } = seasonBoard(
       rows.map((r) => ({
         id: r.id,
         userId: r.user_id,
@@ -241,9 +241,16 @@ export const supabaseGymsApi: GymsApi = {
       })),
       getChallenge(challengeId),
       mode,
+      season,
+      Date.now(),
     );
     const reports = await myReports(ranked.slice(0, BOARD_SIZE).map((r) => r.entry.id));
-    const all = ranked.map((r) => ({ rank: r.rank, score: r.score, entry: toEntry(r.entry.row, reports.get(r.entry.id)) }));
+    const all = ranked.map((r) => ({
+      rank: r.rank,
+      score: r.score,
+      entry: toEntry(r.entry.row, reports.get(r.entry.id)),
+      crowns: crowns.get(r.entry.userId),
+    }));
     const meId = useAuth.getState().userId;
     const mine = all.find((r) => r.entry.athlete.id === meId) ?? null;
     const board: Board = {

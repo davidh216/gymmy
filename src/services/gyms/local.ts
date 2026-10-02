@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getChallenge } from '@/lib/challenges';
 import { uid } from '@/lib/format';
-import { BOARD_SIZE, rankEntries, type ReportKind } from '@/lib/leaderboard';
+import { BOARD_SIZE, rankEntries, seasonBoard, type ReportKind } from '@/lib/leaderboard';
 
 import { seedWorld, type StoredEntry, type StoredGym } from './seed';
 import type { Athlete, Board, Entry, Gym, GymsApi } from './types';
@@ -200,10 +200,15 @@ export const localGymsApi: GymsApi = {
     return toGym(gym);
   },
 
-  async getBoard({ gymId, challengeId, mode }) {
+  async getBoard({ gymId, challengeId, mode, season = 'all' }) {
     const w = await load();
-    const ranked = rankEntries(visible(w, gymId, challengeId), getChallenge(challengeId), mode);
-    const rows = ranked.map((r) => ({ rank: r.rank, score: r.score, entry: toEntry(w, r.entry) }));
+    const { ranked, crowns } = seasonBoard(visible(w, gymId, challengeId), getChallenge(challengeId), mode, season, Date.now());
+    const rows = ranked.map((r) => ({
+      rank: r.rank,
+      score: r.score,
+      entry: toEntry(w, r.entry),
+      crowns: crowns.get(r.entry.userId),
+    }));
     const mine = rows.find((r) => r.entry.athlete.id === ME) ?? null;
     const board: Board = {
       rows: rows.slice(0, BOARD_SIZE),

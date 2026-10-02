@@ -72,6 +72,7 @@ export function BoardRowView({
         <T variant="heading" numberOfLines={1} color={isMe ? colors.accent : colors.text}>
           @{row.entry.athlete.username}
           {isMe ? ' (you)' : ''}
+          {row.crowns ? ` ${'👑'.repeat(Math.min(row.crowns, 3))}${row.crowns > 3 ? `×${row.crowns}` : ''}` : ''}
         </T>
         <T variant="caption" color={colors.textFaint}>
           {row.entry.hasVideo ? '▶ Video' : row.entry.athlete.sample ? 'Sample entry' : 'No video'}
