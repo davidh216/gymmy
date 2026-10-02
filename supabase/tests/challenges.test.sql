@@ -26,4 +26,19 @@ set role authenticated;
 select pg_temp.check(public.sync_push('[{"kind":"custom_program","id":"custom-1","data":{"name":"PPL"},"updated_at":"2026-10-02T10:00:00Z"}]') = 1,
   'custom plans sync');
 reset role;
+
+-- 20261010000000_places_cache.sql: only the Edge Function (service role) touches the cache.
+insert into public.places_cache (key, elements) values ('40.71,-74.01', '[]');
+set role authenticated;
+do $$ begin
+  perform count(*) from public.places_cache;
+  raise exception 'FAILED: users can read the places cache';
+exception when insufficient_privilege then raise notice 'ok - users can''t read the places cache';
+end $$;
+reset role;
+do $$ begin
+  insert into public.places_cache (key) values ('not a key');
+  raise exception 'FAILED: bad cache key accepted';
+exception when check_violation then raise notice 'ok - cache keys are grid cells';
+end $$;
 \echo ALL CHALLENGE DB TESTS PASSED

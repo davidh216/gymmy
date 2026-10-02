@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { supabase } from '@/services/supabase';
+
 import {
   fetchOverpass,
   overpassQuery,
@@ -10,9 +12,24 @@ import {
   type OverpassElement,
 } from '@/lib/places';
 
-/** Public Overpass instances, tried in order. */
 /** Gyms rarely move; reuse a search of the same ~1 km area for a week. */
 const CACHE_MS = 7 * 24 * 3600 * 1000;
+
+/**
+ * Gymmy's shared cache (the gym-places Edge Function), so people in the same area share
+ * one lookup. Null when it isn't available, and the app asks OpenStreetMap directly.
+ */
+async function viaProxy(origin: Coords): Promise<{ elements: OverpassElement[] } | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.functions.invoke<{ elements: OverpassElement[] }>('gym-places', {
+      body: { lat: origin.lat, lng: origin.lng },
+    });
+    return !error && Array.isArray(data?.elements) ? { elements: data.elements } : null;
+  } catch {
+    return null;
+  }
+}
 
 export class PlacesError extends Error {
   constructor(
@@ -76,7 +93,7 @@ export async function nearbyGyms(origin: Coords): Promise<NearbyPlace[]> {
   }
   let json: { elements?: OverpassElement[] };
   try {
-    json = await fetchOverpass(overpassQuery(origin));
+    json = (await viaProxy(origin)) ?? (await fetchOverpass(overpassQuery(origin)));
   } catch (e) {
     throw new PlacesError(
       `Couldn’t load nearby gyms. The map service may be busy; try again in a minute. (${e instanceof Error ? e.message : 'unknown error'})`,
