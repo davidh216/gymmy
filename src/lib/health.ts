@@ -116,3 +116,52 @@ export function sleepHours(samples: SleepSample[], window: { start: number; end:
   total += curEnd - curStart;
   return Math.round((total / 3_600_000) * 10) / 10;
 }
+
+/** A heart reading from Apple Health: HRV (ms) or resting heart rate (bpm). */
+export type Reading = { value: number; at: number };
+
+/** Heart signals compared with your own recent normal, cached after each Health sync. */
+export type Vitals = {
+  hrv?: number;
+  hrvBaseline?: number;
+  rhr?: number;
+  rhrBaseline?: number;
+  /** Latest body weight, kg. */
+  bodyMassKg?: number;
+  bodyMassAt?: number;
+  at: number;
+};
+
+const DAY_MS = 86_400_000;
+/** Days of history that make up "your normal". */
+export const BASELINE_DAYS = 14;
+
+const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : undefined);
+
+/**
+ * Today's value (the average of the last 24 hours) against the average of the two weeks
+ * before. Needs a few days of history before it says anything.
+ */
+export function againstBaseline(readings: Reading[], now: number): { today?: number; baseline?: number } {
+  const recent = readings.filter((r) => r.at > now - DAY_MS && r.at <= now).map((r) => r.value);
+  const past = readings.filter((r) => r.at <= now - DAY_MS && r.at > now - (BASELINE_DAYS + 1) * DAY_MS);
+  const days = new Set(past.map((r) => Math.floor(r.at / DAY_MS))).size;
+  return { today: mean(recent), baseline: days >= 3 ? mean(past.map((r) => r.value)) : undefined };
+}
+
+/**
+ * Readiness from heart signals, 0–100, or undefined without enough data. HRV 10% under your
+ * normal costs about 25 points; a resting heart rate 4 bpm over costs about 24.
+ */
+export function heartScore(v: Pick<Vitals, 'hrv' | 'hrvBaseline' | 'rhr' | 'rhrBaseline'>): number | undefined {
+  const clamp = (n: number) => Math.round(Math.max(0, Math.min(100, n)));
+  const scores: number[] = [];
+  if (v.hrv !== undefined && v.hrvBaseline) scores.push(clamp(75 + (v.hrv / v.hrvBaseline - 1) * 250));
+  if (v.rhr !== undefined && v.rhrBaseline) scores.push(clamp(75 - (v.rhr - v.rhrBaseline) * 6));
+  return scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : undefined;
+}
+
+/** Vitals are only trusted while fresh. */
+export function freshVitals(v: Vitals | undefined, now: number): Vitals | undefined {
+  return v && now - v.at < 36 * 3600 * 1000 ? v : undefined;
+}

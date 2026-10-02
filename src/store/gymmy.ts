@@ -15,6 +15,7 @@ import {
   targetReps,
   type CustomProgram,
 } from '@/lib/programs';
+import type { Vitals } from '@/lib/health';
 import { dayKey, type CheckIn } from '@/lib/recovery';
 import {
   STARTING_GEMS,
@@ -77,7 +78,14 @@ type State = {
   /** Daily recovery check-ins by local date (YYYY-MM-DD). */
   checkIns: Record<string, CheckIn>;
   /** Apple Health sync. Workouts finished after `connectedAt` earn rewards when imported. */
-  health: { enabled: boolean; connectedAt?: number; lastSync?: number };
+  health: {
+    enabled: boolean;
+    connectedAt?: number;
+    lastSync?: number;
+    /** Asked to read HRV, resting heart rate and body weight. */
+    readsVitals?: boolean;
+    vitals?: Vitals;
+  };
   /** Start of the most recent week whose recap card was opened or dismissed. */
   recapSeen: number;
 };

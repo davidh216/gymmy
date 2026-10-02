@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Clip } from '@/components/clip';
 import { Button, Card, Icon, T, haptic } from '@/components/ui';
 import { formatResult, getChallenge, parseSeconds } from '@/lib/challenges';
-import { fromDisplayWeight } from '@/lib/format';
+import { fromDisplayWeight, toDisplayWeight } from '@/lib/format';
 import { medalFor } from '@/lib/leaderboard';
 import type { PostEntryResult } from '@/services/gyms';
 import { useGym, usePostEntry } from '@/services/gyms/queries';
@@ -28,7 +28,11 @@ export default function PostEntry() {
   const post = usePostEntry();
 
   const [result, setResult] = useState('');
-  const [bodyweight, setBodyweight] = useState('');
+  // Prefilled from Apple Health's latest weight when there is one.
+  const healthMass = useGymmy((s) => s.health.vitals?.bodyMassKg);
+  const [bodyweight, setBodyweight] = useState(() =>
+    healthMass ? String(Math.round(toDisplayWeight(healthMass, units) * 10) / 10) : '',
+  );
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [checked, setChecked] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);

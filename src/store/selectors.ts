@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useNow } from '@/hooks/use-now';
 
+import { freshVitals, heartScore } from '@/lib/health';
 import { milestoneStates, milestoneStats } from '@/lib/milestones';
 import { levelFromXp } from '@/lib/progression';
 import { planAdvice, type PlanAdvice, type PlanProgress, type Program } from '@/lib/programs';
@@ -58,11 +59,13 @@ export function useMilestones() {
 export function useReadiness() {
   const workouts = useGymmy((s) => s.workouts);
   const checkIns = useGymmy((s) => s.checkIns);
+  const vitals = useGymmy((s) => s.health.vitals);
   const now = useNow(60_000);
   return useMemo(() => {
     const today = checkIns[dayKey(now)];
-    return { today, now, ...readiness(today, workouts, now) };
-  }, [workouts, checkIns, now]);
+    const fresh = freshVitals(vitals, now);
+    return { today, now, vitals: fresh, ...readiness(today, workouts, now, fresh && heartScore(fresh)) };
+  }, [workouts, checkIns, vitals, now]);
 }
 
 /** How to adapt your plan's next session to today (lighter day, comeback, behind schedule). */

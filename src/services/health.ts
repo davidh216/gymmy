@@ -3,11 +3,14 @@ import { AppState, Platform } from 'react-native';
 
 import {
   ACTIVITY,
+  BASELINE_DAYS,
+  againstBaseline,
   healthExport,
   sleepHours,
   sleepWindow,
   workoutFromHealth,
   type HealthWorkout,
+  type Reading,
 } from '@/lib/health';
 import type { Workout } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
@@ -50,13 +53,17 @@ export async function healthSupported(): Promise<boolean> {
 
 const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis' as const;
 const WORKOUTS = 'HKWorkoutTypeIdentifier' as const;
+const HRV = 'HKQuantityTypeIdentifierHeartRateVariabilitySDNN' as const;
+const RESTING_HR = 'HKQuantityTypeIdentifierRestingHeartRate' as const;
+const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass' as const;
+const VITALS = [HRV, RESTING_HR, BODY_MASS] as const;
 
 /** Shows Apple's permission sheet: read sleep and workouts, save workouts. */
 export async function connectHealth(): Promise<{ imported: number }> {
   const hk = await healthKit();
   try {
     await hk.requestAuthorization({
-      toRead: [SLEEP, WORKOUTS],
+      toRead: [SLEEP, WORKOUTS, ...VITALS],
       toShare: [
         WORKOUTS,
         'HKQuantityTypeIdentifierDistanceWalkingRunning',
@@ -68,8 +75,59 @@ export async function connectHealth(): Promise<{ imported: number }> {
     throw new HealthError(`Couldn’t connect to Apple Health. (${e instanceof Error ? e.message : 'unknown error'})`, 'failed');
   }
   const { health, setHealth } = useGymmy.getState();
-  setHealth({ enabled: true, connectedAt: health.connectedAt ?? Date.now() });
+  setHealth({ enabled: true, connectedAt: health.connectedAt ?? Date.now(), readsVitals: true });
   return syncHealth({ force: true });
+}
+
+/** For people who connected before Gymmy read heart data: asks for HRV, resting heart rate and weight. */
+export async function enableVitals(): Promise<void> {
+  const hk = await healthKit();
+  try {
+    await hk.requestAuthorization({ toRead: [...VITALS], toShare: [] });
+  } catch (e) {
+    throw new HealthError(`Couldn’t connect to Apple Health. (${e instanceof Error ? e.message : 'unknown error'})`, 'failed');
+  }
+  useGymmy.getState().setHealth({ readsVitals: true });
+  await refreshVitals();
+}
+
+/**
+ * Reads HRV and resting heart rate for the last two weeks (to compare today with your
+ * normal) and your latest body weight. Missing data or permission just leaves gaps.
+ */
+export async function refreshVitals(): Promise<void> {
+  const { health, setHealth } = useGymmy.getState();
+  if (!health.enabled || !health.readsVitals) return;
+  try {
+    const hk = await healthKit();
+    const now = Date.now();
+    const since = new Date(now - (BASELINE_DAYS + 1) * 86_400_000);
+    const read = async (id: typeof HRV | typeof RESTING_HR, unit: string): Promise<Reading[]> =>
+      (await hk.queryQuantitySamples(id, { limit: 0, unit, filter: { date: { startDate: since } } })).map((s) => ({
+        value: s.quantity,
+        at: s.endDate.getTime(),
+      }));
+    const [hrv, rhr, mass] = await Promise.all([
+      read(HRV, 'ms').catch(() => []),
+      read(RESTING_HR, 'count/min').catch(() => []),
+      hk.queryQuantitySamples(BODY_MASS, { limit: 1, ascending: false, unit: 'kg' }).catch(() => []),
+    ]);
+    const h = againstBaseline(hrv, now);
+    const r = againstBaseline(rhr, now);
+    setHealth({
+      vitals: {
+        hrv: h.today,
+        hrvBaseline: h.baseline,
+        rhr: r.today,
+        rhrBaseline: r.baseline,
+        bodyMassKg: mass[0]?.quantity,
+        bodyMassAt: mass[0]?.endDate.getTime(),
+        at: now,
+      },
+    });
+  } catch {
+    // Heart data is a bonus; readiness works without it.
+  }
 }
 
 export function disconnectHealth() {
@@ -107,6 +165,7 @@ export async function syncHealth(opts: { force?: boolean } = {}): Promise<{ impo
     .filter((w): w is Workout => w !== null);
   const imported = importWorkouts(workouts);
   setHealth({ lastSync: now });
+  await refreshVitals();
   return { imported };
 }
 

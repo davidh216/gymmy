@@ -132,7 +132,13 @@ function sleepScore(hours: number): number {
 const fromRating = (r: Rating, highIsGood: boolean) => (highIsGood ? r - 1 : 5 - r) * 20 + 20;
 
 /** How ready you are to train today, from your check-in and recent training. */
-export function readiness(checkIn: CheckIn | undefined, workouts: Workout[], now: number): Readiness {
+export function readiness(
+  checkIn: CheckIn | undefined,
+  workouts: Workout[],
+  now: number,
+  /** Heart signals from Apple Health (see heartScore), when connected. */
+  heart?: number,
+): Readiness {
   const inRow = trainingDaysInRow(workouts, now);
   const muscles = muscleRecovery(workouts, now);
   const avgRecovered = muscles.reduce((n, m) => n + m.recovered, 0) / muscles.length;
@@ -145,6 +151,10 @@ export function readiness(checkIn: CheckIn | undefined, workouts: Workout[], now
     const s = sleepScore(checkIn.sleepHours);
     factors.push({ label: 'Sleep', score: s });
     weighted.push([s, 0.3]);
+  }
+  if (heart !== undefined) {
+    factors.push({ label: 'Heart (HRV)', score: heart });
+    weighted.push([heart, 0.3]);
   }
   if (checkIn?.soreness) {
     const s = fromRating(checkIn.soreness, false);

@@ -3,10 +3,10 @@ import { Platform, StyleSheet, View } from 'react-native';
 
 import { Button, Card, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
-import { formatAgo } from '@/lib/format';
+import { formatAgo, formatWeight } from '@/lib/format';
 import { bucket } from '@/lib/analytics';
 import { track } from '@/services/analytics';
-import { connectHealth, disconnectHealth, healthSupported, syncHealth } from '@/services/health';
+import { connectHealth, disconnectHealth, enableVitals, healthSupported, syncHealth } from '@/services/health';
 import { useGymmy } from '@/store/gymmy';
 import { colors, space } from '@/theme';
 
@@ -24,11 +24,19 @@ export function HealthCard() {
     },
   });
   const sync = useMutation({ mutationFn: () => syncHealth({ force: true }) });
+  const vitals = useMutation({ mutationFn: enableVitals, onSuccess: () => haptic('success') });
+  const units = useGymmy((s) => s.profile?.units ?? 'lb');
 
   if (Platform.OS !== 'ios') return null;
 
   const result = connect.data ?? sync.data;
-  const error = connect.error ?? sync.error;
+  const error = connect.error ?? sync.error ?? vitals.error;
+  const v = health.vitals;
+  const heart = [
+    v?.hrv !== undefined ? `HRV ${Math.round(v.hrv)} ms${v.hrvBaseline ? ` (normal ${Math.round(v.hrvBaseline)})` : ''}` : '',
+    v?.rhr !== undefined ? `resting HR ${Math.round(v.rhr)} bpm` : '',
+    v?.bodyMassKg !== undefined ? formatWeight(v.bodyMassKg, units) : '',
+  ].filter(Boolean);
 
   return (
     <Card style={{ gap: space.md }}>
@@ -41,10 +49,24 @@ export function HealthCard() {
               ? 'Update Gymmy from TestFlight to connect Apple Health.'
               : health.enabled
                 ? `Connected${health.lastSync ? ` · synced ${formatAgo(health.lastSync, now)}` : ''} · ${imported} imported`
-                : 'Bring in your sleep and your Apple Watch runs, walks, rides, rows and swims. Gymmy workouts are saved to Health too.'}
+                : 'Bring in sleep, heart rate variability, resting heart rate, weight and your Apple Watch runs, walks, rides, rows and swims. Gymmy workouts are saved to Health too.'}
           </T>
         </View>
       </View>
+      {health.enabled && heart.length > 0 && (
+        <T variant="caption" color={colors.textDim}>
+          {heart.join(' · ')}
+        </T>
+      )}
+      {health.enabled && !health.readsVitals && (
+        <Button
+          title={vitals.isPending ? 'Connecting…' : 'Add heart rate & weight'}
+          variant="secondary"
+          icon={{ ios: 'heart.fill', web: 'favorite' }}
+          disabled={vitals.isPending}
+          onPress={() => vitals.mutate()}
+        />
+      )}
       {result && result.imported > 0 && (
         <T variant="caption" color={colors.accent}>
           Imported {result.imported} {result.imported === 1 ? 'workout' : 'workouts'}.
