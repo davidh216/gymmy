@@ -6,9 +6,15 @@ appId: com.davidh216.gymmy
 - tapOn: "Let's go"
 - tapOn: "Your name"
 - inputText: "Alex"
-- hideKeyboard
+# Return submits the name and moves on (hideKeyboard may press Return too, skipping a step).
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 10000
 - tapOn: "Continue"
-- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Start with Kong"
+    timeout: 10000
 - tapOn: "Start with Kong"
 # The header is always on screen; buttons further down may need a scroll.
 - extendedWaitUntil:
