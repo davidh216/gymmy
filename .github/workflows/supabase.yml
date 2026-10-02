@@ -103,6 +103,12 @@ jobs:
           fi
           # Signed-out people search for gyms too, so this one takes no login.
           supabase functions deploy gym-places --project-ref "$PROJECT_REF" --use-api --no-verify-jwt
+          # Smoke test: gyms near Times Square should come back, the second time from the cache.
+          for i in 1 2; do
+            curl -sS --max-time 60 -X POST "https://$PROJECT_REF.supabase.co/functions/v1/gym-places" \
+              -H 'Content-Type: application/json' -d '{"lat":40.758,"lng":-73.9855}' \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log(j.error?`gym-places error: ${j.error}`:`gym-places: ${j.elements.length} places, cached=${j.cached}`)}catch{console.log("gym-places: unexpected reply",s.slice(0,200))}})'
+          done
 
       - name: Analytics report
         if: steps.plan.outputs.report == 'true'
