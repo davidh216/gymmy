@@ -37,7 +37,15 @@ export function T({
   style,
   ...props
 }: TextProps & { variant?: Variant; color?: string }) {
-  return <Text {...props} style={[type[variant] as TextStyle, { color }, style]} />;
+  // Follow Dynamic Type, but cap the biggest styles so headline numbers don't break layouts.
+  const maxScale = variant === 'hero' || variant === 'title' ? 1.3 : 1.8;
+  return (
+    <Text
+      maxFontSizeMultiplier={maxScale}
+      {...props}
+      style={[type[variant] as TextStyle, { color }, style]}
+    />
+  );
 }
 
 export function Icon({
@@ -56,14 +64,26 @@ export function Card({
   children,
   style,
   onPress,
+  accessibilityLabel,
+  testID,
 }: {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  accessibilityLabel?: string;
+  testID?: string;
 }) {
-  if (!onPress) return <View style={[styles.card, style]}>{children}</View>;
+  if (!onPress)
+    return (
+      <View style={[styles.card, style]} testID={testID}>
+        {children}
+      </View>
+    );
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
       onPress={() => {
         haptic();
         onPress();
@@ -141,6 +161,8 @@ export function Chip({
         haptic();
         onPress?.();
       }}
+      accessibilityRole="button"
+      accessibilityState={{ selected: Boolean(active) }}
       style={[styles.chip, active && styles.chipActive]}>
       <T variant="caption" color={active ? colors.accentInk : colors.textDim}>
         {label}

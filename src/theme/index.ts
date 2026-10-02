@@ -7,7 +7,7 @@ export const colors = {
   border: '#27272F',
   text: '#FAFAFA',
   textDim: '#A1A1AA',
-  textFaint: '#63636E',
+  textFaint: '#85858F',
   accent: '#C6FF3D',
   accentInk: '#0B0F00',
   gem: '#A78BFA',

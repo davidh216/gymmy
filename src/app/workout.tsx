@@ -95,7 +95,12 @@ export default function WorkoutScreen() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.topBar, { paddingTop: insets.top + space.sm }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.iconBtn}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          style={styles.iconBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Minimize workout">
           <Icon name={{ ios: 'chevron.down', web: 'expand_more' }} color={colors.textDim} />
         </Pressable>
         <View style={styles.timer}>
@@ -662,6 +667,7 @@ function SetRow({
         {cols.map((c) => (
           <SetInput
             key={c.field}
+            label={`${c.field === 'weight' ? `Weight in ${units}` : c.field === 'distance' ? `Distance in ${distanceUnit(units)}` : c.label}, ${label === 'W' ? 'warm-up set' : `set ${label}`}`}
             testID={`set-${index + 1}-${c.field}`}
             column={c}
             value={set[c.field]}
@@ -704,6 +710,7 @@ function SetRow({
  * and shows the stored value otherwise.
  */
 function SetInput({
+  label,
   testID,
   column,
   value,
@@ -711,6 +718,7 @@ function SetInput({
   done,
   onChange,
 }: {
+  label: string;
   testID: string;
   column: Column;
   value: number | undefined;
@@ -731,7 +739,7 @@ function SetInput({
       selectTextOnFocus
       placeholder={placeholder}
       placeholderTextColor={colors.textFaint}
-      accessibilityLabel={column.label}
+      accessibilityLabel={label}
       testID={testID}
       style={[styles.colInput, styles.input, done && styles.inputDone]}
     />
