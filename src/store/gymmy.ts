@@ -66,6 +66,8 @@ type State = {
   checkIns: Record<string, CheckIn>;
   /** Apple Health sync. Workouts finished after `connectedAt` earn rewards when imported. */
   health: { enabled: boolean; connectedAt?: number; lastSync?: number };
+  /** Start of the most recent week whose recap card was opened or dismissed. */
+  recapSeen: number;
 };
 
 type Actions = {
@@ -105,6 +107,8 @@ type Actions = {
   saveCheckIn: (input: Omit<CheckIn, 'date' | 'at'>) => { xp: number; gems: number };
 
   summon: (count: 1 | 10) => SummonResult[] | null;
+  /** Hides the Today recap card for the week starting `weekStart`. */
+  seeRecap: (weekStart: number) => void;
   reset: () => void;
 };
 
@@ -124,6 +128,7 @@ const initialState: State = {
   claimedMilestones: {},
   checkIns: {},
   health: { enabled: false },
+  recapSeen: 0,
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -468,6 +473,10 @@ export const useGymmy = create<State & Actions>()(
           return results;
         },
 
+        seeRecap: (weekStart) => {
+          if (get().recapSeen < weekStart) set({ recapSeen: weekStart });
+        },
+
         reset: () => set(initialState),
       };
     },
@@ -486,6 +495,7 @@ export const useGymmy = create<State & Actions>()(
         state.claimedMilestones ??= {};
         state.checkIns ??= {};
         state.health ??= { enabled: false };
+        state.recapSeen ??= 0;
         return state;
       },
     },

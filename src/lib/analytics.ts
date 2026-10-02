@@ -17,6 +17,7 @@ export type AnalyticsEvent =
   | { event: 'check_in'; props: { first: boolean; rest: boolean; activities: string } }
   | { event: 'custom_exercise_create'; props: { submitted: boolean } }
   | { event: 'custom_exercise_submit' }
+  | { event: 'recap_share' }
   | { event: 'summon'; props: { count: 1 | 10 } }
   | { event: 'health_connect'; props: { imported: string } }
   | { event: 'gym_join'; props: { via: 'gym' | 'nearby' | 'invite' | 'create' } }

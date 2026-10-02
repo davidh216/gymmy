@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { CompanionHero } from '@/components/companion-hero';
 import { MilestoneBanner } from '@/components/milestone-banner';
 import { ReadinessCard } from '@/components/readiness-card';
+import { RecapCard } from '@/components/recap-card';
 import { Screen } from '@/components/screen';
 import { WorkoutRow } from '@/components/workout-row';
 import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
@@ -89,6 +90,8 @@ export default function Today() {
           })}
         </View>
       </Card>
+
+      <RecapCard />
 
       <MilestoneBanner />
 

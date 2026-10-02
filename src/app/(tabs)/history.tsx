@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { WorkoutRow } from '@/components/workout-row';
@@ -10,7 +10,8 @@ import { getExercise } from '@/lib/exercises';
 import { formatAgo, formatSet, formatVolume } from '@/lib/format';
 import { trainedExercises } from '@/lib/progress';
 import { lastSession, volume } from '@/lib/records';
-import { weeklyCounts } from '@/lib/streaks';
+import { shiftWeek } from '@/lib/recap';
+import { weekStart, weeklyCounts } from '@/lib/streaks';
 import { useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -45,7 +46,14 @@ export default function History() {
           <View style={styles.chart}>
             <View style={[styles.goalLine, { bottom: `${(goal / max) * 100}%` }]} />
             {counts.map((c, i) => (
-              <View key={i} style={styles.barCol}>
+              <Pressable
+                key={i}
+                style={styles.barCol}
+                accessibilityRole="button"
+                accessibilityLabel={i === WEEKS - 1 ? 'Recap for this week' : `Recap for ${WEEKS - 1 - i} weeks ago`}
+                onPress={() =>
+                  router.push({ pathname: '/recap', params: { week: String(shiftWeek(weekStart(now), i - (WEEKS - 1))) } })
+                }>
                 <View
                   style={[
                     styles.bar,
@@ -55,7 +63,7 @@ export default function History() {
                     },
                   ]}
                 />
-              </View>
+              </Pressable>
             ))}
           </View>
           <View style={styles.chartLabels}>
@@ -66,6 +74,9 @@ export default function History() {
               This week
             </T>
           </View>
+          <T variant="caption" color={colors.accent} style={{ marginTop: space.sm }} onPress={() => router.push('/recap')}>
+            Weekly recap →
+          </T>
         </View>
       </Card>
 
