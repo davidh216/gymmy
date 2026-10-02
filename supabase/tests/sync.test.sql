@@ -61,4 +61,18 @@ reset role;
 delete from auth.users where id = (select id from public.profiles where username = 'carol');
 select pg_temp.check(not exists (select 1 from public.sync_records r
   where not exists (select 1 from public.profiles p where p.id = r.user_id)), 'account deletion removes synced data');
+
+-- The app's own "Delete account" call takes the backup and custom-exercise submissions with it.
+select pg_temp.act_as('dave');
+select public.sync_push('[{"kind":"workout","id":"d1","data":{"name":"Push"},"updated_at":"2026-10-01T10:00:00Z"}]');
+insert into public.exercise_submissions (name, muscle_group, kind) values ('Dave Curl', 'arms', 'weight');
+reset role;
+select set_config('test.dave', (select id::text from public.profiles where username = 'dave'), false);
+select pg_temp.act_as('dave');
+select public.delete_my_account();
+reset role;
+select pg_temp.check(not exists (select 1 from public.sync_records where user_id = current_setting('test.dave')::uuid)
+  and not exists (select 1 from public.exercise_submissions where user_id = current_setting('test.dave')::uuid)
+  and not exists (select 1 from auth.users where id = current_setting('test.dave')::uuid),
+  'delete_my_account wipes the account, its backup and submissions');
 \echo ALL SYNC DB TESTS PASSED
