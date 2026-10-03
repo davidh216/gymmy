@@ -13,14 +13,13 @@ name: Log a set and finish a workout
 - hideKeyboard
 - tapOn: "Back Squat.*"
 - tapOn: "Add 1 exercise"
+# Number pads have no Return key, so the keyboard stays up; the set row sits above it.
 - tapOn:
     id: "set-1-weight"
 - inputText: "225"
-- hideKeyboard
 - tapOn:
     id: "set-1-reps"
 - inputText: "5"
-- hideKeyboard
 - tapOn:
     id: "set-1-done"
 - tapOn:
