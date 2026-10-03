@@ -22,11 +22,18 @@ name: Log a set and finish a workout
 - inputText: "5"
 - tapOn:
     id: "set-1-done"
+# Confirms the set registered before finishing (the header counts done sets).
+- extendedWaitUntil:
+    visible: "1 set done.*"
+    timeout: 5000
 - tapOn:
     text: "Skip"
     optional: true
 - tapOn: "Finish"
-- assertVisible: "Done"
+# The summary celebrates first, so give it a moment.
+- extendedWaitUntil:
+    visible: "Done"
+    timeout: 15000
 - assertVisible: ".*Back Squat.*"
 - tapOn: "Done"
 - assertVisible:
