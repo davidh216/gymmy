@@ -1,4 +1,4 @@
-import { exerciseNamed, getExercise, searchExercises, setExtraExercises, type Exercise } from '../exercises';
+import { exerciseNamed, fixGroup, getExercise, searchExercises, setExtraExercises, type Exercise } from '../exercises';
 import { formatAgo, formatSet } from '../format';
 import { bestSet, exerciseInUse, lastSession, lastSessions, topSet } from '../records';
 import type { Workout, WorkoutExercise } from '../types';
@@ -89,5 +89,21 @@ describe('formatting', () => {
     expect(formatAgo(new Date(2026, 8, 30, 22).getTime(), now)).toBe('yesterday');
     expect(formatAgo(new Date(2026, 8, 27).getTime(), now)).toBe('4d ago');
     expect(formatAgo(new Date(2026, 8, 3).getTime(), now)).toBe('4w ago');
+  });
+});
+
+describe('biceps and triceps', () => {
+  it('sorts older "arms" exercises by name', () => {
+    expect(fixGroup('arms', 'Spider Curl')).toBe('biceps');
+    expect(fixGroup('arms', 'Rope Pushdown')).toBe('triceps');
+    expect(fixGroup('arms', 'Bench Dip')).toBe('triceps');
+    expect(fixGroup('arms', 'JM Press Close-Grip')).toBe('triceps');
+    expect(fixGroup('legs', 'Leg Curl')).toBe('legs');
+  });
+
+  it('fixes custom exercises as they load', () => {
+    setExtraExercises([{ id: 'custom_x', name: 'Cable Kickback', group: 'arms' as never, kind: 'weight' }]);
+    expect(getExercise('custom_x').group).toBe('triceps');
+    setExtraExercises([]);
   });
 });

@@ -9,7 +9,8 @@ import { Screen } from '@/components/screen';
 import { WorkoutRow } from '@/components/workout-row';
 import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
-import { TEMPLATES } from '@/lib/exercises';
+import { confirm } from '@/lib/confirm';
+import { TEMPLATES, templateBlurb } from '@/lib/exercises';
 import { formatDuration, greeting } from '@/lib/format';
 import { PROGRAMS, lighterReason, planProgress } from '@/lib/programs';
 import { dayKeyTime } from '@/lib/recovery';
@@ -25,6 +26,8 @@ export default function Today() {
   const gems = useGymmy((s) => s.gems);
   const workouts = useGymmy((s) => s.workouts);
   const startWorkout = useGymmy((s) => s.startWorkout);
+  const saved = useGymmy((s) => s.templates);
+  const deleteTemplate = useGymmy((s) => s.deleteTemplate);
   const { streak, thisWeek, goal, activeDays } = useProgress();
   const checkIns = useGymmy((s) => s.checkIns);
   const now = useNow(60_000);
@@ -109,12 +112,23 @@ export default function Today() {
         showsHorizontalScrollIndicator={false}
         style={styles.templates}
         contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg }}>
-        {TEMPLATES.map((t) => (
+        {[...saved.map((t) => ({ ...t, blurb: templateBlurb(t.exerciseIds), mine: true })), ...TEMPLATES].map((t) => (
           <Card
             key={t.id}
             style={styles.template}
-            onPress={() => start({ name: t.name, exerciseIds: t.exerciseIds })}>
-            <T variant="heading">{t.name}</T>
+            onPress={() => start({ name: t.name, exerciseIds: t.exerciseIds })}
+            onLongPress={
+              'mine' in t
+                ? () =>
+                    confirm(`Delete “${t.name}”?`, 'This removes the template. Your workouts stay.', 'Delete', () =>
+                      deleteTemplate(t.id),
+                    )
+                : undefined
+            }>
+            <T variant="heading" numberOfLines={1}>
+              {'mine' in t ? '★ ' : ''}
+              {t.name}
+            </T>
             <T variant="caption" color={colors.textDim}>
               {t.blurb}
             </T>

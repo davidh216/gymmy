@@ -64,12 +64,14 @@ export function Card({
   children,
   style,
   onPress,
+  onLongPress,
   accessibilityLabel,
   testID,
 }: {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  onLongPress?: () => void;
   accessibilityLabel?: string;
   testID?: string;
 }) {
@@ -84,6 +86,8 @@ export function Card({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       testID={testID}
+      onLongPress={onLongPress}
+      delayLongPress={450}
       onPress={() => {
         haptic();
         onPress();

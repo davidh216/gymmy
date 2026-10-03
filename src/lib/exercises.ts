@@ -3,7 +3,8 @@ export type MuscleGroup =
   | 'back'
   | 'legs'
   | 'shoulders'
-  | 'arms'
+  | 'biceps'
+  | 'triceps'
   | 'core'
   | 'cardio';
 
@@ -37,7 +38,8 @@ export const MUSCLE_GROUPS: { id: MuscleGroup; label: string }[] = [
   { id: 'back', label: 'Back' },
   { id: 'legs', label: 'Legs' },
   { id: 'shoulders', label: 'Shoulders' },
-  { id: 'arms', label: 'Arms' },
+  { id: 'biceps', label: 'Biceps' },
+  { id: 'triceps', label: 'Triceps' },
   { id: 'core', label: 'Core' },
   { id: 'cardio', label: 'Cardio' },
 ];
@@ -84,12 +86,16 @@ export const EXERCISES: Exercise[] = [
   ex('face_pull', 'Face Pull', 'shoulders'),
   ex('rear_delt_fly', 'Rear Delt Fly', 'shoulders'),
 
-  ex('barbell_curl', 'Barbell Curl', 'arms'),
-  ex('db_curl', 'Dumbbell Curl', 'arms'),
-  ex('hammer_curl', 'Hammer Curl', 'arms'),
-  ex('tricep_pushdown', 'Tricep Pushdown', 'arms'),
-  ex('skull_crusher', 'Skull Crusher', 'arms'),
-  ex('overhead_tricep_ext', 'Overhead Tricep Extension', 'arms'),
+  ex('barbell_curl', 'Barbell Curl', 'biceps'),
+  ex('db_curl', 'Dumbbell Curl', 'biceps'),
+  ex('hammer_curl', 'Hammer Curl', 'biceps'),
+  ex('preacher_curl', 'Preacher Curl', 'biceps'),
+  ex('cable_curl', 'Cable Curl', 'biceps'),
+  ex('tricep_pushdown', 'Tricep Pushdown', 'triceps'),
+  ex('skull_crusher', 'Skull Crusher', 'triceps'),
+  ex('overhead_tricep_ext', 'Overhead Tricep Extension', 'triceps'),
+  ex('close_grip_bench', 'Close-Grip Bench Press', 'triceps'),
+  ex('tricep_kickback', 'Tricep Kickback', 'triceps'),
 
   ex('plank', 'Plank', 'core', 'duration'),
   ex('hanging_leg_raise', 'Hanging Leg Raise', 'core', 'reps'),
@@ -115,7 +121,17 @@ const BY_ID = new Map(EXERCISES.map((e) => [e.id, e]));
 let extra: Exercise[] = [];
 let extraById = new Map<string, Exercise>();
 
+/**
+ * Older exercises were filed under "arms", before biceps and triceps were split. Sort them by
+ * name: pressing and extension moves work the triceps, everything else the biceps.
+ */
+export function fixGroup(group: string, name: string): MuscleGroup {
+  if (group !== 'arms') return group as MuscleGroup;
+  return /tri|push ?down|skull|extension|kickback|dip|close.?grip/i.test(name) ? 'triceps' : 'biceps';
+}
+
 export function setExtraExercises(list: Exercise[]) {
+  list = list.map((e) => ((e.group as string) === 'arms' ? { ...e, group: fixGroup(e.group, e.name) } : e));
   extra = list;
   extraById = new Map(list.map((e) => [e.id, e]));
 }
@@ -156,6 +172,17 @@ export type Template = {
   blurb: string;
   exerciseIds: string[];
 };
+
+/** A workout template you saved. */
+export type SavedTemplate = { id: string; name: string; exerciseIds: string[]; createdAt: number };
+
+/** "Chest · Biceps · Core" from the exercises' muscle groups, in order. */
+export function templateBlurb(exerciseIds: string[]): string {
+  const labels = [...new Set(exerciseIds.map((id) => getExercise(id).group))].map(
+    (g) => MUSCLE_GROUPS.find((m) => m.id === g)?.label ?? g,
+  );
+  return labels.slice(0, 3).join(' · ') + (labels.length > 3 ? ' · …' : '');
+}
 
 export const TEMPLATES: Template[] = [
   {

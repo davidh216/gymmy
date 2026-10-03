@@ -1,4 +1,4 @@
-import type { Exercise } from './exercises';
+import { fixGroup, type Exercise, type SavedTemplate } from './exercises';
 import type { CustomProgram } from './programs';
 import type { CheckIn } from './recovery';
 import type { Workout } from './types';
@@ -9,7 +9,15 @@ import type { Workout } from './types';
  * change marks its record dirty; dirty records are pushed, and records changed elsewhere are
  * pulled and merged. The newest edit of a record wins.
  */
-export type SyncKind = 'meta' | 'workout' | 'check_in' | 'custom_exercise' | 'custom_program' | 'companion' | 'milestone';
+export type SyncKind =
+  | 'meta'
+  | 'workout'
+  | 'check_in'
+  | 'custom_exercise'
+  | 'custom_program'
+  | 'template'
+  | 'companion'
+  | 'milestone';
 
 export type SyncRecord = {
   kind: SyncKind;
@@ -34,6 +42,7 @@ export type Syncable = {
   checkIns: Record<string, CheckIn>;
   customExercises: (Exercise & { createdAt: number })[];
   customPrograms: CustomProgram[];
+  templates: SavedTemplate[];
   collection: Record<string, Owned>;
   claimedMilestones: Record<string, number>;
 };
@@ -62,6 +71,7 @@ export function recordsOf(s: Syncable): Map<string, unknown> {
   for (const c of Object.values(s.checkIns)) out.set(recordKey('check_in', c.date), withoutHealthSleep(c));
   for (const e of s.customExercises) out.set(recordKey('custom_exercise', e.id), e);
   for (const p of s.customPrograms) out.set(recordKey('custom_program', p.id), p);
+  for (const t of s.templates) out.set(recordKey('template', t.id), t);
   for (const [id, owned] of Object.entries(s.collection)) out.set(recordKey('companion', id), owned);
   for (const [id, claimedAt] of Object.entries(s.claimedMilestones)) out.set(recordKey('milestone', id), { claimedAt });
   return out;
@@ -85,6 +95,7 @@ export function changedKeys(prev: Syncable, next: Syncable): string[] {
   diff('workout', prev.workouts, next.workouts, (w) => w.id, (w) => w.source !== 'health');
   diff('custom_exercise', prev.customExercises, next.customExercises, (e) => e.id);
   diff('custom_program', prev.customPrograms, next.customPrograms, (p) => p.id);
+  diff('template', prev.templates, next.templates, (t) => t.id);
   const byId = <V>(kind: SyncKind, a: Record<string, V>, b: Record<string, V>) => {
     if (a === b) return;
     for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) if (a[id] !== b[id]) keys.push(recordKey(kind, id));
@@ -122,6 +133,7 @@ export function applyRecords(
   const checkIns = { ...local.checkIns };
   const custom = new Map(local.customExercises.map((e) => [e.id, e]));
   const programs = new Map(local.customPrograms.map((p) => [p.id, p]));
+  const templates = new Map(local.templates.map((t) => [t.id, t]));
   const collection = { ...local.collection };
   const claimed = { ...local.claimedMilestones };
   let meta: Partial<Syncable> = {};
@@ -155,7 +167,15 @@ export function applyRecords(
       }
       case 'custom_exercise':
         if (r.deleted) custom.delete(r.id);
-        else custom.set(r.id, r.data as Syncable['customExercises'][number]);
+        else {
+          const e = r.data as Syncable['customExercises'][number];
+          // Records from before biceps and triceps were split say "arms".
+          custom.set(r.id, { ...e, group: fixGroup(e.group, e.name) });
+        }
+        break;
+      case 'template':
+        if (r.deleted) templates.delete(r.id);
+        else templates.set(r.id, r.data as SavedTemplate);
         break;
       case 'custom_program':
         if (r.deleted) programs.delete(r.id);
@@ -192,6 +212,7 @@ export function applyRecords(
     checkIns,
     customExercises: [...custom.values()].sort((a, b) => b.createdAt - a.createdAt),
     customPrograms: [...programs.values()].sort((a, b) => b.createdAt - a.createdAt),
+    templates: [...templates.values()].sort((a, b) => b.createdAt - a.createdAt),
     collection,
     claimedMilestones: claimed,
   };

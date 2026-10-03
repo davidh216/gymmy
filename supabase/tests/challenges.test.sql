@@ -25,6 +25,8 @@ select set_config('request.jwt.claim.sub', (select id::text from public.profiles
 set role authenticated;
 select pg_temp.check(public.sync_push('[{"kind":"custom_program","id":"custom-1","data":{"name":"PPL"},"updated_at":"2026-10-02T10:00:00Z"}]') = 1,
   'custom plans sync');
+select pg_temp.check(public.sync_push('[{"kind":"template","id":"tpl-1","data":{"name":"Arm day"},"updated_at":"2026-10-03T10:00:00Z"}]') = 1,
+  'templates sync');
 reset role;
 
 -- 20261010000000_places_cache.sql: only the Edge Function (service role) touches the cache.
@@ -40,5 +42,13 @@ do $$ begin
   insert into public.places_cache (key) values ('not a key');
   raise exception 'FAILED: bad cache key accepted';
 exception when check_violation then raise notice 'ok - cache keys are grid cells';
+end $$;
+
+-- 20261011000000_biceps_triceps.sql: "arms" is split.
+do $$ begin
+  insert into public.exercise_submissions (user_id, name, muscle_group, kind)
+  values ((select id from public.profiles limit 1), 'Old Curl', 'arms', 'weight');
+  raise exception 'FAILED: arms still accepted';
+exception when check_violation then raise notice 'ok - arms is now biceps or triceps';
 end $$;
 \echo ALL CHALLENGE DB TESTS PASSED

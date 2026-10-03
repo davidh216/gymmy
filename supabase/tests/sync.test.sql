@@ -65,7 +65,7 @@ select pg_temp.check(not exists (select 1 from public.sync_records r
 -- The app's own "Delete account" call takes the backup and custom-exercise submissions with it.
 select pg_temp.act_as('dave');
 select public.sync_push('[{"kind":"workout","id":"d1","data":{"name":"Push"},"updated_at":"2026-10-01T10:00:00Z"}]');
-insert into public.exercise_submissions (name, muscle_group, kind) values ('Dave Curl', 'arms', 'weight');
+insert into public.exercise_submissions (name, muscle_group, kind) values ('Dave Curl', 'biceps', 'weight');
 reset role;
 select set_config('test.dave', (select id::text from public.profiles where username = 'dave'), false);
 select pg_temp.act_as('dave');

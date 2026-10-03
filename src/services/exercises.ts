@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import type { Exercise, ExerciseKind, MuscleGroup } from '@/lib/exercises';
+import { fixGroup, type Exercise, type ExerciseKind, type MuscleGroup } from '@/lib/exercises';
 import { useGymmy, type CustomExercise, type SubmissionStatus } from '@/store/gymmy';
 
 import { useAuth } from './auth';
@@ -43,7 +43,15 @@ async function syncExercises(userId: string | null): Promise<number> {
   setCommunityExercises(
     rows
       .filter((r) => r.status === 'approved')
-      .map((r): Exercise => ({ id: `community_${r.id}`, name: r.name, group: r.muscle_group, kind: r.kind, source: 'community' })),
+      .map(
+        (r): Exercise => ({
+          id: `community_${r.id}`,
+          name: r.name,
+          group: fixGroup(r.muscle_group, r.name),
+          kind: r.kind,
+          source: 'community',
+        }),
+      ),
   );
   setSubmissionStatuses(Object.fromEntries(rows.map((r) => [r.id, r.status])));
   return rows.length;

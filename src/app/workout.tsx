@@ -12,6 +12,7 @@ import {
 import Animated, { FadeInDown, FadeOutDown, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SaveTemplateButton } from '@/components/save-template-button';
 import { Button, Chip, Icon, T, haptic } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
@@ -155,6 +156,13 @@ export default function WorkoutScreen() {
           onPress={() => router.push('/exercise-picker')}
           style={{ marginTop: space.md }}
         />
+        <View style={{ marginTop: space.sm }}>
+          <SaveTemplateButton
+            name={active.name}
+            exerciseIds={active.exercises.map((e) => e.exerciseId)}
+            variant="ghost"
+          />
+        </View>
         <Button
           title="Discard workout"
           variant="danger"

@@ -92,3 +92,13 @@ it('never makes a lighter day heavier, and carries notes from warm-up-only sessi
   store().startWorkout({ exerciseIds: ['squat'] });
   expect(store().active!.exercises[0].note).toBe('Knee sleeves');
 });
+
+it('saves workout templates that start the same exercises', () => {
+  const id = store().saveTemplate({ name: ' Arm day ', exerciseIds: ['barbell_curl', 'tricep_pushdown', 'barbell_curl'] });
+  expect(store().templates[0]).toMatchObject({ id, name: 'Arm day', exerciseIds: ['barbell_curl', 'tricep_pushdown'] });
+  store().startWorkout({ name: 'Arm day', exerciseIds: store().templates[0].exerciseIds });
+  expect(store().active!.exercises.map((e) => e.exerciseId)).toEqual(['barbell_curl', 'tricep_pushdown']);
+  store().discardWorkout();
+  store().deleteTemplate(id);
+  expect(store().templates).toEqual([]);
+});

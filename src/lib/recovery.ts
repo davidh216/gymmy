@@ -72,7 +72,8 @@ const RECOVERY_HOURS: Record<Exclude<MuscleGroup, 'cardio'>, number> = {
   back: 72,
   chest: 60,
   shoulders: 60,
-  arms: 48,
+  biceps: 48,
+  triceps: 48,
   core: 48,
 };
 

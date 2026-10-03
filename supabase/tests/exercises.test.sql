@@ -21,7 +21,7 @@ select pg_temp.check((select status = 'pending' and name = 'Landmine Press' from
 select set_config('test.s1', (select id::text from public.exercise_submissions), false);
 do $$ begin
   insert into public.exercise_submissions (user_id, name, muscle_group, kind)
-    values ((select id from public.profiles where username = 'carol'), 'Fake', 'arms', 'reps');
+    values ((select id from public.profiles where username = 'carol'), 'Fake', 'biceps', 'reps');
   raise exception 'FAILED: submitted as someone else';
 exception when insufficient_privilege then raise notice 'ok - you can only submit as yourself';
 end $$;

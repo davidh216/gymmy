@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CompanionAvatar } from '@/components/companion-avatar';
 import { MilestoneBanner } from '@/components/milestone-banner';
+import { SaveTemplateButton } from '@/components/save-template-button';
 import { Button, Card, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { confirm } from '@/lib/confirm';
 import { getCompanion } from '@/lib/companions';
@@ -147,7 +148,10 @@ export default function SessionScreen() {
 
         <View style={styles.actions}>
           {isCelebration ? (
-            <Button size="lg" title="Done" onPress={() => router.back()} />
+            <>
+              <Button size="lg" title="Done" onPress={() => router.back()} />
+              <SaveTemplateButton name={workout.name} exerciseIds={workout.exercises.map((e) => e.exerciseId)} />
+            </>
           ) : (
             <>
               <Button
@@ -160,6 +164,7 @@ export default function SessionScreen() {
                   router.replace('/workout');
                 }}
               />
+              <SaveTemplateButton name={workout.name} exerciseIds={workout.exercises.map((e) => e.exerciseId)} />
               <Button
                 title="Delete workout"
                 variant="danger"

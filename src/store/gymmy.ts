@@ -4,7 +4,14 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
-import { getExercise, setExtraExercises, tidyExerciseName, type Exercise } from '@/lib/exercises';
+import {
+  fixGroup,
+  getExercise,
+  setExtraExercises,
+  tidyExerciseName,
+  type Exercise,
+  type SavedTemplate,
+} from '@/lib/exercises';
 import { defaultWorkoutName, fromDisplayWeight, toDisplayWeight, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import { getMilestone, milestoneStats } from '@/lib/milestones';
@@ -69,6 +76,8 @@ type State = {
   customExercises: CustomExercise[];
   /** Training plans you built. */
   customPrograms: CustomProgram[];
+  /** Workout templates you saved, newest first. */
+  templates: SavedTemplate[];
   /** Approved community exercises, cached so history works offline. */
   communityExercises: Exercise[];
   /** The training plan you're following. Progress counts workouts since `startedAt`. */
@@ -122,6 +131,9 @@ type Actions = {
   saveCustomProgram: (input: CustomProgramInput, id?: string) => string;
   /** Deletes a custom plan, leaving it first if you're following it. */
   deleteCustomProgram: (id: string) => void;
+  /** Saves a workout's exercises as a template; returns its id. */
+  saveTemplate: (input: { name: string; exerciseIds: string[] }) => string;
+  deleteTemplate: (id: string) => void;
   /** Starts a workout prefilled from a plan session. */
   startPlanSession: (ref: PlanRef) => void;
   /** Grants XP and gems for achieved, unclaimed milestones. Returns what was granted. */
@@ -151,6 +163,7 @@ const initialState: State = {
   lastRewards: null,
   customExercises: [],
   customPrograms: [],
+  templates: [],
   communityExercises: [],
   plan: null,
   claimedMilestones: {},
@@ -284,6 +297,19 @@ export const useGymmy = create<State & Actions>()(
           }));
           return program.id;
         },
+
+        saveTemplate: ({ name, exerciseIds }) => {
+          const template: SavedTemplate = {
+            id: `tpl-${uid()}`,
+            name: name.trim() || 'My workout',
+            exerciseIds: [...new Set(exerciseIds)],
+            createdAt: Date.now(),
+          };
+          set((s) => ({ templates: [template, ...s.templates] }));
+          return template.id;
+        },
+
+        deleteTemplate: (id) => set((s) => ({ templates: s.templates.filter((t) => t.id !== id) })),
 
         deleteCustomProgram: (id) =>
           set((s) => ({
@@ -564,7 +590,7 @@ export const useGymmy = create<State & Actions>()(
     },
     {
       name: 'gymmy',
-      version: 6,
+      version: 7,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
@@ -572,6 +598,9 @@ export const useGymmy = create<State & Actions>()(
           state.profile = { ...state.profile, username: toUsername(state.profile.name) };
         }
         state.customExercises ??= [];
+        // v7: "arms" split into biceps and triceps.
+        state.customExercises = state.customExercises.map((e) => ({ ...e, group: fixGroup(e.group, e.name) }));
+        state.communityExercises = (state.communityExercises ?? []).map((e) => ({ ...e, group: fixGroup(e.group, e.name) }));
         state.communityExercises ??= [];
         state.plan ??= null;
         state.claimedMilestones ??= {};
@@ -579,6 +608,7 @@ export const useGymmy = create<State & Actions>()(
         state.health ??= { enabled: false };
         state.recapSeen ??= 0;
         state.customPrograms ??= [];
+        state.templates ??= [];
         return state;
       },
     },

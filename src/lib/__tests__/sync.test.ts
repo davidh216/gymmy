@@ -25,6 +25,7 @@ const state = (patch: Partial<Syncable> = {}): Syncable => ({
   checkIns: {},
   customExercises: [],
   customPrograms: [],
+  templates: [],
   collection: { kong: { stars: 1, obtainedAt: 5 } },
   claimedMilestones: {},
   ...patch,
@@ -176,5 +177,15 @@ describe('Apple Health sleep', () => {
       firstSync: false,
     });
     expect(merged.checkIns!['2026-10-02']).toMatchObject({ energy: 5, sleepHours: 7.2, sleepSource: 'health' });
+  });
+});
+
+describe('saved templates', () => {
+  it('sync both ways', () => {
+    const t = { id: 'tpl-1', name: 'Arm day', exerciseIds: ['barbell_curl'], createdAt: 1 };
+    const before = state();
+    const after = { ...before, templates: [t] };
+    expect(changedKeys(before, after)).toEqual(['template:tpl-1']);
+    expect(applyRecords(before, [{ kind: 'template', id: 'tpl-1', data: t, updatedAt: 5 }], { dirty: {}, firstSync: false }).templates).toEqual([t]);
   });
 });
