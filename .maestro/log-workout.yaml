@@ -30,9 +30,10 @@ name: Log a set and finish a workout
     text: "Skip"
     optional: true
 - tapOn: "Finish"
-# The summary celebrates first, so give it a moment. Done sits below the rewards, so scroll to it.
+# The summary celebrates first, so give it a moment. Stat labels are uppercased on iOS, and Done
+# sits below the rewards, so match case-insensitively and scroll to it.
 - extendedWaitUntil:
-    visible: ".*Duration.*"
+    visible: "(?i).*duration.*"
     timeout: 15000
 - scrollUntilVisible:
     element: ".*Back Squat.*"
