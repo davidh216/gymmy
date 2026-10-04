@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -635,6 +636,7 @@ function SetRow({
     if (!set.done && !valid) {
       // Fill from previous session on first tap, like most lifting apps.
       if (previous && isLoggable(kind, cols, previous)) {
+        Keyboard.dismiss();
         const patch: Partial<SetEntry> = { done: true };
         for (const c of cols) patch[c.field] = set[c.field] ?? previous[c.field];
         updateSet(workoutExerciseId, set.id, patch);
@@ -644,6 +646,8 @@ function SetRow({
       return;
     }
     const done = !set.done;
+    // Logging a set finishes editing it.
+    if (done) Keyboard.dismiss();
     updateSet(workoutExerciseId, set.id, { done });
     if (done) {
       haptic('medium');
@@ -735,14 +739,24 @@ function SetInput({
   onChange: (value: number | undefined) => void;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
+  const focused = useRef(false);
+  const shown = draft ?? (value === undefined ? '' : column.format(value));
   return (
     <TextInput
-      value={draft ?? (value === undefined ? '' : column.format(value))}
+      value={shown}
       onChangeText={(t) => {
+        // iOS can send a stray change (often empty) as the keyboard closes; only typing counts.
+        if (!focused.current || t === shown) return;
         setDraft(t);
         onChange(column.parse(t));
       }}
-      onBlur={() => setDraft(null)}
+      onFocus={() => {
+        focused.current = true;
+      }}
+      onBlur={() => {
+        focused.current = false;
+        setDraft(null);
+      }}
       keyboardType={column.keyboard}
       selectTextOnFocus
       placeholder={placeholder}

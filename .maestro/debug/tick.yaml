@@ -1,0 +1,31 @@
+appId: com.davidh216.gymmy
+name: Debug - stop just after ticking the set
+# Not part of the suite. CI replays it after a failure to show the set right after it's ticked.
+---
+- runFlow: ../common/onboard.yaml
+- scrollUntilVisible:
+    element: "Start empty workout"
+    direction: DOWN
+    centerElement: true
+- tapOn: "Start empty workout"
+- tapOn: "Add exercises"
+- tapOn: "Search exercises"
+- inputText: "squat"
+- hideKeyboard
+- tapOn: "Back Squat.*"
+- tapOn: "Add 1 exercise"
+# Number pads have no Return key, so the keyboard stays up; the set row sits above it.
+- tapOn:
+    id: "set-1-weight"
+- inputText: "225"
+- tapOn:
+    id: "set-1-reps"
+- inputText: "5"
+- tapOn:
+    id: "set-1-done"
+# Confirms the set registered before finishing (the header counts done sets).
+- extendedWaitUntil:
+    visible: "1 set done.*"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 5000

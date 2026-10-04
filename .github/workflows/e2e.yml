@@ -88,6 +88,9 @@ jobs:
           done
           echo "== Elements on screen now"
           maestro hierarchy 2>/dev/null | grep -oE '"(accessibilityText|text|resource-id|title|value)" *: *"[^"]+"' | sort -u | head -150 || true
+          echo "== After replaying the workout up to ticking the set"
+          maestro test .maestro/debug/tick.yaml || true
+          maestro hierarchy 2>/dev/null | grep -oE '"(accessibilityText|text|resource-id|title|value)" *: *"[^"]+"' | sort -u | head -150 || true
           echo "== After replaying the workout up to Finish"
           maestro test .maestro/debug/finish.yaml || true
           maestro hierarchy 2>/dev/null | grep -oE '"(accessibilityText|text|resource-id|title|value)" *: *"[^"]+"' | sort -u | head -150 || true
