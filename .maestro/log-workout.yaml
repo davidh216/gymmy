@@ -30,11 +30,18 @@ name: Log a set and finish a workout
     text: "Skip"
     optional: true
 - tapOn: "Finish"
-# The summary celebrates first, so give it a moment.
+# The summary celebrates first, so give it a moment. Done sits below the rewards, so scroll to it.
 - extendedWaitUntil:
-    visible: "Done"
+    visible: ".*Duration.*"
     timeout: 15000
-- assertVisible: ".*Back Squat.*"
+- scrollUntilVisible:
+    element: ".*Back Squat.*"
+    direction: DOWN
+    centerElement: true
+- scrollUntilVisible:
+    element: "Done"
+    direction: DOWN
+    centerElement: true
 - tapOn: "Done"
 - assertVisible:
     id: "today"
