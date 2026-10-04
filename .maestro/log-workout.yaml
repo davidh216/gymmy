@@ -44,8 +44,11 @@ name: Log a set and finish a workout
     direction: DOWN
     centerElement: true
 - tapOn: "Done"
-- assertVisible:
-    id: "today"
+# Back on Today, still scrolled down to where the workout was started from.
+- scrollUntilVisible:
+    element:
+      id: "today"
+    direction: UP
 - scrollUntilVisible:
     element: "(?i)recent"
     direction: DOWN

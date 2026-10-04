@@ -1,7 +1,7 @@
 appId: com.davidh216.gymmy
-name: Debug - stop just after Finish
+name: Debug - finish and close the summary
 # Not part of the suite (only top-level flows run). CI replays it after a failure and prints the
-# screen, to see what Finish leads to on iOS.
+# screen, to see what Finish and Done lead to on iOS.
 ---
 - runFlow: ../common/onboard.yaml
 - scrollUntilVisible:
@@ -32,5 +32,12 @@ name: Debug - stop just after Finish
     text: "Skip"
     optional: true
 - tapOn: "Finish"
+- waitForAnimationToEnd:
+    timeout: 5000
+- scrollUntilVisible:
+    element: "Done"
+    direction: DOWN
+    centerElement: true
+- tapOn: "Done"
 - waitForAnimationToEnd:
     timeout: 5000
