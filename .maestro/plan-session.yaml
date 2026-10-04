@@ -5,6 +5,8 @@ name: Start a training plan session
 - scrollUntilVisible:
     element: ".*HYROX Prep.*"
     direction: DOWN
+    # Today has grown long; give the scroll more time than the 20s default.
+    timeout: 40000
     centerElement: true
 - tapOn: ".*HYROX Prep.*"
 - tapOn: "Start this plan"
