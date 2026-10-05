@@ -28,6 +28,7 @@ export default function PostEntry() {
   const post = usePostEntry();
 
   const [result, setResult] = useState('');
+  const [repsText, setRepsText] = useState('');
   // Prefilled from Apple Health's latest weight when there is one.
   const healthMass = useGymmy((s) => s.health.vitals?.bodyMassKg);
   const [bodyweight, setBodyweight] = useState(() =>
@@ -42,8 +43,10 @@ export default function PostEntry() {
   const value = parseValue(result);
   const bw = parseFloat(bodyweight.replace(',', '.'));
   const bodyweightKg = Number.isFinite(bw) && bw > 0 ? fromDisplayWeight(bw, units) : undefined;
+  const repsN = parseInt(repsText, 10);
+  const reps = challenge.reps && Number.isInteger(repsN) && repsN >= 1 && repsN <= 100 ? repsN : undefined;
   const allChecked = checked.length === challenge.standards.length;
-  const ready = value !== null && videoUri && allChecked && (!isWeight || bodyweightKg);
+  const ready = value !== null && videoUri && allChecked && (!isWeight || bodyweightKg) && (!challenge.reps || reps);
 
   function parseValue(text: string): number | null {
     if (challenge.metric === 'seconds') return parseSeconds(text);
@@ -89,6 +92,7 @@ export default function PostEntry() {
         gymId: params.gymId,
         challengeId: challenge.id,
         value,
+        reps,
         bodyweightKg: isWeight ? bodyweightKg : undefined,
         videoUri,
         athlete: { username, companionId },
@@ -133,7 +137,7 @@ export default function PostEntry() {
             {done.rank === 1 ? 'You took the crown!' : medal ? `You made the podium` : `Ranked #${done.rank}`}
           </T>
           <T variant="heading" color={colors.textDim}>
-            {challenge.name} · {formatResult(challenge, done.entry.value, units)}
+            {challenge.name} · {formatResult(challenge, done.entry.value, units, done.entry.reps)}
           </T>
           {done.dethroned.length > 0 && (
             <T variant="body" color={colors.flame} style={{ textAlign: 'center', marginTop: space.sm }}>
@@ -198,11 +202,30 @@ export default function PostEntry() {
           <T variant="heading" color={colors.textDim}>
             {challenge.metric === 'weight' ? units : challenge.metric === 'reps' ? 'reps' : 'm:ss'}
           </T>
+          {challenge.reps && (
+            <>
+              <T variant="heading" color={colors.textDim}>
+                ×
+              </T>
+              <TextInput
+                value={repsText}
+                onChangeText={setRepsText}
+                keyboardType="number-pad"
+                placeholder="1"
+                placeholderTextColor={colors.textFaint}
+                style={styles.smallInput}
+                accessibilityLabel="Reps"
+              />
+              <T variant="heading" color={colors.textDim}>
+                reps
+              </T>
+            </>
+          )}
         </View>
         {isWeight && (
           <View style={styles.inputRow}>
             <T variant="body" color={colors.textDim} style={{ flex: 1 }}>
-              Your bodyweight (for pound-for-pound)
+              Your bodyweight (for the bodyweight % board)
             </T>
             <TextInput
               value={bodyweight}
@@ -269,7 +292,9 @@ export default function PostEntry() {
               ? 'Add your video to continue.'
               : value === null
                 ? 'Enter your result.'
-                : isWeight && !bodyweightKg
+                : challenge.reps && !reps
+                  ? 'Enter your reps (1–100).'
+                  : isWeight && !bodyweightKg
                   ? 'Enter your bodyweight.'
                   : 'Confirm each standard.'}
           </T>

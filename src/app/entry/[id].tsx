@@ -102,7 +102,7 @@ export default function EntryScreen() {
             <T variant="label" color={colors.textFaint}>
               {challenge.name} · {challenge.measure}
             </T>
-            <T variant="hero">{formatResult(challenge, entry.value, units)}</T>
+            <T variant="hero">{formatResult(challenge, entry.value, units, entry.reps)}</T>
           </View>
           {entry.bodyweightKg ? (
             <View style={{ alignItems: 'flex-end' }}>

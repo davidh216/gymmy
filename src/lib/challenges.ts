@@ -11,6 +11,8 @@ export type Challenge = {
   metric: Metric;
   /** Whether a higher value ranks better (false for fastest-time challenges). */
   higherIsBetter: boolean;
+  /** Barbell lifts log weight × reps and rank by total, max weight or bodyweight %. */
+  reps?: boolean;
   /** Standards the poster confirms and reporters judge against. */
   standards: string[];
 };
@@ -23,33 +25,37 @@ export const CHALLENGES: Challenge[] = [
   {
     id: 'bench_1rm',
     name: 'Bench Press',
-    measure: 'Heaviest single',
+    measure: 'Weight × reps',
     metric: 'weight',
     higherIsBetter: true,
+    reps: true,
     standards: [...LIFT_STANDARDS, 'Bar touches chest, no bounce'],
   },
   {
     id: 'squat_1rm',
     name: 'Back Squat',
-    measure: 'Heaviest single',
+    measure: 'Weight × reps',
     metric: 'weight',
     higherIsBetter: true,
+    reps: true,
     standards: [...LIFT_STANDARDS, 'Hip crease below the knee'],
   },
   {
     id: 'deadlift_1rm',
     name: 'Deadlift',
-    measure: 'Heaviest single',
+    measure: 'Weight × reps',
     metric: 'weight',
     higherIsBetter: true,
+    reps: true,
     standards: [...LIFT_STANDARDS, 'Hips and knees locked out at the top'],
   },
   {
     id: 'ohp_1rm',
     name: 'Overhead Press',
-    measure: 'Heaviest single',
+    measure: 'Weight × reps',
     metric: 'weight',
     higherIsBetter: true,
+    reps: true,
     standards: [...LIFT_STANDARDS, 'Strict press, no leg drive'],
   },
   {
@@ -126,11 +132,6 @@ export function getChallenge(id: string): Challenge {
   return challenge;
 }
 
-/** Pound-for-pound ranking only makes sense for loaded lifts. */
-export function supportsPoundForPound(challenge: Challenge): boolean {
-  return challenge.metric === 'weight';
-}
-
 /** "m:ss.s" for times, e.g. 1:42.5. */
 export function formatSeconds(total: number): string {
   const m = Math.floor(total / 60);
@@ -147,10 +148,12 @@ export function parseSeconds(text: string): number | null {
   return value > 0 ? Math.round(value * 10) / 10 : null;
 }
 
-export function formatResult(challenge: Challenge, value: number, units: Units): string {
+export function formatResult(challenge: Challenge, value: number, units: Units, reps?: number): string {
   switch (challenge.metric) {
     case 'weight':
-      return `${toDisplayWeight(value, units)} ${units}`;
+      return challenge.reps && reps
+        ? `${toDisplayWeight(value, units)} ${units} × ${reps}`
+        : `${toDisplayWeight(value, units)} ${units}`;
     case 'reps':
       return `${value} reps`;
     case 'seconds':

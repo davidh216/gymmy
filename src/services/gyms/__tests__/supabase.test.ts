@@ -12,6 +12,7 @@ describe('supabase gyms helpers', () => {
         challenge_id: 'bench_1rm',
         user_id: 'u1',
         value: '102.5' as unknown as number,
+        reps: null,
         bodyweight_kg: null,
         video_path: 'u1/x.mp4',
         status: 'live',

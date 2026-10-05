@@ -1,11 +1,17 @@
 import type { Challenge } from './challenges';
 
-export type BoardMode = 'open' | 'p4p';
+/**
+ * How a board ranks: `total` is weight × reps, `open` the raw result (max weight for lifts),
+ * `p4p` the weight as a share of bodyweight.
+ */
+export type BoardMode = 'total' | 'open' | 'p4p';
 
 export type RankableEntry = {
   id: string;
   userId: string;
   value: number;
+  /** Reps in the set, for weight × reps lifts. */
+  reps?: number;
   bodyweightKg?: number;
   createdAt: number;
 };
@@ -20,8 +26,27 @@ export function medalFor(rank: number): string | null {
   return MEDALS[rank - 1] ?? null;
 }
 
-/** The number a board sorts by: raw value, or value per kg of bodyweight. */
+/** The ways a challenge's board can be ranked, the default first. */
+export function boardModes(challenge: Challenge): BoardMode[] {
+  if (challenge.reps) return ['total', 'open', 'p4p'];
+  if (challenge.metric === 'weight') return ['open', 'p4p'];
+  return ['open'];
+}
+
+/** The ranking used for podiums, medals and "you're #N" after posting. */
+export function primaryMode(challenge: Challenge): BoardMode {
+  return boardModes(challenge)[0];
+}
+
+export const MODE_LABELS: Record<BoardMode, string> = {
+  total: 'Total',
+  open: 'Max weight',
+  p4p: 'Bodyweight %',
+};
+
+/** The number a board sorts by: weight × reps, the raw value, or value per kg of bodyweight. */
 export function scoreOf(entry: RankableEntry, mode: BoardMode): number | null {
+  if (mode === 'total') return entry.value * (entry.reps ?? 1);
   if (mode === 'open') return entry.value;
   return entry.bodyweightKg && entry.bodyweightKg > 0 ? entry.value / entry.bodyweightKg : null;
 }

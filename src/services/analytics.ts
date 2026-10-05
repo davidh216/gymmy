@@ -21,7 +21,14 @@ export const analyticsAvailable = isRemote && !__DEV__ && Platform.OS !== 'web';
 
 type Queued = { event: string; props: object; client_at: string; app_version?: string; platform: string };
 
-type AnalyticsState = { installId: string; enabled: boolean; queue: Queued[] };
+type AnalyticsState = {
+  installId: string;
+  /** Off until the user says yes; see StatsAsk on Today. */
+  enabled: boolean;
+  /** Whether we've asked yet (yes or no). */
+  asked: boolean;
+  queue: Queued[];
+};
 
 /** A random v4 UUID (not for security: just an anonymous install id). */
 function randomId(): string {
@@ -32,10 +39,15 @@ function randomId(): string {
 }
 
 export const useAnalytics = create<AnalyticsState>()(
-  persist((): AnalyticsState => ({ installId: randomId(), enabled: true, queue: [] }), {
+  persist((): AnalyticsState => ({ installId: randomId(), enabled: false, asked: false, queue: [] }), {
     name: 'gymmy-analytics',
-    version: 1,
+    version: 2,
     storage: createJSONStorage(() => AsyncStorage),
+    // v1 was on by default; now it's opt-in, so everyone gets asked once.
+    migrate: (persisted, version) => {
+      const state = persisted as AnalyticsState;
+      return version < 2 ? { ...state, enabled: false, asked: false, queue: [] } : state;
+    },
   }),
 );
 
@@ -83,7 +95,7 @@ export function flushAnalytics(): Promise<void> {
 
 /** Turning analytics off also drops anything not yet sent. */
 export function setAnalyticsEnabled(enabled: boolean) {
-  useAnalytics.setState({ enabled, ...(enabled ? {} : { queue: [] }) });
+  useAnalytics.setState({ enabled, asked: true, ...(enabled ? {} : { queue: [] }) });
 }
 
 /** Tracks app opens, screens and workout lifecycle events; flushes when the app backgrounds. */

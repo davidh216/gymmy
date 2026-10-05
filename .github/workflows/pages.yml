@@ -1,0 +1,49 @@
+# Publishes the support page and privacy policy to GitHub Pages:
+#   https://davidh216.github.io/gymmy/            (Support URL)
+#   https://davidh216.github.io/gymmy/privacy.html (Privacy Policy URL)
+# Needs Settings → Pages → Source: "GitHub Actions" once.
+name: Pages
+
+on:
+  push:
+    branches: [claude/modernize-ios-mvp]
+    paths: ['docs/site/**', 'docs/launch/privacy-policy.md', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the pages
+        run: |
+          mkdir -p _site
+          cp docs/site/* _site/
+          body=$(npx -y marked@15 -i docs/launch/privacy-policy.md)
+          {
+            echo '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            echo '<title>Gymmy Privacy Policy</title><link rel="stylesheet" href="style.css"></head>'
+            echo '<body><main>'
+            echo "$body"
+            echo '<p class="links"><a href="./">Gymmy Support</a></p></main></body></html>'
+          } > _site/privacy.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+      - id: deployment
+        uses: actions/deploy-pages@v4

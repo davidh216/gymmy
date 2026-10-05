@@ -35,6 +35,8 @@ export type Entry = {
   athlete: Athlete;
   /** kg, reps or seconds depending on the challenge metric. */
   value: number;
+  /** Reps in the set, for weight × reps lifts. */
+  reps?: number;
   bodyweightKg?: number;
   hasVideo: boolean;
   /** Playable URL; only filled in when loading a single entry. */
@@ -43,6 +45,8 @@ export type Entry = {
   createdAt: number;
   /** Set when the current user has reported this entry. */
   myReport?: ReportKind;
+  /** A baseline row from Gymmy, not a real athlete. */
+  pacer?: boolean;
 };
 
 export type BoardRow = {
@@ -72,6 +76,7 @@ export type PostEntryInput = {
   gymId: string;
   challengeId: string;
   value: number;
+  reps?: number;
   bodyweightKg?: number;
   videoUri: string;
   athlete: Omit<Athlete, 'id' | 'sample'>;

@@ -6,10 +6,11 @@ import { StyleSheet, View } from 'react-native';
 import { BackHeader } from '@/components/back-header';
 import { ErrorState } from '@/components/error-state';
 import { Screen } from '@/components/screen';
+import { athleteName } from '@/components/gym-parts';
 import { Button, Card, Icon, SectionHeader, T, haptic } from '@/components/ui';
 import { CHALLENGES, formatResult, type Challenge } from '@/lib/challenges';
 import { confirm } from '@/lib/confirm';
-import { medalFor } from '@/lib/leaderboard';
+import { medalFor, primaryMode } from '@/lib/leaderboard';
 import { useMeId } from '@/services/gyms';
 import { useBoard, useGym, useJoinGym, useLeaveGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
@@ -115,7 +116,7 @@ export default function GymScreen() {
 
 function ChallengeRow({ gymId, challenge }: { gymId: string | null; challenge: Challenge }) {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
-  const { data } = useBoard(gymId, challenge.id, 'open');
+  const { data } = useBoard(gymId, challenge.id, primaryMode(challenge));
   const meId = useMeId();
   const leader = data?.rows[0];
   const mine = data?.rows.find((r) => r.entry.athlete.id === meId) ?? data?.me;
@@ -133,7 +134,7 @@ function ChallengeRow({ gymId, challenge }: { gymId: string | null; challenge: C
         <T variant="heading">{challenge.name}</T>
         <T variant="caption" color={colors.textFaint} numberOfLines={1}>
           {leader
-            ? `🥇 @${leader.entry.athlete.username} · ${formatResult(challenge, leader.entry.value, units)}`
+            ? `🥇 ${athleteName(leader.entry)} · ${formatResult(challenge, leader.entry.value, units, leader.entry.reps)}`
             : `${challenge.measure} · unclaimed, be the first`}
         </T>
       </View>

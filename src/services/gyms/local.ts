@@ -2,10 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getChallenge } from '@/lib/challenges';
 import { uid } from '@/lib/format';
-import { BOARD_SIZE, rankEntries, seasonBoard, type ReportKind } from '@/lib/leaderboard';
+import { type ReportKind } from '@/lib/leaderboard';
 
+import { buildBoard, podiumUsers, primaryRanking } from './board';
 import { seedWorld, type StoredEntry, type StoredGym } from './seed';
-import type { Athlete, Board, Entry, Gym, GymsApi } from './types';
+import type { Athlete, Entry, Gym, GymsApi } from './types';
 
 /**
  * A single-device stand-in for the real backend. Data lives in AsyncStorage and
@@ -82,6 +83,7 @@ function toEntry(w: World, e: StoredEntry): Entry {
     challengeId: e.challengeId,
     athlete: w.athletes[e.userId],
     value: e.value,
+    reps: e.reps,
     bodyweightKg: e.bodyweightKg,
     hasVideo: Boolean(e.videoUri),
     videoUri: e.videoUri,
@@ -202,20 +204,8 @@ export const localGymsApi: GymsApi = {
 
   async getBoard({ gymId, challengeId, mode, season = 'all' }) {
     const w = await load();
-    const { ranked, crowns } = seasonBoard(visible(w, gymId, challengeId), getChallenge(challengeId), mode, season, Date.now());
-    const rows = ranked.map((r) => ({
-      rank: r.rank,
-      score: r.score,
-      entry: toEntry(w, r.entry),
-      crowns: crowns.get(r.entry.userId),
-    }));
-    const mine = rows.find((r) => r.entry.athlete.id === ME) ?? null;
-    const board: Board = {
-      rows: rows.slice(0, BOARD_SIZE),
-      me: mine && mine.rank > BOARD_SIZE ? mine : null,
-      total: rows.length,
-    };
-    return board;
+    const entries = visible(w, gymId, challengeId).map((e) => toEntry(w, e));
+    return buildBoard(entries, getChallenge(challengeId), mode, season, ME, Date.now());
   },
 
   async getEntry(id) {
@@ -224,12 +214,10 @@ export const localGymsApi: GymsApi = {
     return e ? toEntry(w, e) : null;
   },
 
-  async postEntry({ gymId, challengeId, value, bodyweightKg, videoUri, athlete }) {
+  async postEntry({ gymId, challengeId, value, reps, bodyweightKg, videoUri, athlete }) {
     const w = await load();
     const challenge = getChallenge(challengeId);
-    const podiumBefore = rankEntries(visible(w, gymId, challengeId), challenge, 'open')
-      .slice(0, 3)
-      .map((r) => r.entry.userId);
+    const podiumBefore = podiumUsers(primaryRanking(visible(w, gymId, challengeId), challenge, Date.now()));
 
     w.athletes[ME] = { id: ME, ...athlete };
     const stored: StoredEntry = {
@@ -238,6 +226,7 @@ export const localGymsApi: GymsApi = {
       challengeId,
       userId: ME,
       value,
+      reps,
       bodyweightKg,
       videoUri,
       // The real backend holds entries in `processing` until the content scan passes.
@@ -247,8 +236,8 @@ export const localGymsApi: GymsApi = {
     w.entries.push(stored);
     await save();
 
-    const after = rankEntries(visible(w, gymId, challengeId), challenge, 'open');
-    const podiumAfter = after.slice(0, 3).map((r) => r.entry.userId);
+    const after = primaryRanking(visible(w, gymId, challengeId), challenge, Date.now());
+    const podiumAfter = podiumUsers(after);
     const rank = after.find((r) => r.entry.userId === ME)?.rank ?? after.length;
     const dethroned = podiumBefore
       .filter((id) => id !== ME && !podiumAfter.includes(id))
@@ -277,7 +266,7 @@ export const localGymsApi: GymsApi = {
     const pairs = new Set(mine.map((e) => `${e.gymId}|${e.challengeId}`));
     for (const pair of pairs) {
       const [gymId, challengeId] = pair.split('|');
-      const ranked = rankEntries(visible(w, gymId, challengeId), getChallenge(challengeId), 'open');
+      const ranked = primaryRanking(visible(w, gymId, challengeId), getChallenge(challengeId), Date.now());
       const rank = ranked.find((r) => r.entry.userId === ME)?.rank;
       if (rank && rank <= 3) medals.push({ gymId, challengeId, rank });
     }

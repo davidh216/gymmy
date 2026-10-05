@@ -1,6 +1,6 @@
 # Gymmy Privacy Policy
 
-_Draft for review. Last updated: [date]. Contact: [support email]._
+_Last updated: October 5, 2026. Contact: [davidh216+gymmy@gmail.com](mailto:davidh216+gymmy@gmail.com)._
 
 Gymmy is a workout tracker with gym leaderboards. This policy explains what Gymmy keeps, where it goes, and how to delete it. In short: your training stays on your phone unless you create an account, nothing is sold, and there are no ads.
 
@@ -32,7 +32,7 @@ If you allow it, Gymmy uses your approximate location once, when you look for gy
 
 ## Anonymous usage statistics
 
-Gymmy records which screens and features get used (for example "finished a workout", "started a plan"), with a random install ID that isn't linked to your account, name or email, and rounded numbers only. Never your workouts, health data, name or email. Turn it off any time in Profile → Privacy.
+Gymmy records which screens and features get used (for example "finished a workout", "started a plan"), with a random install ID that isn't linked to your account, name or email, and rounded numbers only. Never your workouts, health data, name or email. This is off until you say yes when Gymmy asks, and you can change it any time in Profile → Privacy.
 
 ## Crash reports
 

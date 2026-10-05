@@ -6,6 +6,7 @@ import { MilestoneBanner } from '@/components/milestone-banner';
 import { ReadinessCard } from '@/components/readiness-card';
 import { RecapCard } from '@/components/recap-card';
 import { Screen } from '@/components/screen';
+import { StatsAsk } from '@/components/stats-ask';
 import { WorkoutRow } from '@/components/workout-row';
 import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
@@ -147,6 +148,8 @@ export default function Today() {
           ))}
         </>
       )}
+
+      <StatsAsk />
     </Screen>
   );
 }

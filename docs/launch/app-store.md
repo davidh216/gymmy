@@ -17,7 +17,7 @@ Data **not linked to the user**:
 
 | Data type | Used for |
 |---|---|
-| Usage Data → Product interaction | Analytics (anonymous install id, can be turned off) |
+| Usage Data → Product interaction | Analytics (anonymous install id, opt-in) |
 | Diagnostics → Crash data | App functionality (Sentry, when enabled) |
 | Location → Coarse location | App functionality (nearby gym search, not stored) |
 
@@ -31,7 +31,9 @@ Likely **12+**: user-generated videos and usernames with reporting, blocking and
 
 > Gymmy is a workout log with gym leaderboards. Everything except the leaderboards works without an account.
 >
-> **Demo account:** [email] / [password] (already a member of a gym with a few entries).
+> **Support:** davidh216+gymmy@gmail.com · Support URL and Privacy Policy URL: see "Web pages" below.
+>
+> **No demo account needed:** create one in the app in under a minute (Gyms tab → Create account, with an email and password). Every leaderboard shows labelled baseline rows (e.g. "1 plate · 135 lb × 5 · Baseline"), so boards have rankings to compete against before anyone posts.
 >
 > **Apple Health:** Profile → Apple Health → Connect. Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight for readiness and history, and saves workouts. Nothing from Health is used for ads or shared.
 >
@@ -64,6 +66,7 @@ RECOVER SMARTER
 
 CLAIM YOUR GYM
 • Leaderboards for the big lifts, pull-ups, rows, runs and carries
+• Rank lifts by total (weight × reps), max weight or bodyweight %
 • Post a video of your attempt and take the top spot
 • Monthly seasons: finish #1 and keep the crown
 
@@ -76,3 +79,10 @@ Works offline. Your data stays on your phone unless you create an account.
 **Keywords (100):** workout,gym,log,tracker,hyrox,strength,leaderboard,pr,running,plan,lifting,fitness,recovery
 
 **Screenshots to capture (6.9" iPhone):** Today, workout logging, plan, progress chart, leaderboard, weekly recap.
+
+## Web pages
+
+Published by `.github/workflows/pages.yml` from `docs/launch/privacy-policy.md` and `docs/site/`:
+
+- Support URL: `https://davidh216.github.io/gymmy/`
+- Privacy Policy URL: `https://davidh216.github.io/gymmy/privacy.html`

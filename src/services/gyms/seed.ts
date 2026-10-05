@@ -19,6 +19,7 @@ export type StoredEntry = {
   challengeId: string;
   userId: string;
   value: number;
+  reps?: number;
   bodyweightKg?: number;
   videoUri?: string;
   status: 'processing' | 'live' | 'hidden' | 'removed';
@@ -91,7 +92,7 @@ export function seedWorld(now: number) {
     gym.members = roster.map((a) => a.id);
     for (const challenge of CHALLENGES) {
       const [lo, hi] = BASE[challenge.id];
-      for (const athlete of roster) {
+      for (const [a, athlete] of roster.entries()) {
         if (rand() < 0.15) continue; // not everyone attempts everything
         const raw = lo + (hi - lo) * rand();
         // Lifts land on 5 lb jumps like real plates, stored in kg.
@@ -102,6 +103,8 @@ export function seedWorld(now: number) {
           challengeId: challenge.id,
           userId: athlete.id,
           value,
+          // Sets of 1–8, picked without disturbing the random sequence above.
+          reps: challenge.reps ? 1 + ((a * 3 + g) % 8) : undefined,
           bodyweightKg: challenge.metric === 'weight' ? bodyweight.get(athlete.id) : undefined,
           status: 'live',
           createdAt: now - Math.floor(rand() * 60) * 24 * 60 * 60 * 1000,

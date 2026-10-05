@@ -1,10 +1,11 @@
 import { getChallenge } from '@/lib/challenges';
 import { uid } from '@/lib/format';
-import { BOARD_SIZE, rankEntries, seasonBoard, type ReportKind } from '@/lib/leaderboard';
+import { type ReportKind } from '@/lib/leaderboard';
 
 import { useAuth } from '../auth';
 import { supabase } from '../supabase';
-import type { Board, Entry, EntryStatus, Gym, GymsApi } from './types';
+import { buildBoard, podiumUsers, primaryRanking } from './board';
+import type { Entry, EntryStatus, Gym, GymsApi } from './types';
 
 /** Gyms backed by Supabase. Access rules live in supabase/migrations. */
 
@@ -27,6 +28,7 @@ type EntryRow = {
   challenge_id: string;
   user_id: string;
   value: number;
+  reps: number | null;
   bodyweight_kg: number | null;
   video_path: string;
   status: EntryStatus;
@@ -36,7 +38,7 @@ type EntryRow = {
 
 const GYM_COLUMNS = 'id, kind, name, area, invite_code, place_id, gym_members(count)';
 const ENTRY_COLUMNS =
-  'id, gym_id, challenge_id, user_id, value, bodyweight_kg, video_path, status, created_at, profile:profiles(username, companion_id)';
+  'id, gym_id, challenge_id, user_id, value, reps, bodyweight_kg, video_path, status, created_at, profile:profiles(username, companion_id)';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function db() {
@@ -84,6 +86,7 @@ export function toEntry(row: EntryRow, myReport?: ReportKind): Entry {
       companionId: row.profile?.companion_id ?? 'kong',
     },
     value: Number(row.value),
+    reps: row.reps ?? undefined,
     bodyweightKg: row.bodyweight_kg === null ? undefined : Number(row.bodyweight_kg),
     hasVideo: Boolean(row.video_path),
     status: row.status,
@@ -230,36 +233,13 @@ export const supabaseGymsApi: GymsApi = {
   },
 
   async getBoard({ gymId, challengeId, mode, season = 'all' }) {
-    const rows = await boardRows(gymId, challengeId);
-    const { ranked, crowns } = seasonBoard(
-      rows.map((r) => ({
-        id: r.id,
-        userId: r.user_id,
-        value: Number(r.value),
-        bodyweightKg: r.bodyweight_kg === null ? undefined : Number(r.bodyweight_kg),
-        createdAt: Date.parse(r.created_at),
-        row: r,
-      })),
-      getChallenge(challengeId),
-      mode,
-      season,
-      Date.now(),
-    );
-    const reports = await myReports(ranked.slice(0, BOARD_SIZE).map((r) => r.entry.id));
-    const all = ranked.map((r) => ({
-      rank: r.rank,
-      score: r.score,
-      entry: toEntry(r.entry.row, reports.get(r.entry.id)),
-      crowns: crowns.get(r.entry.userId),
-    }));
-    const meId = useAuth.getState().userId;
-    const mine = all.find((r) => r.entry.athlete.id === meId) ?? null;
-    const board: Board = {
-      rows: all.slice(0, BOARD_SIZE),
-      me: mine && mine.rank > BOARD_SIZE ? mine : null,
-      total: all.length,
-    };
-    return board;
+    const entries = (await boardRows(gymId, challengeId)).map((r) => toEntry(r));
+    const board = buildBoard(entries, getChallenge(challengeId), mode, season, useAuth.getState().userId, Date.now());
+    const shown = [...board.rows, ...(board.me ? [board.me] : [])].filter((r) => !r.entry.pacer);
+    const reports = await myReports(shown.map((r) => r.entry.id));
+    const withReport = (r: (typeof board.rows)[number]) =>
+      reports.has(r.entry.id) ? { ...r, entry: { ...r.entry, myReport: reports.get(r.entry.id) } } : r;
+    return { ...board, rows: board.rows.map(withReport), me: board.me && withReport(board.me) };
   },
 
   async getEntry(id) {
@@ -273,23 +253,28 @@ export const supabaseGymsApi: GymsApi = {
     return { ...toEntry(row, reports.get(row.id)), videoUri: signed.data?.signedUrl };
   },
 
-  async postEntry({ gymId, challengeId, value, bodyweightKg, videoUri, athlete }) {
+  async postEntry({ gymId, challengeId, value, reps, bodyweightKg, videoUri, athlete }) {
     const userId = me();
     const challenge = getChallenge(challengeId);
-    const topUsers = async () =>
-      rankEntries(
-        (await boardRows(gymId, challengeId)).map((r) => ({
+    const ranking = async () => {
+      const rows = await boardRows(gymId, challengeId);
+      const athletes = new Map(rows.map((r) => [r.user_id, toEntry(r).athlete]));
+      const ranked = primaryRanking(
+        rows.map((r) => ({
           id: r.id,
           userId: r.user_id,
           value: Number(r.value),
+          reps: r.reps ?? undefined,
+          bodyweightKg: r.bodyweight_kg === null ? undefined : Number(r.bodyweight_kg),
           createdAt: Date.parse(r.created_at),
-          row: r,
         })),
         challenge,
-        'open',
+        Date.now(),
       );
+      return { ranked, athletes };
+    };
 
-    const before = (await topUsers()).slice(0, 3);
+    const before = await ranking();
 
     // Upload the clip into the user's own folder, then create the entry pointing at it.
     const file = await fetch(videoUri);
@@ -302,7 +287,14 @@ export const supabaseGymsApi: GymsApi = {
     await supabaseGymsApi.updateMe({ companionId: athlete.companionId }).catch(() => {});
     const inserted = await db()
       .from('entries')
-      .insert({ gym_id: gymId, challenge_id: challengeId, value, bodyweight_kg: bodyweightKg ?? null, video_path: path })
+      .insert({
+        gym_id: gymId,
+        challenge_id: challengeId,
+        value,
+        reps: reps ?? null,
+        bodyweight_kg: bodyweightKg ?? null,
+        video_path: path,
+      })
       .select(ENTRY_COLUMNS)
       .single();
     if (inserted.error) {
@@ -314,12 +306,12 @@ export const supabaseGymsApi: GymsApi = {
     const status = entry.status === 'processing' ? await scanVideo(entry.id) : entry.status;
     if (status !== 'live') return { entry: { ...entry, status }, status, rank: 0, dethroned: [] };
 
-    const after = await topUsers();
+    const after = (await ranking()).ranked;
     const rank = after.find((r) => r.entry.userId === userId)?.rank ?? after.length;
-    const podium = new Set(after.slice(0, 3).map((r) => r.entry.userId));
-    const dethroned = before
-      .filter((r) => r.entry.userId !== userId && !podium.has(r.entry.userId))
-      .map((r) => toEntry(r.entry.row).athlete);
+    const podium = new Set(podiumUsers(after));
+    const dethroned = podiumUsers(before.ranked)
+      .filter((id) => id !== userId && !podium.has(id))
+      .flatMap((id) => before.athletes.get(id) ?? []);
     return { entry: { ...entry, status }, status, rank, dethroned };
   },
 
@@ -342,15 +334,17 @@ export const supabaseGymsApi: GymsApi = {
     const results = await Promise.all(
       pairs.map(async (pair) => {
         const [gymId, challengeId] = pair.split('|');
-        const ranked = rankEntries(
+        const ranked = primaryRanking(
           (await boardRows(gymId, challengeId)).map((r) => ({
             id: r.id,
             userId: r.user_id,
             value: Number(r.value),
+            reps: r.reps ?? undefined,
+            bodyweightKg: r.bodyweight_kg === null ? undefined : Number(r.bodyweight_kg),
             createdAt: Date.parse(r.created_at),
           })),
           getChallenge(challengeId),
-          'open',
+          Date.now(),
         );
         const rank = ranked.find((r) => r.entry.userId === userId)?.rank;
         return rank && rank <= 3 ? { gymId, challengeId, rank } : null;

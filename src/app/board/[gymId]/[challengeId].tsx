@@ -8,9 +8,17 @@ import { ErrorState } from '@/components/error-state';
 import { Screen } from '@/components/screen';
 import { Button, Card, Chip, SectionHeader, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
-import { getChallenge, supportsPoundForPound } from '@/lib/challenges';
+import { getChallenge } from '@/lib/challenges';
 import { friendlyError } from '@/lib/errors';
-import { seasonDaysLeft, seasonName, type BoardMode, type Season } from '@/lib/leaderboard';
+import {
+  boardModes,
+  MODE_LABELS,
+  primaryMode,
+  seasonDaysLeft,
+  seasonName,
+  type BoardMode,
+  type Season,
+} from '@/lib/leaderboard';
 import { useBoard, useGym, useJoinGym } from '@/services/gyms/queries';
 import { useGymmy } from '@/store/gymmy';
 import { colors, space } from '@/theme';
@@ -20,7 +28,8 @@ export default function BoardScreen() {
   const gymId = params.gymId === 'global' ? null : params.gymId;
   const challenge = getChallenge(params.challengeId);
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
-  const [mode, setMode] = useState<BoardMode>('open');
+  const modes = boardModes(challenge);
+  const [mode, setMode] = useState<BoardMode>(primaryMode(challenge));
   const [season, setSeason] = useState<Season>('month');
   const now = useNow(60 * 60_000);
   const [showRules, setShowRules] = useState(false);
@@ -46,11 +55,17 @@ export default function BoardScreen() {
           : 'Best ever. 👑 marks past monthly champions.'}
       </T>
 
-      {supportsPoundForPound(challenge) && (
-        <View style={styles.modes}>
-          <Chip label="Open" active={mode === 'open'} onPress={() => setMode('open')} />
-          <Chip label="Pound-for-pound" active={mode === 'p4p'} onPress={() => setMode('p4p')} />
-        </View>
+      {modes.length > 1 && (
+        <>
+          <View style={styles.modes}>
+            {modes.map((m) => (
+              <Chip key={m} label={MODE_LABELS[m]} active={mode === m} onPress={() => setMode(m)} />
+            ))}
+          </View>
+          <T variant="caption" color={colors.textDim} style={{ marginBottom: space.md }}>
+            {MODE_HINTS[mode]}
+          </T>
+        </>
       )}
 
       <Pressable onPress={() => setShowRules(!showRules)} style={styles.rulesToggle}>
@@ -130,6 +145,12 @@ export default function BoardScreen() {
     </Screen>
   );
 }
+
+const MODE_HINTS: Record<BoardMode, string> = {
+  total: 'Ranked by weight × reps.',
+  open: 'Ranked by the heaviest weight lifted.',
+  p4p: 'Ranked by weight as a share of bodyweight.',
+};
 
 const styles = StyleSheet.create({
   modes: { flexDirection: 'row', gap: space.sm, marginBottom: space.md },
