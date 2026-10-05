@@ -45,6 +45,7 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG || 'david-hwang' }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT || 'gymmy' }}
+          SENTRY_URL: https://sentry.io/
         run: |
           if [ -z "$SENTRY_AUTH_TOKEN" ] || [ -z "$SENTRY_ORG" ] || [ -z "$SENTRY_PROJECT" ]; then
             echo "Sentry isn't set up yet (SENTRY_AUTH_TOKEN secret); skipping."
