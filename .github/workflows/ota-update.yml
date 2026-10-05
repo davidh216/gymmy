@@ -6,7 +6,7 @@ name: OTA update
 on:
   push:
     branches: [claude/modernize-ios-mvp]
-    paths: ['src/**', 'assets/**', 'package.json', 'package-lock.json']
+    paths: ['src/**', 'assets/**', 'package.json', 'package-lock.json', '.env', '.github/workflows/ota-update.yml']
   workflow_dispatch:
 
 jobs:
