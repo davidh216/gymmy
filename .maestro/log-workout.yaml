@@ -38,10 +38,11 @@ name: Log a set and finish a workout
 - scrollUntilVisible:
     element: ".*Back Squat.*"
     direction: DOWN
-    centerElement: true
+    timeout: 40000
 - scrollUntilVisible:
     element: "Done"
     direction: DOWN
+    timeout: 40000
     centerElement: true
 - tapOn: "Done"
 # Back on Today, still scrolled down to where the workout was started from.

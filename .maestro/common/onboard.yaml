@@ -4,14 +4,24 @@ appId: com.davidh216.gymmy
 - launchApp:
     clearState: true
 - tapOn: "Let's go"
-- tapOn: "Your name"
+# The name field focuses itself on slow runs, which hides its placeholder.
+- tapOn:
+    text: "Your name"
+    optional: true
 - inputText: "Alex"
-# Return submits the name and moves on (hideKeyboard may press Return too, skipping a step).
+# Return usually submits the name; when it doesn't, Continue does. Tap until the companion pick shows.
 - pressKey: Enter
-- extendedWaitUntil:
-    visible: "Continue"
-    timeout: 10000
-- tapOn: "Continue"
+- repeat:
+    while:
+      notVisible: "Start with Kong"
+    times: 3
+    commands:
+      - extendedWaitUntil:
+          visible: "Continue"
+          timeout: 10000
+      - tapOn: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 3000
 - extendedWaitUntil:
     visible: "Start with Kong"
     timeout: 10000
