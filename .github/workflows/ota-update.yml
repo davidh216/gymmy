@@ -41,6 +41,8 @@ jobs:
         run: eas update --channel production --message "${MESSAGE%%$'\n'*}" --non-interactive
       - if: steps.check.outputs.ready == 'true'
         name: Upload source maps to Sentry
+        # The update is already live by now; a Sentry problem shouldn't mark it failed.
+        continue-on-error: true
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG || 'david-hwang' }}
