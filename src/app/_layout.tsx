@@ -70,6 +70,7 @@ function RootLayout() {
               options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
             />
             <Stack.Screen name="exercise-picker" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="workout-location" options={{ presentation: 'modal' }} />
             <Stack.Screen name="exercise-edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="plan-edit" options={{ presentation: 'modal' }} />
             <Stack.Screen name="session/[id]" options={{ presentation: 'modal' }} />

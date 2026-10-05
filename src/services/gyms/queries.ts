@@ -24,7 +24,7 @@ export const useMyProfile = () => {
   return useQuery({ queryKey: ['gyms', 'profile', userId], queryFn: fetchMyProfile, enabled: Boolean(userId) });
 };
 
-export const useMyGyms = () => useQuery({ queryKey: gymKeys.mine, queryFn: gymsApi.myGyms });
+export const useMyGyms = (enabled = true) => useQuery({ queryKey: gymKeys.mine, queryFn: gymsApi.myGyms, enabled });
 export const useMyMedals = () => useQuery({ queryKey: gymKeys.medals, queryFn: gymsApi.myMedals });
 export const useGymSearch = (q: string) =>
   useQuery({ queryKey: gymKeys.search(q), queryFn: () => gymsApi.searchGyms(q) });

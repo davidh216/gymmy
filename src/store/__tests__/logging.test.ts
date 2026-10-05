@@ -102,3 +102,17 @@ it('saves workout templates that start the same exercises', () => {
   store().deleteTemplate(id);
   expect(store().templates).toEqual([]);
 });
+
+it('records where a workout happened, and lets you change it afterwards', () => {
+  store().startWorkout({ exerciseIds: ['squat'] });
+  store().setWorkoutLocation({ name: 'Iron Temple', gymId: 'g1' });
+  const e = store().active!.exercises[0];
+  store().updateSet(e.id, e.sets[0].id, { weight: 100, reps: 5, done: true });
+  const finished = store().finishWorkout()!;
+  expect(finished.location).toEqual({ name: 'Iron Temple', gymId: 'g1' });
+
+  store().setWorkoutLocation({ name: 'Garage' }, finished.id);
+  expect(store().workouts[0].location).toEqual({ name: 'Garage' });
+  store().setWorkoutLocation(null, finished.id);
+  expect('location' in store().workouts[0]).toBe(false);
+});

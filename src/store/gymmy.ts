@@ -33,7 +33,7 @@ import {
 } from '@/lib/progression';
 import { completedSets, detectPRs, exerciseSettings, lastPerformance } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
-import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout, WorkoutExercise } from '@/lib/types';
+import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout, WorkoutExercise, WorkoutLocation } from '@/lib/types';
 
 export type Profile = {
   name: string;
@@ -106,6 +106,8 @@ type Actions = {
 
   startWorkout: (opts?: { name?: string; exerciseIds?: string[] }) => void;
   renameWorkout: (name: string) => void;
+  /** Sets or clears where a workout happened: the active one, or a finished one by id. */
+  setWorkoutLocation: (location: WorkoutLocation | null, workoutId?: string) => void;
   addExercises: (exerciseIds: string[]) => void;
   removeExercise: (workoutExerciseId: string) => void;
   updateExercise: (workoutExerciseId: string, patch: Partial<Pick<WorkoutExercise, 'note' | 'rest'>>) => void;
@@ -417,6 +419,15 @@ export const useGymmy = create<State & Actions>()(
         },
 
         renameWorkout: (name) => mutateActive((a) => ({ ...a, name })),
+
+        setWorkoutLocation: (location, workoutId) => {
+          const apply = <W extends ActiveWorkout>(w: W): W => {
+            const { location: _old, ...rest } = w;
+            return (location ? { ...rest, location } : rest) as W;
+          };
+          if (!workoutId) return mutateActive(apply);
+          set((s) => ({ workouts: s.workouts.map((w) => (w.id === workoutId ? apply(w) : w)) }));
+        },
 
         addExercises: (exerciseIds) => {
           const history = get().workouts;

@@ -122,6 +122,17 @@ export default function WorkoutScreen() {
           placeholderTextColor={colors.textFaint}
           maxLength={40}
         />
+        <Pressable
+          onPress={() => router.push('/workout-location')}
+          hitSlop={8}
+          style={styles.location}
+          accessibilityRole="button"
+          accessibilityLabel={active.location ? `Gym: ${active.location.name}. Change gym` : 'Add gym'}
+          testID="workout-location">
+          <T variant="caption" color={active.location ? colors.text : colors.accent} numberOfLines={1}>
+            📍 {active.location ? active.location.name : 'Add gym'}
+          </T>
+        </Pressable>
         <T variant="caption" color={colors.textFaint} style={{ marginBottom: space.lg }}>
           {doneCount} {doneCount === 1 ? 'set' : 'sets'} done · tap ✓ to log a set
         </T>
@@ -770,6 +781,7 @@ function SetInput({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
+  location: { alignSelf: 'flex-start', marginBottom: space.xs },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',

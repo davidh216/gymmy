@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -75,6 +75,17 @@ export default function SessionScreen() {
             <MilestoneBanner />
           </View>
         )}
+
+        <Pressable
+          onPress={() => router.push({ pathname: '/workout-location', params: { workoutId: workout.id } })}
+          hitSlop={8}
+          style={styles.location}
+          accessibilityRole="button"
+          accessibilityLabel={workout.location ? `Gym: ${workout.location.name}. Change gym` : 'Add gym'}>
+          <T variant="caption" color={workout.location ? colors.textDim : colors.accent} numberOfLines={1}>
+            📍 {workout.location ? workout.location.name : 'Add gym'}
+          </T>
+        </Pressable>
 
         <Card style={styles.stats}>
           <Stat value={formatMinutes(workout.endedAt - workout.startedAt)} label="Duration" />
@@ -254,6 +265,7 @@ function Celebration({
 }
 
 const styles = StyleSheet.create({
+  location: { alignSelf: 'flex-start', marginBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bg },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.md },
   content: { paddingHorizontal: space.lg, maxWidth: 640, width: '100%', alignSelf: 'center' },

@@ -22,9 +22,10 @@ export function WorkoutRow({ workout }: { workout: Workout }) {
           <T variant="heading" numberOfLines={1}>
             {workout.name}
           </T>
-          <T variant="caption" color={colors.textFaint}>
+          <T variant="caption" color={colors.textFaint} numberOfLines={1}>
             {formatDate(workout.endedAt)} · {formatMinutes(workout.endedAt - workout.startedAt)}
             {vol > 0 ? ` · ${formatVolume(vol, units)}` : ''}
+            {workout.location ? ` · 📍 ${workout.location.name}` : ''}
           </T>
         </View>
         {workout.prs.length > 0 && (

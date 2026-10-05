@@ -50,12 +50,24 @@ export type PersonalRecord = {
   previous: number;
 };
 
+/** Where a workout happened: a Gymmy gym, a map place, or just a name. */
+export type WorkoutLocation = {
+  name: string;
+  /** Neighbourhood or address line, when known. */
+  area?: string;
+  /** Gymmy gym, when picked from your gyms. */
+  gymId?: string;
+  /** Map place (osm:node/123), when picked from nearby gyms. */
+  placeId?: string;
+};
+
 export type ActiveWorkout = {
   id: string;
   name: string;
   startedAt: number;
   exercises: WorkoutExercise[];
   plan?: PlanRef;
+  location?: WorkoutLocation;
 };
 
 export type Workout = ActiveWorkout & {
