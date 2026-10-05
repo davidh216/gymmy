@@ -51,4 +51,11 @@ do $$ begin
   raise exception 'FAILED: arms still accepted';
 exception when check_violation then raise notice 'ok - arms is now biceps or triceps';
 end $$;
+-- 20261013000000_entry_reps.sql: lifts carry reps, within reason.
+do $$ begin
+  insert into public.entries (gym_id, challenge_id, user_id, value, reps, video_path)
+  values ((select id from public.gyms limit 1), 'bench_1rm', (select id from public.profiles limit 1), 100, 0, 'x/y.mp4');
+  raise exception 'FAILED: zero reps accepted';
+exception when check_violation then raise notice 'ok - reps must be 1 to 100';
+end $$;
 \echo ALL CHALLENGE DB TESTS PASSED
