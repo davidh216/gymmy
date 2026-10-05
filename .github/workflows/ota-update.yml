@@ -43,11 +43,11 @@ jobs:
         name: Upload source maps to Sentry
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG || 'david-hwang' }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT || 'gymmy' }}
         run: |
           if [ -z "$SENTRY_AUTH_TOKEN" ] || [ -z "$SENTRY_ORG" ] || [ -z "$SENTRY_PROJECT" ]; then
-            echo "Sentry isn't set up yet (SENTRY_AUTH_TOKEN secret, SENTRY_ORG and SENTRY_PROJECT variables); skipping."
+            echo "Sentry isn't set up yet (SENTRY_AUTH_TOKEN secret); skipping."
             exit 0
           fi
           npx sentry-expo-upload-sourcemaps dist
