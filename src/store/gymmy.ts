@@ -24,6 +24,7 @@ import {
 } from '@/lib/programs';
 import type { Vitals } from '@/lib/health';
 import { dayKey, type CheckIn } from '@/lib/recovery';
+import { mergeHealthWeights, type WeighIn, type WeightReviewSettings } from '@/lib/weight';
 import {
   STARTING_GEMS,
   SUMMON_10_COST,
@@ -43,6 +44,8 @@ export type Profile = {
   units: Units;
   /** Ask how hard each set felt (RPE) after checking it off. */
   rpe?: boolean;
+  /** Weekly weigh-in review and weight goal; off unless turned on. */
+  weightReview?: WeightReviewSettings;
 };
 
 export type Owned = { stars: number; obtainedAt: number };
@@ -97,6 +100,10 @@ type State = {
   };
   /** Start of the most recent week whose recap card was opened or dismissed. */
   recapSeen: number;
+  /** Body weight by day. Typed-in weigh-ins sync; ones from Apple Health stay on the phone. */
+  weighIns: Record<string, WeighIn>;
+  /** Sunday of the most recent week whose weigh-in review was saved or skipped. */
+  weightReviewSeen: number;
 };
 
 type Actions = {
@@ -150,6 +157,12 @@ type Actions = {
   summon: (count: 1 | 10) => SummonResult[] | null;
   /** Hides the Today recap card for the week starting `weekStart`. */
   seeRecap: (weekStart: number) => void;
+  /** Logs a typed-in weight (kg) for a day, today by default. */
+  logWeight: (kg: number, date?: string) => void;
+  deleteWeighIn: (date: string) => void;
+  /** Adds Apple Health weight readings for days without a typed-in weigh-in. */
+  importHealthWeights: (samples: { kg: number; at: number }[]) => void;
+  seeWeightReview: (weekStart: number) => void;
   reset: () => void;
 };
 
@@ -172,6 +185,8 @@ const initialState: State = {
   checkIns: {},
   health: { enabled: false },
   recapSeen: 0,
+  weighIns: {},
+  weightReviewSeen: 0,
 };
 
 /** Seed sets for a newly added exercise from its last performance. */
@@ -596,12 +611,30 @@ export const useGymmy = create<State & Actions>()(
           if (get().recapSeen < weekStart) set({ recapSeen: weekStart });
         },
 
+        logWeight: (kg, date = dayKey(Date.now())) =>
+          set((s) => ({ weighIns: { ...s.weighIns, [date]: { date, kg: Math.round(kg * 100) / 100, at: Date.now() } } })),
+
+        deleteWeighIn: (date) =>
+          set((s) => {
+            const { [date]: _gone, ...rest } = s.weighIns;
+            return { weighIns: rest };
+          }),
+
+        importHealthWeights: (samples) => {
+          const next = mergeHealthWeights(get().weighIns, samples);
+          if (next !== get().weighIns) set({ weighIns: next });
+        },
+
+        seeWeightReview: (weekStart) => {
+          if (get().weightReviewSeen < weekStart) set({ weightReviewSeen: weekStart });
+        },
+
         reset: () => set(initialState),
       };
     },
     {
       name: 'gymmy',
-      version: 7,
+      version: 8,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted, version) => {
         const state = persisted as State;
@@ -618,6 +651,8 @@ export const useGymmy = create<State & Actions>()(
         state.checkIns ??= {};
         state.health ??= { enabled: false };
         state.recapSeen ??= 0;
+        state.weighIns ??= {};
+        state.weightReviewSeen ??= 0;
         state.customPrograms ??= [];
         state.templates ??= [];
         return state;

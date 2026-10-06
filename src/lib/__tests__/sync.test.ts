@@ -26,6 +26,7 @@ const state = (patch: Partial<Syncable> = {}): Syncable => ({
   customExercises: [],
   customPrograms: [],
   templates: [],
+  weighIns: {},
   collection: { kong: { stars: 1, obtainedAt: 5 } },
   claimedMilestones: {},
   ...patch,
@@ -187,5 +188,37 @@ describe('saved templates', () => {
     const after = { ...before, templates: [t] };
     expect(changedKeys(before, after)).toEqual(['template:tpl-1']);
     expect(applyRecords(before, [{ kind: 'template', id: 'tpl-1', data: t, updatedAt: 5 }], { dirty: {}, firstSync: false }).templates).toEqual([t]);
+  });
+});
+
+describe('weigh-ins', () => {
+  const typed = { date: '2026-10-06', kg: 80, at: 1 };
+  const fromHealth = { date: '2026-10-05', kg: 81, source: 'health' as const, at: 1 };
+
+  it('sync typed-in weigh-ins and keep Health readings on the phone', () => {
+    const base = state();
+    const s = { ...base, weighIns: { [typed.date]: typed, [fromHealth.date]: fromHealth } };
+    expect([...recordsOf(s).keys()].filter((k) => k.startsWith('weigh_in'))).toEqual(['weigh_in:2026-10-06']);
+    expect(changedKeys(base, s)).toEqual(['weigh_in:2026-10-06']);
+  });
+
+  it('delete the cloud copy when Health replaces a typed weigh-in', () => {
+    const before = state({ weighIns: { [typed.date]: typed } });
+    const after = { ...before, weighIns: { [typed.date]: { ...fromHealth, date: typed.date } } };
+    expect(changedKeys(before, after)).toEqual(['weigh_in:2026-10-06']);
+    expect(pushRecords(after, { 'weigh_in:2026-10-06': 5 })[0]).toMatchObject({ deleted: true });
+  });
+
+  it('pull typed weigh-ins without dropping this phone\'s Health readings', () => {
+    const local = state({ weighIns: { [fromHealth.date]: fromHealth } });
+    const patch = applyRecords(
+      local,
+      [
+        { kind: 'weigh_in', id: typed.date, data: typed, updatedAt: 2 },
+        { kind: 'weigh_in', id: fromHealth.date, deleted: true, updatedAt: 2 },
+      ],
+      { dirty: {}, firstSync: false },
+    );
+    expect(patch.weighIns).toEqual({ [typed.date]: typed, [fromHealth.date]: fromHealth });
   });
 });

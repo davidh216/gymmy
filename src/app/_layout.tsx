@@ -80,6 +80,7 @@ function RootLayout() {
             <Stack.Screen name="milestones" />
             <Stack.Screen name="recovery" />
             <Stack.Screen name="recap" />
+            <Stack.Screen name="weight" />
             <Stack.Screen name="exercise/[id]" />
             <Stack.Screen name="programs" />
             <Stack.Screen name="program/[id]" />

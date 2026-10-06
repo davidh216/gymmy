@@ -2,10 +2,11 @@ import { fixGroup, type Exercise, type SavedTemplate } from './exercises';
 import type { CustomProgram } from './programs';
 import type { CheckIn } from './recovery';
 import type { Workout } from './types';
+import type { WeighIn } from './weight';
 
 /**
- * Cloud sync works on records: one per workout, check-in, custom exercise, custom plan, companion and
- * claimed milestone, plus one "meta" record for profile, XP, gems and settings. Each local
+ * Cloud sync works on records: one per workout, check-in, custom exercise, custom plan, template,
+ * typed-in weigh-in, companion and claimed milestone, plus one "meta" record for profile, XP, gems and settings. Each local
  * change marks its record dirty; dirty records are pushed, and records changed elsewhere are
  * pulled and merged. The newest edit of a record wins.
  */
@@ -16,6 +17,7 @@ export type SyncKind =
   | 'custom_exercise'
   | 'custom_program'
   | 'template'
+  | 'weigh_in'
   | 'companion'
   | 'milestone';
 
@@ -43,6 +45,7 @@ export type Syncable = {
   customExercises: (Exercise & { createdAt: number })[];
   customPrograms: CustomProgram[];
   templates: SavedTemplate[];
+  weighIns: Record<string, WeighIn>;
   collection: Record<string, Owned>;
   claimedMilestones: Record<string, number>;
 };
@@ -72,6 +75,7 @@ export function recordsOf(s: Syncable): Map<string, unknown> {
   for (const e of s.customExercises) out.set(recordKey('custom_exercise', e.id), e);
   for (const p of s.customPrograms) out.set(recordKey('custom_program', p.id), p);
   for (const t of s.templates) out.set(recordKey('template', t.id), t);
+  for (const w of Object.values(s.weighIns)) if (w.source !== 'health') out.set(recordKey('weigh_in', w.date), w);
   for (const [id, owned] of Object.entries(s.collection)) out.set(recordKey('companion', id), owned);
   for (const [id, claimedAt] of Object.entries(s.claimedMilestones)) out.set(recordKey('milestone', id), { claimedAt });
   return out;
@@ -101,6 +105,16 @@ export function changedKeys(prev: Syncable, next: Syncable): string[] {
     for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) if (a[id] !== b[id]) keys.push(recordKey(kind, id));
   };
   byId('check_in', prev.checkIns, next.checkIns);
+  // Health weigh-ins never sync; a typed one replaced by Health reads as a delete.
+  if (prev.weighIns !== next.weighIns) {
+    for (const date of new Set([...Object.keys(prev.weighIns), ...Object.keys(next.weighIns)])) {
+      const a = prev.weighIns[date];
+      const b = next.weighIns[date];
+      const typed = (w?: WeighIn) => Boolean(w && w.source !== 'health');
+      if (a === b || (!typed(a) && !typed(b))) continue;
+      keys.push(recordKey('weigh_in', date));
+    }
+  }
   byId('companion', prev.collection, next.collection);
   byId('milestone', prev.claimedMilestones, next.claimedMilestones);
   return keys;
@@ -134,6 +148,7 @@ export function applyRecords(
   const custom = new Map(local.customExercises.map((e) => [e.id, e]));
   const programs = new Map(local.customPrograms.map((p) => [p.id, p]));
   const templates = new Map(local.templates.map((t) => [t.id, t]));
+  const weighIns = { ...local.weighIns };
   const collection = { ...local.collection };
   const claimed = { ...local.claimedMilestones };
   let meta: Partial<Syncable> = {};
@@ -177,6 +192,12 @@ export function applyRecords(
         if (r.deleted) templates.delete(r.id);
         else templates.set(r.id, r.data as SavedTemplate);
         break;
+      case 'weigh_in':
+        // A Health reading on this phone stands in for a deleted typed one.
+        if (r.deleted) {
+          if (weighIns[r.id] && weighIns[r.id].source !== 'health') delete weighIns[r.id];
+        } else weighIns[r.id] = r.data as WeighIn;
+        break;
       case 'custom_program':
         if (r.deleted) programs.delete(r.id);
         else programs.set(r.id, r.data as CustomProgram);
@@ -213,6 +234,7 @@ export function applyRecords(
     customExercises: [...custom.values()].sort((a, b) => b.createdAt - a.createdAt),
     customPrograms: [...programs.values()].sort((a, b) => b.createdAt - a.createdAt),
     templates: [...templates.values()].sort((a, b) => b.createdAt - a.createdAt),
+    weighIns,
     collection,
     claimedMilestones: claimed,
   };

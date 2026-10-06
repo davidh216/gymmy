@@ -7,6 +7,7 @@ import { ReadinessCard } from '@/components/readiness-card';
 import { RecapCard } from '@/components/recap-card';
 import { Screen } from '@/components/screen';
 import { StatsAsk } from '@/components/stats-ask';
+import { WeightReviewCard } from '@/components/weight-review-card';
 import { WorkoutRow } from '@/components/workout-row';
 import { Button, Card, GemCount, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
@@ -96,6 +97,8 @@ export default function Today() {
       </Card>
 
       <RecapCard />
+
+      <WeightReviewCard />
 
       <MilestoneBanner />
 

@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
 function ProfileLinks() {
   const { ready, earned, all } = useMilestones();
   const plan = useGymmy((s) => s.plan);
+  const weightReview = useGymmy((s) => s.profile?.weightReview);
   const program = plan ? getProgram(plan.programId) : undefined;
   return (
     <View style={{ gap: space.sm, marginTop: space.md }}>
@@ -258,6 +259,18 @@ function ProfileLinks() {
           <T variant="heading">Milestones</T>
           <T variant="caption" color={ready.length ? colors.accent : colors.textDim}>
             {ready.length ? `${ready.length} ready to claim` : `${earned} of ${all.length} earned`}
+          </T>
+        </View>
+        <T variant="heading" color={colors.textFaint}>
+          →
+        </T>
+      </Card>
+      <Card style={styles.link} onPress={() => router.push('/weight')}>
+        <T style={{ fontSize: 24 }}>⚖️</T>
+        <View style={{ flex: 1 }}>
+          <T variant="heading">Weight</T>
+          <T variant="caption" color={colors.textDim}>
+            {weightReview?.enabled ? 'Weekly weigh-in is on' : 'Weigh-ins, goal and weekly review'}
           </T>
         </View>
         <T variant="heading" color={colors.textFaint}>

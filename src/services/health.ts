@@ -93,7 +93,7 @@ export async function enableVitals(): Promise<void> {
 
 /**
  * Reads HRV and resting heart rate for the last two weeks (to compare today with your
- * normal) and your latest body weight. Missing data or permission just leaves gaps.
+ * normal) and your body weights for the last 8 weeks. Missing data or permission just leaves gaps.
  */
 export async function refreshVitals(): Promise<void> {
   const { health, setHealth } = useGymmy.getState();
@@ -110,18 +110,31 @@ export async function refreshVitals(): Promise<void> {
     const [hrv, rhr, mass] = await Promise.all([
       read(HRV, 'ms').catch(() => []),
       read(RESTING_HR, 'count/min').catch(() => []),
-      hk.queryQuantitySamples(BODY_MASS, { limit: 1, ascending: false, unit: 'kg' }).catch(() => []),
+      hk
+        .queryQuantitySamples(BODY_MASS, {
+          limit: 0,
+          ascending: false,
+          unit: 'kg',
+          filter: { date: { startDate: new Date(now - WEIGHT_HISTORY_DAYS * 86_400_000) } },
+        })
+        .catch(() => []),
     ]);
+    // Weights also fill the weigh-in log (on this phone only) for the weekly review.
+    useGymmy.getState().importHealthWeights(mass.map((m) => ({ kg: m.quantity, at: m.endDate.getTime() })));
     const h = againstBaseline(hrv, now);
     const r = againstBaseline(rhr, now);
+    const latestMass = mass.reduce<(typeof mass)[number] | undefined>(
+      (best, m) => (!best || m.endDate > best.endDate ? m : best),
+      undefined,
+    );
     setHealth({
       vitals: {
         hrv: h.today,
         hrvBaseline: h.baseline,
         rhr: r.today,
         rhrBaseline: r.baseline,
-        bodyMassKg: mass[0]?.quantity,
-        bodyMassAt: mass[0]?.endDate.getTime(),
+        bodyMassKg: latestMass?.quantity,
+        bodyMassAt: latestMass?.endDate.getTime(),
         at: now,
       },
     });
@@ -134,6 +147,8 @@ export function disconnectHealth() {
   useGymmy.getState().setHealth({ enabled: false });
 }
 
+/** How far back body weights are read for the weigh-in log. */
+const WEIGHT_HISTORY_DAYS = 56;
 const SYNC_EVERY_MS = 10 * 60 * 1000;
 const BACKFILL_DAYS = 30;
 

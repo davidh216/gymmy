@@ -116,3 +116,24 @@ it('records where a workout happened, and lets you change it afterwards', () => 
   store().setWorkoutLocation(null, finished.id);
   expect('location' in store().workouts[0]).toBe(false);
 });
+
+it('logs weigh-ins, keeps typed ones over Health readings, and marks the weekly review seen', () => {
+  store().logWeight(80.456, '2026-10-04');
+  expect(store().weighIns['2026-10-04']).toMatchObject({ date: '2026-10-04', kg: 80.46 });
+  expect(store().weighIns['2026-10-04'].source).toBeUndefined();
+
+  const at = new Date(2026, 9, 4, 8).getTime();
+  store().importHealthWeights([
+    { kg: 79, at },
+    { kg: 81, at: at + 86_400_000 },
+  ]);
+  expect(store().weighIns['2026-10-04'].kg).toBe(80.46);
+  expect(store().weighIns['2026-10-05']).toMatchObject({ kg: 81, source: 'health' });
+
+  store().deleteWeighIn('2026-10-04');
+  expect(store().weighIns['2026-10-04']).toBeUndefined();
+
+  store().seeWeightReview(100);
+  store().seeWeightReview(50);
+  expect(store().weightReviewSeen).toBe(100);
+});
