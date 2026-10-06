@@ -46,9 +46,18 @@ export type Profile = {
   rpe?: boolean;
   /** Weekly weigh-in review and weight goal; off unless turned on. */
   weightReview?: WeightReviewSettings;
+  focus?: Focus;
 };
 
-export type Owned = { stars: number; obtainedAt: number };
+export type Owned = {
+  stars: number;
+  obtainedAt: number;
+  /** What you call this buddy, when you've named it. */
+  nickname?: string;
+};
+
+/** Why someone opened Gymmy, from onboarding. Shapes the first workout suggested. */
+export type Focus = 'strength' | 'event' | 'consistency' | 'log';
 
 export type SummonResult = { id: string; isNew: boolean };
 
@@ -107,7 +116,10 @@ type State = {
 };
 
 type Actions = {
-  completeOnboarding: (profile: Profile, starterId: string) => void;
+  /** Saves the profile and first buddy; optionally names the buddy and starts a plan. */
+  completeOnboarding: (profile: Profile, starterId: string, opts?: { nickname?: string; planId?: string }) => void;
+  /** Names a buddy you own; an empty name goes back to its species name. */
+  renameCompanion: (id: string, nickname: string) => void;
   updateProfile: (patch: Partial<Profile>) => void;
   setCompanion: (id: string) => void;
 
@@ -262,12 +274,23 @@ export const useGymmy = create<State & Actions>()(
       return {
         ...initialState,
 
-        completeOnboarding: (profile, starterId) =>
+        completeOnboarding: (profile, starterId, opts = {}) => {
+          const nickname = cleanNickname(opts.nickname, starterId);
           set({
             profile,
             companionId: starterId,
-            collection: { [starterId]: { stars: 1, obtainedAt: Date.now() } },
-          }),
+            collection: { [starterId]: { stars: 1, obtainedAt: Date.now(), ...(nickname ? { nickname } : {}) } },
+            plan: opts.planId && getProgram(opts.planId) ? { programId: opts.planId, startedAt: Date.now() } : null,
+          });
+        },
+
+        renameCompanion: (id, name) => {
+          const owned = get().collection[id];
+          if (!owned) return;
+          const { nickname: _old, ...rest } = owned;
+          const nickname = cleanNickname(name, id);
+          set({ collection: { ...get().collection, [id]: nickname ? { ...rest, nickname } : rest } });
+        },
 
         updateProfile: (patch) => {
           const profile = get().profile;
@@ -681,4 +704,16 @@ const subscribeHydration = (cb: () => void) => useGymmy.persist.onFinishHydratio
 /** True once persisted state has been loaded from storage. */
 export function useHydrated() {
   return useSyncExternalStore(subscribeHydration, useGymmy.persist.hasHydrated);
+}
+
+/** A buddy's nickname, tidied; undefined when empty or the same as its species name. */
+export function cleanNickname(name: string | undefined, companionId: string): string | undefined {
+  const clean = (name ?? '').trim().replace(/\s+/g, ' ').slice(0, 16);
+  return clean && clean !== getCompanion(companionId).name ? clean : undefined;
+}
+
+/** What to call a buddy: its nickname, or its species name. */
+export function useCompanionName(companionId: string): string {
+  const nickname = useGymmy((s) => s.collection[companionId]?.nickname);
+  return nickname ?? getCompanion(companionId).name;
 }

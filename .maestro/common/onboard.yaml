@@ -9,12 +9,13 @@ appId: com.davidh216.gymmy
     text: "Your name"
     optional: true
 - inputText: "Alex"
-# Return usually submits the name; when it doesn't, Continue does. Tap until the companion pick shows.
+# Return usually submits the name; when it doesn't, Continue does. Tap Continue through the buddy,
+# hatch and "what brings you here" steps until the last step (goal and units) shows.
 - pressKey: Enter
 - repeat:
     while:
       notVisible: "Start with Kong"
-    times: 3
+    times: 6
     commands:
       - extendedWaitUntil:
           visible: "Continue"
@@ -25,6 +26,9 @@ appId: com.davidh216.gymmy
 - extendedWaitUntil:
     visible: "Start with Kong"
     timeout: 10000
+# The weekly goal has no default; picking it is the commitment.
+- tapOn:
+    id: "goal-3"
 - tapOn: "Start with Kong"
 # The header is always on screen; buttons further down may need a scroll.
 - extendedWaitUntil:

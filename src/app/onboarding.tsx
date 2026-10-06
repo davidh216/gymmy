@@ -1,17 +1,28 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, FadeInRight, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CompanionAvatar } from '@/components/companion-avatar';
 import { Button, Chip, T, haptic } from '@/components/ui';
 import { STARTER_IDS, getCompanion } from '@/lib/companions';
+import { getProgram } from '@/lib/programs';
 import type { Units } from '@/lib/types';
-import { toUsername, useGymmy } from '@/store/gymmy';
+import { toUsername, useGymmy, type Focus } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
-const STEPS = 4;
+const STEPS = 6;
+
+type FocusOption = { id: Focus; emoji: string; title: string; blurb: string; plans: string[] };
+
+/** What brings you here, and the plans each answer suggests (first is the default). */
+const FOCUS: FocusOption[] = [
+  { id: 'strength', emoji: '🏋️', title: 'Get stronger', blurb: 'Lift more, build muscle', plans: ['strength-5x5', 'build-muscle'] },
+  { id: 'event', emoji: '🏁', title: 'Train for an event', blurb: 'HYROX, a 5K or a marathon', plans: ['hyrox', 'first-5k', 'marathon'] },
+  { id: 'consistency', emoji: '📅', title: 'Stay consistent', blurb: 'Show up every week', plans: [] },
+  { id: 'log', emoji: '📝', title: 'Just log my lifts', blurb: 'I have my own program', plans: [] },
+];
 
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
@@ -19,33 +30,45 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [starter, setStarter] = useState<string>(STARTER_IDS[0]);
-  const [goal, setGoal] = useState(3);
+  const [nickname, setNickname] = useState('');
+  const [focus, setFocus] = useState<Focus | null>(null);
+  const [planId, setPlanId] = useState<string | null>(null);
+  // No default: choosing it yourself is the commitment.
+  const [goal, setGoal] = useState<number | null>(null);
   const [units, setUnits] = useState<Units>('lb');
 
+  const chosen = getCompanion(starter);
+  const buddyName = nickname.trim() || chosen.name;
+  const last = step === STEPS - 1;
+
   const next = () => {
-    if (step < STEPS - 1) setStep(step + 1);
-    else {
-      haptic('success');
-      const displayName = name.trim() || 'Champ';
-      completeOnboarding(
-        { name: displayName, username: toUsername(displayName), weeklyGoal: goal, units },
-        starter,
-      );
-    }
+    if (!last) return setStep(step + 1);
+    if (goal === null) return;
+    haptic('success');
+    const displayName = name.trim() || 'Champ';
+    completeOnboarding(
+      { name: displayName, username: toUsername(displayName), weeklyGoal: goal, units, focus: focus ?? undefined },
+      starter,
+      { nickname, planId: planId ?? undefined },
+    );
   };
 
-  const chosen = getCompanion(starter);
+  const pickFocus = (f: FocusOption) => {
+    haptic();
+    setFocus(f.id);
+    setPlanId(f.plans[0] ?? null);
+  };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <LinearGradient
-        colors={step === 2 ? [chosen.colors[0], colors.bg] : ['#1A2600', colors.bg]}
+        colors={step === 2 || step === 3 ? [chosen.colors[0], colors.bg] : ['#1A2600', colors.bg]}
         style={StyleSheet.absoluteFill}
         end={{ x: 0.5, y: 0.6 }}
       />
-      <View style={[styles.content, { paddingTop: insets.top + space.xl }]}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + space.xl }]}>
         <View style={styles.dots}>
           {Array.from({ length: STEPS }, (_, i) => (
             <View key={i} style={[styles.dot, i <= step && styles.dotActive]} />
@@ -96,6 +119,8 @@ export default function Onboarding() {
                       haptic();
                       setStarter(id);
                     }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
                     style={[styles.starter, selected && { borderColor: colors.accent }]}>
                     <CompanionAvatar companion={c} size={64} ring={false} />
                     <T variant="heading">{c.name}</T>
@@ -106,17 +131,86 @@ export default function Onboarding() {
                 );
               })}
             </View>
-            <T variant="body" color={colors.textDim} style={styles.quote}>
-              “{chosen.lines[0]}”
-            </T>
           </Animated.View>
         )}
 
         {step === 3 && (
-          <Animated.View key="goal" entering={FadeInRight} style={styles.step}>
-            <T variant="hero">How many days a week?</T>
+          <Animated.View key="hatch" entering={FadeIn} style={[styles.step, { alignItems: 'center' }]}>
+            <Animated.View entering={ZoomIn.springify().damping(9)} style={{ marginVertical: space.lg }}>
+              <CompanionAvatar companion={chosen} size={140} />
+            </Animated.View>
+            <T variant="hero" style={styles.centerText}>
+              {chosen.name} is here!
+            </T>
+            <T variant="body" color={colors.textDim} style={styles.quote}>
+              “{chosen.lines[0]}”
+            </T>
+            <T variant="label" color={colors.textFaint} style={{ marginTop: space.lg }}>
+              Give them a name (optional)
+            </T>
+            <TextInput
+              value={nickname}
+              onChangeText={setNickname}
+              placeholder={chosen.name}
+              placeholderTextColor={colors.textFaint}
+              style={[styles.input, { marginTop: 0, alignSelf: 'stretch', textAlign: 'center' }]}
+              returnKeyType="done"
+              maxLength={16}
+              accessibilityLabel="Buddy name"
+            />
+          </Animated.View>
+        )}
+
+        {step === 4 && (
+          <Animated.View key="focus" entering={FadeInRight} style={styles.step}>
+            <T variant="hero">What brings you here?</T>
             <T variant="body" color={colors.textDim}>
-              Hit your weekly goal to build a streak. Streaks multiply your XP.
+              {buddyName} will line up your first workout.
+            </T>
+            {FOCUS.map((f) => {
+              const selected = focus === f.id;
+              return (
+                <Pressable
+                  key={f.id}
+                  onPress={() => pickFocus(f)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={`${f.title}. ${f.blurb}`}
+                  style={[styles.option, selected && styles.optionActive]}>
+                  <T style={{ fontSize: 26 }}>{f.emoji}</T>
+                  <View style={{ flex: 1 }}>
+                    <T variant="heading">{f.title}</T>
+                    <T variant="caption" color={colors.textDim}>
+                      {f.blurb}
+                    </T>
+                  </View>
+                </Pressable>
+              );
+            })}
+            {focus && FOCUS.find((f) => f.id === focus)!.plans.length > 0 && (
+              <Animated.View entering={FadeInDown} style={{ gap: space.sm }}>
+                <T variant="label" color={colors.textFaint} style={{ marginTop: space.sm }}>
+                  Start a plan
+                </T>
+                <View style={styles.row}>
+                  {FOCUS.find((f) => f.id === focus)!.plans.map((id) => {
+                    const p = getProgram(id);
+                    return p ? (
+                      <Chip key={id} label={`${p.emoji} ${p.name}`} active={planId === id} onPress={() => setPlanId(id)} />
+                    ) : null;
+                  })}
+                  <Chip label="Not yet" active={planId === null} onPress={() => setPlanId(null)} />
+                </View>
+              </Animated.View>
+            )}
+          </Animated.View>
+        )}
+
+        {step === 5 && (
+          <Animated.View key="goal" entering={FadeInRight} style={styles.step}>
+            <T variant="hero">How many days a week will you train?</T>
+            <T variant="body" color={colors.textDim}>
+              Hit it every week to build a streak. Streaks multiply your XP. Start with what you can keep up.
             </T>
             <View style={styles.goalRow}>
               {[2, 3, 4, 5, 6].map((n) => (
@@ -126,6 +220,10 @@ export default function Onboarding() {
                     haptic();
                     setGoal(n);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${n} days a week`}
+                  accessibilityState={{ selected: goal === n }}
+                  testID={`goal-${n}`}
                   style={[styles.goal, goal === n && styles.goalActive]}>
                   <T variant="title" color={goal === n ? colors.accentInk : colors.text}>
                     {n}
@@ -142,16 +240,15 @@ export default function Onboarding() {
             </View>
           </Animated.View>
         )}
-      </View>
+      </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + space.lg }]}>
-        {step > 0 && (
-          <Button title="Back" variant="ghost" onPress={() => setStep(step - 1)} />
-        )}
+        {step > 0 && <Button title="Back" variant="ghost" onPress={() => setStep(step - 1)} />}
         <Button
-          title={step === 0 ? "Let's go" : step === STEPS - 1 ? `Start with ${chosen.name}` : 'Continue'}
+          title={step === 0 ? "Let's go" : last ? `Start with ${buddyName}` : 'Continue'}
           size="lg"
           style={{ flex: 1 }}
+          disabled={last && goal === null}
           onPress={next}
         />
       </View>
@@ -161,7 +258,7 @@ export default function Onboarding() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  content: { flex: 1, paddingHorizontal: space.xl, maxWidth: 560, width: '100%', alignSelf: 'center' },
+  content: { flexGrow: 1, paddingHorizontal: space.xl, paddingBottom: space.xl, maxWidth: 560, width: '100%', alignSelf: 'center' },
   dots: { flexDirection: 'row', gap: 6, marginBottom: space.xxl },
   dot: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.cardHigh },
   dotActive: { backgroundColor: colors.accent },
@@ -208,6 +305,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   goalActive: { backgroundColor: colors.accent },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(20,20,24,0.85)',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  optionActive: { borderColor: colors.accent },
   row: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
   footer: {
     flexDirection: 'row',

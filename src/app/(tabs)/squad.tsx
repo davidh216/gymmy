@@ -119,7 +119,7 @@ export default function Squad() {
               style={[styles.tile, active && styles.tileActive]}>
               <CompanionAvatar companion={c} size={64} locked={!own} />
               <T variant="caption" numberOfLines={1}>
-                {own ? c.name : '???'}
+                {own ? (own.nickname ?? c.name) : '???'}
               </T>
               <T variant="label" color={RARITY[c.rarity].color} style={{ fontSize: 9 }}>
                 {own ? '★'.repeat(own.stars) : RARITY[c.rarity].label}

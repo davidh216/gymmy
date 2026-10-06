@@ -13,7 +13,7 @@ import Animated, {
 import { CompanionAvatar } from '@/components/companion-avatar';
 import { ProgressBar, T } from '@/components/ui';
 import { RARITY, companionMood, getCompanion } from '@/lib/companions';
-import { useGymmy } from '@/store/gymmy';
+import { useCompanionName, useGymmy } from '@/store/gymmy';
 import { useProgress } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
@@ -22,6 +22,7 @@ export function CompanionHero() {
   const stars = useGymmy((s) => s.collection[s.companionId]?.stars ?? 1);
   const { level, into, needed, daysSince } = useProgress();
   const companion = getCompanion(companionId);
+  const name = useCompanionName(companionId);
   const mood = companionMood(daysSince);
   // Stable line per day so it doesn't flicker on re-render.
   const line = companion.lines[new Date().getDate() % companion.lines.length];
@@ -52,13 +53,13 @@ export function CompanionHero() {
         </Animated.View>
         <View style={styles.info}>
           <View style={styles.nameRow}>
-            <T variant="title">{companion.name}</T>
+            <T variant="title">{name}</T>
             <T variant="caption" color={RARITY[companion.rarity].color}>
               {'★'.repeat(stars)}
             </T>
           </View>
           <T variant="caption" color={colors.textDim}>
-            {companion.title}
+            {name === companion.name ? companion.title : `${companion.name} · ${companion.title}`}
           </T>
           <View style={styles.mood}>
             <T variant="caption">

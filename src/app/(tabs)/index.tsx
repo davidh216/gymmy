@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { CompanionHero } from '@/components/companion-hero';
+import { FirstWorkoutCard } from '@/components/first-workout-card';
 import { MilestoneBanner } from '@/components/milestone-banner';
 import { ReadinessCard } from '@/components/readiness-card';
 import { RecapCard } from '@/components/recap-card';
@@ -62,6 +63,8 @@ export default function Today() {
         </View>
       }>
       <CompanionHero />
+
+      <FirstWorkoutCard />
 
       <Card style={styles.weekCard}>
         <View style={styles.statsRow}>

@@ -137,3 +137,17 @@ it('logs weigh-ins, keeps typed ones over Health readings, and marks the weekly 
   store().seeWeightReview(50);
   expect(store().weightReviewSeen).toBe(100);
 });
+
+it('names the first buddy and starts the chosen plan at the end of onboarding', () => {
+  const profile = { name: 'Alex', username: 'alex', weeklyGoal: 4, units: 'kg' as const, focus: 'event' as const };
+  store().completeOnboarding(profile, 'kong', { nickname: '  Bruno ', planId: 'hyrox' });
+  expect(store().collection.kong.nickname).toBe('Bruno');
+  expect(store().plan?.programId).toBe('hyrox');
+  expect(store().profile?.focus).toBe('event');
+
+  store().renameCompanion('kong', 'Kong');
+  expect('nickname' in store().collection.kong).toBe(false);
+
+  store().completeOnboarding(profile, 'kong', { planId: 'nope' });
+  expect(store().plan).toBeNull();
+});

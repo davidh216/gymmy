@@ -222,3 +222,12 @@ describe('weigh-ins', () => {
     expect(patch.weighIns).toEqual({ [typed.date]: typed, [fromHealth.date]: fromHealth });
   });
 });
+
+it('keeps a buddy nickname when companions merge on first sync', () => {
+  const local = state({ collection: { kong: { stars: 1, obtainedAt: 5, nickname: 'Bruno' } } });
+  const patch = applyRecords(local, [{ kind: 'companion', id: 'kong', data: { stars: 2, obtainedAt: 9 }, updatedAt: 3 }], {
+    dirty: {},
+    firstSync: true,
+  });
+  expect(patch.collection?.kong).toEqual({ stars: 2, obtainedAt: 5, nickname: 'Bruno' });
+});

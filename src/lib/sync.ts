@@ -30,7 +30,7 @@ export type SyncRecord = {
   updatedAt: number;
 };
 
-type Owned = { stars: number; obtainedAt: number };
+type Owned = { stars: number; obtainedAt: number; nickname?: string };
 
 /** The parts of app state that sync. Typed loosely so this file doesn't depend on the store. */
 export type Syncable = {
@@ -210,7 +210,11 @@ export function applyRecords(
           const mine = collection[r.id];
           collection[r.id] =
             merge && mine
-              ? { stars: Math.max(mine.stars, remote.stars), obtainedAt: Math.min(mine.obtainedAt, remote.obtainedAt) }
+              ? {
+                  stars: Math.max(mine.stars, remote.stars),
+                  obtainedAt: Math.min(mine.obtainedAt, remote.obtainedAt),
+                  ...((remote.nickname ?? mine.nickname) ? { nickname: remote.nickname ?? mine.nickname } : {}),
+                }
               : remote;
         }
         break;
