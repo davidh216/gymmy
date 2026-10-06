@@ -2,12 +2,12 @@ appId: com.davidh216.gymmy
 name: Start a training plan session
 ---
 - runFlow: common/onboard.yaml
+# Today is long and the floating tab bar covers its bottom edge, so half-visible counts.
 - scrollUntilVisible:
     element: ".*HYROX Prep.*"
     direction: DOWN
-    # Today has grown long; give the scroll more time than the 20s default.
     timeout: 40000
-    centerElement: true
+    visibilityPercentage: 50
 - tapOn: ".*HYROX Prep.*"
 - tapOn: "Start this plan"
 - assertVisible: ".*Week 1 of 8.*"

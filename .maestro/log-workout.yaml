@@ -50,7 +50,9 @@ name: Log a set and finish a workout
     element:
       id: "today"
     direction: UP
+# Recent sits near the bottom, where the floating tab bar overlaps it.
 - scrollUntilVisible:
     element: "(?i)recent"
     direction: DOWN
-    centerElement: true
+    timeout: 40000
+    visibilityPercentage: 50
