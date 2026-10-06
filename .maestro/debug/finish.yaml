@@ -37,7 +37,9 @@ name: Debug - finish and close the summary
 - scrollUntilVisible:
     element: "Done"
     direction: DOWN
-    centerElement: true
+    timeout: 40000
+    # Done is the last thing on the summary, so it may never sit fully clear.
+    visibilityPercentage: 50
 - tapOn: "Done"
 - waitForAnimationToEnd:
     timeout: 5000

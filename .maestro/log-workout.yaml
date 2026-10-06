@@ -43,7 +43,8 @@ name: Log a set and finish a workout
     element: "Done"
     direction: DOWN
     timeout: 40000
-    centerElement: true
+    # Done is the last thing on the summary, so it may never sit fully clear.
+    visibilityPercentage: 50
 - tapOn: "Done"
 # Back on Today, still scrolled down to where the workout was started from.
 - scrollUntilVisible:
