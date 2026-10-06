@@ -27,6 +27,8 @@ select pg_temp.check(public.sync_push('[{"kind":"custom_program","id":"custom-1"
   'custom plans sync');
 select pg_temp.check(public.sync_push('[{"kind":"template","id":"tpl-1","data":{"name":"Arm day"},"updated_at":"2026-10-03T10:00:00Z"}]') = 1,
   'templates sync');
+select pg_temp.check(public.sync_push('[{"kind":"weigh_in","id":"2026-10-06","data":{"date":"2026-10-06","kg":80},"updated_at":"2026-10-06T10:00:00Z"}]') = 1,
+  'weigh-ins sync');
 reset role;
 
 -- 20261010000000_places_cache.sql: only the Edge Function (service role) touches the cache.
