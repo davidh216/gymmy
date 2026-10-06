@@ -17,9 +17,10 @@ appId: com.davidh216.gymmy
       notVisible: "Start with Kong"
     times: 6
     commands:
+      # The first flow of a run starts on a cold simulator, so allow a slow step.
       - extendedWaitUntil:
           visible: "Continue"
-          timeout: 10000
+          timeout: 20000
       - tapOn: "Continue"
       - waitForAnimationToEnd:
           timeout: 3000
