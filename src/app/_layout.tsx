@@ -83,6 +83,7 @@ function RootLayout() {
             <Stack.Screen name="weight" />
             <Stack.Screen name="exercise/[id]" />
             <Stack.Screen name="programs" />
+            <Stack.Screen name="plan-generator" />
             <Stack.Screen name="program/[id]" />
             <Stack.Screen name="gym-find" options={{ presentation: 'modal' }} />
             <Stack.Screen name="post-entry" options={{ presentation: 'modal' }} />

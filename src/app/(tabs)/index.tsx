@@ -185,6 +185,16 @@ function PlanSection() {
           showsHorizontalScrollIndicator={false}
           style={styles.templates}
           contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg }}>
+          <Card style={styles.template} onPress={() => router.push('/plan-generator')} testID="today-plan-generate">
+            <T style={{ fontSize: 26 }}>✨</T>
+            <T variant="heading">Build me a plan</T>
+            <T variant="caption" color={colors.textDim} numberOfLines={1}>
+              Made for your week
+            </T>
+            <T variant="caption" color={colors.accent} style={{ marginTop: space.sm }}>
+              Answer 5 questions →
+            </T>
+          </Card>
           {PROGRAMS.map((p) => (
             <Card
               key={p.id}

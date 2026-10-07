@@ -14,6 +14,14 @@ export default function ProgramsScreen() {
   const custom = useGymmy((s) => s.customPrograms);
   return (
     <Screen header={<BackHeader title="Training plans" subtitle="Pick a goal and follow it week by week" />}>
+      <Button
+        title="Build me a plan"
+        icon={{ ios: 'sparkles', web: 'auto_awesome' }}
+        size="lg"
+        onPress={() => router.push('/plan-generator')}
+        style={{ marginBottom: space.md }}
+        testID="plan-generate"
+      />
       {PROGRAMS.map((p, i) => (
         <Animated.View key={p.id} entering={FadeInDown.delay(i * 60)}>
           <ProgramCard program={p} active={p.id === current} />

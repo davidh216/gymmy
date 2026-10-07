@@ -1,6 +1,6 @@
-import { getExercise } from "./exercises";
-import { fromDisplayWeight, toDisplayWeight } from "./format";
-import type { SetEntry, Units, Workout } from "./types";
+import { getExercise } from './exercises';
+import { fromDisplayWeight, toDisplayWeight } from './format';
+import type { SetEntry, Units, Workout } from './types';
 
 /**
  * The coach's call for a lift's next session (double progression):
@@ -9,7 +9,7 @@ import type { SetEntry, Units, Workout } from "./types";
  * - repeat: reps were missed (or it was max effort), so own this weight first.
  * - deload: missed twice in a row at the same weight, so drop about 10% and build back.
  */
-export type CoachCall = "up" | "reps" | "repeat" | "deload";
+export type CoachCall = 'up' | 'reps' | 'repeat' | 'deload';
 
 export type CoachTarget = {
   call: CoachCall;
@@ -24,7 +24,7 @@ export type CoachTarget = {
 export const MAX_EFFORT_RPE = 9.5;
 
 /** One plate step: 5 lb or 2.5 kg. */
-export const plateStep = (units: Units) => (units === "lb" ? 5 : 2.5);
+export const plateStep = (units: Units) => (units === 'lb' ? 5 : 2.5);
 
 /** About 90% of a load, rounded down to what plates make (5 lb or 2.5 kg steps), for lighter days. */
 export function lighterLoad(kg: number, units: Units): number {
@@ -54,11 +54,7 @@ export function repRange(reps?: string): [number, number] | undefined {
 type Session = { endedAt: number; weight: number; sets: SetEntry[] };
 
 /** Working sets at the heaviest weight from each session with this lift, newest first. */
-function recentTopSets(
-  exerciseId: string,
-  history: Workout[],
-  count: number,
-): Session[] {
+function recentTopSets(exerciseId: string, history: Workout[], count: number): Session[] {
   const sessions: Session[] = [];
   for (const w of history) {
     const sets = w.exercises
@@ -89,7 +85,7 @@ export function nextTarget(
   units: Units,
   range?: [number, number],
 ): CoachTarget | null {
-  if (getExercise(exerciseId).kind !== "weight") return null;
+  if (getExercise(exerciseId).kind !== 'weight') return null;
   const [last, before] = recentTopSets(exerciseId, history, 2);
   if (!last) return null;
   const reps = last.sets.map((s) => s.reps!);
@@ -99,32 +95,29 @@ export function nextTarget(
   const maxEffort = last.sets.some((s) => (s.rpe ?? 0) >= MAX_EFFORT_RPE);
   const from = last.weight;
 
-  if (hitAll && !maxEffort)
-    return { call: "up", weight: heavierLoad(from, units), reps: floor, from };
+  if (hitAll && !maxEffort) return { call: 'up', weight: heavierLoad(from, units), reps: floor, from };
 
   const missed = reps.some((r) => r < floor);
   if (missed && before && sameWeight(before.weight, from)) {
     const beforeReps = before.sets.map((s) => s.reps!);
-    const missedBefore = beforeReps.some(
-      (r) => r < (range ? range[0] : Math.max(...beforeReps, goal)),
-    );
+    const missedBefore = beforeReps.some((r) => r < (range ? range[0] : Math.max(...beforeReps, goal)));
     // Stalled: missed both times with no more total reps than before.
     const total = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
     if (missedBefore && total(reps) <= total(beforeReps)) {
       const weight = lighterLoad(from, units);
-      if (weight < from) return { call: "deload", weight, reps: floor, from };
+      if (weight < from) return { call: 'deload', weight, reps: floor, from };
     }
   }
 
   if (!missed && range && !hitAll) {
     return {
-      call: "reps",
+      call: 'reps',
       weight: from,
       reps: Math.min(range[1], Math.min(...reps) + 1),
       from,
     };
   }
-  return { call: "repeat", weight: from, reps: floor, from };
+  return { call: 'repeat', weight: from, reps: floor, from };
 }
 
 /** Prefill a session's sets with the coach's target: working sets at last time's top weight move together. */
