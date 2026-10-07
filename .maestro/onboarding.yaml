@@ -6,4 +6,6 @@ name: Onboarding lands on Today
 - scrollUntilVisible:
     element: "(?i)quick start"
     direction: DOWN
+    timeout: 40000
+    visibilityPercentage: 50
     centerElement: true

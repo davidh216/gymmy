@@ -76,16 +76,36 @@ jobs:
           xcrun simctl terminate "$UDID" com.davidh216.gymmy || true
 
       - name: Run Maestro flows
-        run: maestro test .maestro --format junit --output maestro-report.xml
+        run: maestro test .maestro --format junit --output maestro-report.xml --debug-output maestro-debug --flatten-debug-output
 
       # Artifacts can't always be downloaded, so print what was on screen when a flow failed.
       - name: Show the screen after a failure
         if: failure()
         run: |
-          for f in ~/.maestro/tests/*/commands-*.json; do
+          # Each flow's steps with their status; the failing step and its error come last.
+          find maestro-debug ~/.maestro/tests -name 'commands-*.json' 2>/dev/null | while read -r f; do
             echo "== $f"
-            grep -o '"message" *: *"[^"]*"' "$f" | sort -u | head -20 || true
+            python3 - "$f" <<'PY' || true
+          import json, sys
+          for c in json.load(open(sys.argv[1])):
+              meta = c.get('metadata', {})
+              status = meta.get('status', '?')
+              if status in ('COMPLETED', 'SKIPPED'):
+                  continue
+              cmd = next(iter(c.get('command', {}).values()), {}) or {}
+              label = cmd.get('label') or cmd.get('description') or json.dumps(cmd)[:160]
+              err = (meta.get('error') or {}).get('message', '')
+              print(f'  {status}: {label} {err}'[:400])
+          PY
           done
+          # A crash report means the app died rather than a selector missing.
+          echo "== App crash reports"
+          ls -t ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i gymmy | head -5 || true
+          latest=$(ls -t ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i gymmy | head -1)
+          if [ -n "$latest" ]; then
+            grep -E '"(exception|termination|type|signal|codes|indicator|reason)"|asi|abort|RCTFatal|JavaScript' \
+              ~/Library/Logs/DiagnosticReports/"$latest" | head -40 || true
+          fi
           echo "== Elements on screen now"
           maestro hierarchy 2>/dev/null | grep -oE '"(accessibilityText|text|resource-id|title|value)" *: *"[^"]+"' | sort -u | head -150 || true
           echo "== After replaying the workout up to ticking the set"
@@ -103,5 +123,6 @@ jobs:
           path: |
             maestro-report.xml
             xcodebuild.log
+            maestro-debug
             ~/.maestro/tests
           if-no-files-found: ignore
