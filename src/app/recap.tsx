@@ -4,15 +4,19 @@ import { Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { BackHeader } from '@/components/back-header';
 import { Screen } from '@/components/screen';
+import { CompanionAvatar } from '@/components/companion-avatar';
 import { Button, Card, Icon, SectionHeader, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
-import { getExercise } from '@/lib/exercises';
+import { coachReview, type CoachNote } from '@/lib/coach-review';
+import { getCompanion } from '@/lib/companions';
+import { MUSCLE_GROUPS, getExercise } from '@/lib/exercises';
 import { formatDistanceKm, formatMinutes, formatScore, formatVolume } from '@/lib/format';
 import { change, hasActivity, recapHeadline, recapShareText, shiftWeek, weekLabel, weekRecap } from '@/lib/recap';
 import { dayKeyTime } from '@/lib/recovery';
 import { activeDaysThisWeek, weekStart } from '@/lib/streaks';
 import { track } from '@/services/analytics';
-import { useGymmy } from '@/store/gymmy';
+import { useCompanionName, useGymmy } from '@/store/gymmy';
+import { useProgram } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -25,6 +29,8 @@ export default function RecapScreen() {
   const claimedMilestones = useGymmy((s) => s.claimedMilestones);
   const goal = useGymmy((s) => s.profile?.weeklyGoal ?? 3);
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
+  const plan = useGymmy((s) => s.plan);
+  const program = useProgram(plan?.programId);
 
   const thisWeek = weekStart(now);
   const [start, setStart] = useState(() => {
@@ -37,6 +43,12 @@ export default function RecapScreen() {
     checkIns,
     claimedMilestones,
     weeklyGoal: goal,
+  });
+  const coach = coachReview({
+    start,
+    workouts,
+    checkIns,
+    plan: program && plan && plan.startedAt < r.end ? { programId: program.id, daysPerWeek: program.daysPerWeek, name: program.name } : null,
   });
   const current = start === thisWeek;
   const earliest = workouts.length ? weekStart(Math.min(...workouts.map((w) => w.endedAt))) : thisWeek;
@@ -141,6 +153,8 @@ export default function RecapScreen() {
               </Card>
             ))}
           </View>
+
+          <CoachNotes notes={coach.notes} setsByGroup={coach.setsByGroup} />
 
           {r.prs.length > 0 && (
             <>
@@ -253,7 +267,52 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+const NOTE_COLOR: Record<CoachNote['tone'], string> = { good: colors.accent, tip: colors.text, warn: colors.flame };
+
+/** The buddy's read on the week: plan, targets, muscles left out, when to ease off. */
+function CoachNotes({
+  notes,
+  setsByGroup,
+}: {
+  notes: CoachNote[];
+  setsByGroup: ReturnType<typeof coachReview>['setsByGroup'];
+}) {
+  const companionId = useGymmy((s) => s.companionId);
+  const buddy = useCompanionName(companionId);
+  const groups = MUSCLE_GROUPS.filter((g) => g.id !== 'cardio' && setsByGroup[g.id]);
+  if (!notes.length && !groups.length) return null;
+  return (
+    <>
+      <SectionHeader title={`${buddy}’s notes`} />
+      <Card style={styles.coach} testID="coach-review">
+        <View style={styles.coachTop}>
+          <CompanionAvatar companion={getCompanion(companionId)} size={36} ring={false} />
+          <View style={{ flex: 1, gap: space.xs }}>
+            {notes.map((n) => (
+              <T key={n.id} variant="body" color={NOTE_COLOR[n.tone]}>
+                {n.emoji} {n.text}
+              </T>
+            ))}
+            {!notes.length && (
+              <T variant="body" color={colors.textDim}>
+                Keep logging and I’ll keep moving the weights.
+              </T>
+            )}
+          </View>
+        </View>
+        {groups.length > 0 && (
+          <T variant="caption" color={colors.textDim}>
+            Sets by muscle: {groups.map((g) => `${g.label} ${setsByGroup[g.id]}`).join(' · ')}
+          </T>
+        )}
+      </Card>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
+  coach: { gap: space.sm },
+  coachTop: { flexDirection: 'row', gap: space.md, alignItems: 'flex-start' },
   nav: {
     flexDirection: 'row',
     alignItems: 'center',

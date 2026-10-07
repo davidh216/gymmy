@@ -5,6 +5,7 @@ import { CompanionHero } from '@/components/companion-hero';
 import { FirstWorkoutCard } from '@/components/first-workout-card';
 import { MilestoneBanner } from '@/components/milestone-banner';
 import { ReadinessCard } from '@/components/readiness-card';
+import { CoachPickCard } from '@/components/coach-pick-card';
 import { RecapCard } from '@/components/recap-card';
 import { Screen } from '@/components/screen';
 import { StatsAsk } from '@/components/stats-ask';
@@ -111,6 +112,8 @@ export default function Today() {
 
       <ActiveOrStart onStart={() => start()} />
 
+      <CoachPickCard />
+
       <PlanSection />
 
       <SectionHeader title="Quick start" />
@@ -192,7 +195,7 @@ function PlanSection() {
               Made for your week
             </T>
             <T variant="caption" color={colors.accent} style={{ marginTop: space.sm }}>
-              Answer 5 questions →
+              5 questions →
             </T>
           </Card>
           {PROGRAMS.map((p) => (
