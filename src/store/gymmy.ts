@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { applyTarget, lighterLoad, nextTarget, repRange, type CoachTarget } from '@/lib/coach';
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
 import {
   fixGroup,
@@ -12,7 +13,7 @@ import {
   type Exercise,
   type SavedTemplate,
 } from '@/lib/exercises';
-import { defaultWorkoutName, fromDisplayWeight, toDisplayWeight, uid } from '@/lib/format';
+import { defaultWorkoutName, uid } from '@/lib/format';
 import { EMPTY_PITY, summon, type Pity } from '@/lib/gacha';
 import { getMilestone, milestoneStats } from '@/lib/milestones';
 import {
@@ -34,7 +35,7 @@ import {
 } from '@/lib/progression';
 import { completedSets, detectPRs, exerciseSettings, lastPerformance } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
-import type { ActiveWorkout, PlanRef, SetEntry, Units, Workout, WorkoutExercise, WorkoutLocation } from '@/lib/types';
+import type { ActiveWorkout, PlanRef, SetEntry, Target, Units, Workout, WorkoutExercise, WorkoutLocation } from '@/lib/types';
 
 export type Profile = {
   name: string;
@@ -201,11 +202,12 @@ const initialState: State = {
   weightReviewSeen: 0,
 };
 
-/** Seed sets for a newly added exercise from its last performance. */
-function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
+/** Seed sets for a newly added exercise from its last performance, moved on by the coach's target. */
+function seedSets(exerciseId: string, history: Workout[], coach: CoachTarget | null): SetEntry[] {
   const previous = lastPerformance(exerciseId, history);
   if (previous?.length) {
-    return previous.map(({ rpe: _rpe, ...s }) => ({ ...s, id: uid(), done: false }));
+    const sets = previous.map(({ rpe: _rpe, ...s }) => ({ ...s, id: uid(), done: false }));
+    return coach ? applyTarget(sets, coach) : sets;
   }
   const kind = getExercise(exerciseId).kind;
   const count = kind === 'duration' || kind === 'distance' ? 1 : 3;
@@ -215,20 +217,15 @@ function seedSets(exerciseId: string, history: Workout[]): SetEntry[] {
 export const CHECK_IN_XP = 10;
 export const CHECK_IN_GEMS = 5;
 
-/** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from last time. */
-/** About 90% of a load, rounded down to what plates make (5 lb or 2.5 kg steps), for lighter days. */
-export function lighterLoad(kg: number, units: Units): number {
-  const step = units === 'lb' ? 5 : 2.5;
-  const display = toDisplayWeight(kg, units) * 0.9;
-  const rounded = Math.floor(display / step) * step;
-  // Never heavier than last time (a 2 kg dumbbell stays 2 kg rather than rounding up).
-  return rounded > 0 ? fromDisplayWeight(rounded, units) : kg;
-}
+/** Kept here for existing callers; the coach owns load math now. */
+export { lighterLoad };
 
+/** Sets for a plan exercise: planned count, reps/minutes from the plan, weight from the coach or last time. */
 function planSets(
   exerciseId: string,
   target: { sets: number; reps?: string; minutes?: number; distance?: number },
   history: Workout[],
+  coach: CoachTarget | null,
   light?: { units: Units },
 ): SetEntry[] {
   const previous = (lastPerformance(exerciseId, history) ?? []).filter((s) => !s.warmup);
@@ -237,8 +234,8 @@ function planSets(
     const last = previous[Math.min(i, previous.length - 1)];
     return {
       id: uid(),
-      weight: last?.weight && light ? lighterLoad(last.weight, light.units) : last?.weight,
-      reps: reps ?? last?.reps,
+      weight: coach ? coach.weight : last?.weight && light ? lighterLoad(last.weight, light.units) : last?.weight,
+      reps: coach ? coach.reps : (reps ?? last?.reps),
       minutes: target.minutes ?? (target.distance ? undefined : last?.minutes),
       distance: target.distance,
       done: false,
@@ -247,12 +244,23 @@ function planSets(
 }
 
 /** A new exercise in a workout, keeping your note and rest time from last time. */
-function workoutExercise(exerciseId: string, history: Workout[], sets?: SetEntry[]): WorkoutExercise {
+function workoutExercise(
+  exerciseId: string,
+  history: Workout[],
+  units: Units,
+  plan?: { target: Target; light: boolean },
+): WorkoutExercise {
   const last = exerciseSettings(exerciseId, history);
+  // Lighter plan days keep last time's load, eased off, with no coach call.
+  const coach = plan?.light ? null : nextTarget(exerciseId, history, units, repRange(plan?.target.reps));
   return {
     id: uid(),
     exerciseId,
-    sets: sets ?? seedSets(exerciseId, history),
+    sets: plan
+      ? planSets(exerciseId, plan.target, history, coach, plan.light ? { units } : undefined)
+      : seedSets(exerciseId, history, coach),
+    ...(plan ? { target: plan.target } : {}),
+    ...(coach ? { coach } : {}),
     ...(last.note ? { note: last.note } : {}),
     ...(last.rest !== undefined ? { rest: last.rest } : {}),
   };
@@ -309,7 +317,7 @@ export const useGymmy = create<State & Actions>()(
               id: uid(),
               name: opts?.name ?? defaultWorkoutName(Date.now()),
               startedAt: Date.now(),
-              exercises: (opts?.exerciseIds ?? []).map((exerciseId) => workoutExercise(exerciseId, history)),
+              exercises: (opts?.exerciseIds ?? []).map((exerciseId) => workoutExercise(exerciseId, history, get().profile?.units ?? 'lb')),
             },
           });
         },
@@ -368,14 +376,12 @@ export const useGymmy = create<State & Actions>()(
               name: `${program.name} · ${session.name}`,
               startedAt: Date.now(),
               plan: ref,
-              exercises: session.exercises.map(({ exerciseId, ...target }) => ({
-                ...workoutExercise(
-                  exerciseId,
-                  history,
-                  planSets(exerciseId, target, history, ref.light ? { units: get().profile?.units ?? 'lb' } : undefined),
-                ),
-                target,
-              })),
+              exercises: session.exercises.map(({ exerciseId, ...target }) =>
+                workoutExercise(exerciseId, history, get().profile?.units ?? 'lb', {
+                  target,
+                  light: Boolean(ref.light),
+                }),
+              ),
             },
           });
         },
@@ -473,7 +479,7 @@ export const useGymmy = create<State & Actions>()(
             ...a,
             exercises: [
               ...a.exercises,
-              ...exerciseIds.map((exerciseId) => workoutExercise(exerciseId, history)),
+              ...exerciseIds.map((exerciseId) => workoutExercise(exerciseId, history, get().profile?.units ?? 'lb')),
             ],
           }));
         },

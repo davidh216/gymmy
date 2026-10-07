@@ -33,10 +33,11 @@ import {
   toDisplayWeight,
 } from '@/lib/format';
 import { BARS, PLATES, RPE_CHOICES, formatPlates, plateLoad, rpeLabel } from '@/lib/plates';
+import type { CoachTarget } from '@/lib/coach';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { saveWorkoutToHealth } from '@/services/health';
-import { useGymmy } from '@/store/gymmy';
+import { useCompanionName, useGymmy } from '@/store/gymmy';
 import { colors, fonts, radius, space } from '@/theme';
 
 const DEFAULT_REST = 90;
@@ -227,6 +228,31 @@ export default function WorkoutScreen() {
   );
 }
 
+const COACH_WHY: Record<CoachTarget['call'], (c: CoachTarget) => string> = {
+  up: () => 'You hit every rep last time, so add a little.',
+  reps: (c) => `Same weight, go for ${c.reps} reps.`,
+  repeat: () => 'Same weight again. Get every rep before adding more.',
+  deload: () => 'Two tough sessions in a row. Drop back a bit and build up again.',
+};
+
+/** The buddy's target for this lift, set from your last sessions. ↑ marks an increase. */
+function CoachLine({ coach, units }: { coach: CoachTarget; units: Units }) {
+  const companionId = useGymmy((s) => s.companionId);
+  const buddy = useCompanionName(companionId);
+  const arrow = coach.call === 'up' ? ' ↑' : coach.call === 'deload' ? ' ↓' : '';
+  return (
+    <View style={styles.coach} testID="coach-target">
+      <T variant="caption" color={colors.accent}>
+        {buddy}: {formatSet({ id: '', done: false, weight: coach.weight, reps: coach.reps }, 'weight', units)}
+        {arrow}
+      </T>
+      <T variant="caption" color={colors.textDim}>
+        {COACH_WHY[coach.call](coach)}
+      </T>
+    </View>
+  );
+}
+
 function ExerciseCard({
   workoutExercise,
   index,
@@ -354,6 +380,7 @@ function ExerciseCard({
           {workoutExercise.target.note}
         </T>
       )}
+      {workoutExercise.coach && <CoachLine coach={workoutExercise.coach} units={units} />}
       {plates && exercise.kind === 'weight' && <PlatePanel sets={workoutExercise.sets} units={units} />}
       {last ? (
         <View style={styles.stats}>
@@ -865,6 +892,7 @@ const styles = StyleSheet.create({
   },
   rpeSkip: { paddingHorizontal: space.sm },
   stats: { flexDirection: 'row', gap: space.sm, marginBottom: space.sm },
+  coach: { marginBottom: space.xs },
   target: { alignItems: 'flex-end', marginRight: space.md },
   stat: {
     flex: 1,

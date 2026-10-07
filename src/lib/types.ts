@@ -1,3 +1,5 @@
+import type { CoachTarget } from './coach';
+
 export type SetEntry = {
   id: string;
   /** Load in kg (canonical unit; converted for display). */
@@ -32,6 +34,8 @@ export type WorkoutExercise = {
   note?: string;
   /** Rest after each set, in seconds. 0 turns the timer off. Carries over to the next session. */
   rest?: number;
+  /** The coach's target when the sets were prefilled. */
+  coach?: CoachTarget;
 };
 
 /** A training plan session this workout came from (weeks and sessions are 1-based). */

@@ -15,7 +15,7 @@ beforeEach(() => {
   useGymmy.setState({ profile: { name: 'Alex', username: 'alex', weeklyGoal: 3, units: 'kg' } });
 });
 
-it('carries warm-ups, notes and rest times into the next workout, but not RPE', () => {
+it('carries warm-ups, notes and rest times into the next workout, with the coach adding weight', () => {
   store().startWorkout({ exerciseIds: ['squat'] });
   const e = store().active!.exercises[0];
   store().updateExercise(e.id, { note: 'Belt on', rest: 180 });
@@ -26,10 +26,10 @@ it('carries warm-ups, notes and rest times into the next workout, but not RPE', 
 
   store().startWorkout({ exerciseIds: ['squat'] });
   const next = store().active!.exercises[0];
-  expect(next).toMatchObject({ note: 'Belt on', rest: 180 });
+  expect(next).toMatchObject({ note: 'Belt on', rest: 180, coach: { call: 'up', weight: 102.5, reps: 5 } });
   expect(next.sets.map((s) => [s.weight, s.warmup ?? false, s.done, s.rpe])).toEqual([
     [60, true, false, undefined],
-    [100, false, false, undefined],
+    [102.5, false, false, undefined],
   ]);
 });
 
