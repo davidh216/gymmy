@@ -66,7 +66,6 @@ export function workoutFromHealth(h: HealthWorkout, companionId: string): Workou
   };
 }
 
-/** How to save a Gymmy workout to Apple Health: its activity type and total distance in meters. */
 /** NSComparisonPredicate.Operator.equalTo. */
 const EQUAL_TO = 4;
 
@@ -75,6 +74,7 @@ export function ownHealthCopy(workoutId: string) {
   return { metadata: { withMetadataKey: 'HKExternalUUID', operatorType: EQUAL_TO, value: workoutId } };
 }
 
+/** How to save a Gymmy workout to Apple Health: its activity type and total distance in meters. */
 export function healthExport(workout: Workout): { activityType: number; distanceMeters?: number } {
   const exercises = workout.exercises.filter((e) => e.sets.some((s) => s.done));
   const only = exercises.length === 1 ? exercises[0].exerciseId : undefined;
@@ -172,4 +172,32 @@ export function heartScore(v: Pick<Vitals, 'hrv' | 'hrvBaseline' | 'rhr' | 'rhrB
 /** Vitals are only trusted while fresh. */
 export function freshVitals(v: Vitals | undefined, now: number): Vitals | undefined {
   return v && now - v.at < 36 * 3600 * 1000 ? v : undefined;
+}
+
+/** The totals a Gymmy workout carries in Apple Health: distance (m) and active energy (kcal), when known. */
+export function healthTotals(
+  workout: Workout,
+  activeKcal: number | undefined,
+): { distance?: number; energyBurned?: number } | undefined {
+  const { distanceMeters } = healthExport(workout);
+  const totals = {
+    ...(distanceMeters ? { distance: distanceMeters } : {}),
+    ...(activeKcal && activeKcal > 0 ? { energyBurned: activeKcal } : {}),
+  };
+  return Object.keys(totals).length ? totals : undefined;
+}
+
+/** Whether Gymmy's copy in Apple Health needs replacing after an edit: times, activity or totals changed. */
+export function healthCopyChanged(
+  before: Workout,
+  after: Workout,
+  kcal: { before?: number; after?: number } = {},
+): boolean {
+  const totals = (w: Workout, k?: number) => JSON.stringify(healthTotals(w, k) ?? {});
+  return (
+    before.startedAt !== after.startedAt ||
+    before.endedAt !== after.endedAt ||
+    healthExport(before).activityType !== healthExport(after).activityType ||
+    totals(before, kcal.before) !== totals(after, kcal.after)
+  );
 }

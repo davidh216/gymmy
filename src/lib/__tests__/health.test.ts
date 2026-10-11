@@ -1,4 +1,4 @@
-import { ACTIVITY, APP_BUNDLE_ID, healthExport, ownHealthCopy, sleepHours, sleepWindow, workoutFromHealth, type HealthWorkout } from '../health';
+import { ACTIVITY, APP_BUNDLE_ID, healthCopyChanged, healthExport, healthTotals, ownHealthCopy, sleepHours, sleepWindow, workoutFromHealth, type HealthWorkout } from '../health';
 import type { Workout } from '../types';
 
 const H = 3_600_000;
@@ -97,5 +97,32 @@ describe('ownHealthCopy', () => {
     expect(ownHealthCopy('w1')).toEqual({
       metadata: { withMetadataKey: 'HKExternalUUID', operatorType: 4, value: 'w1' },
     });
+  });
+});
+
+describe('healthTotals and healthCopyChanged', () => {
+  const base = {
+    id: 'w',
+    name: 'Run',
+    startedAt: 0,
+    endedAt: 1_800_000,
+    companionId: 'c',
+    xp: 0,
+    gems: 0,
+    prs: [],
+    exercises: [{ id: 'e', exerciseId: 'run', sets: [{ id: 's', distance: 5, minutes: 30, done: true }] }],
+  } as Workout;
+
+  it('carries distance and active calories when known', () => {
+    expect(healthTotals(base, 380)).toEqual({ distance: 5000, energyBurned: 380 });
+    expect(healthTotals(base, undefined)).toEqual({ distance: 5000 });
+    const lift = { ...base, exercises: [{ id: 'e', exerciseId: 'squat', sets: [{ id: 's', weight: 100, reps: 5, done: true }] }] };
+    expect(healthTotals(lift, 0)).toBeUndefined();
+  });
+
+  it('replaces the Health copy only when what Health shows changed', () => {
+    expect(healthCopyChanged(base, { ...base, name: 'Easy run' }, { before: 380, after: 380 })).toBe(false);
+    expect(healthCopyChanged(base, base, { before: 380, after: 400 })).toBe(true);
+    expect(healthCopyChanged(base, { ...base, endedAt: 2_000_000 })).toBe(true);
   });
 });

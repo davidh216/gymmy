@@ -10,7 +10,7 @@ Data **linked to the user** (only when they create an account):
 | User Content → Photos or videos | App functionality | Leaderboard attempt videos |
 | User Content → Other user content | App functionality | Usernames, results, reports |
 | Health & Fitness → Fitness | App functionality | Workouts and check-ins in the cloud backup |
-| Health & Fitness → Health | App functionality | Check-in ratings, sleep hours and body weights the user types in (Apple Health data is never uploaded) |
+| Health & Fitness → Health | App functionality | Check-in ratings, sleep hours, body weights and the height, birth year and sex the user types in (Apple Health data is never uploaded) |
 | Identifiers → User ID | App functionality | Account id |
 
 Data **not linked to the user**:
@@ -35,7 +35,7 @@ Likely **12+**: user-generated videos and usernames with reporting, blocking and
 >
 > **No demo account needed:** create one in the app in under a minute (Gyms tab → Create account, with an email and password). Every leaderboard shows labelled baseline rows (e.g. "1 plate · 135 lb × 5 · Baseline"), so boards have rankings to compete against before anyone posts.
 >
-> **Apple Health:** Profile → Apple Health → Connect. Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight for readiness and history, and saves workouts. Nothing from Health is used for ads or shared.
+> **Apple Health:** Profile → Apple Health → Connect. Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight for readiness and history, and saves workouts (with estimated active calories when allowed). Nothing from Health is used for ads or shared.
 >
 > **Location:** Gyms → Find, add or join a gym asks for When-In-Use location to list gyms within 5 km from OpenStreetMap.
 >

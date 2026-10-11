@@ -6,6 +6,7 @@ import {
   BASELINE_DAYS,
   againstBaseline,
   healthExport,
+  healthTotals,
   ownHealthCopy,
   sleepHours,
   sleepWindow,
@@ -13,6 +14,7 @@ import {
   type HealthWorkout,
   type Reading,
 } from '@/lib/health';
+import { workoutCalories } from '@/lib/calories';
 import type { Workout } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
 
@@ -57,6 +59,9 @@ const WORKOUTS = 'HKWorkoutTypeIdentifier' as const;
 const HRV = 'HKQuantityTypeIdentifierHeartRateVariabilitySDNN' as const;
 const RESTING_HR = 'HKQuantityTypeIdentifierRestingHeartRate' as const;
 const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass' as const;
+const ACTIVE_ENERGY = 'HKQuantityTypeIdentifierActiveEnergyBurned' as const;
+/** AuthorizationStatus.sharingAuthorized. */
+const SHARING_AUTHORIZED = 2;
 const VITALS = [HRV, RESTING_HR, BODY_MASS] as const;
 
 /** Shows Apple's permission sheet: read sleep and workouts, save workouts. */
@@ -70,13 +75,14 @@ export async function connectHealth(): Promise<{ imported: number }> {
         'HKQuantityTypeIdentifierDistanceWalkingRunning',
         'HKQuantityTypeIdentifierDistanceCycling',
         'HKQuantityTypeIdentifierDistanceSwimming',
+        ACTIVE_ENERGY,
       ],
     });
   } catch (e) {
     throw new HealthError(`Couldn’t connect to Apple Health. (${e instanceof Error ? e.message : 'unknown error'})`, 'failed');
   }
   const { health, setHealth } = useGymmy.getState();
-  setHealth({ enabled: true, connectedAt: health.connectedAt ?? Date.now(), readsVitals: true });
+  setHealth({ enabled: true, connectedAt: health.connectedAt ?? Date.now(), readsVitals: true, savesEnergy: true });
   return syncHealth({ force: true });
 }
 
@@ -90,6 +96,17 @@ export async function enableVitals(): Promise<void> {
   }
   useGymmy.getState().setHealth({ readsVitals: true });
   await refreshVitals();
+}
+
+/** For people who connected before calories: asks to save estimated active calories with workouts. */
+export async function enableHealthCalories(): Promise<void> {
+  const hk = await healthKit();
+  try {
+    await hk.requestAuthorization({ toRead: [], toShare: [ACTIVE_ENERGY] });
+  } catch (e) {
+    throw new HealthError(`Couldn’t connect to Apple Health. (${e instanceof Error ? e.message : 'unknown error'})`, 'failed');
+  }
+  useGymmy.getState().setHealth({ savesEnergy: true });
 }
 
 /**
@@ -202,18 +219,35 @@ export async function lastNightSleep(): Promise<number | null> {
 
 /** Saves a finished Gymmy workout to Apple Health. Errors are swallowed: it's a bonus. */
 export async function saveWorkoutToHealth(workout: Workout): Promise<void> {
-  if (!useGymmy.getState().health.enabled || workout.source === 'health') return;
+  const { health, weighIns, profile } = useGymmy.getState();
+  if (!health.enabled || workout.source === 'health') return;
   try {
     const hk = await healthKit();
-    const { activityType, distanceMeters } = healthExport(workout);
-    await hk.saveWorkoutSample(
-      activityType as typeof ACTIVITY.running,
-      [],
-      new Date(workout.startedAt),
-      new Date(workout.endedAt),
-      distanceMeters ? { distance: distanceMeters } : undefined,
-      { HKExternalUUID: workout.id },
-    );
+    const { activityType } = healthExport(workout);
+    // Calories go along only when Health lets Gymmy share active energy; otherwise the save would fail.
+    let energy: number | undefined;
+    try {
+      if (health.savesEnergy && hk.authorizationStatusFor(ACTIVE_ENERGY) === SHARING_AUTHORIZED) {
+        energy = workoutCalories(workout, weighIns, profile?.body)?.active;
+      }
+    } catch {
+      energy = undefined;
+    }
+    const save = (kcal: number | undefined) =>
+      hk.saveWorkoutSample(
+        activityType as typeof ACTIVITY.running,
+        [],
+        new Date(workout.startedAt),
+        new Date(workout.endedAt),
+        healthTotals(workout, kcal),
+        { HKExternalUUID: workout.id },
+      );
+    try {
+      await save(energy);
+    } catch (e) {
+      if (energy === undefined) throw e;
+      await save(undefined);
+    }
   } catch {
     // Not connected on this build, or permission withdrawn in the Health app.
   }

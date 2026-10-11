@@ -6,7 +6,14 @@ import { useNow } from '@/hooks/use-now';
 import { formatAgo, formatWeight } from '@/lib/format';
 import { bucket } from '@/lib/analytics';
 import { track } from '@/services/analytics';
-import { connectHealth, disconnectHealth, enableVitals, healthSupported, syncHealth } from '@/services/health';
+import {
+  connectHealth,
+  disconnectHealth,
+  enableHealthCalories,
+  enableVitals,
+  healthSupported,
+  syncHealth,
+} from '@/services/health';
 import { useGymmy } from '@/store/gymmy';
 import { colors, space } from '@/theme';
 
@@ -15,7 +22,11 @@ export function HealthCard() {
   const health = useGymmy((s) => s.health);
   const imported = useGymmy((s) => s.workouts.filter((w) => w.source === 'health').length);
   const now = useNow(60_000);
-  const { data: supported } = useQuery({ queryKey: ['health', 'supported'], queryFn: healthSupported, enabled: Platform.OS === 'ios' });
+  const { data: supported } = useQuery({
+    queryKey: ['health', 'supported'],
+    queryFn: healthSupported,
+    enabled: Platform.OS === 'ios',
+  });
   const connect = useMutation({
     mutationFn: connectHealth,
     onSuccess: (r) => {
@@ -25,15 +36,18 @@ export function HealthCard() {
   });
   const sync = useMutation({ mutationFn: () => syncHealth({ force: true }) });
   const vitals = useMutation({ mutationFn: enableVitals, onSuccess: () => haptic('success') });
+  const calories = useMutation({ mutationFn: enableHealthCalories, onSuccess: () => haptic('success') });
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
 
   if (Platform.OS !== 'ios') return null;
 
   const result = connect.data ?? sync.data;
-  const error = connect.error ?? sync.error ?? vitals.error;
+  const error = connect.error ?? sync.error ?? vitals.error ?? calories.error;
   const v = health.vitals;
   const heart = [
-    v?.hrv !== undefined ? `HRV ${Math.round(v.hrv)} ms${v.hrvBaseline ? ` (normal ${Math.round(v.hrvBaseline)})` : ''}` : '',
+    v?.hrv !== undefined
+      ? `HRV ${Math.round(v.hrv)} ms${v.hrvBaseline ? ` (normal ${Math.round(v.hrvBaseline)})` : ''}`
+      : '',
     v?.rhr !== undefined ? `resting HR ${Math.round(v.rhr)} bpm` : '',
     v?.bodyMassKg !== undefined ? formatWeight(v.bodyMassKg, units) : '',
   ].filter(Boolean);
@@ -49,7 +63,7 @@ export function HealthCard() {
               ? 'Update Gymmy from TestFlight to connect Apple Health.'
               : health.enabled
                 ? `Connected${health.lastSync ? ` · synced ${formatAgo(health.lastSync, now)}` : ''} · ${imported} imported`
-                : 'Bring in sleep, heart rate variability, resting heart rate, weight and your Apple Watch runs, walks, rides, rows and swims. Gymmy workouts are saved to Health too.'}
+                : 'Bring in sleep, heart rate variability, resting heart rate, weight and your Apple Watch runs, walks, rides, rows and swims. Gymmy workouts are saved to Health too, with estimated calories.'}
           </T>
         </View>
       </View>
@@ -65,6 +79,15 @@ export function HealthCard() {
           icon={{ ios: 'heart.fill', web: 'favorite' }}
           disabled={vitals.isPending}
           onPress={() => vitals.mutate()}
+        />
+      )}
+      {health.enabled && !health.savesEnergy && (
+        <Button
+          title={calories.isPending ? 'Connecting…' : 'Save calories to Health'}
+          variant="secondary"
+          icon={{ ios: 'flame.fill', web: 'local_fire_department' }}
+          disabled={calories.isPending}
+          onPress={() => calories.mutate()}
         />
       )}
       {result && result.imported > 0 && (

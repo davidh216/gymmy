@@ -110,6 +110,8 @@ type State = {
     lastSync?: number;
     /** Asked to read HRV, resting heart rate and body weight. */
     readsVitals?: boolean;
+    /** Asked to save estimated active calories with Gymmy workouts. */
+    savesEnergy?: boolean;
     vitals?: Vitals;
   };
   /** Start of the most recent week whose recap card was opened or dismissed. */

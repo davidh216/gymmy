@@ -24,7 +24,7 @@ If you post an attempt to a gym board, other people can see your username, compa
 
 ## Apple Health
 
-With your permission Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight, and saves the workouts you log. Health data is used only for your readiness score, recovery, calorie estimates and workout history inside the app. It is never used for advertising, never sold, and never shared with third parties.
+With your permission Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight, and saves the workouts you log, with estimated active calories if you allow it. Health data is used only for your readiness score, recovery, calorie estimates and workout history inside the app. It is never used for advertising, never sold, and never shared with third parties.
 
 ## Location
 
