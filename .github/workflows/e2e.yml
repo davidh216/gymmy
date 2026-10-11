@@ -76,14 +76,14 @@ jobs:
           xcrun simctl terminate "$UDID" com.davidh216.gymmy || true
 
       - name: Run Maestro flows
-        run: maestro test .maestro --format junit --output maestro-report.xml --debug-output maestro-debug --flatten-debug-output
+        run: maestro test .maestro --format junit --output maestro-report.xml --debug-output maestro-debug --flatten-debug-output --test-output-dir maestro-out
 
       # Artifacts can't always be downloaded, so print what was on screen when a flow failed.
       - name: Show the screen after a failure
         if: failure()
         run: |
           # Each flow's steps with their status; the failing step and its error come last.
-          find maestro-debug ~/.maestro/tests -name 'commands-*.json' 2>/dev/null | while read -r f; do
+          find maestro-out maestro-debug ~/.maestro/tests -name 'commands-*.json' 2>/dev/null | while read -r f; do
             echo "== $f"
             python3 - "$f" <<'PY' || true
           import json, sys
@@ -98,6 +98,7 @@ jobs:
               print(f'  {status}: {label} {err}'[:400])
           PY
           done
+          echo "== Output files"; find maestro-out maestro-debug -maxdepth 2 2>/dev/null | head -40
           # A crash report means the app died rather than a selector missing.
           echo "== App crash reports"
           ls -t ~/Library/Logs/DiagnosticReports 2>/dev/null | grep -i gymmy | head -5 || true
@@ -124,5 +125,6 @@ jobs:
             maestro-report.xml
             xcodebuild.log
             maestro-debug
+            maestro-out
             ~/.maestro/tests
           if-no-files-found: ignore
