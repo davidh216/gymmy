@@ -62,11 +62,24 @@ export default function SessionScreen() {
             companion={companion}
           />
         ) : (
-          <View style={{ gap: 4, marginBottom: space.lg }}>
-            <T variant="caption" color={colors.textDim}>
-              {formatDate(workout.endedAt)}
-            </T>
-            <T variant="hero">{workout.name}</T>
+          <View style={styles.titleRow}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <T variant="caption" color={colors.textDim}>
+                {formatDate(workout.endedAt)}
+              </T>
+              <T variant="hero">{workout.name}</T>
+            </View>
+            <Pressable
+              onPress={() => router.push({ pathname: '/session-edit', params: { id: workout.id } })}
+              hitSlop={10}
+              style={styles.edit}
+              accessibilityRole="button"
+              accessibilityLabel="Edit workout"
+              testID="session-edit">
+              <T variant="heading" color={colors.accent}>
+                Edit
+              </T>
+            </Pressable>
           </View>
         )}
 
@@ -177,6 +190,12 @@ export default function SessionScreen() {
               />
               <SaveTemplateButton name={workout.name} exerciseIds={workout.exercises.map((e) => e.exerciseId)} />
               <Button
+                title="Edit workout"
+                variant="secondary"
+                icon={{ ios: 'pencil', web: 'edit' }}
+                onPress={() => router.push({ pathname: '/session-edit', params: { id: workout.id } })}
+              />
+              <Button
                 title="Delete workout"
                 variant="danger"
                 onPress={() =>
@@ -266,6 +285,8 @@ function Celebration({
 
 const styles = StyleSheet.create({
   location: { alignSelf: 'flex-start', marginBottom: space.sm },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, marginBottom: space.lg },
+  edit: { paddingTop: space.lg },
   root: { flex: 1, backgroundColor: colors.bg },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.md },
   content: { paddingHorizontal: space.lg, maxWidth: 640, width: '100%', alignSelf: 'center' },

@@ -151,3 +151,39 @@ it('names the first buddy and starts the chosen plan at the end of onboarding', 
   store().completeOnboarding(profile, 'kong', { planId: 'nope' });
   expect(store().plan).toBeNull();
 });
+
+it('edits a finished workout: sets, name and times, re-checking records', () => {
+  const day = 86_400_000;
+  store().startWorkout({ exerciseIds: ['squat'] });
+  let e = store().active!.exercises[0];
+  store().updateSet(e.id, e.sets[0].id, { weight: 100, reps: 5, done: true });
+  const first = store().finishWorkout()!;
+  store().startWorkout({ exerciseIds: ['squat'] });
+  e = store().active!.exercises[0];
+  store().updateSet(e.id, e.sets[0].id, { weight: 90, reps: 5, done: true });
+  const second = store().finishWorkout()!;
+  expect(second.prs).toEqual([]);
+  const xp = store().xp;
+
+  const startedAt = second.startedAt - 10 * 60_000;
+  const edit = {
+    name: ' Heavy day ',
+    startedAt,
+    endedAt: startedAt + 45 * 60_000,
+    exercises: second.exercises.map((x) => ({
+      ...x,
+      sets: [{ ...x.sets[0], weight: 120 }, { id: 'empty', done: false }],
+    })),
+  };
+  store().updateWorkout(second.id, edit);
+  const edited = store().workouts.find((w) => w.id === second.id)!;
+  expect(edited).toMatchObject({ name: 'Heavy day', startedAt, endedAt: startedAt + 45 * 60_000 });
+  expect(edited.exercises[0].sets.map((s) => s.weight)).toEqual([120]);
+  expect(edited.prs.map((p) => p.exerciseId)).toEqual(['squat']);
+  expect(store().xp).toBe(xp);
+
+  // Moved before the first workout, it has nothing earlier to beat, and the list stays newest first.
+  store().updateWorkout(second.id, { ...edit, startedAt: startedAt - day, endedAt: startedAt - day + 45 * 60_000 });
+  expect(store().workouts.find((w) => w.id === second.id)!.prs).toEqual([]);
+  expect(store().workouts.map((w) => w.id)).toEqual([first.id, second.id]);
+});

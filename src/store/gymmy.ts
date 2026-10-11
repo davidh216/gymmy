@@ -25,6 +25,7 @@ import {
 } from '@/lib/programs';
 import type { Vitals } from '@/lib/health';
 import { dayKey, type CheckIn } from '@/lib/recovery';
+import { cleanExercises, type WorkoutEdit } from '@/lib/workout-edit';
 import { mergeHealthWeights, type WeighIn, type WeightReviewSettings } from '@/lib/weight';
 import {
   STARTING_GEMS,
@@ -139,6 +140,8 @@ type Actions = {
   discardWorkout: () => void;
   finishWorkout: () => Workout | null;
   deleteWorkout: (id: string) => void;
+  /** Saves edits to a finished workout. Records are re-checked; XP and gems stay as earned. */
+  updateWorkout: (id: string, edit: WorkoutEdit) => void;
 
   addCustomExercise: (input: CustomExerciseInput) => CustomExercise;
   updateCustomExercise: (id: string, patch: Partial<CustomExerciseInput> & Pick<CustomExercise, 'submission'>) => void;
@@ -583,6 +586,26 @@ export const useGymmy = create<State & Actions>()(
         },
 
         deleteWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
+
+        updateWorkout: (id, edit) =>
+          set((s) => {
+            const old = s.workouts.find((w) => w.id === id);
+            if (!old) return {};
+            const exercises = cleanExercises(edit.exercises);
+            if (!exercises.length) return {};
+            const earlier = s.workouts.filter((w) => w.id !== id && w.endedAt < edit.endedAt);
+            const workout: Workout = {
+              ...old,
+              name: edit.name.trim(),
+              startedAt: edit.startedAt,
+              endedAt: edit.endedAt,
+              exercises,
+              prs: detectPRs(exercises, earlier),
+            };
+            return {
+              workouts: s.workouts.map((w) => (w.id === id ? workout : w)).sort((a, b) => b.endedAt - a.endedAt),
+            };
+          }),
 
         addCustomExercise: (input) => {
           const exercise: CustomExercise = {
