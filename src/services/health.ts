@@ -6,6 +6,7 @@ import {
   BASELINE_DAYS,
   againstBaseline,
   healthExport,
+  ownHealthCopy,
   sleepHours,
   sleepWindow,
   workoutFromHealth,
@@ -213,6 +214,23 @@ export async function saveWorkoutToHealth(workout: Workout): Promise<void> {
       distanceMeters ? { distance: distanceMeters } : undefined,
       { HKExternalUUID: workout.id },
     );
+  } catch {
+    // Not connected on this build, or permission withdrawn in the Health app.
+  }
+}
+
+/**
+ * After an edit, swaps the copy Gymmy saved in Apple Health for one with the new times.
+ * Health samples can't be changed, only deleted and saved again, and only Gymmy's own copy
+ * (found by the workout id it was saved with) is touched. A workout that never went to
+ * Health stays out of it.
+ */
+export async function replaceWorkoutInHealth(workout: Workout): Promise<void> {
+  if (!useGymmy.getState().health.enabled || workout.source === 'health') return;
+  try {
+    const hk = await healthKit();
+    const removed = await hk.deleteObjects(WORKOUTS, ownHealthCopy(workout.id));
+    if (removed > 0) await saveWorkoutToHealth(workout);
   } catch {
     // Not connected on this build, or permission withdrawn in the Health app.
   }

@@ -187,3 +187,33 @@ it('edits a finished workout: sets, name and times, re-checking records', () => 
   expect(store().workouts.find((w) => w.id === second.id)!.prs).toEqual([]);
   expect(store().workouts.map((w) => w.id)).toEqual([first.id, second.id]);
 });
+
+it('re-checks later records when an earlier workout is edited or deleted', () => {
+  const log = (weight: number) => {
+    store().startWorkout({ exerciseIds: ['squat'] });
+    const e = store().active!.exercises[0];
+    store().updateSet(e.id, e.sets[0].id, { weight, reps: 1, done: true });
+    const w = store().finishWorkout()!;
+    // Space them out so each one is clearly later.
+    const shifted = { ...w, startedAt: w.startedAt - (3 - store().workouts.length) * 86_400_000 };
+    shifted.endedAt = shifted.startedAt + 3_600_000;
+    useGymmy.setState((s) => ({ workouts: s.workouts.map((x) => (x.id === w.id ? shifted : x)) }));
+    return shifted;
+  };
+  const w1 = log(100);
+  const w2 = log(105);
+  const w3 = log(110);
+  const prsOf = (id: string) => store().workouts.find((w) => w.id === id)!.prs.map((p) => p.previous);
+  expect([prsOf(w2.id), prsOf(w3.id)]).toEqual([[100], [105]]);
+
+  // w2 drops below w1: no record there, and w3 now beat 100.
+  store().updateWorkout(w2.id, {
+    ...w2,
+    exercises: w2.exercises.map((e) => ({ ...e, sets: [{ ...e.sets[0], weight: 90 }] })),
+  });
+  expect([prsOf(w2.id), prsOf(w3.id)]).toEqual([[], [100]]);
+
+  // Without w1, w2 is the first squat (no record) and w3 beat 90.
+  store().deleteWorkout(w1.id);
+  expect([prsOf(w2.id), prsOf(w3.id)]).toEqual([[], [90]]);
+});

@@ -34,7 +34,7 @@ import {
   workoutRewards,
   type Rewards,
 } from '@/lib/progression';
-import { completedSets, detectPRs, exerciseSettings, lastPerformance } from '@/lib/records';
+import { completedSets, detectPRs, exerciseSettings, lastPerformance, recheckPRs } from '@/lib/records';
 import { countInWeek, weekStreak } from '@/lib/streaks';
 import type { ActiveWorkout, PlanRef, SetEntry, Target, Units, Workout, WorkoutExercise, WorkoutLocation } from '@/lib/types';
 
@@ -585,7 +585,13 @@ export const useGymmy = create<State & Actions>()(
           return workout;
         },
 
-        deleteWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
+        deleteWorkout: (id) =>
+          set((s) => {
+            const gone = s.workouts.find((w) => w.id === id);
+            if (!gone) return {};
+            // Later workouts may now hold records they had to beat this one for.
+            return { workouts: recheckPRs(s.workouts.filter((w) => w.id !== id), gone.endedAt) };
+          }),
 
         updateWorkout: (id, edit) =>
           set((s) => {
@@ -593,18 +599,16 @@ export const useGymmy = create<State & Actions>()(
             if (!old) return {};
             const exercises = cleanExercises(edit.exercises);
             if (!exercises.length) return {};
-            const earlier = s.workouts.filter((w) => w.id !== id && w.endedAt < edit.endedAt);
             const workout: Workout = {
               ...old,
               name: edit.name.trim(),
               startedAt: edit.startedAt,
               endedAt: edit.endedAt,
               exercises,
-              prs: detectPRs(exercises, earlier),
             };
-            return {
-              workouts: s.workouts.map((w) => (w.id === id ? workout : w)).sort((a, b) => b.endedAt - a.endedAt),
-            };
+            const workouts = s.workouts.map((w) => (w.id === id ? workout : w)).sort((a, b) => b.endedAt - a.endedAt);
+            // This workout and every later one are re-checked against what came before them.
+            return { workouts: recheckPRs(workouts, Math.min(old.endedAt, edit.endedAt)) };
           }),
 
         addCustomExercise: (input) => {

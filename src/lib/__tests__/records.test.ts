@@ -1,4 +1,4 @@
-import { bestsByExercise, detectPRs, e1rm, lastPerformance, volume } from '../records';
+import { bestsByExercise, detectPRs, e1rm, lastPerformance, recheckPRs, volume } from '../records';
 import type { Workout, WorkoutExercise } from '../types';
 
 const set = (weight: number, reps: number, done = true) => ({ id: `${weight}x${reps}`, weight, reps, done });
@@ -63,5 +63,34 @@ describe('helpers', () => {
     expect(bestsByExercise(h).get('squat')).toBeCloseTo(e1rm(140, 3));
     expect(lastPerformance('squat', h)?.[0].weight).toBe(120);
     expect(lastPerformance('deadlift', h)).toBeNull();
+  });
+});
+
+describe('recheckPRs', () => {
+  const w = (id: string, endedAt: number, weight: number, extra: Partial<Workout> = {}): Workout =>
+    ({
+      id,
+      name: id,
+      startedAt: endedAt - 1,
+      endedAt,
+      companionId: 'c',
+      xp: 0,
+      gems: 0,
+      prs: [],
+      exercises: [{ id: `e${id}`, exerciseId: 'squat', sets: [{ id: `s${id}`, weight, reps: 1, done: true }] }],
+      ...extra,
+    }) as Workout;
+
+  it('only touches workouts from `since` on, and keeps unchanged ones as they were', () => {
+    const list = [w('c', 3, 120), w('b', 2, 110), w('a', 1, 100)];
+    const out = recheckPRs(list, 2);
+    expect(out.map((x) => x.prs.map((p) => p.previous))).toEqual([[110], [100], []]);
+    expect(out[2]).toBe(list[2]);
+    expect(recheckPRs(out, 1)).toBe(out);
+  });
+
+  it('leaves Apple Health imports alone', () => {
+    const list = [w('h', 2, 200, { source: 'health' }), w('a', 1, 100)];
+    expect(recheckPRs(list, 0)[0].prs).toEqual([]);
   });
 });

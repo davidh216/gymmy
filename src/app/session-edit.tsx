@@ -9,14 +9,27 @@ import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { getExercise } from '@/lib/exercises';
 import { formatDate, uid } from '@/lib/format';
-import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
+import { healthExport } from '@/lib/health';
+import type { SetEntry, Units, Workout, WorkoutExercise } from '@/lib/types';
 import { MAX_EDIT_MINUTES, MINUTE, durationMinutes, editProblem, shiftDays } from '@/lib/workout-edit';
+import { replaceWorkoutInHealth } from '@/services/health';
 import { useGymmy } from '@/store/gymmy';
 import { usePicked } from '@/store/picker';
 import { colors, radius, space } from '@/theme';
 
 const PICK_TARGET = 'session-edit';
 const formatTime = (ts: number) => new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+function healthChanged(a: Workout, b: Workout): boolean {
+  const ha = healthExport(a);
+  const hb = healthExport(b);
+  return (
+    a.startedAt !== b.startedAt ||
+    a.endedAt !== b.endedAt ||
+    ha.activityType !== hb.activityType ||
+    ha.distanceMeters !== hb.distanceMeters
+  );
+}
 
 /** Fix a finished workout: its name, when it happened, how long it took, and every set. */
 export default function SessionEditScreen() {
@@ -77,6 +90,9 @@ export default function SessionEditScreen() {
     if (problem) return;
     haptic('success');
     updateWorkout(workout.id, edit);
+    // Health keeps its own copy: replace it when what it shows (times, activity, distance) changed.
+    const saved = useGymmy.getState().workouts.find((w) => w.id === workout.id);
+    if (saved && healthChanged(workout, saved)) replaceWorkoutInHealth(saved);
     router.back();
   };
 

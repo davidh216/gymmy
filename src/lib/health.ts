@@ -67,6 +67,14 @@ export function workoutFromHealth(h: HealthWorkout, companionId: string): Workou
 }
 
 /** How to save a Gymmy workout to Apple Health: its activity type and total distance in meters. */
+/** NSComparisonPredicate.Operator.equalTo. */
+const EQUAL_TO = 4;
+
+/** Finds the copy Gymmy saved in Apple Health for a workout: it carries the workout id. */
+export function ownHealthCopy(workoutId: string) {
+  return { metadata: { withMetadataKey: 'HKExternalUUID', operatorType: EQUAL_TO, value: workoutId } };
+}
+
 export function healthExport(workout: Workout): { activityType: number; distanceMeters?: number } {
   const exercises = workout.exercises.filter((e) => e.sets.some((s) => s.done));
   const only = exercises.length === 1 ? exercises[0].exerciseId : undefined;

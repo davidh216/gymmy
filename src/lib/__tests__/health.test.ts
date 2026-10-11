@@ -1,4 +1,4 @@
-import { ACTIVITY, APP_BUNDLE_ID, healthExport, sleepHours, sleepWindow, workoutFromHealth, type HealthWorkout } from '../health';
+import { ACTIVITY, APP_BUNDLE_ID, healthExport, ownHealthCopy, sleepHours, sleepWindow, workoutFromHealth, type HealthWorkout } from '../health';
 import type { Workout } from '../types';
 
 const H = 3_600_000;
@@ -89,5 +89,13 @@ describe('sleepHours', () => {
   it('clips to the window and returns null without data', () => {
     expect(sleepHours([{ start: at(14), end: at(20), value: 1 }], window)).toBe(2);
     expect(sleepHours([], window)).toBeNull();
+  });
+});
+
+describe('ownHealthCopy', () => {
+  it('matches the external id Gymmy saves workouts with', () => {
+    expect(ownHealthCopy('w1')).toEqual({
+      metadata: { withMetadataKey: 'HKExternalUUID', operatorType: 4, value: 'w1' },
+    });
   });
 });

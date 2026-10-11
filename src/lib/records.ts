@@ -58,7 +58,10 @@ export function bestsByExercise(history: Workout[]): Map<string, number> {
  * so the very first session of a lift doesn't spam records.
  */
 export function detectPRs(exercises: WorkoutExercise[], history: Workout[]): PersonalRecord[] {
-  const bests = bestsByExercise(history);
+  return prsAgainst(exercises, bestsByExercise(history));
+}
+
+function prsAgainst(exercises: WorkoutExercise[], bests: Map<string, number>): PersonalRecord[] {
   const prs: PersonalRecord[] = [];
   for (const exercise of exercises) {
     const previous = bests.get(exercise.exerciseId);
@@ -70,11 +73,41 @@ export function detectPRs(exercises: WorkoutExercise[], history: Workout[]): Per
   return prs;
 }
 
+/**
+ * Re-checks the records of workouts that finished at or after `since`, oldest first, against
+ * everything before each one. Used after a workout is edited or deleted, since its numbers
+ * decide what later workouts had to beat. Health imports keep theirs; unchanged workouts keep
+ * their identity so sync only sends what really changed.
+ */
+export function recheckPRs(workouts: Workout[], since: number): Workout[] {
+  const sameRecords = (a: PersonalRecord[], b: PersonalRecord[]) =>
+    a.length === b.length &&
+    a.every((p, i) => p.exerciseId === b[i].exerciseId && p.value === b[i].value && p.previous === b[i].previous);
+  // One pass, oldest first, carrying each exercise's best so far.
+  const bests = bestsByExercise(workouts.filter((w) => w.endedAt < since));
+  const updated = new Map<string, Workout>();
+  const later = workouts.filter((w) => w.endedAt >= since).sort((a, b) => a.endedAt - b.endedAt);
+  for (let i = 0; i < later.length; ) {
+    // Workouts that end at the same moment don't count against each other.
+    let j = i;
+    while (j < later.length && later[j].endedAt === later[i].endedAt) j++;
+    const group = later.slice(i, j);
+    for (const w of group) {
+      if (w.source === 'health') continue;
+      const prs = prsAgainst(w.exercises, bests);
+      if (!sameRecords(prs, w.prs)) updated.set(w.id, { ...w, prs });
+    }
+    for (const [exerciseId, score] of bestsByExercise(group)) {
+      const prev = bests.get(exerciseId);
+      if (prev === undefined || score > prev) bests.set(exerciseId, score);
+    }
+    i = j;
+  }
+  return updated.size ? workouts.map((w) => updated.get(w.id) ?? w) : workouts;
+}
+
 export function completedSets(exercises: WorkoutExercise[]): number {
-  return exercises.reduce(
-    (n, ex) => n + ex.sets.filter((s) => setLogged(ex.exerciseId, s)).length,
-    0,
-  );
+  return exercises.reduce((n, ex) => n + ex.sets.filter((s) => setLogged(ex.exerciseId, s)).length, 0);
 }
 
 /** Total kg moved (weight × reps) across completed weighted sets. */
@@ -173,6 +206,10 @@ export function lastSessions(history: Workout[]): Map<string, SessionStats> {
 }
 
 /** Whether any saved or in-progress workout uses this exercise. */
-export function exerciseInUse(exerciseId: string, history: Workout[], active?: { exercises: WorkoutExercise[] } | null) {
+export function exerciseInUse(
+  exerciseId: string,
+  history: Workout[],
+  active?: { exercises: WorkoutExercise[] } | null,
+) {
   return [...history, ...(active ? [active] : [])].some((w) => w.exercises.some((e) => e.exerciseId === exerciseId));
 }
