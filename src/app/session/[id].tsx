@@ -8,6 +8,7 @@ import { CompanionAvatar } from '@/components/companion-avatar';
 import { MilestoneBanner } from '@/components/milestone-banner';
 import { SaveTemplateButton } from '@/components/save-template-button';
 import { Button, Card, ProgressBar, SectionHeader, Stat, T } from '@/components/ui';
+import { formatKcal } from '@/lib/calories';
 import { confirm } from '@/lib/confirm';
 import { getCompanion } from '@/lib/companions';
 import { getExercise } from '@/lib/exercises';
@@ -21,6 +22,7 @@ import {
 import { levelFromXp } from '@/lib/progression';
 import { completedSets, volume } from '@/lib/records';
 import { useGymmy } from '@/store/gymmy';
+import { useWorkoutCalories } from '@/store/selectors';
 import { colors, radius, space } from '@/theme';
 
 export default function SessionScreen() {
@@ -32,6 +34,8 @@ export default function SessionScreen() {
   const rewards = useGymmy((s) => s.lastRewards);
   const hasActive = useGymmy((s) => s.active !== null);
   const { deleteWorkout, startWorkout } = useGymmy.getState();
+  const kcal = useWorkoutCalories(workout);
+  const hasBody = useGymmy((s) => Boolean(s.profile?.body?.heightCm));
 
   if (!workout) {
     return (
@@ -105,6 +109,32 @@ export default function SessionScreen() {
           <Stat value={String(completedSets(workout.exercises))} label="Sets" />
           <Stat value={vol > 0 ? formatVolume(vol, units) : '—'} label="Volume" />
         </Card>
+        {kcal ? (
+          <Pressable
+            onPress={() => router.push('/weight')}
+            hitSlop={6}
+            style={styles.kcalNote}
+            accessibilityRole="button"
+            accessibilityLabel={`About ${kcal.active} active calories, ${kcal.total} in total. Change body details`}
+            testID="session-kcal">
+            <T variant="body">
+              🔥 ≈ {formatKcal(kcal.active)}{' '}
+              <T variant="caption" color={colors.textDim}>
+                active · {formatKcal(kcal.total)} total
+              </T>
+            </T>
+            <T variant="caption" color={colors.textFaint}>
+              Estimated from your exercises, time and weight.
+              {hasBody ? '' : ' Add your height for a closer number →'}
+            </T>
+          </Pressable>
+        ) : (
+          <Pressable onPress={() => router.push('/weight')} hitSlop={6} style={styles.kcalNote} accessibilityRole="button">
+            <T variant="caption" color={colors.accent}>
+              Log your weight to estimate calories →
+            </T>
+          </Pressable>
+        )}
 
         {isCelebration && rewards && (
           <>
@@ -291,6 +321,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center', gap: space.md },
   content: { paddingHorizontal: space.lg, maxWidth: 640, width: '100%', alignSelf: 'center' },
   stats: { flexDirection: 'row' },
+  kcalNote: { marginTop: space.sm, marginBottom: space.sm, gap: 2 },
   rewardRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   prCard: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.sm },
   setLine: { flexDirection: 'row', alignItems: 'center' },

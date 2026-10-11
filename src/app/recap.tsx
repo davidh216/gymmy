@@ -7,6 +7,7 @@ import { Screen } from '@/components/screen';
 import { CompanionAvatar } from '@/components/companion-avatar';
 import { Button, Card, Icon, SectionHeader, T } from '@/components/ui';
 import { useNow } from '@/hooks/use-now';
+import { activeCalories } from '@/lib/calories';
 import { coachReview, type CoachNote } from '@/lib/coach-review';
 import { getCompanion } from '@/lib/companions';
 import { MUSCLE_GROUPS, getExercise } from '@/lib/exercises';
@@ -29,6 +30,8 @@ export default function RecapScreen() {
   const claimedMilestones = useGymmy((s) => s.claimedMilestones);
   const goal = useGymmy((s) => s.profile?.weeklyGoal ?? 3);
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
+  const weighIns = useGymmy((s) => s.weighIns);
+  const body = useGymmy((s) => s.profile?.body);
   const plan = useGymmy((s) => s.plan);
   const program = useProgram(plan?.programId);
 
@@ -91,6 +94,16 @@ export default function RecapScreen() {
       label: 'Volume',
       value: formatVolume(r.volumeKg, units),
       change: change(r.volumeKg, r.previous.volumeKg),
+    });
+  }
+  const inWeek = (from: number) => workouts.filter((w) => w.endedAt >= from && w.endedAt < shiftWeek(from, 1));
+  const kcal = activeCalories(inWeek(start), weighIns, body);
+  const kcalBefore = activeCalories(inWeek(shiftWeek(start, -1)), weighIns, body);
+  if (kcal) {
+    stats.push({
+      label: 'Active kcal',
+      value: kcal.toLocaleString('en-US'),
+      change: kcalBefore !== undefined ? change(kcal, kcalBefore) : undefined,
     });
   }
   if (r.distanceKm || r.previous.distanceKm) {

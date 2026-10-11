@@ -9,6 +9,7 @@ import { useNow } from '@/hooks/use-now';
 import { confirm } from '@/lib/confirm';
 import { formatWeight, fromDisplayWeight } from '@/lib/format';
 import { dayKey, dayKeyTime } from '@/lib/recovery';
+import type { Body, Sex } from '@/lib/calories';
 import type { Units } from '@/lib/types';
 import { weeklyReview, type WeightDirection, type WeightGoal } from '@/lib/weight';
 import { useGymmy } from '@/store/gymmy';
@@ -46,7 +47,7 @@ export default function WeightScreen() {
     });
 
   return (
-    <Screen header={<BackHeader title="Weight" subtitle="Weigh-ins and weekly trend" />}>
+    <Screen header={<BackHeader title="Weight & body" subtitle="Weigh-ins, trend and calorie estimates" />}>
       <Card style={styles.row}>
         <View style={{ flex: 1, gap: 2 }}>
           <T variant="heading">Weekly weigh-in</T>
@@ -61,6 +62,8 @@ export default function WeightScreen() {
           testID="weight-review-switch"
         />
       </Card>
+
+      <BodyDetails units={units} />
 
       <SectionHeader title="Goal" />
       <View style={styles.chips}>
@@ -168,7 +171,142 @@ export default function WeightScreen() {
   );
 }
 
+const CM_PER_IN = 2.54;
+const SEX_CHOICES: { id: Sex | undefined; label: string }[] = [
+  { id: 'female', label: 'Female' },
+  { id: 'male', label: 'Male' },
+  { id: undefined, label: 'Not set' },
+];
+
+/** Height (feet and inches, or cm), birth year and sex: what calorie estimates use besides weight. */
+function BodyDetails({ units }: { units: Units }) {
+  const body = useGymmy((s) => s.profile?.body);
+  const updateProfile = useGymmy((s) => s.updateProfile);
+  const setBody = (patch: Partial<Body>) => {
+    const next = { ...body, ...patch };
+    (Object.keys(next) as (keyof Body)[]).forEach((k) => next[k] === undefined && delete next[k]);
+    updateProfile({ body: Object.keys(next).length ? next : undefined });
+  };
+  const inches = body?.heightCm ? Math.round(body.heightCm / CM_PER_IN) : undefined;
+  const year = new Date().getFullYear();
+  const setHeight = (cm: number | undefined) => setBody({ heightCm: cm && cm >= 100 && cm <= 250 ? cm : undefined });
+
+  return (
+    <>
+      <SectionHeader title="Body" />
+      <Card style={{ gap: space.md }}>
+        <View style={styles.row}>
+          <T variant="body" style={{ flex: 1 }}>
+            Height
+          </T>
+          {units === 'lb' ? (
+            <>
+              <NumberBox
+                value={inches ? Math.floor(inches / 12) : undefined}
+                suffix="ft"
+                label="Height, feet"
+                onChange={(ft) => setHeight(ft ? Math.round((ft * 12 + ((inches ?? 0) % 12)) * CM_PER_IN) : undefined)}
+              />
+              <NumberBox
+                value={inches !== undefined ? inches % 12 : undefined}
+                suffix="in"
+                label="Height, inches"
+                onChange={(inch) =>
+                  setHeight(
+                    Math.round(((inches ? Math.floor(inches / 12) : 0) * 12 + Math.min(11, inch ?? 0)) * CM_PER_IN),
+                  )
+                }
+              />
+            </>
+          ) : (
+            <NumberBox value={body?.heightCm} suffix="cm" label="Height in cm" onChange={(cm) => setHeight(cm)} />
+          )}
+        </View>
+        <View style={styles.row}>
+          <T variant="body" style={{ flex: 1 }}>
+            Birth year
+          </T>
+          <NumberBox
+            value={body?.birthYear}
+            label="Birth year"
+            wide
+            onChange={(y) => setBody({ birthYear: y && y >= 1900 && y <= year - 10 ? y : undefined })}
+          />
+        </View>
+        <View style={styles.chips}>
+          {SEX_CHOICES.map((c) => (
+            <Chip key={c.label} label={c.label} active={body?.sex === c.id} onPress={() => setBody({ sex: c.id })} />
+          ))}
+        </View>
+        <T variant="caption" color={colors.textFaint}>
+          Calories are estimated from each workout’s exercises and length, your weight that day and your resting burn,
+          which uses height, age and sex. Only height is needed; the rest makes it closer.
+        </T>
+      </Card>
+    </>
+  );
+}
+
+/** A small number field that saves when you finish typing. */
+function NumberBox({
+  value,
+  suffix,
+  label,
+  wide,
+  onChange,
+}: {
+  value: number | undefined;
+  suffix?: string;
+  label: string;
+  wide?: boolean;
+  onChange: (value: number | undefined) => void;
+}) {
+  const [text, setText] = useState<string | null>(null);
+  const num = (t: string) => {
+    const n = parseInt(t, 10);
+    return Number.isFinite(n) && n >= 0 ? n : undefined;
+  };
+  return (
+    <View style={styles.numberBox}>
+      <TextInput
+        value={text ?? (value === undefined ? '' : String(value))}
+        onChangeText={setText}
+        onEndEditing={() => {
+          if (text !== null) onChange(num(text));
+          setText(null);
+        }}
+        onBlur={() => {
+          if (text !== null) onChange(num(text));
+          setText(null);
+        }}
+        keyboardType="number-pad"
+        placeholder="—"
+        placeholderTextColor={colors.textFaint}
+        style={[styles.number, wide && { width: 72 }]}
+        accessibilityLabel={label}
+        maxLength={4}
+      />
+      {suffix ? (
+        <T variant="caption" color={colors.textDim}>
+          {suffix}
+        </T>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  numberBox: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  number: {
+    width: 52,
+    height: 38,
+    borderRadius: radius.sm,
+    backgroundColor: colors.cardHigh,
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginBottom: space.sm },
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },

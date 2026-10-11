@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type { Body } from '@/lib/calories';
 import { applyTarget, lighterLoad, nextTarget, repRange, type CoachTarget } from '@/lib/coach';
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
 import {
@@ -49,6 +50,8 @@ export type Profile = {
   /** Weekly weigh-in review and weight goal; off unless turned on. */
   weightReview?: WeightReviewSettings;
   focus?: Focus;
+  /** Height, and optionally birth year and sex, for calorie estimates. */
+  body?: Body;
 };
 
 export type Owned = {

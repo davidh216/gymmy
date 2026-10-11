@@ -2,17 +2,20 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { Card, Icon, T } from '@/components/ui';
+import { formatKcal } from '@/lib/calories';
 import { getExercise } from '@/lib/exercises';
 import { formatDate, formatMinutes, formatVolume } from '@/lib/format';
 import { volume } from '@/lib/records';
 import type { Workout } from '@/lib/types';
 import { useGymmy } from '@/store/gymmy';
+import { useWorkoutCalories } from '@/store/selectors';
 import { colors, space } from '@/theme';
 
 export function WorkoutRow({ workout }: { workout: Workout }) {
   const units = useGymmy((s) => s.profile?.units ?? 'lb');
   const names = workout.exercises.map((e) => getExercise(e.exerciseId).name);
   const vol = volume(workout.exercises);
+  const kcal = useWorkoutCalories(workout);
   return (
     <Card
       onPress={() => router.push({ pathname: '/session/[id]', params: { id: workout.id } })}
@@ -25,6 +28,7 @@ export function WorkoutRow({ workout }: { workout: Workout }) {
           <T variant="caption" color={colors.textFaint} numberOfLines={1}>
             {formatDate(workout.endedAt)} · {formatMinutes(workout.endedAt - workout.startedAt)}
             {vol > 0 ? ` · ${formatVolume(vol, units)}` : ''}
+            {kcal ? ` · ${formatKcal(kcal.active)}` : ''}
             {workout.location ? ` · 📍 ${workout.location.name}` : ''}
           </T>
         </View>

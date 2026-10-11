@@ -268,9 +268,9 @@ function ProfileLinks() {
       <Card style={styles.link} onPress={() => router.push('/weight')}>
         <T style={{ fontSize: 24 }}>⚖️</T>
         <View style={{ flex: 1 }}>
-          <T variant="heading">Weight</T>
+          <T variant="heading">Weight & body</T>
           <T variant="caption" color={colors.textDim}>
-            {weightReview?.enabled ? 'Weekly weigh-in is on' : 'Weigh-ins, goal and weekly review'}
+            {weightReview?.enabled ? 'Weekly weigh-in is on' : 'Weigh-ins, height and goal for calorie estimates'}
           </T>
         </View>
         <T variant="heading" color={colors.textFaint}>

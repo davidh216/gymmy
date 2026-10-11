@@ -1,6 +1,6 @@
 # Gymmy Privacy Policy
 
-_Last updated: October 6, 2026. Contact: [davidh216+gymmy@gmail.com](mailto:davidh216+gymmy@gmail.com)._
+_Last updated: October 11, 2026. Contact: [davidh216+gymmy@gmail.com](mailto:davidh216+gymmy@gmail.com)._
 
 Gymmy is a workout tracker with gym leaderboards. This policy explains what Gymmy keeps, where it goes, and how to delete it. In short: your training stays on your phone unless you create an account, nothing is sold, and there are no ads.
 
@@ -12,7 +12,7 @@ Everything stays on your iPhone: your profile (name, weekly goal, units), workou
 
 You sign up with an email address and password, and pick a public username. Gymmy then backs up and syncs to your account:
 
-- workouts you log in Gymmy (including the gym you tag them with), daily check-ins (sleep hours, soreness, energy, stress, rest days), body weights you type in, your weight goal, custom exercises and plans, companions, milestones, XP, gems and settings.
+- workouts you log in Gymmy (including the gym you tag them with), daily check-ins (sleep hours, soreness, energy, stress, rest days), body weights you type in, your weight goal, the height, birth year and sex you enter for calorie estimates, custom exercises and plans, companions, milestones, XP, gems and settings.
 
 It is stored with Supabase (our database provider) and only you can read it.
 
@@ -24,7 +24,7 @@ If you post an attempt to a gym board, other people can see your username, compa
 
 ## Apple Health
 
-With your permission Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight, and saves the workouts you log. Health data is used only for your readiness score, recovery and workout history inside the app. It is never used for advertising, never sold, and never shared with third parties.
+With your permission Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight, and saves the workouts you log. Health data is used only for your readiness score, recovery, calorie estimates and workout history inside the app. It is never used for advertising, never sold, and never shared with third parties.
 
 ## Location
 

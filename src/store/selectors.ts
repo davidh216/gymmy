@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useNow } from '@/hooks/use-now';
 
+import { workoutCalories, type CalorieEstimate } from '@/lib/calories';
 import { freshVitals, heartScore } from '@/lib/health';
 import { milestoneStates, milestoneStats } from '@/lib/milestones';
 import { levelFromXp } from '@/lib/progression';
@@ -16,6 +17,7 @@ import {
 } from '@/lib/programs';
 import { dayKey, readiness } from '@/lib/recovery';
 import { activeDaysThisWeek, countInWeek, daysSince, weekStreak } from '@/lib/streaks';
+import type { Workout } from '@/lib/types';
 
 import { useGymmy } from './gymmy';
 
@@ -95,4 +97,11 @@ export function useProgram(id: string | undefined): Program | undefined {
   const mine = custom.find((p) => p.id === id);
   if (mine) return mine.days.length ? programFromCustom(mine) : undefined;
   return isCustomProgram(id) ? undefined : getProgram(id);
+}
+
+/** Estimated calories for a workout, from your weight then and your body details. */
+export function useWorkoutCalories(workout: Workout | undefined): CalorieEstimate | undefined {
+  const weighIns = useGymmy((s) => s.weighIns);
+  const body = useGymmy((s) => s.profile?.body);
+  return useMemo(() => (workout ? workoutCalories(workout, weighIns, body) : undefined), [workout, weighIns, body]);
 }
