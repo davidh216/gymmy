@@ -8,6 +8,7 @@ import { ReadinessCard } from '@/components/readiness-card';
 import { CoachPickCard } from '@/components/coach-pick-card';
 import { RecapCard } from '@/components/recap-card';
 import { Screen } from '@/components/screen';
+import { SetupNudge } from '@/components/setup-nudge';
 import { StatsAsk } from '@/components/stats-ask';
 import { WeightReviewCard } from '@/components/weight-review-card';
 import { WorkoutRow } from '@/components/workout-row';
@@ -103,6 +104,8 @@ export default function Today() {
       <RecapCard />
 
       <WeightReviewCard />
+
+      <SetupNudge />
 
       <MilestoneBanner />
 

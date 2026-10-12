@@ -26,6 +26,7 @@ import {
 } from '@/lib/programs';
 import type { Vitals } from '@/lib/health';
 import { dayKey, type CheckIn } from '@/lib/recovery';
+import type { NudgeId } from '@/lib/nudges';
 import type { ReminderSettings } from '@/lib/reminders';
 import { cleanExercises, type WorkoutEdit } from '@/lib/workout-edit';
 import { mergeHealthWeights, type WeighIn, type WeightReviewSettings } from '@/lib/weight';
@@ -123,6 +124,8 @@ type State = {
   weightReviewSeen: number;
   /** Reminder settings; kept on this phone only. */
   reminders: ReminderSettings;
+  /** When each setup prompt on Today was answered or dismissed. */
+  nudgesSeen: Partial<Record<NudgeId, number>>;
 };
 
 type Actions = {
@@ -188,6 +191,7 @@ type Actions = {
   importHealthWeights: (samples: { kg: number; at: number }[]) => void;
   seeWeightReview: (weekStart: number) => void;
   setReminders: (patch: Partial<ReminderSettings>) => void;
+  seeNudge: (id: NudgeId) => void;
   reset: () => void;
 };
 
@@ -213,6 +217,7 @@ const initialState: State = {
   weighIns: {},
   weightReviewSeen: 0,
   reminders: {},
+  nudgesSeen: {},
 };
 
 /** Seed sets for a newly added exercise from its last performance, moved on by the coach's target. */
@@ -696,6 +701,8 @@ export const useGymmy = create<State & Actions>()(
         },
 
         setReminders: (patch) => set((s) => ({ reminders: { ...s.reminders, ...patch } })),
+
+        seeNudge: (id) => set((s) => ({ nudgesSeen: { ...s.nudgesSeen, [id]: Date.now() } })),
 
         reset: () => set(initialState),
       };
