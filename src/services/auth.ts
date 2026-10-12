@@ -106,6 +106,13 @@ export async function signInWithApple(): Promise<boolean> {
     nonce,
   });
   if (error) throw new AuthError(`Couldn’t sign in with Apple. (${error.message})`);
+  // Lets the account's Apple sign-in be revoked if it's ever deleted. Best effort: signing in
+  // already worked, and the next Apple sign-in tries again.
+  if (credential.authorizationCode) {
+    supabase.functions
+      .invoke('apple-token', { body: { action: 'link', code: credential.authorizationCode } })
+      .catch(() => {});
+  }
   return true;
 }
 
@@ -159,6 +166,9 @@ export async function chooseUsername(raw: string) {
 export async function deleteAccount() {
   const userId = useAuth.getState().userId;
   if (!supabase || !userId) return;
+  // Revokes Sign in with Apple first, while still signed in (Apple requires it for deleted
+  // accounts). Email accounts have nothing to revoke; a failure doesn't block the deletion.
+  await supabase.functions.invoke('apple-token', { body: { action: 'revoke' } }).catch(() => {});
   const bucket = supabase.storage.from('attempts');
   const { data: files } = await bucket.list(userId, { limit: 1000 });
   if (files?.length) await bucket.remove(files.map((f) => `${userId}/${f.name}`));

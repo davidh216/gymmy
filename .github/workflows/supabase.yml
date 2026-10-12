@@ -2,7 +2,7 @@
 # Trigger with a commit whose message contains a marker (or from the Actions tab):
 #   [db push]           apply new migrations in supabase/migrations
 #   [db sql]            run supabase/ops/run.sql (one-off fixes, e.g. making someone admin)
-#   [functions deploy]  deploy Edge Functions (moderate-entry, gym-places); sets HIVE_API_KEY if that secret exists
+#   [functions deploy]  deploy Edge Functions (moderate-entry, apple-token, gym-places); sets HIVE_API_KEY if that secret exists
 #   [db check]          only print the status report
 #   [db report]         print the anonymous analytics report (read-only)
 # Every run ends with the status report (read-only).
@@ -101,6 +101,8 @@ jobs:
           else
             echo "Skipping moderate-entry: add the HIVE_API_KEY secret to deploy it."
           fi
+          # Keeps Sign in with Apple revocable; reads the APPLE_* secrets set in the Supabase dashboard.
+          supabase functions deploy apple-token --project-ref "$PROJECT_REF" --use-api
           # Signed-out people search for gyms too, so this one takes no login.
           supabase functions deploy gym-places --project-ref "$PROJECT_REF" --use-api --no-verify-jwt
           # Smoke test: gyms near Times Square should come back, the second time from the cache.

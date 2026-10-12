@@ -40,7 +40,7 @@ When crash reporting is on, app crashes are sent to Sentry with the error, devic
 
 ## Deleting your data
 
-- **Account and cloud data:** Profile → Delete account permanently deletes your account, cloud backup, leaderboard entries, videos, reports and blocks.
+- **Account and cloud data:** Profile → Delete account permanently deletes your account, cloud backup, leaderboard entries, videos, reports and blocks. If you signed in with Apple, Gymmy keeps a token from Apple only so it can revoke that sign-in when you delete your account, and it does.
 - **Data on your phone:** Profile → Reset all data deletes everything stored locally; deleting the app does too.
 - **Export:** Profile → Export gives you your workouts and check-ins as CSV, or everything as JSON.
 
