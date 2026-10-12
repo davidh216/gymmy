@@ -33,9 +33,13 @@ Likely **12+**: user-generated videos and usernames with reporting, blocking and
 >
 > **Support:** davidh216+gymmy@gmail.com · Support URL and Privacy Policy URL: see "Web pages" below.
 >
-> **No demo account needed:** create one in the app in under a minute (Gyms tab → Create account, with an email and password). Every leaderboard shows labelled baseline rows (e.g. "1 plate · 135 lb × 5 · Baseline"), so boards have rankings to compete against before anyone posts.
+> **No demo account needed:** create one in the app in under a minute (Gyms tab → Create account), with Sign in with Apple or an email and password. Apple sign-ins pick a username afterwards. Every leaderboard shows labelled baseline rows (e.g. "1 plate · 135 lb × 5 · Baseline"), so boards have rankings to compete against before anyone posts.
 >
 > **Apple Health:** Profile → Apple Health → Connect. Gymmy reads sleep, workouts, heart rate variability, resting heart rate and body weight for readiness and history, and saves workouts (with estimated active calories when allowed). Nothing from Health is used for ads or shared.
+>
+> **Notifications:** Profile → Reminders. Off until the user turns one on, which is when iOS asks for permission. They're local reminders (training days at a chosen time, a Sunday weigh-in, a Monday recap); nothing is sent from a server.
+>
+> **Widget:** long-press the Home Screen → + → Gymmy. It shows the weekly streak, this week's training days and the next session; tapping it opens the app.
 >
 > **Location:** Gyms → Find, add or join a gym asks for When-In-Use location to list gyms within 5 km from OpenStreetMap.
 >
