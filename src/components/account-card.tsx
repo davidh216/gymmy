@@ -1,9 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Button, Card, T, haptic } from '@/components/ui';
 import { track } from '@/services/analytics';
-import { AuthError, fetchMyUsername, signIn, signUp } from '@/services/auth';
+import { AuthError, appleSignInAvailable, fetchMyUsername, signIn, signInWithApple, signUp } from '@/services/auth';
 import { toUsername, useGymmy } from '@/store/gymmy';
 import { colors, radius, space } from '@/theme';
 
@@ -19,6 +21,7 @@ export function AccountCard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const { data: apple } = useQuery({ queryKey: ['auth', 'apple'], queryFn: appleSignInAvailable });
   const valid =
     /\S+@\S+\.\S+/.test(email) && password.length >= 8 && (mode === 'signin' || username.length >= 3);
 
@@ -50,6 +53,21 @@ export function AccountCard() {
     }
   };
 
+  const withApple = async () => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      if (!(await signInWithApple())) return;
+      track({ event: 'account', props: { action: 'apple' } });
+      haptic('success');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Card style={styles.card}>
       <T variant="title">{mode === 'signup' ? 'Create your account' : 'Welcome back'}</T>
@@ -57,6 +75,24 @@ export function AccountCard() {
         Gyms are shared with other lifters, so posting and reporting need an account. Your workouts stay on
         this phone.
       </T>
+      {apple && (
+        <>
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={
+              mode === 'signup'
+                ? AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP
+                : AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+            }
+            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+            cornerRadius={radius.md}
+            style={styles.apple}
+            onPress={busy ? () => {} : withApple}
+          />
+          <T variant="caption" color={colors.textFaint} style={{ textAlign: 'center' }}>
+            or use email
+          </T>
+        </>
+      )}
       {mode === 'signup' && (
         <View style={styles.field}>
           <T variant="label" color={colors.textFaint}>
@@ -145,6 +181,7 @@ export function AccountCard() {
 
 const styles = StyleSheet.create({
   card: { gap: space.md },
+  apple: { height: 50 },
   field: { gap: 6 },
   usernameRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   input: {

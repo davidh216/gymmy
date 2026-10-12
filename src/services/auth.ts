@@ -1,3 +1,6 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 
 import { setMonitoringUser } from './monitoring';
@@ -65,6 +68,45 @@ export async function signIn(email: string, password: string) {
   if (!supabase) throw new AuthError('Online features are not set up in this build.');
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
   if (error) throw new AuthError(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message);
+}
+
+/** Whether Sign in with Apple works here (iPhone builds that include it). */
+export async function appleSignInAvailable(): Promise<boolean> {
+  if (Platform.OS !== 'ios' || !supabase) return false;
+  try {
+    return await AppleAuthentication.isAvailableAsync();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Signs in with Apple, creating the account on first use. New accounts get a placeholder
+ * username and are asked to pick one. Resolves false when the person cancels.
+ */
+export async function signInWithApple(): Promise<boolean> {
+  if (!supabase) throw new AuthError('Online features are not set up in this build.');
+  // Apple signs a hash of this nonce into the token; Supabase checks it against the raw value.
+  const nonce = Crypto.randomUUID();
+  const hashed = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, nonce);
+  let credential: AppleAuthentication.AppleAuthenticationCredential;
+  try {
+    credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
+      nonce: hashed,
+    });
+  } catch (e) {
+    if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return false;
+    throw new AuthError('Couldn’t sign in with Apple. Try again.');
+  }
+  if (!credential.identityToken) throw new AuthError('Apple didn’t return a sign-in token. Try again.');
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+    nonce,
+  });
+  if (error) throw new AuthError(`Couldn’t sign in with Apple. (${error.message})`);
+  return true;
 }
 
 export async function signOut() {

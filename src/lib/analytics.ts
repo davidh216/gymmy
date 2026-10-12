@@ -22,7 +22,7 @@ export type AnalyticsEvent =
   | { event: 'health_connect'; props: { imported: string } }
   | { event: 'gym_join'; props: { via: 'gym' | 'nearby' | 'invite' | 'create' } }
   | { event: 'entry_post'; props: { challenge: string; status: string } }
-  | { event: 'account'; props: { action: 'sign_up' | 'sign_in' } };
+  | { event: 'account'; props: { action: 'sign_up' | 'sign_in' | 'apple' } };
 
 export type EventName = AnalyticsEvent['event'];
 

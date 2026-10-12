@@ -9,6 +9,8 @@ import { ConfirmHost } from '@/components/confirm-host';
 import { initAuth } from '@/services/auth';
 import { useAnalyticsTracking } from '@/services/analytics';
 import { useHealthAutoSync } from '@/services/health';
+import { useReminders } from '@/services/reminders';
+import { useWidgetSync } from '@/services/widget';
 import { initMonitoring, reportError, withMonitoring } from '@/services/monitoring';
 import { useAutoSync } from '@/services/sync';
 import { queryClient } from '@/services/query-client';
@@ -49,6 +51,8 @@ function RootLayout() {
     if (hydrated) SplashScreen.hideAsync();
   }, [hydrated]);
   useHealthAutoSync(hydrated);
+  useReminders(hydrated);
+  useWidgetSync(hydrated);
   useAutoSync(hydrated);
   useAnalyticsTracking(hydrated);
 
@@ -82,6 +86,7 @@ function RootLayout() {
             <Stack.Screen name="recovery" />
             <Stack.Screen name="recap" />
             <Stack.Screen name="weight" />
+            <Stack.Screen name="reminders" />
             <Stack.Screen name="exercise/[id]" />
             <Stack.Screen name="programs" />
             <Stack.Screen name="plan-generator" />

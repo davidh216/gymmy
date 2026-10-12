@@ -26,6 +26,7 @@ import {
 } from '@/lib/programs';
 import type { Vitals } from '@/lib/health';
 import { dayKey, type CheckIn } from '@/lib/recovery';
+import type { ReminderSettings } from '@/lib/reminders';
 import { cleanExercises, type WorkoutEdit } from '@/lib/workout-edit';
 import { mergeHealthWeights, type WeighIn, type WeightReviewSettings } from '@/lib/weight';
 import {
@@ -120,6 +121,8 @@ type State = {
   weighIns: Record<string, WeighIn>;
   /** Sunday of the most recent week whose weigh-in review was saved or skipped. */
   weightReviewSeen: number;
+  /** Reminder settings; kept on this phone only. */
+  reminders: ReminderSettings;
 };
 
 type Actions = {
@@ -184,6 +187,7 @@ type Actions = {
   /** Adds Apple Health weight readings for days without a typed-in weigh-in. */
   importHealthWeights: (samples: { kg: number; at: number }[]) => void;
   seeWeightReview: (weekStart: number) => void;
+  setReminders: (patch: Partial<ReminderSettings>) => void;
   reset: () => void;
 };
 
@@ -208,6 +212,7 @@ const initialState: State = {
   recapSeen: 0,
   weighIns: {},
   weightReviewSeen: 0,
+  reminders: {},
 };
 
 /** Seed sets for a newly added exercise from its last performance, moved on by the coach's target. */
@@ -689,6 +694,8 @@ export const useGymmy = create<State & Actions>()(
         seeWeightReview: (weekStart) => {
           if (get().weightReviewSeen < weekStart) set({ weightReviewSeen: weekStart });
         },
+
+        setReminders: (patch) => set((s) => ({ reminders: { ...s.reminders, ...patch } })),
 
         reset: () => set(initialState),
       };

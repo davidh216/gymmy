@@ -250,6 +250,7 @@ function ProfileLinks() {
   const { ready, earned, all } = useMilestones();
   const plan = useGymmy((s) => s.plan);
   const weightReview = useGymmy((s) => s.profile?.weightReview);
+  const reminders = useGymmy((s) => s.reminders);
   const program = plan ? getProgram(plan.programId) : undefined;
   return (
     <View style={{ gap: space.sm, marginTop: space.md }}>
@@ -271,6 +272,20 @@ function ProfileLinks() {
           <T variant="heading">Weight & body</T>
           <T variant="caption" color={colors.textDim}>
             {weightReview?.enabled ? 'Weekly weigh-in is on' : 'Weigh-ins, height and goal for calorie estimates'}
+          </T>
+        </View>
+        <T variant="heading" color={colors.textFaint}>
+          →
+        </T>
+      </Card>
+      <Card style={styles.link} onPress={() => router.push('/reminders')}>
+        <T style={{ fontSize: 24 }}>🔔</T>
+        <View style={{ flex: 1 }}>
+          <T variant="heading">Reminders</T>
+          <T variant="caption" color={colors.textDim}>
+            {reminders.training || reminders.weighIn || reminders.recap
+              ? 'On'
+              : 'Training days, weigh-ins and the weekly recap'}
           </T>
         </View>
         <T variant="heading" color={colors.textFaint}>
