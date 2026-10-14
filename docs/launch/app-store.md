@@ -45,26 +45,32 @@ Likely **12+**: user-generated videos and usernames with reporting, blocking and
 
 ## Store listing
 
-**Name:** Gymmy
-**Subtitle (30):** Lift, log and claim your gym
-**Promotional text (170):** Log workouts in seconds, follow HYROX, marathon or strength plans, and take the #1 spot on your gym's leaderboard. New: monthly seasons with champion crowns.
+Paste each field into App Store Connect → Gymmy → the 1.0 version page. Character limits are checked.
+
+**Name (30):** Gymmy
+**Subtitle (30):** Workout log, coach & gym ranks
+**Promotional text (170):** New: Kong sets your weights. Hit every rep and the bar goes up next time. Build a plan in 5 questions, see calories burned, and take #1 on your gym's leaderboard.
 
 **Description:**
 
-Gymmy makes training a game you actually want to play.
+Gymmy is a workout log with a coach in your pocket and a leaderboard at your gym.
+
+A COACH THAT SETS THE WEIGHT
+• Kong, your gym buddy, fills in every set: hit all your reps and the weight goes up next time
+• Miss a few and it holds; stall twice and it eases off so you can build back
+• Weekly notes on what went well, what you skipped and when to take a lighter week
+
+A PLAN BUILT FOR YOU
+• Answer 5 questions (goal, days, experience, equipment, time) and get an 8-week plan
+• Or follow HYROX, marathon, first 5K, 5×5 strength and muscle plans, or build your own
+• Lighter sessions when you're tired or coming back from a break
 
 LOG FAST
 • Sets, reps, weight, time and distance, with last time's numbers right there
 • Warm-up sets, RPE, rest timers, plate calculator and notes
+• Fix a past workout any time: sets, reps, start time and length
 • Personal records and progress charts for every lift and run
-
-FOLLOW A PLAN
-• HYROX, marathon, first 5K, 5×5 strength and muscle-building plans, or build your own
-• Lighter sessions when you're tired or coming back from a break
-
-RECOVER SMARTER
-• Daily readiness from your check-in, training load and Apple Health heart data
-• Muscle recovery map and rest-day tracking
+• Estimated calories burned from your height, weight and workout
 
 CLAIM YOUR GYM
 • Leaderboards for the big lifts, pull-ups, rows, runs and carries
@@ -72,15 +78,34 @@ CLAIM YOUR GYM
 • Post a video of your attempt and take the top spot
 • Monthly seasons: finish #1 and keep the crown
 
-STAY MOTIVATED
-• Streaks, milestones, gems and companions that grow with you
-• A weekly recap of everything you did
+STAY ON TRACK
+• Reminders on your training days, skipped when you've already trained
+• Streaks, milestones, gems and 14 gym buddies to collect
+• Daily readiness from your check-in, training load and Apple Health
+• Workouts and calories saved to Apple Health
 
 Works offline. Your data stays on your phone unless you create an account.
 
-**Keywords (100):** workout,gym,log,tracker,hyrox,strength,leaderboard,pr,running,plan,lifting,fitness,recovery
+**Keywords (100):** tracker,lifting,weightlifting,strength,plan,overload,hyrox,pr,calories,running,fitness,exercise
 
-**Screenshots to capture (6.9" iPhone):** Today, workout logging, plan, progress chart, leaderboard, weekly recap.
+(Words already in the name and subtitle, like workout, log, coach and gym, are indexed anyway, so they're left out of the keywords.)
+
+**What's New (first release):** leave empty; App Store Connect doesn't show it for version 1.0.
+
+### Screenshots
+
+`docs/launch/screenshots/` has eight 1320 × 2868 PNGs for the **6.9" iPhone** slot (Apple scales them for smaller iPhones). Upload them in this order:
+
+1. `01-today.png`: Your gym buddy levels up with you
+2. `02-workout.png`: Your coach sets every weight
+3. `03-plan.png`: A plan built for you in 5 questions
+4. `04-board.png`: Claim #1 at your gym
+5. `05-recap.png`: Weekly notes from your coach
+6. `06-progress.png`: Watch every lift climb
+7. `07-history.png`: Every set, rep and record
+8. `08-squad.png`: Collect 14 gym buddies
+
+They're taken from the app with demo data: about ten weeks of training on a "Muscle · 4 days" plan, and an Iron Temple leaderboard.
 
 ## Web pages
 
