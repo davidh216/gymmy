@@ -39,8 +39,6 @@ Likely **12+**: user-generated videos and usernames with reporting, blocking and
 >
 > **Notifications:** Profile → Reminders. Off until the user turns one on, which is when iOS asks for permission. They're local reminders (training days at a chosen time, a Sunday weigh-in, a Monday recap); nothing is sent from a server.
 >
-> **Widget:** long-press the Home Screen → + → Gymmy. It shows the weekly streak, this week's training days and the next session; tapping it opens the app.
->
 > **Location:** Gyms → Find, add or join a gym asks for When-In-Use location to list gyms within 5 km from OpenStreetMap.
 >
 > **User-generated content (Guideline 1.2):** leaderboard entries are videos. Every entry has Report (with reasons) and Block. Three "invalid" reports or one "inappropriate" report hides an entry until a moderator reviews it in the in-app admin queue. Before posting, users confirm the challenge standards one by one. Profile → Delete account removes the account and all of its content.

@@ -24,5 +24,9 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       - run: npm ci
-      # Queues the cloud build and submits it to TestFlight when it finishes.
-      - run: eas build --platform ios --profile production --non-interactive --no-wait --auto-submit
+      # Queues the cloud build and submits it to TestFlight when it finishes. Capabilities are set
+      # by hand in the Apple developer portal (Apple's API rejects some, like App Groups), so EAS
+      # leaves them alone.
+      - env:
+          EXPO_NO_CAPABILITY_SYNC: '1'
+        run: eas build --platform ios --profile production --non-interactive --no-wait --auto-submit

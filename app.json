@@ -64,28 +64,7 @@
         }
       ],
       "@sentry/react-native",
-      "expo-apple-authentication",
-      [
-        "expo-widgets",
-        {
-          "bundleIdentifier": "com.davidh216.gymmy.widgets",
-          "groupIdentifier": "group.com.davidh216.gymmy",
-          "widgets": [
-            {
-              "name": "GymmyWidget",
-              "displayName": "Gymmy",
-              "description": "Your streak, this week and what’s next.",
-              "supportedFamilies": [
-                "systemSmall",
-                "systemMedium",
-                "accessoryRectangular",
-                "accessoryInline"
-              ],
-              "contentMarginsDisabled": false
-            }
-          ]
-        }
-      ]
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true,
