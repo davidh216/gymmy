@@ -85,6 +85,29 @@ describe('nextTarget', () => {
     });
   });
 
+  it('follows the same kind of day when a plan trains a lift heavy and light', () => {
+    const planned = (daysAgo: number, reps: string, s: SetEntry[]): Workout => {
+      const w = workout(daysAgo, 'overhead_press', s);
+      w.exercises[0].target = { sets: s.length, reps };
+      return w;
+    };
+    const history = [planned(3, '10–12', sets(lb(90), [12, 12, 12])), planned(7, '6–8', sets(lb(130), [8, 8, 8, 8]))];
+    const heavy = nextTarget('overhead_press', history, 'lb', [6, 8]);
+    expect(heavy).toMatchObject({ call: 'up', reps: 6 });
+    expect(showLb(heavy!.weight)).toBe(135);
+    expect(showLb(nextTarget('overhead_press', history, 'lb', [10, 12])!.weight)).toBe(95);
+  });
+
+  it('matches free workouts by reps and falls back to any session', () => {
+    const history = [
+      workout(2, 'overhead_press', sets(lb(90), [12, 12, 12])),
+      workout(6, 'overhead_press', sets(lb(120), [7, 6, 6])),
+    ];
+    expect(nextTarget('overhead_press', history, 'lb', [6, 8])).toMatchObject({ call: 'reps', reps: 7 });
+    const onlyLight = [workout(2, 'overhead_press', sets(lb(90), [12, 12, 12]))];
+    expect(showLb(nextTarget('overhead_press', onlyLight, 'lb', [3, 5])!.weight)).toBe(95);
+  });
+
   it('ignores warm-ups and back-off sets', () => {
     const s = [...sets(40, [5], { warmup: true }), ...sets(100, [5, 5]), ...sets(80, [3])];
     expect(nextTarget('squat', [workout(1, 'squat', s)], 'kg')).toMatchObject({

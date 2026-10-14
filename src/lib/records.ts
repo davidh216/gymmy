@@ -121,8 +121,12 @@ export function volume(exercises: WorkoutExercise[]): number {
 }
 
 /** The most recent finished performance of an exercise, for "previous" hints. */
-export function lastPerformance(exerciseId: string, history: Workout[]): SetEntry[] | null {
-  return lastSession(exerciseId, history)?.sets ?? null;
+export function lastPerformance(
+  exerciseId: string,
+  history: Workout[],
+  fits?: (e: WorkoutExercise) => boolean,
+): SetEntry[] | null {
+  return lastSession(exerciseId, history, fits)?.sets ?? null;
 }
 
 /**
@@ -161,19 +165,30 @@ export type SessionStats = {
   rest?: number;
 };
 
-/** Latest finished session of an exercise and its top set. */
-export function lastSession(exerciseId: string, history: Workout[]): SessionStats | null {
+/**
+ * Latest finished session of an exercise and its top set. With `fits`, the latest session that
+ * fits (e.g. the same kind of plan day) wins, and any session is the fallback.
+ */
+export function lastSession(
+  exerciseId: string,
+  history: Workout[],
+  fits?: (e: WorkoutExercise) => boolean,
+): SessionStats | null {
   const kind = getExercise(exerciseId).kind;
   let latest: SessionStats | null = null;
+  let latestFit: SessionStats | null = null;
   for (const w of history) {
-    if (latest && w.endedAt <= latest.endedAt) continue;
+    if (latest && w.endedAt <= latest.endedAt && (!fits || (latestFit && w.endedAt <= latestFit.endedAt))) continue;
     for (const e of w.exercises) {
       if (e.exerciseId !== exerciseId) continue;
       const top = topSet(kind, e.sets);
-      if (top) latest = { endedAt: w.endedAt, sets: e.sets.filter((s) => s.done), top, note: e.note, rest: e.rest };
+      if (!top) continue;
+      const stats = { endedAt: w.endedAt, sets: e.sets.filter((s) => s.done), top, note: e.note, rest: e.rest };
+      if (!latest || w.endedAt >= latest.endedAt) latest = stats;
+      if (fits?.(e) && (!latestFit || w.endedAt >= latestFit.endedAt)) latestFit = stats;
     }
   }
-  return latest;
+  return latestFit ?? latest;
 }
 
 /** Your note and rest time from the latest workout that had this exercise (warm-ups only counts). */

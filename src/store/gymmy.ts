@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { Body } from '@/lib/calories';
-import { applyTarget, lighterLoad, nextTarget, repRange, type CoachTarget } from '@/lib/coach';
+import { applyTarget, inRepRange, lighterLoad, nextTarget, repRange, type CoachTarget } from '@/lib/coach';
 import { MAX_STARS, companionXpBonus, getCompanion } from '@/lib/companions';
 import {
   fixGroup,
@@ -246,7 +246,9 @@ function planSets(
   coach: CoachTarget | null,
   light?: { units: Units },
 ): SetEntry[] {
-  const previous = (lastPerformance(exerciseId, history) ?? []).filter((s) => !s.warmup);
+  // Follow the same kind of day: a heavy 6–8 day doesn't start from the light 10–12 day's sets.
+  const range = repRange(target.reps);
+  const previous = (lastPerformance(exerciseId, history, range && inRepRange(range)) ?? []).filter((s) => !s.warmup);
   const reps = targetReps(target.reps);
   return Array.from({ length: Math.max(1, target.sets) }, (_, i) => {
     const last = previous[Math.min(i, previous.length - 1)];

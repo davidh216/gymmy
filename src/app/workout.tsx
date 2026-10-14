@@ -31,7 +31,7 @@ import {
   toDisplayWeight,
 } from '@/lib/format';
 import { BARS, PLATES, RPE_CHOICES, formatPlates, plateLoad, rpeLabel } from '@/lib/plates';
-import type { CoachTarget } from '@/lib/coach';
+import { inRepRange, repRange, type CoachTarget } from '@/lib/coach';
 import { bestSet, lastSession } from '@/lib/records';
 import type { SetEntry, Units, WorkoutExercise } from '@/lib/types';
 import { saveWorkoutToHealth } from '@/services/health';
@@ -273,7 +273,8 @@ function ExerciseCard({
   const [tools, setTools] = useState(false);
   const [plates, setPlates] = useState(false);
   const [rpeFor, setRpeFor] = useState<string | null>(null);
-  const last = lastSession(exercise.id, history);
+  const range = repRange(workoutExercise.target?.reps);
+  const last = lastSession(exercise.id, history, range && inRepRange(range));
   const best = bestSet(exercise.id, history);
   const previous = last?.sets;
   const rest = workoutExercise.rest ?? DEFAULT_REST;

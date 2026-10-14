@@ -1,6 +1,6 @@
 import { getExercise } from './exercises';
 import { fromDisplayWeight, toDisplayWeight } from './format';
-import type { SetEntry, Units, Workout } from './types';
+import type { SetEntry, Units, Workout, WorkoutExercise } from './types';
 
 /**
  * The coach's call for a lift's next session (double progression):
@@ -53,30 +53,52 @@ export function repRange(reps?: string): [number, number] | undefined {
 
 type Session = { endedAt: number; weight: number; sets: SetEntry[] };
 
-/** Working sets at the heaviest weight from each session with this lift, newest first. */
-function recentTopSets(exerciseId: string, history: Workout[], count: number): Session[] {
-  const sessions: Session[] = [];
+/**
+ * Whether a past session trained a lift in this rep range. Plans often run a lift heavy one day
+ * (6–8) and lighter another (10–12); each day's numbers should follow its own kind of day.
+ * Plan sessions match on their target; free workouts on top-weight reps within two of the range.
+ */
+export function inRepRange(range: [number, number]) {
+  return (e: WorkoutExercise): boolean => {
+    const planned = repRange(e.target?.reps);
+    if (planned) return planned[0] === range[0] && planned[1] === range[1];
+    const sets = e.sets.filter((s) => s.done && !s.warmup && s.weight && s.reps);
+    if (!sets.length) return false;
+    const weight = Math.max(...sets.map((s) => s.weight!));
+    const best = Math.max(...sets.filter((s) => s.weight === weight).map((s) => s.reps!));
+    return best >= range[0] - 2 && best <= range[1] + 2;
+  };
+}
+
+/**
+ * Working sets at the heaviest weight from each session with this lift, newest first. With a rep
+ * range, sessions in that range come first, falling back to all of them when there are none.
+ */
+function recentTopSets(exerciseId: string, history: Workout[], count: number, range?: [number, number]): Session[] {
+  const fits = range && inRepRange(range);
+  const all: (Session & { fits: boolean })[] = [];
   for (const w of history) {
-    const sets = w.exercises
-      .filter((e) => e.exerciseId === exerciseId)
-      .flatMap((e) => e.sets)
-      .filter((s) => s.done && !s.warmup && s.weight && s.reps);
+    const exercises = w.exercises.filter((e) => e.exerciseId === exerciseId);
+    const sets = exercises.flatMap((e) => e.sets).filter((s) => s.done && !s.warmup && s.weight && s.reps);
     if (!sets.length) continue;
     const weight = Math.max(...sets.map((s) => s.weight!));
-    sessions.push({
+    all.push({
       endedAt: w.endedAt,
       weight,
       sets: sets.filter((s) => s.weight === weight),
+      fits: !fits || exercises.some(fits),
     });
   }
-  return sessions.sort((a, b) => b.endedAt - a.endedAt).slice(0, count);
+  const fitting = all.filter((s) => s.fits);
+  return (fitting.length ? fitting : all).sort((a, b) => b.endedAt - a.endedAt).slice(0, count);
 }
 
 const sameWeight = (a: number, b: number) => Math.abs(a - b) < 0.01;
 
 /**
  * Next session's weight and reps for a weighted lift, from its last two sessions.
- * `range` is the plan's rep range; without one the goal is the best set's reps last time.
+ * `range` is the plan's rep range, and only sessions in that range count when there are any;
+ * without one the goal is the best set's reps last time.
  * Null for lifts with no weighted history (or that aren't weighted).
  */
 export function nextTarget(
@@ -86,7 +108,7 @@ export function nextTarget(
   range?: [number, number],
 ): CoachTarget | null {
   if (getExercise(exerciseId).kind !== 'weight') return null;
-  const [last, before] = recentTopSets(exerciseId, history, 2);
+  const [last, before] = recentTopSets(exerciseId, history, 2, range);
   if (!last) return null;
   const reps = last.sets.map((s) => s.reps!);
   const goal = range ? range[1] : Math.max(...reps);

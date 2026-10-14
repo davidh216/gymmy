@@ -64,6 +64,16 @@ describe('helpers', () => {
     expect(lastPerformance('squat', h)?.[0].weight).toBe(120);
     expect(lastPerformance('deadlift', h)).toBeNull();
   });
+
+  it('prefers the latest session that fits, falling back to any', () => {
+    const h = [
+      workout('heavy', 1, [{ id: 'a', exerciseId: 'squat', sets: [set(140, 6)], target: { sets: 1, reps: '6–8' } }]),
+      workout('light', 2, [{ id: 'b', exerciseId: 'squat', sets: [set(100, 12)], target: { sets: 1, reps: '10–12' } }]),
+    ];
+    const heavyDay = (e: WorkoutExercise) => e.target?.reps === '6–8';
+    expect(lastPerformance('squat', h, heavyDay)?.[0].weight).toBe(140);
+    expect(lastPerformance('squat', h, () => false)?.[0].weight).toBe(100);
+  });
 });
 
 describe('recheckPRs', () => {
